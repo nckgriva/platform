@@ -1,0 +1,62 @@
+package com.gracelogic.platform.notification.sms;
+
+import com.gracelogic.platform.notification.dto.Message;
+import com.gracelogic.platform.property.service.PropertyService;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+@Service
+public class SmsServiceImpl implements SmsService {
+    @Autowired
+    private PropertyService propertyService;
+
+
+    private Logger logger = Logger.getLogger(getClass());
+
+    //private final String API_KEY = "1fbfb7aa-ca1e-7204-d1a9-f32a4e4ba131";
+
+    private final String sendSms = "http://sms.ru/sms/send?api_id=%s&to=%s&text=%s&from=%s";
+
+    public boolean sendSms(Message message) {
+        try {
+            CloseableHttpClient httpClient = HttpClients.custom().build();
+
+            String uri = String.format(
+                    sendSms,
+                    propertyService.getPropertyValue("notification:sms.apikey"),
+                    message.getTo(),
+                    URLEncoder.encode(message.getText(), "UTF-8"),
+                    propertyService.getPropertyValue("notification:sms.from")
+            );
+
+            logger.info("uri " + uri);
+            HttpGet sendMethod = new HttpGet(uri);
+            CloseableHttpResponse result = httpClient.execute(sendMethod);
+
+            HttpEntity entity = result.getEntity();
+            String response = EntityUtils.toString(entity);
+            EntityUtils.consume(entity);
+
+            logger.info(response);
+            return result.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
+        } catch (UnsupportedEncodingException e) {
+            logger.error("", e);
+        } catch (IOException e) {
+            logger.error("", e);
+        }
+        return false;
+    }
+
+}
