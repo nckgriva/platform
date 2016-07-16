@@ -1,12 +1,11 @@
 package com.gracelogic.platform.user.security;
 
-import com.gracelogic.platform.user.dto.UserModel;
+import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.model.Grant;
 import com.gracelogic.platform.user.model.RoleGrant;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.model.UserRole;
 import com.gracelogic.platform.user.service.UserService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,9 +32,9 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
     @Override
     public org.springframework.security.core.Authentication authenticate(org.springframework.security.core.Authentication authentication) throws AuthenticationException {
         if (authentication instanceof AuthenticationToken) {
-            User user = userService.login((String) authentication.getPrincipal(), ((AuthenticationToken) authentication).getLoginType(), (String) authentication.getCredentials(), ((AuthenticationToken) authentication).getRemoteAddress());
+            User user = userService.login((String) authentication.getPrincipal(), ((AuthenticationToken) authentication).getLoginType(), (String) authentication.getCredentials(), ((AuthenticationToken) authentication).getRemoteAddress(), ((AuthenticationToken) authentication).isTrust());
             if (user != null) {
-                UserModel userModel = UserModel.prepare(user);
+                AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
 
                 Set<Grant> grants = new HashSet<Grant>();
                 for (UserRole userRole : user.getUserRoles()) {
@@ -48,9 +47,9 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
                 for (Grant grant : grants) {
                     authorities.add(new SimpleGrantedAuthority(grant.getName()));
                 }
-                authentication = new AuthenticationToken(authentication.getPrincipal(), authentication.getCredentials(), authorities, ((AuthenticationToken) authentication).getRemoteAddress(), ((AuthenticationToken) authentication).getLoginType(), ((AuthenticationToken) authentication).getRole());
+                authentication = new AuthenticationToken(authentication.getPrincipal(), authentication.getCredentials(), authorities, ((AuthenticationToken) authentication).getRemoteAddress(), ((AuthenticationToken) authentication).getLoginType(), ((AuthenticationToken) authentication).isTrust());
 
-                ((UsernamePasswordAuthenticationToken) authentication).setDetails(userModel);
+                ((UsernamePasswordAuthenticationToken) authentication).setDetails(authorizedUser);
             }
             else {
                 throw new BadCredentialsException("Invalid login or password.");

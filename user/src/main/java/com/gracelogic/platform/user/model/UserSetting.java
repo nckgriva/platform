@@ -1,7 +1,7 @@
 package com.gracelogic.platform.user.model;
 
-import com.gracelogic.platform.dao.model.IdObject;
-import com.gracelogic.platform.dao.JPAProperties;
+import com.gracelogic.platform.db.model.IdObject;
+import com.gracelogic.platform.db.JPAProperties;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -19,7 +19,7 @@ import java.util.UUID;
 )
 public class UserSetting extends IdObject<UUID> {
     @Id
-    @Column(name = "ID")
+    @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @org.hibernate.annotations.Type(type = "pg-uuid")

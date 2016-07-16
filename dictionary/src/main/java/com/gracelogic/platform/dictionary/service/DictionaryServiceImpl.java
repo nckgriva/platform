@@ -1,7 +1,7 @@
 package com.gracelogic.platform.dictionary.service;
 
-import com.gracelogic.platform.dao.model.IdObject;
-import com.gracelogic.platform.dao.service.IdObjectService;
+import com.gracelogic.platform.db.model.IdObject;
+import com.gracelogic.platform.db.service.IdObjectService;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

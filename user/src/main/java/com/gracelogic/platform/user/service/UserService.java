@@ -5,6 +5,7 @@ import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.AuthCode;
 import com.gracelogic.platform.user.model.User;
+import com.gracelogic.platform.user.model.UserSession;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 
 import javax.servlet.http.HttpSession;
@@ -18,17 +19,19 @@ import java.util.UUID;
 public interface UserService {
     User getUserByField(String fieldName, String fieldValue);
 
-    User login(String login, String loginField, String password, String remoteAddress);
+    User login(String login, String loginField, String password, String remoteAddress, boolean trust);
 
     void changeUserPassword(UUID userId, String newPassword);
 
-    boolean checkPhone(String phone);
+    boolean checkPhone(String phone, boolean fullCheck);
 
-    boolean checkEmail(String email);
+    boolean checkEmail(String email, boolean fullCheck);
+
+    boolean checkPassword(String email);
 
     boolean verifyLogin(UUID userId, String loginType, String code);
 
-    void updateSessionInfo(HttpSession session, AuthenticationToken authenticationToken, String userAgent, boolean isDestroying);
+    UserSession updateSessionInfo(HttpSession session, AuthenticationToken authenticationToken, String userAgent, boolean isDestroying);
 
     void sendRepairCode(String login, String loginType) throws IllegalParameterException, SendingException;
 

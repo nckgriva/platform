@@ -13,24 +13,24 @@ import java.util.Collection;
 public class AuthenticationToken extends UsernamePasswordAuthenticationToken {
     private String remoteAddress = null;
     private String loginType = null;
-    private String role;
+    private boolean trust = false;  //for oauth
 
-    public AuthenticationToken(Object principal, Object credentials, String remoteAddress, String loginType, String role) {
+    public AuthenticationToken(Object principal, Object credentials, String remoteAddress, String loginType, boolean trust) {
         super(principal, credentials);
         this.remoteAddress = remoteAddress;
         this.loginType = loginType;
-        this.role = role;
+        this.trust = trust;
     }
 
     public AuthenticationToken(Object principal, Object credentials) {
         super(principal, credentials);
     }
 
-    public AuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities, String remoteAddress, String loginType, String role) {
+    public AuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities, String remoteAddress, String loginType, boolean trust) {
         super(principal, credentials, authorities);
         this.remoteAddress = remoteAddress;
         this.loginType = loginType;
-        this.role = role;
+        this.trust = trust;
     }
 
     public String getRemoteAddress() {
@@ -49,11 +49,11 @@ public class AuthenticationToken extends UsernamePasswordAuthenticationToken {
         this.loginType = loginType;
     }
 
-    public String getRole() {
-        return role;
+    public boolean isTrust() {
+        return trust;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setTrust(boolean trust) {
+        this.trust = trust;
     }
 }

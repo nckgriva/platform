@@ -1,6 +1,6 @@
 package com.gracelogic.platform.user.dao;
 
-import com.gracelogic.platform.dao.dao.BaseDao;
+import com.gracelogic.platform.db.dao.BaseDao;
 import com.gracelogic.platform.user.model.AuthCode;
 import com.gracelogic.platform.user.model.IncorrectLoginAttempt;
 import com.gracelogic.platform.user.model.User;

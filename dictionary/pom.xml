@@ -16,7 +16,7 @@
     <dependencies>
 	    <dependency>
             <groupId>com.gracelogic.platform</groupId>
-            <artifactId>platform-dao</artifactId>
+            <artifactId>platform-db</artifactId>
             <version>1.0</version>
         </dependency>
     </dependencies>

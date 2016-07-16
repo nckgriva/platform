@@ -1,6 +1,6 @@
 package com.gracelogic.platform.property.service;
 
-import com.gracelogic.platform.dao.service.IdObjectService;
+import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.property.dto.PropertyModel;
 import com.gracelogic.platform.property.model.Property;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,6 @@
 package com.gracelogic.platform.user.service;
 
-import com.gracelogic.platform.dao.service.IdObjectService;
+import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.notification.dto.Message;
 import com.gracelogic.platform.notification.service.MessageSenderService;
@@ -8,7 +8,7 @@ import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.notification.dto.SendingType;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.dao.UserDao;
-import com.gracelogic.platform.user.dto.UserModel;
+import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
@@ -55,11 +55,20 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User login(String login, String loginField, String password, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotActivatedException {
+    public User login(String login, String loginField, String password, String remoteAddress, boolean trust) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotActivatedException {
         User user = userDao.getUserByField(loginField, login.toLowerCase().trim());
 
         if (user != null) {
             boolean loginTypeVerified = false;
+            if (trust) {
+                loginTypeVerified = true;
+            } else {
+                if (loginField.equalsIgnoreCase("email")) {
+                    loginTypeVerified = user.getEmailVerified();
+                } else if (loginField.equalsIgnoreCase("phone")) {
+                    loginTypeVerified = user.getPhoneVerified();
+                }
+            }
             if (loginField.equalsIgnoreCase("email")) {
                 loginTypeVerified = user.getEmailVerified();
             }
@@ -122,25 +131,40 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean checkPhone(String phone) {
+    public boolean checkPhone(String phone, boolean fullCheck) {
         if (!StringUtils.isEmpty(phone) && phone.length() > 5) {
             Pattern p = Pattern.compile("^7\\d{10}$");
             Matcher m = p.matcher(phone.trim());
-            return m.find() && getUserByField("phone", phone.toLowerCase().trim()) == null;
+            boolean result = m.find();
+            if (fullCheck) {
+                return result && idObjectService.checkExist(User.class, null, String.format("el.phone='%s' and el.phoneVerified=true", phone.trim()), null, 1) == 0;
+            }
+            return result;
         }
         return false;
     }
 
     @Override
-    public boolean checkEmail(String email) {
+    public boolean checkEmail(String email, boolean fullCheck) {
         if (!StringUtils.isEmpty(email) && email.length() > 5 && email.length() < 128) {
             Pattern p = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" +
                     "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
             Matcher m = p.matcher(email.trim());
-            return m.find() && getUserByField("email", email.toLowerCase().trim()) == null;
+            boolean result = m.find();
+            if (fullCheck) {
+                return result && idObjectService.checkExist(User.class, null, String.format("el.email='%s' and el.emailVerified=true", email.trim()), null, 1) == 0;
+            }
+            return result;
         }
         return false;
     }
+
+    @Override
+    public boolean checkPassword(String password) {
+        return !StringUtils.isEmpty(password) && password.length() > 5;
+    }
+
+
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -174,7 +198,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void updateSessionInfo(HttpSession session, AuthenticationToken authenticationToken, String userAgent, boolean isDestroying) {
+    public UserSession updateSessionInfo(HttpSession session, AuthenticationToken authenticationToken, String userAgent, boolean isDestroying) {
         if (!StringUtils.isEmpty(session.getId())) {
             AuthenticationToken authentication = null;
             try {
@@ -186,8 +210,8 @@ public class UserServiceImpl implements UserService {
                 authentication = authenticationToken;
             }
 
-            if (authentication != null && authentication.getDetails() != null && authentication.getDetails() instanceof UserModel) {
-                UserModel userModel = (UserModel) authentication.getDetails();
+            if (authentication != null && authentication.getDetails() != null && authentication.getDetails() instanceof AuthorizedUser) {
+                AuthorizedUser authorizedUser = (AuthorizedUser) authentication.getDetails();
                 UserSession userSession = null;
 
                 List<UserSession> userSessions = idObjectService.getList(UserSession.class, String.format("el.sessionId='%s'", session.getId()), null, null, null, null);
@@ -198,7 +222,7 @@ public class UserServiceImpl implements UserService {
                 if (userSession == null) {
                     userSession = new UserSession();
                     userSession.setSessionId(session.getId());
-                    userSession.setUser(idObjectService.setIfModified(User.class, userSession.getUser(), userModel.getId()));
+                    userSession.setUser(idObjectService.setIfModified(User.class, userSession.getUser(), authorizedUser.getId()));
                     userSession.setAuthIp(authentication.getRemoteAddress());
                     userSession.setLoginType(authentication.getLoginType());
                     userSession.setUserAgent(userAgent);
@@ -208,9 +232,11 @@ public class UserServiceImpl implements UserService {
                 //userSession.setThisAccessedTime(session.getLastAccessedTime());
                 userSession.setMaxInactiveInterval((long) session.getMaxInactiveInterval());
                 userSession.setValid(!isDestroying);
-                userSession = idObjectService.save(userSession);
+                return idObjectService.save(userSession);
+
             }
         }
+        return null;
     }
 
 

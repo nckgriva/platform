@@ -1,6 +1,6 @@
 package com.gracelogic.platform.dictionary.service;
 
-import com.gracelogic.platform.dao.model.IdObject;
+import com.gracelogic.platform.db.model.IdObject;
 
 /**
  * Author: Igor Parkhomenko
