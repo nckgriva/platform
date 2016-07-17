@@ -31,6 +31,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -179,6 +180,7 @@ public class UserController extends AbstractAuthorizedController {
     }
 
     @RequestMapping(value = "/verifyEmail", method = RequestMethod.POST)
+    @ResponseBody
     public ResponseEntity verifyEmail(@RequestParam(value = "code", required = true) String code,
                                       @RequestParam(value = "id", required = true) UUID id) {
         if (userService.verifyLogin(id, "email", code)) {
@@ -192,6 +194,7 @@ public class UserController extends AbstractAuthorizedController {
     }
 
     @RequestMapping(value = "/verifyPhone", method = RequestMethod.POST)
+    @ResponseBody
     public ResponseEntity verifyPhone(@RequestParam(value = "code", required = true) String code,
                                       @RequestParam(value = "id", required = true) UUID id) {
         if (userService.verifyLogin(id, "phone", code)) {

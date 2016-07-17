@@ -19,5 +19,6 @@
         <module>user</module>
         <module>web</module>
         <module>oauth</module>
+        <module>template</module>
     </modules>
 </project>
