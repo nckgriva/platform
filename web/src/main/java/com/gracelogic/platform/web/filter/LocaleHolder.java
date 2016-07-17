@@ -6,7 +6,12 @@ public class LocaleHolder {
     private static ThreadLocal<Locale> locale = new ThreadLocal<Locale>();
 
     public static Locale getLocale() {
-        return locale.get();
+        if (locale.get() == null) {
+            return Locale.getDefault();
+        }
+        else {
+            return locale.get();
+        }
     }
 
     public static void setLocale(Locale l) {

@@ -40,6 +40,11 @@
             <version>1.0</version>
         </dependency>
         <dependency>
+            <groupId>com.gracelogic.platform</groupId>
+            <artifactId>platform-template</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.1</version>

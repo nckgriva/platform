@@ -75,6 +75,15 @@ public class User extends IdObject<UUID> {
     @Column(name = "LAST_VISIT_IP", nullable = true)
     private String lastVisitIP;
 
+    @Column(name = "NAME", nullable = true)
+    private String name;
+
+    @Column(name = "SURNAME", nullable = true)
+    private String surname;
+
+    @Column(name = "PATRONYMIC", nullable = true)
+    private String patronymic;
+
     @Override
     public UUID getId() {
         return id;
@@ -215,5 +224,29 @@ public class User extends IdObject<UUID> {
 
     public void setLastVisitIP(String lastVisitIP) {
         this.lastVisitIP = lastVisitIP;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getPatronymic() {
+        return patronymic;
+    }
+
+    public void setPatronymic(String patronymic) {
+        this.patronymic = patronymic;
     }
 }

@@ -1,13 +1,15 @@
 package com.gracelogic.platform.oauth.service;
 
 import com.gracelogic.platform.db.service.IdObjectService;
+import com.gracelogic.platform.oauth.Path;
 import com.gracelogic.platform.oauth.dto.AuthDTO;
 import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.oauth.model.AuthProviderLinkage;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
+import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.User;
-import com.gracelogic.platform.user.service.UserService;
+import com.gracelogic.platform.user.service.UserLifecycleService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,7 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
     private IdObjectService idObjectService;
 
     @Autowired
-    private UserService userService;
+    private UserLifecycleService registrationService;
 
     @Autowired
     private PropertyService propertyService;
@@ -53,12 +55,12 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
 
             logger.info("Oauth registration: " + authorizedUser.toString());
 
-//            try {
-//                user = userService.register(authorizedUser, true, refpc);
-//            }
-//            catch (IllegalParameterException e) {
-//                logger.error("Failed to register user via oauth", e);
-//            }
+            try {
+                user = registrationService.register(authorizedUser, true);
+            }
+            catch (IllegalParameterException e) {
+                logger.error("Failed to register user via oauth", e);
+            }
 
             if (user != null) {
                 AuthProviderLinkage authProviderLinkage = new AuthProviderLinkage();
@@ -74,6 +76,6 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
     }
 
     public String getRedirectUrl(String providerName) {
-        return String.format("%s/shop/oauth/%s", propertyService.getPropertyValue("base_url"), providerName);
+        return String.format("%s/%s/%s", propertyService.getPropertyValue("web:base_url"), Path.OAUTH, providerName);
     }
 }

@@ -2,6 +2,7 @@ package com.gracelogic.platform.user.service;
 
 
 import com.gracelogic.platform.notification.exception.SendingException;
+import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.AuthCode;
 import com.gracelogic.platform.user.model.User;
@@ -37,8 +38,6 @@ public interface UserService {
 
     void changePassword(String login, String loginType, String code, String newPassword) throws IllegalParameterException;
 
-    void sendEmailVerification(UUID userId);
-
     String getUserSetting(UUID userId, String key);
 
     void updateUserSetting(UUID userId, String key, String value);
@@ -48,4 +47,8 @@ public interface UserService {
     void invalidateCodes(UUID userId, UUID codeTypeId);
 
     boolean isActualCodeAvailable(UUID userId, UUID codeTypeId);
+
+    User register(AuthorizedUser user, boolean trust) throws IllegalParameterException;
+
+    void deleteUser(User user);
 }

@@ -34,7 +34,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public LoadedTemplate load(String templateName) throws IOException {
         StringBuilder sb = new StringBuilder();
-        String uri = String.format("%s/%s.mustache", propertyService.getPropertyValue("template_path"), templateName);
+        String uri = String.format("%s/%s.mustache", propertyService.getPropertyValue("template:store_path"), templateName);
         readFile(uri, sb);
         String body = sb.toString();
 

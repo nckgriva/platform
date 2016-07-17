@@ -32,8 +32,8 @@ public class VkOAuthServiceProviderImpl extends AbstractOauthProvider implements
     @Transactional(rollbackFor = Exception.class)
     @Override
     public User accessToken(String code, String redirectUri) {
-        String CLIENT_ID = propertyService.getPropertyValue("vk_client_id");
-        String CLIENT_SECRET = propertyService.getPropertyValue("vk_client_secret");
+        String CLIENT_ID = propertyService.getPropertyValue("oauth:vk_client_id");
+        String CLIENT_SECRET = propertyService.getPropertyValue("oauth:vk_client_secret");
 
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
@@ -73,7 +73,7 @@ public class VkOAuthServiceProviderImpl extends AbstractOauthProvider implements
     @Override
     public String buildAuthRedirect() {
         String sRedirectUri = buildRedirectUri(null);
-        String CLIENT_ID = propertyService.getPropertyValue("vk_client_id");
+        String CLIENT_ID = propertyService.getPropertyValue("oauth:vk_client_id");
 
         return String.format("https://oauth.vk.com/authorize?client_id=%s&response_type=code&scope=email,phone&display=popup&redirect_uri=%s", CLIENT_ID, sRedirectUri);
     }

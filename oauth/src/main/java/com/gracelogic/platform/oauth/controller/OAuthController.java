@@ -67,7 +67,7 @@ public class OAuthController extends AbstractAuthorizedController {
                       @RequestParam(value = "fwd", required = false) String fwd) throws IOException {
 
         if (StringUtils.isEmpty(code)) {
-            response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("base_url"), "content/oauth-error-code"));
+            response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("web:base_url"), "content/oauth-error-code"));
             return;
         }
 
@@ -117,13 +117,13 @@ public class OAuthController extends AbstractAuthorizedController {
         }
         else {
             try {
-                response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("base_url"), "content/oauth-error"));
+                response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("web:base_url"), "content/oauth-error"));
             } catch (Exception ignored) {
             }
         }
 
         if (user == null) {
-            response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("base_url"), "content/oauth-error"));
+            response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("web:base_url"), "content/oauth-error"));
             return;
         }
 
@@ -159,13 +159,13 @@ public class OAuthController extends AbstractAuthorizedController {
         }
 
         if (exception != null) {
-            response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("base_url"), "content/oauth-error"));
+            response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("web:base_url"), "content/oauth-error"));
             return;
 
         }
 
         if (StringUtils.isEmpty(fwd)) {
-            fwd = propertyService.getPropertyValue("base_url");
+            fwd = propertyService.getPropertyValue("web:base_url");
         }
 
         response.sendRedirect(fwd);

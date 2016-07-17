@@ -44,15 +44,15 @@ public class EmailServiceImpl implements EmailService {
 //                }
 //            };
             Properties p = new Properties();
-            p.put("mail.smtp.host", propertyService.getPropertyValue("notification:smtp.host"));
-            p.put("mail.smtp.port", propertyService.getPropertyValue("notification:smtp.port"));
-            p.put("mail.smtp.auth", propertyService.getPropertyValue("notification:smtp.auth"));
-            p.put("mail.smtp.socketFactory.port", propertyService.getPropertyValue("notification:smtp.socketFactory.port"));
-            p.put("mail.smtp.socketFactory.class", propertyService.getPropertyValue("notification:smtp.socketFactory.class"));
-            p.put("mail.smtp.ssl.enable", propertyService.getPropertyValue("notification:smtp.ssl.enable"));
+            p.put("mail.smtp.host", propertyService.getPropertyValue("notification:smtp_host"));
+            p.put("mail.smtp.port", propertyService.getPropertyValue("notification:smtp_port"));
+            p.put("mail.smtp.auth", propertyService.getPropertyValue("notification:smtp_auth"));
+            p.put("mail.smtp.socketFactory.port", propertyService.getPropertyValue("notification:smtp_socketFactory_port"));
+            p.put("mail.smtp.socketFactory.class", propertyService.getPropertyValue("notification:smtp_socketFactory_class"));
+            p.put("mail.smtp.ssl.enable", propertyService.getPropertyValue("notification:smtp_ssl_enable"));
             Authenticator auth = new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(propertyService.getPropertyValue("notification:smtp.user"), propertyService.getPropertyValue("notification:smtp.password"));
+                    return new PasswordAuthentication(propertyService.getPropertyValue("notification:smtp_user"), propertyService.getPropertyValue("notification:smtp_password"));
                 }
             };
             Session s = Session.getInstance(p, auth);

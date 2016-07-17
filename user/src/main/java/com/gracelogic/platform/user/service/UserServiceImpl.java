@@ -7,6 +7,8 @@ import com.gracelogic.platform.notification.service.MessageSenderService;
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.notification.dto.SendingType;
 import com.gracelogic.platform.property.service.PropertyService;
+import com.gracelogic.platform.template.dto.LoadedTemplate;
+import com.gracelogic.platform.template.service.TemplateService;
 import com.gracelogic.platform.user.dao.UserDao;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.*;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,6 +51,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PropertyService propertyService;
 
+    @Autowired
+    private UserLifecycleService lifecycleService;
+
+    @Autowired
+    private TemplateService templateService;
+
     @Override
     public User getUserByField(String fieldName, String fieldValue) {
         return userDao.getUserByField(fieldName, fieldValue);
@@ -71,8 +80,7 @@ public class UserServiceImpl implements UserService {
             }
             if (loginField.equalsIgnoreCase("email")) {
                 loginTypeVerified = user.getEmailVerified();
-            }
-            else if (loginField.equalsIgnoreCase("phone")) {
+            } else if (loginField.equalsIgnoreCase("phone")) {
                 loginTypeVerified = user.getPhoneVerified();
             }
 
@@ -105,8 +113,7 @@ public class UserServiceImpl implements UserService {
                         incorrectLoginAttempt.setUser(user);
                         userDao.saveIncorrectLoginAttempt(incorrectLoginAttempt);
                     }
-                }
-                else {
+                } else {
                     throw new TooManyAttemptsException("TooManyAttemptsException");
                 }
             }
@@ -165,7 +172,6 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean verifyLogin(UUID userId, String loginType, String code) {
@@ -181,8 +187,7 @@ public class UserServiceImpl implements UserService {
                     invalidateCodes(userId, DataConstants.AuthCodeTypes.ACTIVATION.getValue());
                     return true;
                 }
-            }
-            else if (loginType.equalsIgnoreCase("email") && !user.getEmailVerified()) {
+            } else if (loginType.equalsIgnoreCase("email") && !user.getEmailVerified()) {
                 AuthCode emailCode = getActualCode(userId, DataConstants.AuthCodeTypes.EMAIL_VERIFY.getValue(), false);
                 if (emailCode.getCode().equalsIgnoreCase(code)) {
                     user.setEmailVerified(true);
@@ -203,8 +208,8 @@ public class UserServiceImpl implements UserService {
             AuthenticationToken authentication = null;
             try {
                 authentication = (AuthenticationToken) ((org.springframework.security.core.context.SecurityContextImpl) session.getAttribute("SPRING_SECURITY_CONTEXT")).getAuthentication();
+            } catch (Exception ignored) {
             }
-            catch (Exception ignored) {}
 
             if (authentication == null) {
                 authentication = authenticationToken;
@@ -247,23 +252,38 @@ public class UserServiceImpl implements UserService {
         if (user != null && user.getApproved()) {
             boolean isActualCodeAvailable = isActualCodeAvailable(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue());
             AuthCode authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), false);
-            if ((System.currentTimeMillis() - authCode.getCreated().getTime() > Long.parseLong(propertyService.getPropertyValue("sms_delay"))) || !isActualCodeAvailable) {
+            if ((System.currentTimeMillis() - authCode.getCreated().getTime() > Long.parseLong(propertyService.getPropertyValue("user:sms_delay"))) || !isActualCodeAvailable) {
                 if (isActualCodeAvailable) {
                     authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), true);
                 }
                 if (!StringUtils.isEmpty(user.getPhone()) && user.getPhoneVerified()) {
-                    String smsTemplate = "Код восстановления пароля: %s";
-                    messageSenderService.sendMessage(new Message(null, user.getPhone(), null, String.format(smsTemplate, authCode.getCode())), SendingType.SMS);
-                }
-                else if (StringUtils.isEmpty(user.getEmail()) && user.getEmailVerified()) {
-                    messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("smtp_from_address"), user.getEmail(), "Код восстановления пароля", authCode.getCode()), SendingType.EMAIL);
+                    try {
+                        LoadedTemplate template = templateService.load("sms_repair_code");
+                        HashMap<String, String> params = new HashMap<String, String>();
+                        params.put("code", authCode.getCode());
+
+                        messageSenderService.sendMessage(new Message(null, user.getPhone(), template.getSubject(), templateService.apply(template, params)), SendingType.SMS);
+                    } catch (IOException e) {
+                        logger.error(e);
+                        throw new SendingException(e.getMessage());
+                    }
+                } else if (StringUtils.isEmpty(user.getEmail()) && user.getEmailVerified()) {
+                    try {
+                        LoadedTemplate template = templateService.load("email_repair_code");
+                        HashMap<String, String> params = new HashMap<String, String>();
+                        params.put("code", authCode.getCode());
+
+                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"), user.getEmail(), template.getSubject(), templateService.apply(template, params)), SendingType.EMAIL);
+                    } catch (IOException e) {
+                        logger.error(e);
+                        throw new SendingException(e.getMessage());
+                    }
                 }
             } else {
-                throw new IllegalParameterException("TOO_FAST");
+                throw new IllegalParameterException("common.TOO_FAST_OPERATION");
             }
-        }
-        else {
-            throw new SendingException("Пользователь не найден");
+        } else {
+            throw new IllegalParameterException("common.USER_NOT_FOUND");
         }
     }
 
@@ -278,30 +298,11 @@ public class UserServiceImpl implements UserService {
 
             if (code != null && authCode.getCode().equalsIgnoreCase(code) && !StringUtils.isEmpty(newPassword)) {
                 changeUserPassword(user.getId(), newPassword);
+            } else {
+                throw new IllegalParameterException("common.AUTH_CODE_IS_INCORRECT");
             }
-            else {
-                throw new IllegalParameterException("Code is incorrect or new password is empty");
-            }
-        }
-        else {
-            throw new IllegalParameterException("User is null");
-        }
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public void sendEmailVerification(UUID userId) {
-        User user = idObjectService.getObjectById(User.class, userId);
-        if (!StringUtils.isEmpty(user.getEmail()) && !user.getEmailVerified()) {
-            AuthCode emailCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.EMAIL_VERIFY.getValue(), false);
-            if (emailCode != null) {
-                String text = String.format("Для подтверждения Вашего e-mail перейдите по ссылке:\n" +
-                        "%s/registration?action=verifyEmail&id=%s&code=%s", propertyService.getPropertyValue("base_url"), user.getId().toString(), emailCode.getCode());
-                try {
-                    messageSenderService.sendMessage(new Message("no-reply@leofinance.com", user.getEmail(), "Подтверждение e-mail", text), SendingType.EMAIL);
-                } catch (SendingException ignored) {
-                }
-            }
+        } else {
+            throw new IllegalParameterException("common.USER_NOT_FOUND");
         }
     }
 
@@ -321,8 +322,7 @@ public class UserServiceImpl implements UserService {
         List<UserSetting> userSettings = idObjectService.getList(UserSetting.class, String.format("el.user.id='%s' and el.key='%s'", userId.toString(), key), null, null, null, 1);
         if (!userSettings.isEmpty()) {
             userSetting = userSettings.iterator().next();
-        }
-        else {
+        } else {
             userSetting = new UserSetting();
             userSetting.setKey(key);
             userSetting.setUser(idObjectService.getObjectById(User.class, userId));
@@ -403,6 +403,97 @@ public class UserServiceImpl implements UserService {
     public boolean isActualCodeAvailable(UUID userId, UUID codeTypeId) {
         Integer count = idObjectService.checkExist(AuthCode.class, null, String.format("el.user.id='%s' and el.authCodeType.id='%s' and el.authCodeState.id='%s'", userId, codeTypeId, DataConstants.AuthCodeStates.NEW.getValue()), null, 1);
         return count > 0;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public User register(AuthorizedUser userModel, boolean trust) throws IllegalParameterException {
+        boolean existingUser = false;
+
+        if (!trust && !checkPassword(userModel.getPassword())) {
+            throw new IllegalParameterException("register.INVALID_PASSWORD");
+        }
+
+        if (!trust) {
+            if (StringUtils.isEmpty(userModel.getEmail()) && StringUtils.isEmpty(userModel.getPhone())) {
+                throw new IllegalParameterException("register.PHONE_OR_EMAIL_IS_NECESSARY");
+            }
+        }
+
+        if (!StringUtils.isEmpty(userModel.getPhone()) && !checkPhone(userModel.getPhone(), true)) {
+            throw new IllegalParameterException("register.INVALID_PHONE");
+        }
+
+        User user = null;
+        if (!StringUtils.isEmpty(userModel.getPhone())) {
+            user = getUserByField("phone", userModel.getPhone());
+        }
+
+        if (user != null) {
+            if (user.getApproved()) {
+                throw new IllegalParameterException("register.INVALID_PHONE");
+            }
+            existingUser = true;
+        } else {
+            user = new User();
+        }
+
+        if (!StringUtils.isEmpty(userModel.getEmail()) && !checkEmail(userModel.getEmail(), true)) {
+            throw new IllegalParameterException("register.INVALID_EMAIL");
+        }
+
+        //CHECK EMAIL ON ANOTHER ACCOUNT
+        if (!StringUtils.isEmpty(userModel.getEmail())) {
+            User anotherUser = getUserByField("email", userModel.getEmail());
+            if (anotherUser != null) {
+                if (existingUser && !user.getId().equals(anotherUser.getId()) || !existingUser) {
+                    if (!anotherUser.getApproved()) {
+                        lifecycleService.delete(anotherUser);
+                    } else if (!anotherUser.getEmailVerified()) {
+                        idObjectService.updateFieldValue(User.class, anotherUser.getId(), "email", null);
+                    }
+                }
+            }
+        }
+
+        user.setEmailVerified(false);
+        user.setPhoneVerified(false);
+        user.setApproved(trust);
+        user.setSurname(userModel.getSurname());
+        user.setName(userModel.getName());
+        user.setPatronymic(userModel.getPatronymic());
+
+        if (!StringUtils.isEmpty(userModel.getEmail())) {
+            user.setEmail(userModel.getEmail().toLowerCase().trim());
+            if (trust) {
+                user.setEmailVerified(true);
+            }
+        }
+        if (!StringUtils.isEmpty(userModel.getPhone())) {
+            user.setPhone(userModel.getPhone());
+            if (trust) {
+                user.setPhoneVerified(true);
+            }
+        }
+
+        user.setSalt(UserServiceImpl.generatePasswordSalt());
+        if (!trust) {
+            user.setPassword(DigestUtils.shaHex(userModel.getPassword().concat(user.getSalt())));
+        }
+
+        user = idObjectService.save(user);
+
+        return user;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteUser(User user) {
+        idObjectService.delete(IncorrectLoginAttempt.class, String.format("el.user.id='%s'", user.getId()));
+        idObjectService.delete(AuthCode.class, String.format("el.user.id='%s'", user.getId()));
+        idObjectService.delete(UserSession.class, String.format("el.user.id='%s'", user.getId()));
+        idObjectService.delete(UserRole.class, String.format("el.user.id='%s'", user.getId()));
+        idObjectService.delete(User.class, String.format("el.id='%s'", user.getId()));
     }
 
 }

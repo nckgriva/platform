@@ -35,10 +35,10 @@ public class SmsServiceImpl implements SmsService {
 
             String uri = String.format(
                     sendSms,
-                    propertyService.getPropertyValue("notification:sms.apikey"),
+                    propertyService.getPropertyValue("notification:sms_apikey"),
                     message.getTo(),
                     URLEncoder.encode(message.getText(), "UTF-8"),
-                    propertyService.getPropertyValue("notification:sms.from")
+                    propertyService.getPropertyValue("notification:sms_from")
             );
 
             logger.info("uri " + uri);

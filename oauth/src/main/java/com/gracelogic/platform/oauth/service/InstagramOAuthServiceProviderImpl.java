@@ -30,8 +30,8 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
     @Transactional(rollbackFor = Exception.class)
     @Override
     public User accessToken(String code, String redirectUri) {
-        String CLIENT_ID = propertyService.getPropertyValue("instagram_client_id");
-        String CLIENT_SECRET = propertyService.getPropertyValue("instagram_client_secret");
+        String CLIENT_ID = propertyService.getPropertyValue("oauth:instagram_client_id");
+        String CLIENT_SECRET = propertyService.getPropertyValue("oauth:instagram_client_secret");
 
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
@@ -81,7 +81,7 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
 
     @Override
     public String buildAuthRedirect() {
-        String CLIENT_ID = propertyService.getPropertyValue("instagram_client_id");
+        String CLIENT_ID = propertyService.getPropertyValue("oauth:instagram_client_id");
         String sRedirectUri = buildRedirectUri(null);
 
         return String.format("https://api.instagram.com/oauth/authorize/?client_id=%s&response_type=code&redirect_uri=%s", CLIENT_ID, sRedirectUri);

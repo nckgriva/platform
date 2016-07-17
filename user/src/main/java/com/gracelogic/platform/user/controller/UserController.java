@@ -1,16 +1,17 @@
 package com.gracelogic.platform.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.AuthRequest;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
-import com.gracelogic.platform.user.exception.NotAllowedIPException;
-import com.gracelogic.platform.user.exception.TooManyAttemptsException;
-import com.gracelogic.platform.user.exception.UserBlockedException;
-import com.gracelogic.platform.user.exception.UserNotActivatedException;
+import com.gracelogic.platform.user.dto.ChangePasswordRequest;
+import com.gracelogic.platform.user.dto.RepairCodeRequest;
+import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.UserSession;
 import com.gracelogic.platform.user.security.AuthenticationToken;
+import com.gracelogic.platform.user.service.UserLifecycleService;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.ServletUtils;
 import com.gracelogic.platform.web.dto.EmptyResponse;
@@ -19,6 +20,7 @@ import com.gracelogic.platform.web.dto.ValueRequest;
 import com.gracelogic.platform.web.filter.LocaleHolder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +33,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -49,8 +50,11 @@ public class UserController extends AbstractAuthorizedController {
     @Autowired
     private UserService userService;
 
-    @Autowired
+    @Qualifier("userMessageSource")
     private ResourceBundleMessageSource messageSource;
+
+    @Autowired
+    private UserLifecycleService lifecycleService;
 
     //В связи с тем, что при использовании @ResponseBody/@RequestBody невозможно установить Cookie - метод авторизации не используем эти аннтоации
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -206,5 +210,42 @@ public class UserController extends AbstractAuthorizedController {
         } else {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity register(@RequestBody AuthorizedUser userModel) {
+        try {
+            lifecycleService.register(userModel, false);
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        }
+        catch (IllegalParameterException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(value = "/sendRepairCode", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity sendRepairCode(@RequestBody RepairCodeRequest request) {
+
+        try {
+            userService.sendRepairCode(request.getLogin(), request.getLoginType());
+        } catch (SendingException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.SENDING_ERROR", messageSource.getMessage("common.SENDING_ERROR", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (IllegalParameterException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/changePassword", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity changePassword(@RequestBody ChangePasswordRequest request) {
+        try {
+            userService.changePassword(request.getLogin(), request.getLoginType(), request.getCode(), request.getNewPassword());
+        } catch (IllegalParameterException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 }

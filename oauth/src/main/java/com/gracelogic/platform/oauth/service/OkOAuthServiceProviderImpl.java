@@ -33,9 +33,9 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
     @Transactional(rollbackFor = Exception.class)
     @Override
     public User accessToken(String code, String redirectUri) {
-        String CLIENT_ID = propertyService.getPropertyValue("ok_client_id");
-        String CLIENT_SECRET = propertyService.getPropertyValue("ok_client_secret");
-        String PUBLIC_KEY = propertyService.getPropertyValue("ok_public_key");
+        String CLIENT_ID = propertyService.getPropertyValue("oauth:ok_client_id");
+        String CLIENT_SECRET = propertyService.getPropertyValue("oauth:ok_client_secret");
+        String PUBLIC_KEY = propertyService.getPropertyValue("oauth:ok_public_key");
 
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
@@ -72,7 +72,7 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
 
     @Override
     public String buildAuthRedirect() {
-        String CLIENT_ID = propertyService.getPropertyValue("ok_client_id");
+        String CLIENT_ID = propertyService.getPropertyValue("oauth:ok_client_id");
         String sRedirectUri = buildRedirectUri(null);
 
         return String.format("https://connect.ok.ru/oauth/authorize?client_id=%s&scope=VALUABLE_ACCESS&response_type=code&layout=w&redirect_uri=%s", CLIENT_ID, sRedirectUri);
