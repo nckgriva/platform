@@ -8,6 +8,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -61,5 +63,20 @@ public class ServletUtils {
 
         body = stringBuilder.toString();
         return body;
+    }
+
+    public static Map<String, String> getQueryMap(String query) {
+        Map<String, String> map = new HashMap<String, String>();
+        if (StringUtils.isEmpty(query)) return map;
+        String[] params = query.split("&");
+        for (String param : params) {
+            String name = param.split("=")[0];
+            try {
+                String value = param.split("=")[1];
+                map.put(name, value);
+            }
+            catch (Exception ignored) {}
+        }
+        return map;
     }
 }

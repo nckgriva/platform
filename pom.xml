@@ -20,5 +20,7 @@
         <module>web</module>
         <module>oauth</module>
         <module>template</module>
+        <module>account</module>
+        <module>payment</module>
     </modules>
 </project>
