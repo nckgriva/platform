@@ -2,14 +2,16 @@ package com.gracelogic.platform.dictionary.service;
 
 import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.db.service.IdObjectService;
-
+import com.gracelogic.platform.dictionary.model.Dictionary;
 import org.apache.log4j.Logger;
+import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Author: Igor Parkhomenko
@@ -18,9 +20,7 @@ import java.util.List;
  */
 @Service
 public class DictionaryServiceImpl implements DictionaryService {
-    private static Class[] dictionaryClasses = new Class[] {
-            
-    };
+    private static Set<Class<? extends Dictionary>> dictionaryClasses;
 
     private static Logger logger = Logger.getLogger(DictionaryServiceImpl.class);
 
@@ -31,6 +31,8 @@ public class DictionaryServiceImpl implements DictionaryService {
 
     @PostConstruct
     private void init() {
+        dictionaryClasses = new Reflections("com.gracelogic").getSubTypesOf(Dictionary.class);
+
         for (Class clazz : dictionaryClasses) {
             final HashMap<Object, IdObject> map = new HashMap<Object, IdObject>();
             List list = idObjectService.getList(clazz);

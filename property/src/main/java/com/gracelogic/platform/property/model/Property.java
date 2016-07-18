@@ -1,7 +1,7 @@
 package com.gracelogic.platform.property.model;
 
-import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.db.JPAProperties;
+import com.gracelogic.platform.db.model.IdObject;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;

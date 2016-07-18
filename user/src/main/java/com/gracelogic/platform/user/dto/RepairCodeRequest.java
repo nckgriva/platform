@@ -1,6 +1,5 @@
 package com.gracelogic.platform.user.dto;
 
-import com.gracelogic.platform.web.PlatformPath;
 import com.gracelogic.platform.web.dto.PlatformRequest;
 
 /**

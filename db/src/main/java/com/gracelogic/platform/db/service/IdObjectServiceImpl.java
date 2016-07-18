@@ -22,6 +22,11 @@ public class IdObjectServiceImpl implements IdObjectService {
     private IdObjectDao idObjectDao;
 
     @Override
+    public <T extends IdObject> T lockObject(Class<T> clazz, Object id) {
+        return idObjectDao.lockObject(clazz, id);
+    }
+
+    @Override
     public <T extends IdObject> T getObjectById(Class<T> clazz, Object id) {
         if (id == null) {
             return null;

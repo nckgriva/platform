@@ -8,11 +8,11 @@
     <name>platform</name>
     <version>1.0</version>
     <packaging>pom</packaging>
-    
-     <modules>
+
+    <modules>
         <module>parent</module>
         <module>db</module>
-	<module>dictionary</module>
+        <module>dictionary</module>
         <module>finance</module>
         <module>property</module>
         <module>notification</module>

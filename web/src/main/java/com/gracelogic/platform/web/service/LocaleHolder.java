@@ -1,4 +1,4 @@
-package com.gracelogic.platform.web.filter;
+package com.gracelogic.platform.web.service;
 
 import java.util.Locale;
 

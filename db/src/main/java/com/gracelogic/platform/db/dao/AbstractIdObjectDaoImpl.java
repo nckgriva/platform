@@ -4,6 +4,7 @@ import com.gracelogic.platform.db.model.IdObject;
 import org.apache.log4j.Logger;
 import org.springframework.util.StringUtils;
 
+import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import java.util.Collections;
 import java.util.Date;
@@ -33,6 +34,11 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
                 return null;
             }
         }
+    }
+
+    @Override
+    public <T extends IdObject> T lockObject(Class<T> clazz, Object id) {
+        return getEntityManager().find(clazz, id, LockModeType.PESSIMISTIC_WRITE);
     }
 
     public <T extends IdObject> T save(T entity) {

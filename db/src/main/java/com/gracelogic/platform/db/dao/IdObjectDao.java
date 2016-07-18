@@ -17,6 +17,8 @@ public interface IdObjectDao {
 
     <T extends IdObject> T save(T entity);
 
+    <T extends IdObject> T lockObject(Class<T> clazz, Object id);
+
     Integer checkExist(Class clazz, String fetches, String cause, HashMap<String, Object> params, Integer maxCount);
 
     <T> T saveOrUpdate(T entity);

@@ -1,8 +1,8 @@
 package com.gracelogic.platform.user.model;
 
-import com.gracelogic.platform.dictionary.model.Dictionary;
-import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.db.JPAProperties;
+import com.gracelogic.platform.db.model.IdObject;
+import com.gracelogic.platform.dictionary.model.Dictionary;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;

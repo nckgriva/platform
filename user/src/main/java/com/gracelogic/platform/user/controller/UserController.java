@@ -17,7 +17,7 @@ import com.gracelogic.platform.web.ServletUtils;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.ValueRequest;
-import com.gracelogic.platform.web.filter.LocaleHolder;
+import com.gracelogic.platform.web.service.LocaleHolder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -146,7 +146,7 @@ public class UserController extends AbstractAuthorizedController {
 
     @RequestMapping(value = "/logged", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity isLogged() {
+    public ResponseEntity logged() {
         if (getUser() != null) {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } else {

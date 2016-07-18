@@ -14,10 +14,15 @@
         <version>1.0</version>
     </parent>
     <dependencies>
-	    <dependency>
+        <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-db</artifactId>
             <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.9-RC1</version>
         </dependency>
     </dependencies>
     <build>

@@ -3,9 +3,9 @@ package com.gracelogic.platform.user.service;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.notification.dto.Message;
-import com.gracelogic.platform.notification.service.MessageSenderService;
-import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.notification.dto.SendingType;
+import com.gracelogic.platform.notification.exception.SendingException;
+import com.gracelogic.platform.notification.service.MessageSenderService;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.template.dto.LoadedTemplate;
 import com.gracelogic.platform.template.service.TemplateService;
@@ -175,22 +175,35 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean verifyLogin(UUID userId, String loginType, String code) {
+        String userApproveMethod = propertyService.getPropertyValue("user:approve_method");
+
         User user = idObjectService.getObjectById(User.class, userId);
         if (user != null) {
             if (loginType.equalsIgnoreCase("phone") && !user.getPhoneVerified()) {
-                AuthCode phoneCode = getActualCode(userId, DataConstants.AuthCodeTypes.ACTIVATION.getValue(), false);
+                AuthCode phoneCode = getActualCode(userId, DataConstants.AuthCodeTypes.PHONE_VERIFY.getValue(), false);
                 if (phoneCode.getCode().equalsIgnoreCase(code)) {
                     user.setPhoneVerified(true);
-                    user.setApproved(true);
+                    if (StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.PHONE_CONFIRMATION.getValue())) {
+                        user.setApproved(true);
+                    } else if (StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.EMAIL_AND_PHONE_CONFIRMATION.getValue()) && user.getEmailVerified()) {
+                        user.setApproved(true);
+                    }
+
+
                     idObjectService.save(user);
 
-                    invalidateCodes(userId, DataConstants.AuthCodeTypes.ACTIVATION.getValue());
+                    invalidateCodes(userId, DataConstants.AuthCodeTypes.PHONE_VERIFY.getValue());
                     return true;
                 }
             } else if (loginType.equalsIgnoreCase("email") && !user.getEmailVerified()) {
                 AuthCode emailCode = getActualCode(userId, DataConstants.AuthCodeTypes.EMAIL_VERIFY.getValue(), false);
                 if (emailCode.getCode().equalsIgnoreCase(code)) {
                     user.setEmailVerified(true);
+                    if (StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.EMAIL_CONFIRMATION.getValue())) {
+                        user.setApproved(true);
+                    } else if (StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.EMAIL_AND_PHONE_CONFIRMATION.getValue()) && user.getPhoneVerified()) {
+                        user.setApproved(true);
+                    }
                     idObjectService.save(user);
 
                     invalidateCodes(userId, DataConstants.AuthCodeTypes.EMAIL_VERIFY.getValue());
@@ -408,6 +421,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public User register(AuthorizedUser userModel, boolean trust) throws IllegalParameterException {
+        String userApproveMethod = propertyService.getPropertyValue("user:approve_method");
         boolean existingUser = false;
 
         if (!trust && !checkPassword(userModel.getPassword())) {
@@ -456,9 +470,30 @@ public class UserServiceImpl implements UserService {
             }
         }
 
+        //CHECK PHONE ON ANOTHER ACCOUNT
+        if (!StringUtils.isEmpty(userModel.getPhone())) {
+            User anotherUser = getUserByField("phone", userModel.getPhone());
+            if (anotherUser != null) {
+                if (existingUser && !user.getId().equals(anotherUser.getId()) || !existingUser) {
+                    if (!anotherUser.getApproved()) {
+                        lifecycleService.delete(anotherUser);
+                    } else if (!anotherUser.getPhoneVerified()) {
+                        idObjectService.updateFieldValue(User.class, anotherUser.getId(), "phone", null);
+                    }
+                }
+            }
+        }
+
         user.setEmailVerified(false);
         user.setPhoneVerified(false);
-        user.setApproved(trust);
+        user.setApproved(false);
+
+        if (trust) {
+            user.setApproved(true);
+        } else if (StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
+            user.setApproved(true);
+        }
+
         user.setSurname(userModel.getSurname());
         user.setName(userModel.getName());
         user.setPatronymic(userModel.getPatronymic());
@@ -494,6 +529,39 @@ public class UserServiceImpl implements UserService {
         idObjectService.delete(UserSession.class, String.format("el.user.id='%s'", user.getId()));
         idObjectService.delete(UserRole.class, String.format("el.user.id='%s'", user.getId()));
         idObjectService.delete(User.class, String.format("el.id='%s'", user.getId()));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void sendVerificationCode(User user, String loginType, Map<String, String> templateParams) throws IllegalParameterException, SendingException {
+        if (StringUtils.equalsIgnoreCase(loginType, "phone") && !StringUtils.isEmpty(user.getPhone()) && !user.getPhoneVerified()) {
+            AuthCode code = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PHONE_VERIFY.getValue(), false);
+            if (code != null) {
+                try {
+                    LoadedTemplate template = templateService.load("sms_validation_code");
+                    templateParams.put("code", code.getCode());
+
+                    messageSenderService.sendMessage(new Message(null, user.getPhone(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.SMS);
+                } catch (IOException e) {
+                    logger.error(e);
+                    throw new SendingException(e.getMessage());
+                }
+            }
+        }
+        else if (StringUtils.equalsIgnoreCase(loginType, "email") && !StringUtils.isEmpty(user.getEmail()) && !user.getEmailVerified()) {
+            AuthCode code = getActualCode(user.getId(), DataConstants.AuthCodeTypes.EMAIL_VERIFY.getValue(), false);
+            if (code != null) {
+                try {
+                    LoadedTemplate template = templateService.load("email_validation_code");
+                    templateParams.put("code", code.getCode());
+
+                    messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"), user.getEmail(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.EMAIL);
+                } catch (IOException e) {
+                    logger.error(e);
+                    throw new SendingException(e.getMessage());
+                }
+            }
+        }
     }
 
 }

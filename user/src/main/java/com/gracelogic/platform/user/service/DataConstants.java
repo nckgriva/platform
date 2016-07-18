@@ -10,11 +10,9 @@ import java.util.UUID;
 public class DataConstants {
 
     public enum AuthCodeTypes {
-        ACTIVATION(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
-        LOAN_REQUEST_TERM_ACCEPTANCE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
-        PASSWORD_REPAIR(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
-        EMAIL_VERIFY(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74")),
-        LOAN_TERM_ACCEPTANCE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e75"));
+        PHONE_VERIFY(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        EMAIL_VERIFY(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
+        PASSWORD_REPAIR(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73"));
         private UUID value;
 
         AuthCodeTypes(UUID value) {
@@ -46,6 +44,24 @@ public class DataConstants {
         private String value;
 
         UserSettingKey(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    public enum UserApproveMethod {
+        AUTO("AUTO"),
+        MANUAL("MANUAL"),
+        EMAIL_CONFIRMATION("EMAIL_CONFIRMATION"),
+        PHONE_CONFIRMATION("PHONE_CONFIRMATION"),
+        EMAIL_AND_PHONE_CONFIRMATION("PHONE_CONFIRMATION");
+
+        private String value;
+
+        UserApproveMethod(String value) {
             this.value = value;
         }
 
