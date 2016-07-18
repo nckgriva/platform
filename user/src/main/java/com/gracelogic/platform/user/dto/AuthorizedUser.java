@@ -14,18 +14,19 @@ import java.util.UUID;
  */
 public class AuthorizedUser extends IdObjectModel implements Serializable {
     private String email;
-    private Boolean approved;
     private String phone;
-
-    private Boolean blocked;
     private Boolean emailVerified;
     private Boolean phoneVerified;
+    private Boolean approved;
 
-    //Transient fields
-    private String password;
+    private Boolean blocked;
+
     private String name;
     private String surname;
     private String patronymic;
+
+    //Transient fields
+    private String password;
     private UUID userSessionId;
 
 
@@ -126,6 +127,10 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
         authorizedUser.setBlocked(user.getBlocked());
         authorizedUser.setEmailVerified(user.getEmailVerified());
         authorizedUser.setPhoneVerified(user.getPhoneVerified());
+
+        authorizedUser.setSurname(user.getSurname());
+        authorizedUser.setName(user.getName());
+        authorizedUser.setPatronymic(user.getPatronymic());
 
         return authorizedUser;
     }
