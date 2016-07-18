@@ -29,10 +29,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -50,29 +50,16 @@ public class UserController extends AbstractAuthorizedController {
     @Autowired
     private UserService userService;
 
+    @Autowired
     @Qualifier("userMessageSource")
     private ResourceBundleMessageSource messageSource;
 
     @Autowired
     private UserLifecycleService lifecycleService;
 
-    //В связи с тем, что при использовании @ResponseBody/@RequestBody невозможно установить Cookie - метод авторизации не используем эти аннтоации
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ModelAndView login(HttpServletRequest request, HttpServletResponse response) {
-        ModelAndView modelAndView = new ModelAndView("empty");   //TODO: сделать с этим что-нибудь
-
+    public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequest authRequest) {
         ObjectMapper objectMapper = new ObjectMapper();
-        AuthRequest authRequest = null;
-        try {
-            authRequest = objectMapper.readValue(request.getInputStream(), AuthRequest.class);
-
-            if (authRequest != null) {
-                authRequest.setLogin(StringUtils.trim(authRequest.getLogin()));
-            }
-
-
-        } catch (Exception ignored) {
-        }
 
         Exception exception = null;
         if (authRequest != null) {
@@ -103,7 +90,7 @@ public class UserController extends AbstractAuthorizedController {
                 }
             }
         }
-        response.setContentType("application/json");
+
         String resp = "{}";
 
         if (exception != null) {
@@ -140,8 +127,16 @@ public class UserController extends AbstractAuthorizedController {
             }
         }
 
-        modelAndView.addObject("response", resp);
-        return modelAndView;
+        try {
+            logger.info("Response: " + resp);
+            response.setCharacterEncoding("UTF-8");
+            response.setContentType("application/json");
+            response.getWriter().print(resp);
+            response.getWriter().flush();
+            response.flushBuffer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @RequestMapping(value = "/logged", method = RequestMethod.POST)

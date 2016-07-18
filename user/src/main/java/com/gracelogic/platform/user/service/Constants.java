@@ -6,6 +6,6 @@ package com.gracelogic.platform.user.service;
  * Time: 20:39
  */
 public class Constants {
-    public static final long INVALID_LOGIN_ATTEMPT_PERIOD = 1000 * 60 * 60; //1 час
+    public static final long INVALID_LOGIN_ATTEMPT_PERIOD = 1000 * 60 * 60;
     public static final long INVALID_LOGIN_ATTEMPT_TO_BLOCK = 5;
 }

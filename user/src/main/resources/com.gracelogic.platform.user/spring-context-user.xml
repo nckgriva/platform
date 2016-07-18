@@ -5,6 +5,6 @@
 
     <bean id="userMessageSource"
           class="org.springframework.context.support.ResourceBundleMessageSource">
-        <property name="basenames" value="user"/>
+        <property name="basenames" value="i18n.user"/>
     </bean>
 </beans>

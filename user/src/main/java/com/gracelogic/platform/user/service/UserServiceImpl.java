@@ -487,6 +487,7 @@ public class UserServiceImpl implements UserService {
         user.setEmailVerified(false);
         user.setPhoneVerified(false);
         user.setApproved(false);
+        user.setBlocked(false);
 
         if (trust) {
             user.setApproved(true);
