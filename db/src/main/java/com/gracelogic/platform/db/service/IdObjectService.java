@@ -29,15 +29,15 @@ public interface IdObjectService {
 
     void delete(Class clazz, Object id);
 
-    void delete(Class clazz, String clause);
+    void delete(Class clazz, String cause);
 
-    Integer getCount(Class clazz, String clause);
+    Integer getCount(Class clazz, String cause);
 
-    Long getSum(Class clazz, String fieldName, String clause);
+    Long getSum(Class clazz, String fieldName, String cause);
 
-    Long getSum(Class clazz, String fieldName, String clause, HashMap<String, Object> params);
+    Long getSum(Class clazz, String fieldName, String cause, HashMap<String, Object> params);
 
-    Long getSum(Class clazz, String fieldName, String fetches, String clause, HashMap<String, Object> params);
+    Long getSum(Class clazz, String fieldName, String fetches, String cause, HashMap<String, Object> params);
 
     Integer getCount(Class clazz, String fetches, String cause);
 
@@ -61,9 +61,9 @@ public interface IdObjectService {
 
     <T> List<T> getList(Class<T> clazz, String fetches, String cause, HashMap<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
 
-    Integer getMaxInteger(Class clazz, String fieldName, String clause);
+    Integer getMaxInteger(Class clazz, String fieldName, String cause);
 
-    Date getMaxDate(Class clazz, String fieldName, String clause);
+    Date getMaxDate(Class clazz, String fieldName, String cause);
 
     void updateFieldValue(Class clazz, Object id, String fieldName, Object val);
 

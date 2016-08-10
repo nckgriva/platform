@@ -133,15 +133,15 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
         }
     }
 
-    public Long getSum(Class clazz, String fieldName, String fetches, String clause, HashMap<String, Object> params) {
+    public Long getSum(Class clazz, String fieldName, String fetches, String cause, HashMap<String, Object> params) {
         if (fetches == null) {
             fetches = "";
         }
         Long count = null;
         String query = "select sum(%s) from %s el " + fetches + " ";
         query = String.format(query, fieldName, clazz.getSimpleName());
-        if (clause != null && !clause.isEmpty()) {
-            query += "where " + clause;
+        if (cause != null && !cause.isEmpty()) {
+            query += "where " + cause;
         }
 
         try{
@@ -200,12 +200,12 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
     }
 
     @Override
-    public Integer getMaxInteger(Class clazz, String fieldName, String clause) {
+    public Integer getMaxInteger(Class clazz, String fieldName, String cause) {
         Integer count = null;
         String query = "select max(%s) from %s ";
         query = String.format(query, fieldName, clazz.getSimpleName());
-        if (clause != null && !clause.isEmpty()) {
-            query += "where " + clause;
+        if (cause != null && !cause.isEmpty()) {
+            query += "where " + cause;
         }
 
 
@@ -224,12 +224,12 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
     }
 
     @Override
-    public Date getMaxDate(Class clazz, String fieldName, String clause) {
+    public Date getMaxDate(Class clazz, String fieldName, String cause) {
         Date date = null;
         String query = "select max(%s) from %s ";
         query = String.format(query, fieldName, clazz.getSimpleName());
-        if (clause != null && !clause.isEmpty()) {
-            query += "where " + clause;
+        if (cause != null && !cause.isEmpty()) {
+            query += "where " + cause;
         }
 
 
@@ -243,12 +243,12 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
         return date;
     }
 
-    public void delete(Class clazz, String clause) {
-        if (clause == null) {
-            clause = "";
+    public void delete(Class clazz, String cause) {
+        if (cause == null) {
+            cause = "";
         }
         String query = "delete from %s el where %s ";
-        query = String.format(query, clazz.getSimpleName(), clause);
+        query = String.format(query, clazz.getSimpleName(), cause);
 
         getEntityManager().createQuery(query).executeUpdate();
     }

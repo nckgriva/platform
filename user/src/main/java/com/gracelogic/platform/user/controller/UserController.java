@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
-import com.gracelogic.platform.user.dto.AuthRequest;
-import com.gracelogic.platform.user.dto.AuthorizedUser;
-import com.gracelogic.platform.user.dto.ChangePasswordRequest;
-import com.gracelogic.platform.user.dto.RepairCodeRequest;
+import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.UserSession;
 import com.gracelogic.platform.user.security.AuthenticationToken;
@@ -33,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -128,7 +126,7 @@ public class UserController extends AbstractAuthorizedController {
         }
 
         try {
-            logger.info("Response: " + resp);
+            logger.debug("Response: " + resp);
             response.setCharacterEncoding("UTF-8");
             response.setContentType("application/json");
             response.getWriter().print(resp);

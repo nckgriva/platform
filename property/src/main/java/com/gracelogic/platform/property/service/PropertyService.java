@@ -10,6 +10,8 @@ public interface PropertyService {
 
     Integer getPropertyValueAsInteger(String propertyName);
 
+    Long getPropertyValueAsLong(String propertyName);
+
     Boolean getPropertyValueAsBoolean(String propertyName);
 
     Double getPropertyValueAsDouble(String propertyName);

@@ -70,8 +70,8 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
-    public void delete(Class clazz, String clause) {
-        idObjectDao.delete(clazz, clause);
+    public void delete(Class clazz, String cause) {
+        idObjectDao.delete(clazz, cause);
     }
 
     @Override
@@ -80,18 +80,18 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
-    public Long getSum(Class clazz, String fieldName, String clause) {
-        return idObjectDao.getSum(clazz, fieldName, null, clause, null);
+    public Long getSum(Class clazz, String fieldName, String cause) {
+        return idObjectDao.getSum(clazz, fieldName, null, cause, null);
     }
 
     @Override
-    public Long getSum(Class clazz, String fieldName, String clause, HashMap<String, Object> params) {
-        return idObjectDao.getSum(clazz, fieldName, null, clause, params);
+    public Long getSum(Class clazz, String fieldName, String cause, HashMap<String, Object> params) {
+        return idObjectDao.getSum(clazz, fieldName, null, cause, params);
     }
 
     @Override
-    public Long getSum(Class clazz, String fieldName, String fetches, String clause, HashMap<String, Object> params) {
-        return idObjectDao.getSum(clazz, fieldName, fetches, clause, params);
+    public Long getSum(Class clazz, String fieldName, String fetches, String cause, HashMap<String, Object> params) {
+        return idObjectDao.getSum(clazz, fieldName, fetches, cause, params);
     }
 
     @Override
@@ -143,28 +143,28 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
-    public <T> List<T> getList(Class<T> clazz, String clause, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
-        return idObjectDao.getList(clazz, null, clause, null, sortField, sortDirection, startRecord, maxResult);
+    public <T> List<T> getList(Class<T> clazz, String cause, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
+        return idObjectDao.getList(clazz, null, cause, null, sortField, sortDirection, startRecord, maxResult);
     }
 
     @Override
-    public <T> List<T> getList(Class<T> clazz, String fetches, String clause, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
-        return idObjectDao.getList(clazz, fetches, clause, null, sortField, sortDirection, startRecord, maxResult);
+    public <T> List<T> getList(Class<T> clazz, String fetches, String cause, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
+        return idObjectDao.getList(clazz, fetches, cause, null, sortField, sortDirection, startRecord, maxResult);
     }
 
     @Override
-    public <T> List<T> getList(Class<T> clazz, String fetches, String clause, HashMap<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
-        return idObjectDao.getList(clazz, fetches, clause, params, sortField, sortDirection, startRecord, maxResult);
+    public <T> List<T> getList(Class<T> clazz, String fetches, String cause, HashMap<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
+        return idObjectDao.getList(clazz, fetches, cause, params, sortField, sortDirection, startRecord, maxResult);
     }
 
     @Override
-    public Integer getMaxInteger(Class clazz, String fieldName, String clause) {
-        return idObjectDao.getMaxInteger(clazz, fieldName, clause);
+    public Integer getMaxInteger(Class clazz, String fieldName, String cause) {
+        return idObjectDao.getMaxInteger(clazz, fieldName, cause);
     }
 
     @Override
-    public Date getMaxDate(Class clazz, String fieldName, String clause) {
-        return idObjectDao.getMaxDate(clazz, fieldName, clause);
+    public Date getMaxDate(Class clazz, String fieldName, String cause) {
+        return idObjectDao.getMaxDate(clazz, fieldName, cause);
     }
 
     @Override

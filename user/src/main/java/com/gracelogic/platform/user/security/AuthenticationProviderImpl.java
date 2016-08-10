@@ -45,7 +45,9 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
 
                 Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
                 for (Grant grant : grants) {
-                    authorities.add(new SimpleGrantedAuthority(grant.getName()));
+                    authorities.add(new SimpleGrantedAuthority(grant.getCode()));
+
+                    authorizedUser.getGrants().add(grant.getCode());
                 }
                 authentication = new AuthenticationToken(authentication.getPrincipal(), authentication.getCredentials(), authorities, ((AuthenticationToken) authentication).getRemoteAddress(), ((AuthenticationToken) authentication).getLoginType(), ((AuthenticationToken) authentication).isTrust());
 

@@ -5,6 +5,8 @@ import com.gracelogic.platform.db.dto.IdObjectModel;
 import com.gracelogic.platform.user.model.User;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -28,6 +30,8 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
     //Transient fields
     private String password;
     private UUID userSessionId;
+
+    private Set<String> grants = new HashSet<String>();
 
 
     public String getEmail() {
@@ -116,6 +120,14 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
 
     public void setUserSessionId(UUID userSessionId) {
         this.userSessionId = userSessionId;
+    }
+
+    public Set<String> getGrants() {
+        return grants;
+    }
+
+    public void setGrants(Set<String> grants) {
+        this.grants = grants;
     }
 
     public static AuthorizedUser prepare(User user, AuthorizedUser authorizedUser) {

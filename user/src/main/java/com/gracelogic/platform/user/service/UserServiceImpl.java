@@ -11,6 +11,8 @@ import com.gracelogic.platform.template.dto.LoadedTemplate;
 import com.gracelogic.platform.template.service.TemplateService;
 import com.gracelogic.platform.user.dao.UserDao;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
+import com.gracelogic.platform.user.dto.GrantDTO;
+import com.gracelogic.platform.user.dto.RoleDTO;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
@@ -98,10 +100,10 @@ public class UserServiceImpl implements UserService {
                     (user.getAllowedAddresses() == null || user.getAllowedAddresses().contains(remoteAddress))) {
                 Long currentTimeMillis = System.currentTimeMillis();
                 Date endDate = new Date(currentTimeMillis);
-                Date startDate = new Date(currentTimeMillis - Constants.INVALID_LOGIN_ATTEMPT_PERIOD);
+                Date startDate = new Date(currentTimeMillis - propertyService.getPropertyValueAsInteger("user:block_period"));
 
                 Long incorrectLoginAttemptCount = userDao.getIncorrectLoginAttemptCount(user.getId(), startDate, endDate);
-                if (incorrectLoginAttemptCount < Constants.INVALID_LOGIN_ATTEMPT_TO_BLOCK) {
+                if (incorrectLoginAttemptCount < propertyService.getPropertyValueAsInteger("user:attempts_to_block")) {
                     String passwordAndSalt = password.concat(user.getSalt());
                     if (user.getPassword().equals(DigestUtils.shaHex(passwordAndSalt))) {
                         user.setLastVisitDt(new Date());
@@ -265,7 +267,7 @@ public class UserServiceImpl implements UserService {
         if (user != null && user.getApproved()) {
             boolean isActualCodeAvailable = isActualCodeAvailable(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue());
             AuthCode authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), false);
-            if ((System.currentTimeMillis() - authCode.getCreated().getTime() > Long.parseLong(propertyService.getPropertyValue("user:sms_delay"))) || !isActualCodeAvailable) {
+            if ((System.currentTimeMillis() - authCode.getCreated().getTime() > Long.parseLong(propertyService.getPropertyValue("user:action_delay"))) || !isActualCodeAvailable) {
                 if (isActualCodeAvailable) {
                     authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), true);
                 }
@@ -275,7 +277,7 @@ public class UserServiceImpl implements UserService {
                         HashMap<String, String> params = new HashMap<String, String>();
                         params.put("code", authCode.getCode());
 
-                        messageSenderService.sendMessage(new Message(null, user.getPhone(), template.getSubject(), templateService.apply(template, params)), SendingType.SMS);
+                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:sms_from"), user.getPhone(), template.getSubject(), templateService.apply(template, params)), SendingType.SMS);
                     } catch (IOException e) {
                         logger.error(e);
                         throw new SendingException(e.getMessage());
@@ -542,7 +544,7 @@ public class UserServiceImpl implements UserService {
                     LoadedTemplate template = templateService.load("sms_validation_code");
                     templateParams.put("code", code.getCode());
 
-                    messageSenderService.sendMessage(new Message(null, user.getPhone(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.SMS);
+                    messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:sms_from"), user.getPhone(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.SMS);
                 } catch (IOException e) {
                     logger.error(e);
                     throw new SendingException(e.getMessage());
@@ -564,5 +566,4 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
-
 }

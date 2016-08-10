@@ -74,6 +74,11 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
+    public Long getPropertyValueAsLong(String propertyName) {
+        return Long.parseLong(getPropertyValue(propertyName));
+    }
+
+    @Override
     public Boolean getPropertyValueAsBoolean(String propertyName) {
         return Boolean.parseBoolean(getPropertyValue(propertyName));
     }

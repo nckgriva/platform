@@ -2,6 +2,7 @@ package com.gracelogic.platform.user.service;
 
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
+import com.gracelogic.platform.user.dto.RoleDTO;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.AuthCode;
 import com.gracelogic.platform.user.model.User;
@@ -9,6 +10,7 @@ import com.gracelogic.platform.user.model.UserSession;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 

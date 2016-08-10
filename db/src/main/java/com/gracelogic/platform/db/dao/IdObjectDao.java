@@ -31,7 +31,7 @@ public interface IdObjectDao {
 
     void delete(Class clazz, Object id);
 
-    Long getSum(Class clazz, String fieldName, String fetches, String clause, HashMap<String, Object> params);
+    Long getSum(Class clazz, String fieldName, String fetches, String cause, HashMap<String, Object> params);
 
     Integer getCount(Class clazz, String column, String fetches, String cause, HashMap<String, Object> params);
 
@@ -45,9 +45,9 @@ public interface IdObjectDao {
 
     void updateTwoFieldValue(Class clazz, Object id, String field1Name, Object val1, String field2Name, Object val2);
 
-    Integer getMaxInteger(Class clazz, String fieldName, String clause);
+    Integer getMaxInteger(Class clazz, String fieldName, String cause);
 
-    Date getMaxDate(Class clazz, String fieldName, String clause);
+    Date getMaxDate(Class clazz, String fieldName, String cause);
 
-    void delete(Class clazz, String clause);
+    void delete(Class clazz, String cause);
 }

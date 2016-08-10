@@ -2,6 +2,7 @@ package com.gracelogic.platform.notification.sms;
 
 import com.gracelogic.platform.notification.dto.Message;
 import com.gracelogic.platform.property.service.PropertyService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -27,7 +28,7 @@ public class SmsServiceImpl implements SmsService {
 
     //private final String API_KEY = "1fbfb7aa-ca1e-7204-d1a9-f32a4e4ba131";
 
-    private final String sendSms = "http://sms.ru/sms/send?api_id=%s&to=%s&text=%s&from=%s";
+    private final String sendSms = "http://sms.ru/sms/send?api_id=%s&to=%s&text=%s%s";
 
     public boolean sendSms(Message message) {
         try {
@@ -38,10 +39,10 @@ public class SmsServiceImpl implements SmsService {
                     propertyService.getPropertyValue("notification:sms_apikey"),
                     message.getTo(),
                     URLEncoder.encode(message.getText(), "UTF-8"),
-                    propertyService.getPropertyValue("notification:sms_from")
+                    !StringUtils.isEmpty(message.getFrom()) ? String.format("&from=%s", message.getFrom()) : ""
             );
 
-            logger.info("uri " + uri);
+            logger.info("uri :" + uri);
             HttpGet sendMethod = new HttpGet(uri);
             CloseableHttpResponse result = httpClient.execute(sendMethod);
 
