@@ -566,4 +566,18 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void addRoleToUser(User user, Collection<UUID> roleIds) {
+        for (UUID roleId : roleIds) {
+            Role role = idObjectService.getObjectById(Role.class, roleId);
+
+            UserRole userRole = new UserRole();
+            userRole.setUser(user);
+            userRole.setRole(role);
+
+            idObjectService.save(userRole);
+        }
+    }
 }

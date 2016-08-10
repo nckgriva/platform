@@ -10,6 +10,7 @@ import com.gracelogic.platform.user.model.UserSession;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 
 import javax.servlet.http.HttpSession;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -55,4 +56,6 @@ public interface UserService {
     void deleteUser(User user);
 
     void sendVerificationCode(User user, String loginType, Map<String, String> templateParams) throws IllegalParameterException, SendingException;
+
+    void addRoleToUser(User user, Collection<UUID> roleIds);
 }

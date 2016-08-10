@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Author: Igor Parkhomenko
@@ -86,6 +87,11 @@ public class PropertyServiceImpl implements PropertyService {
     @Override
     public Double getPropertyValueAsDouble(String propertyName) {
         return Double.parseDouble(getPropertyValue(propertyName));
+    }
+
+    @Override
+    public UUID getPropertyValueAsUUID(String propertyName) {
+        return UUID.fromString(getPropertyValue(propertyName));
     }
 
 }
