@@ -14,7 +14,8 @@ import java.util.UUID;
  * Time: 18:30
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "AUTH_CODE", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "AUTH_CODE", schema = JPAProperties.DEFAULT_SCHEMA, uniqueConstraints =
+        {@UniqueConstraint(columnNames = {"AUTH_CODE", "CODE_TYPE_ID", "USER_ID"})})
 public class AuthCode extends IdObject<UUID> {
     @Id
     @Column(name = ID)
