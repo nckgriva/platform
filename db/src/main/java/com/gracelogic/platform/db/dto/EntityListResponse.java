@@ -15,7 +15,7 @@ public class EntityListResponse<E extends IdObjectModel> {
     private Integer totalCount = 0;
     private Integer queriedCount = 0;
 
-    private LinkedList<E> result = new LinkedList<E>();
+    private LinkedList<E> data = new LinkedList<E>();
 
     public Integer getPages() {
         return pages;
@@ -41,16 +41,16 @@ public class EntityListResponse<E extends IdObjectModel> {
         this.entity = entity;
     }
 
-    public LinkedList<E> getResult() {
-        return result;
+    public LinkedList<E> getData() {
+        return data;
     }
 
-    public void setResult(LinkedList<E> result) {
-        this.result = result;
+    public void setData(LinkedList<E> data) {
+        this.data = data;
     }
 
-    public void addResult(E idObjectModel) {
-        result.addLast(idObjectModel);
+    public void addData(E idObjectModel) {
+        data.addLast(idObjectModel);
     }
 
     public Integer getPartCount() {
@@ -75,5 +75,14 @@ public class EntityListResponse<E extends IdObjectModel> {
 
     public void setQueriedCount(Integer queriedCount) {
         this.queriedCount = queriedCount;
+    }
+
+    //For datatables
+    public int getRecordsTotal() {
+        return getTotalCount();
+    }
+
+    public int getRecordsFiltered() {
+        return getTotalCount();
     }
 }
