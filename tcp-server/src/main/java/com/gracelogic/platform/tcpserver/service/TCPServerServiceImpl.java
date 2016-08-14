@@ -180,6 +180,8 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
 
                         stream = newStream;
 
+                        packages.clear();
+
                     }
 
                     int processedBytes = 0;

@@ -14,7 +14,7 @@ import java.util.UUID;
  * Date: 18.12.14
  * Time: 12:33
  */
-@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
+//@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 public class IdObjectModel implements Serializable {
     private UUID id;
     private Date created;
