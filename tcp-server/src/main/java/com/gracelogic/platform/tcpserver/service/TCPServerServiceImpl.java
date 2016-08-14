@@ -239,7 +239,7 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
 
     public void run() {
         running = true;
-        int port = propertyService.getPropertyValueAsInteger("tcp-server:interaction_port");
+        int port = propertyService.getPropertyValueAsInteger("tcp-server:port");
         logger.info("Binding to port: " + port + ";");
 
         bind(port);
