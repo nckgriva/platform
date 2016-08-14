@@ -22,5 +22,6 @@
         <module>template</module>
         <module>account</module>
         <module>payment</module>
+        <module>tcp-server</module>
     </modules>
 </project>
