@@ -19,7 +19,7 @@
             <artifactId>platform-db</artifactId>
             <version>1.0</version>
         </dependency>
-<dependency>
+        <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-user</artifactId>
             <version>1.0</version>

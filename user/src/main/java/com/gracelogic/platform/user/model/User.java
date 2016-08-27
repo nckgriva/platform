@@ -20,6 +20,7 @@ import java.util.UUID;
 public class User extends IdObject<UUID> {
     @Id
     @Column(name = ID)
+    @Access(AccessType.PROPERTY)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @org.hibernate.annotations.Type(type = "pg-uuid")
