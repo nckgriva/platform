@@ -6,10 +6,7 @@ import org.springframework.util.StringUtils;
 
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Author: Igor Parkhomenko
@@ -50,7 +47,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
         }
     }
 
-    public Integer checkExist(Class clazz, String fetches, String cause, HashMap<String, Object> params, Integer maxCount) {
+    public Integer checkExist(Class clazz, String fetches, String cause, Map<String, Object> params, Integer maxCount) {
         if (fetches == null) {
             fetches = "";
         }
@@ -133,7 +130,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
         }
     }
 
-    public Long getSum(Class clazz, String fieldName, String fetches, String cause, HashMap<String, Object> params) {
+    public Long getSum(Class clazz, String fieldName, String fetches, String cause, Map<String, Object> params) {
         if (fetches == null) {
             fetches = "";
         }
@@ -166,7 +163,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
         }
     }
 
-    public Integer getCount(Class clazz, String column, String fetches, String cause, HashMap<String, Object> params) {
+    public Integer getCount(Class clazz, String column, String fetches, String cause, Map<String, Object> params) {
         if (fetches == null) {
             fetches = "";
         }
@@ -243,14 +240,21 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
         return date;
     }
 
-    public void delete(Class clazz, String cause) {
+    public void delete(Class clazz, String cause, Map<String, Object> params) {
         if (cause == null) {
             cause = "";
         }
         String query = "delete from %s el where %s ";
         query = String.format(query, clazz.getSimpleName(), cause);
 
-        getEntityManager().createQuery(query).executeUpdate();
+        Query query1 = getEntityManager().createQuery(query);
+        if (params != null) {
+            for (String paramName : params.keySet()) {
+                Object paramValue = params.get(paramName);
+                query1.setParameter(paramName, paramValue);
+            }
+        }
+        query1.executeUpdate();
     }
 
 }

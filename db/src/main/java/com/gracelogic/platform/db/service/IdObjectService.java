@@ -5,6 +5,7 @@ import com.gracelogic.platform.db.model.IdObject;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Author: Igor Parkhomenko
@@ -21,7 +22,7 @@ public interface IdObjectService {
 
     <T extends IdObject> T save(T entity);
 
-    Integer checkExist(Class clazz, String fetches, String cause, HashMap<String, Object> params, Integer maxCount);
+    Integer checkExist(Class clazz, String fetches, String cause, Map<String, Object> params, Integer maxCount);
 
     <T> T saveOrUpdate(T entity);
 
@@ -29,21 +30,21 @@ public interface IdObjectService {
 
     void delete(Class clazz, Object id);
 
-    void delete(Class clazz, String cause);
+    void delete(Class clazz, String cause, Map<String, Object> params);
 
     Integer getCount(Class clazz, String cause);
 
     Long getSum(Class clazz, String fieldName, String cause);
 
-    Long getSum(Class clazz, String fieldName, String cause, HashMap<String, Object> params);
+    Long getSum(Class clazz, String fieldName, String cause, Map<String, Object> params);
 
-    Long getSum(Class clazz, String fieldName, String fetches, String cause, HashMap<String, Object> params);
+    Long getSum(Class clazz, String fieldName, String fetches, String cause, Map<String, Object> params);
 
     Integer getCount(Class clazz, String fetches, String cause);
 
-    Integer getCount(Class clazz, String fetches, String cause, HashMap<String, Object> params);
+    Integer getCount(Class clazz, String fetches, String cause, Map<String, Object> params);
 
-    Integer getCount(Class clazz, String column, String fetches, String cause, HashMap<String, Object> params);
+    Integer getCount(Class clazz, String column, String fetches, String cause, Map<String, Object> params);
 
     <T extends IdObject> T setIfModified(Class<T> clazz, T oldObject, Object newId);
 
@@ -59,7 +60,7 @@ public interface IdObjectService {
 
     <T> List<T> getList(Class<T> clazz, String fetches, String cause, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
 
-    <T> List<T> getList(Class<T> clazz, String fetches, String cause, HashMap<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
+    <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
 
     Integer getMaxInteger(Class clazz, String fieldName, String cause);
 

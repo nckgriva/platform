@@ -5,10 +5,7 @@ import com.gracelogic.platform.db.model.IdObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Author: Igor Parkhomenko
@@ -45,7 +42,7 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
-    public Integer checkExist(Class clazz, String fetches, String cause, HashMap<String, Object> params, Integer maxCount) {
+    public Integer checkExist(Class clazz, String fetches, String cause, Map<String, Object> params, Integer maxCount) {
         return idObjectDao.checkExist(clazz, fetches, cause, params, maxCount);
     }
 
@@ -70,8 +67,8 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
-    public void delete(Class clazz, String cause) {
-        idObjectDao.delete(clazz, cause);
+    public void delete(Class clazz, String cause, Map<String, Object> params) {
+        idObjectDao.delete(clazz, cause, params);
     }
 
     @Override
@@ -85,12 +82,12 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
-    public Long getSum(Class clazz, String fieldName, String cause, HashMap<String, Object> params) {
+    public Long getSum(Class clazz, String fieldName, String cause, Map<String, Object> params) {
         return idObjectDao.getSum(clazz, fieldName, null, cause, params);
     }
 
     @Override
-    public Long getSum(Class clazz, String fieldName, String fetches, String cause, HashMap<String, Object> params) {
+    public Long getSum(Class clazz, String fieldName, String fetches, String cause, Map<String, Object> params) {
         return idObjectDao.getSum(clazz, fieldName, fetches, cause, params);
     }
 
@@ -100,12 +97,12 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
-    public Integer getCount(Class clazz, String fetches, String cause, HashMap<String, Object> params) {
+    public Integer getCount(Class clazz, String fetches, String cause, Map<String, Object> params) {
         return idObjectDao.getCount(clazz, null, fetches, cause, params);
     }
 
     @Override
-    public Integer getCount(Class clazz, String column, String fetches, String cause, HashMap<String, Object> params) {
+    public Integer getCount(Class clazz, String column, String fetches, String cause, Map<String, Object> params) {
         return idObjectDao.getCount(clazz, column, fetches, cause, params);
     }
 
@@ -153,7 +150,7 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
-    public <T> List<T> getList(Class<T> clazz, String fetches, String cause, HashMap<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
+    public <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
         return idObjectDao.getList(clazz, fetches, cause, params, sortField, sortDirection, startRecord, maxResult);
     }
 
