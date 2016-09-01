@@ -1,8 +1,8 @@
 package com.gracelogic.platform.user.service;
 
+import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
-import com.gracelogic.platform.user.dto.RoleDTO;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.AuthCode;
 import com.gracelogic.platform.user.model.User;
@@ -58,4 +58,6 @@ public interface UserService {
     void sendVerificationCode(User user, String loginType, Map<String, String> templateParams) throws IllegalParameterException, SendingException;
 
     void addRoleToUser(User user, Collection<UUID> roleIds);
+
+    EntityListResponse<AuthorizedUser> getUsersPaged(String phone, String email, String name, String surname, String patronymic, Integer count, Integer page, Integer start, String sortField, String sortDir);
 }

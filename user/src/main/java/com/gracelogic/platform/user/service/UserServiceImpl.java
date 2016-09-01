@@ -1,5 +1,6 @@
 package com.gracelogic.platform.user.service;
 
+import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.notification.dto.Message;
@@ -11,8 +12,6 @@ import com.gracelogic.platform.template.dto.LoadedTemplate;
 import com.gracelogic.platform.template.service.TemplateService;
 import com.gracelogic.platform.user.dao.UserDao;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
-import com.gracelogic.platform.user.dto.GrantDTO;
-import com.gracelogic.platform.user.dto.RoleDTO;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
@@ -131,7 +130,10 @@ public class UserServiceImpl implements UserService {
         user.setPassword(DigestUtils.shaHex(newPassword.concat(user.getSalt())));
         idObjectService.save(user);
 
-        idObjectService.delete(IncorrectLoginAttempt.class, String.format("el.user.id='%s'", userId.toString()));
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+
+        idObjectService.delete(IncorrectLoginAttempt.class, "el.user.id=:userId", params);
     }
 
     public static String generatePasswordSalt() {
@@ -146,7 +148,10 @@ public class UserServiceImpl implements UserService {
             Matcher m = p.matcher(phone.trim());
             boolean result = m.find();
             if (fullCheck) {
-                return result && idObjectService.checkExist(User.class, null, String.format("el.phone='%s' and el.phoneVerified=true", phone.trim()), null, 1) == 0;
+                Map<String, Object> params = new HashMap<>();
+                params.put("phone", StringUtils.trim(phone));
+
+                return result && idObjectService.checkExist(User.class, null, "el.phone=:phone and el.phoneVerified=true",  params, 1) == 0;
             }
             return result;
         }
@@ -161,7 +166,10 @@ public class UserServiceImpl implements UserService {
             Matcher m = p.matcher(email.trim());
             boolean result = m.find();
             if (fullCheck) {
-                return result && idObjectService.checkExist(User.class, null, String.format("el.email='%s' and el.emailVerified=true", email.trim()), null, 1) == 0;
+                Map<String, Object> params = new HashMap<>();
+                params.put("email", StringUtils.trim(email));
+
+                return result && idObjectService.checkExist(User.class, null, "el.email=:email and el.emailVerified=true", params, 1) == 0;
             }
             return result;
         }
@@ -234,7 +242,10 @@ public class UserServiceImpl implements UserService {
                 AuthorizedUser authorizedUser = (AuthorizedUser) authentication.getDetails();
                 UserSession userSession = null;
 
-                List<UserSession> userSessions = idObjectService.getList(UserSession.class, String.format("el.sessionId='%s'", session.getId()), null, null, null, null);
+                Map<String, Object> params = new HashMap<>();
+                params.put("sessionId", session.getId());
+
+                List<UserSession> userSessions = idObjectService.getList(UserSession.class, null, "el.sessionId=:sessionId", params, null, null, null, 1);
                 if (userSessions != null && !userSessions.isEmpty()) {
                     userSession = userSessions.iterator().next();
                 }
@@ -323,7 +334,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String getUserSetting(UUID userId, String key) {
-        List<UserSetting> userSettings = idObjectService.getList(UserSetting.class, String.format("el.user.id='%s' and el.key='%s'", userId.toString(), key), null, null, null, 1);
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("key", key);
+
+        List<UserSetting> userSettings = idObjectService.getList(UserSetting.class, null, "el.user.id=:userId and el.key=:key", params, null, null, null, 1);
         if (!userSettings.isEmpty()) {
             return userSettings.iterator().next().getValue();
         }
@@ -333,8 +348,12 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateUserSetting(UUID userId, String key, String value) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("key", key);
+
         UserSetting userSetting;
-        List<UserSetting> userSettings = idObjectService.getList(UserSetting.class, String.format("el.user.id='%s' and el.key='%s'", userId.toString(), key), null, null, null, 1);
+        List<UserSetting> userSettings = idObjectService.getList(UserSetting.class, null, "el.user.id=:userId and el.key=:key", params, null, null, null, 1);
         if (!userSettings.isEmpty()) {
             userSetting = userSettings.iterator().next();
         } else {
@@ -350,8 +369,13 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public AuthCode getActualCode(UUID userId, UUID codeTypeId, boolean invalidateImmediately) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("authCodeType", codeTypeId);
+        params.put("authCodeState", DataConstants.AuthCodeStates.NEW.getValue());
+
         if (invalidateImmediately) {
-            idObjectService.delete(AuthCode.class, String.format("el.user.id='%s' and el.authCodeType.id='%s' and el.authCodeState.id='%s'", userId.toString(), codeTypeId.toString(), DataConstants.AuthCodeStates.NEW.getValue()));
+            idObjectService.delete(AuthCode.class, "el.user.id=:userId and el.authCodeType.id=:authCodeType and el.authCodeState.id=:authCodeState", params);
         }
 
         AuthCode actualAuthCode;
@@ -363,7 +387,7 @@ public class UserServiceImpl implements UserService {
                 actualAuthCode = authCodes.iterator().next();
             } else {
                 //Actual codes gt 1
-                idObjectService.delete(AuthCode.class, String.format("el.user.id='%s' and el.authCodeType.id='%s' and el.authCodeState.id='%s'", userId.toString(), codeTypeId.toString(), DataConstants.AuthCodeStates.NEW.getValue()));
+                idObjectService.delete(AuthCode.class, "el.user.id=:userId and el.authCodeType.id=:authCodeType and el.authCodeState.id=:authCodeState", params);
                 actualAuthCode = createCode(userId, codeTypeId);
             }
         }
@@ -387,7 +411,13 @@ public class UserServiceImpl implements UserService {
             String code = null;
             for (int i = 0; i < 5; i++) {
                 String tempCode = String.valueOf(generateCode());
-                Integer count = idObjectService.checkExist(AuthCode.class, null, String.format("el.user.id='%s' and el.authCodeType.id='%s' and el.code='%s'", userId.toString(), codeTypeId.toString(), tempCode), null, 1);
+
+                Map<String, Object> params = new HashMap<>();
+                params.put("userId", userId);
+                params.put("authCodeType", codeTypeId);
+                params.put("code", tempCode);
+
+                Integer count = idObjectService.checkExist(AuthCode.class, null, "el.user.id=:userId and el.authCodeType.id=:authCodeType and el.code=:code", params, 1);
                 if (count == 0) {
                     code = tempCode;
                     break;
@@ -416,7 +446,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isActualCodeAvailable(UUID userId, UUID codeTypeId) {
-        Integer count = idObjectService.checkExist(AuthCode.class, null, String.format("el.user.id='%s' and el.authCodeType.id='%s' and el.authCodeState.id='%s'", userId, codeTypeId, DataConstants.AuthCodeStates.NEW.getValue()), null, 1);
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("authCodeType", codeTypeId);
+        params.put("authCodeState", DataConstants.AuthCodeStates.NEW.getValue());
+
+        Integer count = idObjectService.checkExist(AuthCode.class, null, "el.user.id=:userId and el.authCodeType.id=:authCodeType and el.authCodeState.id=:authCodeState", params, 1);
         return count > 0;
     }
 
@@ -502,13 +537,13 @@ public class UserServiceImpl implements UserService {
         user.setPatronymic(userModel.getPatronymic());
 
         if (!StringUtils.isEmpty(userModel.getEmail())) {
-            user.setEmail(userModel.getEmail().toLowerCase().trim());
+            user.setEmail(StringUtils.trim(StringUtils.lowerCase(userModel.getEmail())));
             if (trust) {
                 user.setEmailVerified(true);
             }
         }
         if (!StringUtils.isEmpty(userModel.getPhone())) {
-            user.setPhone(userModel.getPhone());
+            user.setPhone(StringUtils.trim(userModel.getPhone()));
             if (trust) {
                 user.setPhoneVerified(true);
             }
@@ -527,11 +562,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteUser(User user) {
-        idObjectService.delete(IncorrectLoginAttempt.class, String.format("el.user.id='%s'", user.getId()));
-        idObjectService.delete(AuthCode.class, String.format("el.user.id='%s'", user.getId()));
-        idObjectService.delete(UserSession.class, String.format("el.user.id='%s'", user.getId()));
-        idObjectService.delete(UserRole.class, String.format("el.user.id='%s'", user.getId()));
-        idObjectService.delete(User.class, String.format("el.id='%s'", user.getId()));
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("userId", user.getId());
+
+        idObjectService.delete(IncorrectLoginAttempt.class, "el.user.id=:userId", params);
+        idObjectService.delete(AuthCode.class, "el.user.id=:userId", params);
+        idObjectService.delete(UserSession.class, "el.user.id=:userId", params);
+        idObjectService.delete(UserRole.class, "el.user.id=:userId", params);
+        idObjectService.delete(User.class, user.getId());
     }
 
     @Override
@@ -579,5 +617,48 @@ public class UserServiceImpl implements UserService {
 
             idObjectService.save(userRole);
         }
+    }
+
+    @Override
+    public EntityListResponse<AuthorizedUser> getUsersPaged(String phone, String email, String name, String surname, String patronymic, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        if (!StringUtils.isEmpty(phone)) {
+            cause += "and el.phone=:phone ";
+            params.put("phone", StringUtils.trim(phone));
+        }
+        if (!StringUtils.isEmpty(email)) {
+            cause += "and el.email=:email ";
+            params.put("email", StringUtils.trim(email));
+        }
+        if (!StringUtils.isEmpty(name)) {
+            cause += String.format("and lower(el.name) like '%%%s' ", StringUtils.lowerCase(name));
+        }
+        if (!StringUtils.isEmpty(surname)) {
+            cause += String.format("and lower(el.surname) like '%%%s' ", StringUtils.lowerCase(surname));
+        }
+        if (!StringUtils.isEmpty(patronymic)) {
+            cause += String.format("and lower(el.patronymic) like '%%%s' ", StringUtils.lowerCase(patronymic));
+        }
+
+        int totalCount = idObjectService.getCount(User.class, null, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<AuthorizedUser> entityListResponse = new EntityListResponse<AuthorizedUser>();
+        entityListResponse.setEntity("user");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<User> items = idObjectService.getList(User.class, null, cause, params, sortField, sortDir, startRecord, count);
+        entityListResponse.setPartCount(items.size());
+        for (User e : items) {
+            AuthorizedUser el = AuthorizedUser.prepare(e);
+
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
     }
 }
