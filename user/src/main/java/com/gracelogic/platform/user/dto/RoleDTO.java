@@ -1,5 +1,9 @@
 package com.gracelogic.platform.user.dto;
 
+import com.gracelogic.platform.db.dto.IdObjectModel;
+import com.gracelogic.platform.user.model.Role;
+import com.gracelogic.platform.user.model.UserRole;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,7 +12,7 @@ import java.util.Set;
  * Date: 10.08.2016
  * Time: 9:28
  */
-public class RoleDTO {
+public class RoleDTO extends IdObjectModel {
     private String code;
     private String name;
     private Set<GrantDTO> grants = new HashSet<GrantDTO>();
@@ -35,5 +39,18 @@ public class RoleDTO {
 
     public void setGrants(Set<GrantDTO> grants) {
         this.grants = grants;
+    }
+
+    public static RoleDTO prepare(Role role) {
+        RoleDTO model = new RoleDTO();
+        IdObjectModel.prepare(model, role);
+        model.setCode(role.getCode());
+        model.setName(role.getName());
+
+        return model;
+    }
+
+    public static RoleDTO prepare(UserRole userRole) {
+        return prepare(userRole.getRole());
     }
 }

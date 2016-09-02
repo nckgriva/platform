@@ -151,7 +151,7 @@ public class UserServiceImpl implements UserService {
                 Map<String, Object> params = new HashMap<>();
                 params.put("phone", StringUtils.trim(phone));
 
-                return result && idObjectService.checkExist(User.class, null, "el.phone=:phone and el.phoneVerified=true",  params, 1) == 0;
+                return result && idObjectService.checkExist(User.class, null, "el.phone=:phone and el.phoneVerified=true", params, 1) == 0;
             }
             return result;
         }
@@ -588,8 +588,7 @@ public class UserServiceImpl implements UserService {
                     throw new SendingException(e.getMessage());
                 }
             }
-        }
-        else if (StringUtils.equalsIgnoreCase(loginType, "email") && !StringUtils.isEmpty(user.getEmail()) && !user.getEmailVerified()) {
+        } else if (StringUtils.equalsIgnoreCase(loginType, "email") && !StringUtils.isEmpty(user.getEmail()) && !user.getEmailVerified()) {
             AuthCode code = getActualCode(user.getId(), DataConstants.AuthCodeTypes.EMAIL_VERIFY.getValue(), false);
             if (code != null) {
                 try {
@@ -660,5 +659,78 @@ public class UserServiceImpl implements UserService {
         }
 
         return entityListResponse;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public User saveUser(AuthorizedUser user, boolean mergeRoles, AuthorizedUser executor) throws IllegalParameterException {
+        if (user.getId() == null) {
+            throw new IllegalParameterException("common.USER_NOT_FOUND");
+        }
+        User u = idObjectService.getObjectById(User.class, user.getId());
+        if (u == null) {
+            throw new IllegalParameterException("common.USER_NOT_FOUND");
+        }
+
+        u.setName(user.getName());
+        u.setSurname(user.getSurname());
+        u.setPatronymic(user.getPatronymic());
+
+        if (!u.getBlocked() && user.getBlocked()) {
+            u.setBlockedByUser(idObjectService.getObjectById(User.class, executor.getId()));
+            u.setBlockedtDt(new Date());
+        }
+
+        u.setBlocked(user.getBlocked());
+        if (!u.getBlocked()) {
+            u.setBlockedtDt(null);
+            u.setBlockedByUser(null);
+        }
+
+        u = idObjectService.save(u);
+
+        if (mergeRoles) {
+            mergeUserRoles(u.getId(), user.getRoles());
+        }
+
+        return u;
+    }
+
+    @Override
+    public List<UserRole> getUserRoles(UUID userId) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+
+        return idObjectService.getList(UserRole.class, null, "el.user.id=:userId", params, null, null, null, null);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void mergeUserRoles(UUID userId, Collection<UUID> activeRoles) throws IllegalParameterException {
+        User user = idObjectService.getObjectById(User.class, userId);
+        Set<UUID> currentRoles = new HashSet<>();
+        for (UserRole userRole : getUserRoles(userId)) {
+            currentRoles.add(userRole.getRole().getId());
+        }
+
+        //Delete non-active roles
+        String query = "el.user.id=:userId";
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        if (!activeRoles.isEmpty()) {
+            query += " and el.role.id not in (:roles)";
+            params.put("roles", activeRoles);
+        }
+        idObjectService.delete(UserRole.class, query, params);
+
+        //Add active roles
+        for (UUID roleId : activeRoles) {
+            if (!currentRoles.contains(roleId)) {
+                UserRole userRole = new UserRole();
+                userRole.setUser(user);
+                userRole.setRole(ds.get(Role.class, roleId));
+                idObjectService.save(userRole);
+            }
+        }
     }
 }

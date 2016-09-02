@@ -31,8 +31,8 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
     private String password;
     private UUID userSessionId;
 
-    private Set<String> grants = new HashSet<String>();
-
+    private Set<String> grants = new HashSet<>();
+    private Set<UUID> roles = new HashSet<>();
 
     public String getEmail() {
         return email;
@@ -128,6 +128,14 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
 
     public void setGrants(Set<String> grants) {
         this.grants = grants;
+    }
+
+    public Set<UUID> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<UUID> roles) {
+        this.roles = roles;
     }
 
     public static AuthorizedUser prepare(User user, AuthorizedUser authorizedUser) {

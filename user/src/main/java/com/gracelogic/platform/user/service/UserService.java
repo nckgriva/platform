@@ -6,6 +6,7 @@ import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.AuthCode;
 import com.gracelogic.platform.user.model.User;
+import com.gracelogic.platform.user.model.UserRole;
 import com.gracelogic.platform.user.model.UserSession;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 
@@ -60,4 +61,10 @@ public interface UserService {
     void addRoleToUser(User user, Collection<UUID> roleIds);
 
     EntityListResponse<AuthorizedUser> getUsersPaged(String phone, String email, String name, String surname, String patronymic, Integer count, Integer page, Integer start, String sortField, String sortDir);
+
+    User saveUser(AuthorizedUser user, boolean mergeRoles, AuthorizedUser executor) throws IllegalParameterException;
+
+    List<UserRole> getUserRoles(UUID userId);
+
+    void mergeUserRoles(UUID userId, Collection<UUID> activeRoles) throws IllegalParameterException;
 }
