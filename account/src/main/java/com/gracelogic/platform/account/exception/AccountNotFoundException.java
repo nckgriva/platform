@@ -1,4 +1,4 @@
-package com.gracelogic.platform.payment.exception;
+package com.gracelogic.platform.account.exception;
 
 public class AccountNotFoundException extends Exception {
 

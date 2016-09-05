@@ -1,6 +1,7 @@
 package com.gracelogic.platform.account.model;
 
 
+
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.dictionary.model.Dictionary;
@@ -16,8 +17,8 @@ import java.util.UUID;
  * Time: 12:32
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT_CURRENCY", schema = JPAProperties.DEFAULT_SCHEMA)
-public class AccountCurrency extends IdObject<UUID> implements Dictionary {
+@Table(name = JPAProperties.TABLE_PREFIX + "TRANSACTION_TYPE", schema = JPAProperties.DEFAULT_SCHEMA)
+public class TransactionType extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
@@ -33,8 +34,10 @@ public class AccountCurrency extends IdObject<UUID> implements Dictionary {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = NAME, nullable = false)
     private String name;
+
+
 
     @Override
     public UUID getId() {

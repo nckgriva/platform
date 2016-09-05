@@ -6,7 +6,7 @@ import com.gracelogic.platform.payment.DataConstants;
 import com.gracelogic.platform.payment.Path;
 
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
-import com.gracelogic.platform.payment.exception.AccountNotFoundException;
+import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.payment.exception.PaymentAlreadyExistException;
 import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentSystem;

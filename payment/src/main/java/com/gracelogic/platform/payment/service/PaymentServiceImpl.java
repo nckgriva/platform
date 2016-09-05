@@ -1,19 +1,19 @@
 package com.gracelogic.platform.payment.service;
 
+import com.gracelogic.platform.account.exception.InsufficientFundsException;
 import com.gracelogic.platform.account.model.Account;
+import com.gracelogic.platform.account.service.AccountService;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.payment.DataConstants;
 import com.gracelogic.platform.payment.dto.CalcPaymentFeeResult;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
-import com.gracelogic.platform.payment.exception.AccountNotFoundException;
+import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.payment.exception.PaymentAlreadyExistException;
 import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentState;
 import com.gracelogic.platform.payment.model.PaymentSystem;
-import com.gracelogic.platform.user.dto.AuthorizedUser;
-import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -37,11 +37,19 @@ public class PaymentServiceImpl implements PaymentService {
     private AccountResolver accountResolver;
 
     @Autowired
+    private AccountService accountService;
+
+    @Autowired
     private DictionaryService ds;
 
     @Override
     public Account checkPaymentAbility(PaymentSystem paymentSystem, String accountNumber, String currency) {
-        return accountResolver.getTargetAccount(null, accountNumber, paymentSystem, currency);
+        try {
+            return accountResolver.getTargetAccount(null, accountNumber, paymentSystem, currency);
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -55,7 +63,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         Payment payment = new Payment();
-        payment.setPaymentState(idObjectService.getObjectById(PaymentState.class, DataConstants.PaymentStates.CREATED.getValue()));
+        payment.setPaymentState(ds.get(PaymentState.class, DataConstants.PaymentStates.CREATED.getValue()));
         payment.setPaymentSystem(paymentSystem);
 
         Account account = accountResolver.getTargetAccount(null, paymentModel.getAccountNumber(), paymentSystem, paymentModel.getCurrency());
@@ -82,7 +90,12 @@ public class PaymentServiceImpl implements PaymentService {
         payment = idObjectService.save(payment);
 
         try {
-            accountResolver.paymentReceived(payment);
+            accountService.processTransaction(account.getId(), DataConstants.TransactionTypes.INCOMING_PAYMENT.getValue(), payment.getAmount(), payment.getId(), true);
+        }
+        catch (InsufficientFundsException ignored) {}
+
+        try {
+            accountResolver.notifyPaymentReceived(payment);
             payment.setPaymentState(ds.get(PaymentState.class, DataConstants.PaymentStates.ACTIVATED.getValue()));
             idObjectService.save(payment);
         }

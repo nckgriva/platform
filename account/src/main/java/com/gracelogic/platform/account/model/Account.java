@@ -16,13 +16,15 @@ import java.util.UUID;
  * Time: 12:34
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT", schema = JPAProperties.DEFAULT_SCHEMA, uniqueConstraints =
+        {@UniqueConstraint(columnNames = {"USER_ID", "ACCOUNT_TYPE_ID", "ACCOUNT_CURRENCY_ID"})})
 public class Account extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @org.hibernate.annotations.Type(type = "pg-uuid")
+    @Access(AccessType.PROPERTY)
     private UUID id;
 
     @Column(name = CREATED, nullable = false)
@@ -36,11 +38,11 @@ public class Account extends IdObject<UUID> {
     private Long balance;
 
     @ManyToOne
-    @JoinColumn(name = "TYPE_ID", nullable = false)
+    @JoinColumn(name = "ACCOUNT_TYPE_ID", nullable = false)
     private AccountType accountType;
 
     @ManyToOne
-    @JoinColumn(name = "CURRENCY_ID", nullable = true)
+    @JoinColumn(name = "ACCOUNT_CURRENCY_ID", nullable = true)
     private AccountCurrency accountCurrency;
 
     @ManyToOne

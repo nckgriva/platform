@@ -31,7 +31,7 @@ public class PaymentState extends IdObject<UUID> implements Dictionary {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = "NAME", nullable = false, length = 128)
+    @Column(name = NAME, nullable = false)
     private String name;
 
     @Column(name = "DESCRIPTION", nullable = true)

@@ -38,4 +38,19 @@ public class DataConstants {
             return value;
         }
     }
+
+    public enum TransactionTypes {
+        INCOMING_PAYMENT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        OUTGOING_PAYMENT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72"));
+
+        private UUID value;
+
+        TransactionTypes(UUID value) {
+            this.value = value;
+        }
+
+        public UUID getValue() {
+            return value;
+        }
+    }
 }
