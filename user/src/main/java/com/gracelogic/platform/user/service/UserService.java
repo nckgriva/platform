@@ -60,8 +60,6 @@ public interface UserService {
 
     void addRoleToUser(User user, Collection<UUID> roleIds);
 
-    EntityListResponse<AuthorizedUser> getUsersPaged(String phone, String email, String name, String surname, String patronymic, Integer count, Integer page, Integer start, String sortField, String sortDir);
-
     User saveUser(AuthorizedUser user, boolean mergeRoles, AuthorizedUser executor) throws IllegalParameterException;
 
     List<UserRole> getUserRoles(UUID userId);

@@ -10,6 +10,7 @@ import java.util.UUID;
 public class DataConstants {
 
     public enum PaymentSystems {
+        MANUAL(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e61")),
         YANDEX_MONEY(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
         SBRF(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
         ELECSNET(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73"));
@@ -24,17 +25,17 @@ public class DataConstants {
         }
     }
 
-    public static enum PaymentStates {
-        CREATED(1),
-        ACTIVATED(2),
-        CANCELLED(3);
-        private int value;
+    public enum PaymentStates {
+        CREATED(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        ACTIVATED(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
+        CANCELLED(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73"));
+        private UUID value;
 
-        PaymentStates(int value) {
+        PaymentStates(UUID value) {
             this.value = value;
         }
 
-        public int getValue() {
+        public UUID getValue() {
             return value;
         }
     }

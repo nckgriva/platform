@@ -618,49 +618,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public EntityListResponse<AuthorizedUser> getUsersPaged(String phone, String email, String name, String surname, String patronymic, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
-        if (!StringUtils.isEmpty(phone)) {
-            cause += "and el.phone=:phone ";
-            params.put("phone", StringUtils.trim(phone));
-        }
-        if (!StringUtils.isEmpty(email)) {
-            cause += "and el.email=:email ";
-            params.put("email", StringUtils.trim(email));
-        }
-        if (!StringUtils.isEmpty(name)) {
-            cause += String.format("and lower(el.name) like '%%%s' ", StringUtils.lowerCase(name));
-        }
-        if (!StringUtils.isEmpty(surname)) {
-            cause += String.format("and lower(el.surname) like '%%%s' ", StringUtils.lowerCase(surname));
-        }
-        if (!StringUtils.isEmpty(patronymic)) {
-            cause += String.format("and lower(el.patronymic) like '%%%s' ", StringUtils.lowerCase(patronymic));
-        }
-
-        int totalCount = idObjectService.getCount(User.class, null, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
-
-        EntityListResponse<AuthorizedUser> entityListResponse = new EntityListResponse<AuthorizedUser>();
-        entityListResponse.setEntity("user");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
-
-        List<User> items = idObjectService.getList(User.class, null, cause, params, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
-        for (User e : items) {
-            AuthorizedUser el = AuthorizedUser.prepare(e);
-
-            entityListResponse.addData(el);
-        }
-
-        return entityListResponse;
-    }
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public User saveUser(AuthorizedUser user, boolean mergeRoles, AuthorizedUser executor) throws IllegalParameterException {
