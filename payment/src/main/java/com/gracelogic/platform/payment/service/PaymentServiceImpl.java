@@ -10,6 +10,7 @@ import com.gracelogic.platform.payment.DataConstants;
 import com.gracelogic.platform.payment.dto.CalcPaymentFeeResult;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
+import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentAlreadyExistException;
 import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentState;
@@ -20,6 +21,10 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Author: Igor Parkhomenko
@@ -43,20 +48,29 @@ public class PaymentServiceImpl implements PaymentService {
     private DictionaryService ds;
 
     @Override
-    public Account checkPaymentAbility(PaymentSystem paymentSystem, String accountNumber, String currency) {
-        try {
-            return accountResolver.getTargetAccount(null, accountNumber, paymentSystem, currency);
+    public Account checkPaymentAbility(UUID paymentSystemId, String accountNumber, String currency) throws InvalidPaymentSystemException, AccountNotFoundException {
+        PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
+        if (paymentSystem == null || !paymentSystem.getActive()) {
+            throw new InvalidPaymentSystemException("Invalid payment system");
         }
-        catch (Exception e) {
-            return null;
-        }
+
+        return accountResolver.getTargetAccount(null, accountNumber, paymentSystem, currency);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Payment processPayment(PaymentSystem paymentSystem, ProcessPaymentRequest paymentModel) throws PaymentAlreadyExistException, AccountNotFoundException {
+    public Payment processPayment(UUID paymentSystemId, ProcessPaymentRequest paymentModel) throws PaymentAlreadyExistException, AccountNotFoundException, InvalidPaymentSystemException {
+        PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
+        if (paymentSystem == null || !paymentSystem.getActive()) {
+            throw new InvalidPaymentSystemException("Invalid payment system");
+        }
+
         if (!StringUtils.isEmpty(paymentModel.getPaymentUID())) {
-            Integer count = idObjectService.checkExist(Payment.class, null, String.format("el.paymentSystem.id='%s' and el.paymentUID = '%s'", paymentSystem.getId().toString(), paymentModel.getPaymentUID()), null, 1);
+            Map<String, Object> params = new HashMap<>();
+            params.put("paymentSystemId", paymentSystemId);
+            params.put("paymentUID", paymentModel.getPaymentUID());
+
+            Integer count = idObjectService.checkExist(Payment.class, null, "el.paymentSystem.id=:paymentSystemId and el.paymentUID=:paymentUID", params, 1);
             if (count > 0) {
                 throw new PaymentAlreadyExistException("Payment already exist");
             }

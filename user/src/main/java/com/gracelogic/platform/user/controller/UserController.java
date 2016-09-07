@@ -7,6 +7,7 @@ import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.UserSession;
+import com.gracelogic.platform.user.model.UserSetting;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 import com.gracelogic.platform.user.service.UserLifecycleService;
 import com.gracelogic.platform.user.service.UserService;

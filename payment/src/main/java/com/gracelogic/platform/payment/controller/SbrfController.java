@@ -7,6 +7,7 @@ import com.gracelogic.platform.payment.Path;
 
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
+import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentAlreadyExistException;
 import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentSystem;
@@ -108,7 +109,7 @@ public class SbrfController {
         if (StringUtils.equalsIgnoreCase(action, ACTION_CHECK)) {
             Account result = null;
             try {
-                result = paymentService.checkPaymentAbility(paymentSystem, account, "RUR");
+                result = paymentService.checkPaymentAbility(paymentSystem.getId(), account, "RUR");
             } catch (Exception ignored) {
             }
 
@@ -125,14 +126,13 @@ public class SbrfController {
             paymentModel.setRegisteredAmount(Double.parseDouble(amount));
             paymentModel.setExternalTypeUID(null);
 
-            Payment result;
             try {
-                result = paymentService.processPayment(paymentSystem, paymentModel);
+                Payment result = paymentService.processPayment(paymentSystem.getId(), paymentModel);
                 resp = String.format(RESPONSE_TEMPLATE, String.format("<CODE>0</CODE><MESSAGE>OK</MESSAGE><REG_DATE>%s</REG_DATE>", DATE_FORMAT.format(new Date())));
 
             } catch (PaymentAlreadyExistException e) {
                 resp = String.format(RESPONSE_TEMPLATE, "<CODE>8</CODE><MESSAGE>PAYMENT ALREADY REGISTERED</MESSAGE>");
-            } catch (AccountNotFoundException e) {
+            } catch (AccountNotFoundException | InvalidPaymentSystemException e) {
                 resp = String.format(RESPONSE_TEMPLATE, "<CODE>5</CODE><MESSAGE>BAD REQUEST</MESSAGE>");
             }
         } else {

@@ -4,10 +4,7 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
-import com.gracelogic.platform.user.model.AuthCode;
-import com.gracelogic.platform.user.model.User;
-import com.gracelogic.platform.user.model.UserRole;
-import com.gracelogic.platform.user.model.UserSession;
+import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 
 import javax.servlet.http.HttpSession;
@@ -42,7 +39,7 @@ public interface UserService {
 
     void changePassword(String login, String loginType, String code, String newPassword) throws IllegalParameterException;
 
-    String getUserSetting(UUID userId, String key);
+    UserSetting getUserSetting(UUID userId, String key);
 
     void updateUserSetting(UUID userId, String key, String value);
 

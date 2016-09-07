@@ -333,14 +333,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String getUserSetting(UUID userId, String key) {
+    public UserSetting getUserSetting(UUID userId, String key) {
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
         params.put("key", key);
 
         List<UserSetting> userSettings = idObjectService.getList(UserSetting.class, null, "el.user.id=:userId and el.key=:key", params, null, null, null, 1);
         if (!userSettings.isEmpty()) {
-            return userSettings.iterator().next().getValue();
+            return userSettings.iterator().next();
         }
         return null;
     }

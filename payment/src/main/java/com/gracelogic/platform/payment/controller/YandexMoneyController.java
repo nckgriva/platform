@@ -107,7 +107,7 @@ public class YandexMoneyController {
             } else {
                 Account result = null;
                 try {
-                    result = paymentService.checkPaymentAbility(paymentSystem, account, orderSumCurrencyPaycash);
+                    result = paymentService.checkPaymentAbility(paymentSystem.getId(), account, orderSumCurrencyPaycash);
                 }
                 catch (Exception ignored) {}
 
@@ -134,8 +134,8 @@ public class YandexMoneyController {
 
                     Payment result = null;
                     try {
-                        result = paymentService.processPayment(paymentSystem, paymentModel);
-                    } catch (Exception e) {
+                        result = paymentService.processPayment(paymentSystem.getId(), paymentModel);
+                    } catch (Exception ignored) {
                     }
 
                     if (result != null) {
