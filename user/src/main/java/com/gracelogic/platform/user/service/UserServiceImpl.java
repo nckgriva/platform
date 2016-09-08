@@ -1,6 +1,5 @@
 package com.gracelogic.platform.user.service;
 
-import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.notification.dto.Message;
@@ -284,6 +283,10 @@ public class UserServiceImpl implements UserService {
             //templateParams.put("userId", user.getId().toString());
             templateParams.put("loginType", loginType);
             templateParams.put("login", login);
+            templateParams.put("baseUrl", propertyService.getPropertyValue("web:base_url"));
+            templateParams.put("name", user.getName());
+            templateParams.put("surname", user.getSurname());
+            templateParams.put("patronymic", user.getPatronymic());
 
             boolean isActualCodeAvailable = isActualCodeAvailable(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue());
             AuthCode authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), false);
@@ -294,10 +297,9 @@ public class UserServiceImpl implements UserService {
                 if (!StringUtils.isEmpty(user.getPhone()) && user.getPhoneVerified()) {
                     try {
                         LoadedTemplate template = templateService.load("sms_repair_code");
-                        HashMap<String, String> params = new HashMap<String, String>();
-                        params.put("code", authCode.getCode());
+                        templateParams.put("code", authCode.getCode());
 
-                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:sms_from"), user.getPhone(), template.getSubject(), templateService.apply(template, params)), SendingType.SMS);
+                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:sms_from"), user.getPhone(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.SMS);
                     } catch (IOException e) {
                         logger.error(e);
                         throw new SendingException(e.getMessage());
@@ -305,10 +307,9 @@ public class UserServiceImpl implements UserService {
                 } else if (!StringUtils.isEmpty(user.getEmail()) && user.getEmailVerified()) {
                     try {
                         LoadedTemplate template = templateService.load("email_repair_code");
-                        HashMap<String, String> params = new HashMap<String, String>();
-                        params.put("code", authCode.getCode());
+                        templateParams.put("code", authCode.getCode());
 
-                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"), user.getEmail(), template.getSubject(), templateService.apply(template, params)), SendingType.EMAIL);
+                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"), user.getEmail(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.EMAIL);
                     } catch (IOException e) {
                         logger.error(e);
                         throw new SendingException(e.getMessage());
@@ -569,6 +570,11 @@ public class UserServiceImpl implements UserService {
             templateParams = new HashMap<>();
         }
         templateParams.put("userId", user.getId().toString());
+        templateParams.put("loginType", loginType);
+        templateParams.put("baseUrl", propertyService.getPropertyValue("web:base_url"));
+        templateParams.put("name", user.getName());
+        templateParams.put("surname", user.getSurname());
+        templateParams.put("patronymic", user.getPatronymic());
 
         if (StringUtils.equalsIgnoreCase(loginType, "phone") && !StringUtils.isEmpty(user.getPhone()) && !user.getPhoneVerified()) {
             AuthCode code = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PHONE_VERIFY.getValue(), false);
