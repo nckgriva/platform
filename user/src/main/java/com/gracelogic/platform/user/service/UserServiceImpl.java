@@ -191,6 +191,7 @@ public class UserServiceImpl implements UserService {
         if (user != null) {
             if (loginType.equalsIgnoreCase("phone") && !user.getPhoneVerified()) {
                 AuthCode phoneCode = getActualCode(userId, DataConstants.AuthCodeTypes.PHONE_VERIFY.getValue(), false);
+
                 if (phoneCode.getCode().equalsIgnoreCase(code)) {
                     user.setPhoneVerified(true);
                     if (StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.PHONE_CONFIRMATION.getValue())) {
@@ -273,9 +274,17 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void sendRepairCode(String login, String loginType) throws IllegalParameterException, SendingException {
+    public void sendRepairCode(String login, String loginType, Map<String, String> templateParams) throws IllegalParameterException, SendingException {
         User user = getUserByField(loginType, login);
+
         if (user != null && user.getApproved()) {
+            if (templateParams == null) {
+                templateParams = new HashMap<>();
+            }
+            //templateParams.put("userId", user.getId().toString());
+            templateParams.put("loginType", loginType);
+            templateParams.put("login", login);
+
             boolean isActualCodeAvailable = isActualCodeAvailable(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue());
             AuthCode authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), false);
             if ((System.currentTimeMillis() - authCode.getCreated().getTime() > Long.parseLong(propertyService.getPropertyValue("user:action_delay"))) || !isActualCodeAvailable) {
@@ -293,7 +302,7 @@ public class UserServiceImpl implements UserService {
                         logger.error(e);
                         throw new SendingException(e.getMessage());
                     }
-                } else if (StringUtils.isEmpty(user.getEmail()) && user.getEmailVerified()) {
+                } else if (!StringUtils.isEmpty(user.getEmail()) && user.getEmailVerified()) {
                     try {
                         LoadedTemplate template = templateService.load("email_repair_code");
                         HashMap<String, String> params = new HashMap<String, String>();
@@ -459,7 +468,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public User register(AuthorizedUser userModel, boolean trust) throws IllegalParameterException {
         String userApproveMethod = propertyService.getPropertyValue("user:approve_method");
-        boolean existingUser = false;
 
         if (!trust && !checkPassword(userModel.getPassword())) {
             throw new IllegalParameterException("register.INVALID_PASSWORD");
@@ -471,64 +479,48 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        if (!StringUtils.isEmpty(userModel.getPhone()) && !checkPhone(userModel.getPhone(), true)) {
-            throw new IllegalParameterException("register.INVALID_PHONE");
-        }
-
-        User user = null;
         if (!StringUtils.isEmpty(userModel.getPhone())) {
-            user = getUserByField("phone", userModel.getPhone());
-        }
-
-        if (user != null) {
-            if (user.getApproved()) {
+            if (!checkPhone(userModel.getPhone(), false)) {
                 throw new IllegalParameterException("register.INVALID_PHONE");
             }
-            existingUser = true;
-        } else {
-            user = new User();
-        }
 
-        if (!StringUtils.isEmpty(userModel.getEmail()) && !checkEmail(userModel.getEmail(), true)) {
-            throw new IllegalParameterException("register.INVALID_EMAIL");
-        }
-
-        //CHECK EMAIL ON ANOTHER ACCOUNT
-        if (!StringUtils.isEmpty(userModel.getEmail())) {
-            User anotherUser = getUserByField("email", userModel.getEmail());
-            if (anotherUser != null) {
-                if (existingUser && !user.getId().equals(anotherUser.getId()) || !existingUser) {
-                    if (!anotherUser.getApproved()) {
-                        lifecycleService.delete(anotherUser);
-                    } else if (!anotherUser.getEmailVerified()) {
-                        idObjectService.updateFieldValue(User.class, anotherUser.getId(), "email", null);
-                    }
-                }
-            }
-        }
-
-        //CHECK PHONE ON ANOTHER ACCOUNT
-        if (!StringUtils.isEmpty(userModel.getPhone())) {
             User anotherUser = getUserByField("phone", userModel.getPhone());
             if (anotherUser != null) {
-                if (existingUser && !user.getId().equals(anotherUser.getId()) || !existingUser) {
-                    if (!anotherUser.getApproved()) {
-                        lifecycleService.delete(anotherUser);
-                    } else if (!anotherUser.getPhoneVerified()) {
-                        idObjectService.updateFieldValue(User.class, anotherUser.getId(), "phone", null);
-                    }
+                if (!anotherUser.getApproved()) {
+                    lifecycleService.delete(anotherUser);
+                } else if (!anotherUser.getPhoneVerified()) {
+                    idObjectService.updateFieldValue(User.class, anotherUser.getId(), "phone", null);
+                }
+                else {
+                    throw new IllegalParameterException("register.INVALID_PHONE");
                 }
             }
         }
 
+        if (!StringUtils.isEmpty(userModel.getEmail())) {
+            if (!checkEmail(userModel.getEmail(), false)) {
+                throw new IllegalParameterException("register.INVALID_EMAIL");
+            }
+
+            User anotherUser = getUserByField("email", userModel.getEmail());
+            if (anotherUser != null) {
+                if (!anotherUser.getApproved()) {
+                    lifecycleService.delete(anotherUser);
+                } else if (!anotherUser.getEmailVerified()) {
+                    idObjectService.updateFieldValue(User.class, anotherUser.getId(), "email", null);
+                } else {
+                    throw new IllegalParameterException("register.INVALID_EMAIL");
+                }
+            }
+        }
+
+        User user = new User();
         user.setEmailVerified(false);
         user.setPhoneVerified(false);
         user.setApproved(false);
         user.setBlocked(false);
 
-        if (trust) {
-            user.setApproved(true);
-        } else if (StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
+        if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
             user.setApproved(true);
         }
 
@@ -538,13 +530,13 @@ public class UserServiceImpl implements UserService {
 
         if (!StringUtils.isEmpty(userModel.getEmail())) {
             user.setEmail(StringUtils.trim(StringUtils.lowerCase(userModel.getEmail())));
-            if (trust) {
+            if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
                 user.setEmailVerified(true);
             }
         }
         if (!StringUtils.isEmpty(userModel.getPhone())) {
             user.setPhone(StringUtils.trim(userModel.getPhone()));
-            if (trust) {
+            if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
                 user.setPhoneVerified(true);
             }
         }
@@ -554,9 +546,7 @@ public class UserServiceImpl implements UserService {
             user.setPassword(DigestUtils.shaHex(userModel.getPassword().concat(user.getSalt())));
         }
 
-        user = idObjectService.save(user);
-
-        return user;
+        return idObjectService.save(user);
     }
 
     @Override
@@ -575,6 +565,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void sendVerificationCode(User user, String loginType, Map<String, String> templateParams) throws IllegalParameterException, SendingException {
+        if (templateParams == null) {
+            templateParams = new HashMap<>();
+        }
+        templateParams.put("userId", user.getId().toString());
+
         if (StringUtils.equalsIgnoreCase(loginType, "phone") && !StringUtils.isEmpty(user.getPhone()) && !user.getPhoneVerified()) {
             AuthCode code = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PHONE_VERIFY.getValue(), false);
             if (code != null) {

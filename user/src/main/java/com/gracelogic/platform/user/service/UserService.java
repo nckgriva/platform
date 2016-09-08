@@ -35,7 +35,7 @@ public interface UserService {
 
     UserSession updateSessionInfo(HttpSession session, AuthenticationToken authenticationToken, String userAgent, boolean isDestroying);
 
-    void sendRepairCode(String login, String loginType) throws IllegalParameterException, SendingException;
+    void sendRepairCode(String login, String loginType, Map<String, String> templateParams) throws IllegalParameterException, SendingException;
 
     void changePassword(String login, String loginType, String code, String newPassword) throws IllegalParameterException;
 

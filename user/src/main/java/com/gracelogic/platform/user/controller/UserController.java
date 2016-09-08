@@ -7,7 +7,6 @@ import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.UserSession;
-import com.gracelogic.platform.user.model.UserSetting;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 import com.gracelogic.platform.user.service.UserLifecycleService;
 import com.gracelogic.platform.user.service.UserService;
@@ -144,15 +143,18 @@ public class UserController extends AbstractAuthorizedController {
         if (getUser() != null) {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } else {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
         }
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity logout(HttpServletRequest request) {
-        request.getSession(false).invalidate();
-        SecurityContextHolder.clearContext();
+        try {
+            request.getSession(false).invalidate();
+            SecurityContextHolder.clearContext();
+        }
+        catch (Exception ignored) {}
 
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
@@ -161,7 +163,7 @@ public class UserController extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity isEMailValid(@RequestBody ValueRequest valueRequest) {
         if (!userService.checkEmail(valueRequest.getValue(), true)) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.INVALID_EMAIL", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } else {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         }
@@ -171,7 +173,7 @@ public class UserController extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity isPhoneValid(@RequestBody ValueRequest valueRequest) {
         if (!userService.checkPhone(valueRequest.getValue(), true)) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } else {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         }
@@ -187,7 +189,7 @@ public class UserController extends AbstractAuthorizedController {
             }
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } else {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_CODE", messageSource.getMessage("register.INVALID_CODE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -202,7 +204,7 @@ public class UserController extends AbstractAuthorizedController {
 
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } else {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_CODE", messageSource.getMessage("register.INVALID_CODE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -223,7 +225,7 @@ public class UserController extends AbstractAuthorizedController {
     public ResponseEntity sendRepairCode(@RequestBody RepairCodeRequest request) {
 
         try {
-            userService.sendRepairCode(request.getLogin(), request.getLoginType());
+            userService.sendRepairCode(request.getLogin(), request.getLoginType(), null);
         } catch (SendingException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.SENDING_ERROR", messageSource.getMessage("common.SENDING_ERROR", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (IllegalParameterException e) {

@@ -5,6 +5,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.template.dto.LoadedTemplate;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +38,12 @@ public class TemplateServiceImpl implements TemplateService {
         String uri = String.format("%s/%s.mustache", propertyService.getPropertyValue("template:store_path"), templateName);
         readFile(uri, sb);
         String body = sb.toString();
+        String subject = extractSubjectFromBody(body);
+        if (!StringUtils.isEmpty(subject)) {
+            body = body.replaceFirst(SUBJECT_REGEX, "");
+        }
 
-        return new LoadedTemplate(templateName, extractSubjectFromBody(body), body);
+        return new LoadedTemplate(templateName, subject, body);
     }
 
     @Override

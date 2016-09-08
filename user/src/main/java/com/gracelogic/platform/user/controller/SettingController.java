@@ -35,14 +35,14 @@ public class SettingController extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity getUserSetting(@PathVariable(value = "key") String key) {
         if (getUser() == null) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
         }
 
         UserSetting userSetting = userService.getUserSetting(getUser().getId(), key);
         if (userSetting != null) {
             return new ResponseEntity<UserSettingModel>(UserSettingModel.prepare(userSetting), HttpStatus.OK);
         } else {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("setting.NOT_FOUND", messageSource.getMessage("setting.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -51,7 +51,7 @@ public class SettingController extends AbstractAuthorizedController {
     public ResponseEntity saveUserSetting(@PathVariable(value = "key") String key,
                                           @RequestBody ValueRequest request) {
         if (getUser() == null) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
         }
 
         userService.updateUserSetting(getUser().getId(), key, request.getValue());

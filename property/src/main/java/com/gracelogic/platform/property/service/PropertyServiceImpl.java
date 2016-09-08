@@ -41,32 +41,33 @@ public class PropertyServiceImpl implements PropertyService {
             }
             else {
                 if (propertyModel.getBuildTime() == null || System.currentTimeMillis() - propertyModel.getBuildTime() > propertyModel.getLifetime()) {
-                    List<Property> props = idObjectService.getList(Property.class, "name", propertyName);
-                    Property property = null;
-                    if (props != null && !props.isEmpty()) {
-                        property = props.iterator().next();
-                    }
-                    if (property != null) {
-                        propertyModel = PropertyModel.prepare(property);
-                        properties.put(property.getName(), propertyModel);
-                    }
+                    propertyModel = reloadProperty(propertyName);
                 }
                 return propertyModel.getValue();
             }
         } else {
-            List<Property> props = idObjectService.getList(Property.class, "name", propertyName);
-            Property property = null;
-            PropertyModel propertyModel = null;
-            if (props != null && !props.isEmpty()) {
-                property = props.iterator().next();
-            }
-            if (property != null) {
-                propertyModel = PropertyModel.prepare(property);
-                properties.put(property.getName(), propertyModel);
-            }
-
+            PropertyModel propertyModel = reloadProperty(propertyName);
             return propertyModel != null ? propertyModel.getValue() : null;
         }
+    }
+
+    public PropertyModel reloadProperty(String propertyName) {
+        PropertyModel propertyModel = null;
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("propertyName", propertyName);
+        List<Property> props = idObjectService.getList(Property.class, null, "el.name=:propertyName", params, null, null, null, 1);
+
+        Property property = null;
+        if (props != null && !props.isEmpty()) {
+            property = props.iterator().next();
+        }
+        if (property != null) {
+            propertyModel = PropertyModel.prepare(property);
+            properties.put(property.getName(), propertyModel);
+        }
+
+        return propertyModel;
     }
 
     @Override
