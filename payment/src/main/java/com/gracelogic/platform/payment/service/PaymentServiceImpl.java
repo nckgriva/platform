@@ -51,7 +51,7 @@ public class PaymentServiceImpl implements PaymentService {
     public Account checkPaymentAbility(UUID paymentSystemId, String accountNumber, String currency) throws InvalidPaymentSystemException, AccountNotFoundException {
         PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
         if (paymentSystem == null || !paymentSystem.getActive()) {
-            throw new InvalidPaymentSystemException("Invalid payment system");
+            throw new InvalidPaymentSystemException("InvalidPaymentSystemException");
         }
 
         return accountResolver.getTargetAccount(null, accountNumber, paymentSystem, currency);
@@ -62,7 +62,7 @@ public class PaymentServiceImpl implements PaymentService {
     public Payment processPayment(UUID paymentSystemId, ProcessPaymentRequest paymentModel) throws PaymentAlreadyExistException, AccountNotFoundException, InvalidPaymentSystemException {
         PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
         if (paymentSystem == null || !paymentSystem.getActive()) {
-            throw new InvalidPaymentSystemException("Invalid payment system");
+            throw new InvalidPaymentSystemException("InvalidPaymentSystemException");
         }
 
         if (!StringUtils.isEmpty(paymentModel.getPaymentUID())) {
@@ -72,7 +72,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             Integer count = idObjectService.checkExist(Payment.class, null, "el.paymentSystem.id=:paymentSystemId and el.paymentUID=:paymentUID", params, 1);
             if (count > 0) {
-                throw new PaymentAlreadyExistException("Payment already exist");
+                throw new PaymentAlreadyExistException("PaymentAlreadyExistException");
             }
         }
 
@@ -82,7 +82,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         Account account = accountResolver.getTargetAccount(null, paymentModel.getAccountNumber(), paymentSystem, paymentModel.getCurrency());
         if (account == null) {
-            throw new AccountNotFoundException("Account not found");
+            throw new AccountNotFoundException("AccountNotFoundException");
         }
         User user = account.getUser();
 

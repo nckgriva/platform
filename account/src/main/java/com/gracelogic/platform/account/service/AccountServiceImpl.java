@@ -27,11 +27,11 @@ public class AccountServiceImpl implements AccountService {
         Account account = idObjectService.getObjectById(Account.class, accountId);
 
         if (account == null) {
-            throw new AccountNotFoundException("Account not found");
+            throw new AccountNotFoundException("AccountNotFoundException");
         }
 
         if (amount < 0 && !ignoreInsufficientFunds && account.getBalance() < Math.abs(amount)) {
-            throw new InsufficientFundsException("Insufficient funds");
+            throw new InsufficientFundsException("InsufficientFundsException");
         }
 
         Transaction transaction = new Transaction();
