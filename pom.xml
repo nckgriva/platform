@@ -23,5 +23,6 @@
         <module>account</module>
         <module>payment</module>
         <module>tcp-server</module>
+        <module>task</module>
     </modules>
 </project>
