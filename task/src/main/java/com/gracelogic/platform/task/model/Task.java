@@ -35,8 +35,8 @@ public class Task extends IdObject<UUID> {
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Column(name = "CLASS_NAME", nullable = false)
-    private String className;
+    @Column(name = "SERVICE_NAME", nullable = false)
+    private String serviceName;
 
     @Column(name = "IS_ACTIVE", nullable = false)
     private Boolean active;
@@ -49,10 +49,6 @@ public class Task extends IdObject<UUID> {
 
     @Column(name = "LAST_EXECUTION_DATE", nullable = true)
     private Date lastExecutionDate;
-
-    @Column(name = "PRIORITY", nullable = false)
-    private Integer priority;
-
 
     @Override
     public UUID getId() {
@@ -92,12 +88,12 @@ public class Task extends IdObject<UUID> {
         this.name = name;
     }
 
-    public String getClassName() {
-        return className;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     public String getCronExpression() {
@@ -130,13 +126,5 @@ public class Task extends IdObject<UUID> {
 
     public void setLastExecutionDate(Date lastExecutionDate) {
         this.lastExecutionDate = lastExecutionDate;
-    }
-
-    public Integer getPriority() {
-        return priority;
-    }
-
-    public void setPriority(Integer priority) {
-        this.priority = priority;
     }
 }

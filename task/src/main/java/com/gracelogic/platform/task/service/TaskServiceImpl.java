@@ -7,26 +7,32 @@ import com.gracelogic.platform.task.model.Task;
 import com.gracelogic.platform.task.model.TaskExecuteMethod;
 import com.gracelogic.platform.task.model.TaskExecuteState;
 import com.gracelogic.platform.task.model.TaskExecutionLog;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-@Service
+@Service("taskService")
 public class TaskServiceImpl implements TaskService {
+    private static Logger logger = Logger.getLogger(TaskServiceImpl.class);
+
     @Autowired
     private IdObjectService idObjectService;
 
     @Autowired
     private DictionaryService ds;
 
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public void executeTask(UUID taskId, String parameter, UUID method) {
-        Task task = idObjectService.getObjectById(Task.class, parameter);
+        Task task = idObjectService.getObjectById(Task.class, taskId);
 
         TaskExecutionLog execution = new TaskExecutionLog();
         execution.setTask(task);
@@ -34,39 +40,48 @@ public class TaskServiceImpl implements TaskService {
         execution.setState(ds.get(TaskExecuteState.class, DataConstants.TaskExecutionStates.CREATED.getValue()));
         execution.setParameter(parameter);
 
-        idObjectService.save(task);
+        idObjectService.save(execution);
     }
 
+    protected void setTaskExecutionStateInOtherTransaction(UUID taskExecutionId, UUID stateId) {
+        TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
+        taskService.setTaskExecutionState(taskExecutionId, stateId);
+    }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void setTaskExecutionState(UUID taskExecutionId, UUID stateId) {
-
+    @Override
+    public void setTaskExecutionState(UUID taskExecutionId, UUID stateId) {
+        idObjectService.updateFieldValue(TaskExecutionLog.class, taskExecutionId, "state.id", stateId);
     }
 
+    @Override
     public void startNextTask() {
         Map<String, Object> params = new HashMap<>();
         params.put("state", DataConstants.TaskExecutionStates.CREATED.getValue());
 
-        List<TaskExecutionLog> executions = idObjectService.getList(TaskExecutionLog.class, null, "el.state=:state",  params, "el.created", "ASC", null, 1);
+        List<TaskExecutionLog> executions = idObjectService.getList(TaskExecutionLog.class, null, "el.state.id=:state",  params, "el.created", "ASC", null, 1);
         if (executions.isEmpty()) {
             return;
         }
 
         TaskExecutionLog execution = executions.iterator().next();
 
-        setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
+        setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
 
         try {
+            TaskExecutor executor = applicationContext.getBean(execution.getTask().getServiceName(), TaskExecutor.class);
+            executor.execute(execution.getParameter());
+
             //Получить класс исполнителя и вызвать у него execute с параметрами
-            setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.COMPLETED.getValue());
+            setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.COMPLETED.getValue());
         }
         catch (Exception e) {
-            setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.FAIL.getValue());
+            setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.FAIL.getValue());
+            logger.error(String.format("Failed to complete task: %s", execution.getTask().getServiceName()), e);
         }
 
-        //update task.lastExecutionDate
+        idObjectService.updateFieldValue(Task.class, execution.getTask().getId(), "lastExecutionDate", new Date());
 
         idObjectService.save(execution);
-
     }
 }
