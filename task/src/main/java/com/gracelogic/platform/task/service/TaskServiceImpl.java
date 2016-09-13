@@ -48,6 +48,17 @@ public class TaskServiceImpl implements TaskService {
         taskService.setTaskExecutionState(taskExecutionId, stateId);
     }
 
+    protected void updateLastExecutionDateInOtherTransaction(UUID taskId) {
+        TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
+        taskService.updateLastExecutionDate(taskId);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void updateLastExecutionDate(UUID taskId) {
+        idObjectService.updateFieldValue(Task.class, taskId, "lastExecutionDate", new Date());
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void setTaskExecutionState(UUID taskExecutionId, UUID stateId) {
@@ -80,7 +91,7 @@ public class TaskServiceImpl implements TaskService {
             logger.error(String.format("Failed to complete task: %s", execution.getTask().getServiceName()), e);
         }
 
-        idObjectService.updateFieldValue(Task.class, execution.getTask().getId(), "lastExecutionDate", new Date());
+        updateLastExecutionDateInOtherTransaction(execution.getTask().getId());
 
         idObjectService.save(execution);
     }

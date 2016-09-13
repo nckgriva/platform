@@ -8,4 +8,6 @@ public interface TaskService {
     void setTaskExecutionState(UUID taskExecutionId, UUID stateId);
 
     void startNextTask();
+
+    void updateLastExecutionDate(UUID taskId);
 }
