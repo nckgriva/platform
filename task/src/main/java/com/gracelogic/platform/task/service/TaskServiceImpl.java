@@ -32,6 +32,11 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void executeTask(UUID taskId, String parameter, UUID method) {
+        if (checkTaskExist(taskId, parameter)) {
+            logger.debug("Task already exist - skip it");
+            return;
+        }
+
         Task task = idObjectService.getObjectById(Task.class, taskId);
 
         TaskExecutionLog execution = new TaskExecutionLog();
@@ -41,6 +46,15 @@ public class TaskServiceImpl implements TaskService {
         execution.setParameter(parameter);
 
         idObjectService.save(execution);
+    }
+
+    protected boolean checkTaskExist(UUID taskId, String parameter) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("taskId", taskId);
+        params.put("parameter", parameter);
+        params.put("stateId", DataConstants.TaskExecutionStates.CREATED.getValue());
+        Integer count = idObjectService.checkExist(TaskExecutionLog.class, null, "el.task.id=:taskId and el.parameter=:parameter and el.state.id=:stateId", params, 1);
+        return count > 0;
     }
 
     protected void setTaskExecutionStateInOtherTransaction(UUID taskExecutionId, UUID stateId) {
