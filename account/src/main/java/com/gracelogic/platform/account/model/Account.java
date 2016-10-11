@@ -16,8 +16,7 @@ import java.util.UUID;
  * Time: 12:34
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT", schema = JPAProperties.DEFAULT_SCHEMA, uniqueConstraints =
-        {@UniqueConstraint(columnNames = {"USER_ID", "ACCOUNT_TYPE_ID", "ACCOUNT_CURRENCY_ID"})})
+@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT", schema = JPAProperties.DEFAULT_SCHEMA)
 public class Account extends IdObject<UUID> {
     @Id
     @Column(name = ID)
@@ -48,6 +47,9 @@ public class Account extends IdObject<UUID> {
     @ManyToOne
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
+
+    @Column(name = "EXTERNAL_IDENTIFIER", nullable = true)
+    private String externalIdentifier;
 
     @Override
     public UUID getId() {
@@ -109,5 +111,13 @@ public class Account extends IdObject<UUID> {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getExternalIdentifier() {
+        return externalIdentifier;
+    }
+
+    public void setExternalIdentifier(String externalIdentifier) {
+        this.externalIdentifier = externalIdentifier;
     }
 }

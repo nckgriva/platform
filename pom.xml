@@ -24,5 +24,6 @@
         <module>payment</module>
         <module>tcp-server</module>
         <module>task</module>
+        <module>onec</module>
     </modules>
 </project>
