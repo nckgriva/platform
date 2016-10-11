@@ -15,6 +15,7 @@ import com.gracelogic.platform.payment.exception.PaymentAlreadyExistException;
 import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentState;
 import com.gracelogic.platform.payment.model.PaymentSystem;
+import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -59,7 +60,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Payment processPayment(UUID paymentSystemId, ProcessPaymentRequest paymentModel) throws PaymentAlreadyExistException, AccountNotFoundException, InvalidPaymentSystemException {
+    public Payment processPayment(UUID paymentSystemId, ProcessPaymentRequest paymentModel, AuthorizedUser executedBy) throws PaymentAlreadyExistException, AccountNotFoundException, InvalidPaymentSystemException {
         PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
         if (paymentSystem == null || !paymentSystem.getActive()) {
             throw new InvalidPaymentSystemException("InvalidPaymentSystemException");
@@ -99,6 +100,10 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setAmount(FinanceUtils.toDecimal(response.getAmount()));
             payment.setFee(FinanceUtils.toDecimal(response.getFee()));
             payment.setTotalAmount(FinanceUtils.toDecimal(response.getTotalAmount()));
+        }
+
+        if (executedBy != null) {
+            payment.setExecutedByUser(idObjectService.getObjectById(User.class, executedBy.getId()));
         }
 
         payment = idObjectService.save(payment);

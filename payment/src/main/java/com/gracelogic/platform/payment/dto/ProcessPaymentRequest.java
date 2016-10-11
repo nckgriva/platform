@@ -89,4 +89,12 @@ public class ProcessPaymentRequest extends PlatformRequest {
     public void setFee(Double fee) {
         this.fee = fee;
     }
+
+    public ProcessPaymentRequest() {
+    }
+
+    public ProcessPaymentRequest(String accountNumber, Double registeredAmount) {
+        this.accountNumber = accountNumber;
+        this.registeredAmount = registeredAmount;
+    }
 }

@@ -1,8 +1,5 @@
 package com.gracelogic.platform.onec.dto;
 
-
-import java.util.UUID;
-
 /**
  * Рассчетный счет компании-контрагента
  */
@@ -55,5 +52,16 @@ public class OrganizationAccount {
 
     public void setOrganization(Organization organization) {
         this.organization = organization;
+    }
+
+    @Override
+    public String toString() {
+        return "OrganizationAccount{" +
+                "bankName='" + bankName + '\'' +
+                ", bik='" + bik + '\'' +
+                ", corrAccount='" + corrAccount + '\'' +
+                ", raschAccount='" + raschAccount + '\'' +
+                ", organization=" + organization +
+                '}';
     }
 }

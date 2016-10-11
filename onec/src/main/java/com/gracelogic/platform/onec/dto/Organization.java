@@ -44,4 +44,14 @@ public class Organization {
     public void setOgrn(String ogrn) {
         this.ogrn = ogrn;
     }
+
+    @Override
+    public String toString() {
+        return "Organization{" +
+                "inn='" + inn + '\'' +
+                ", kpp='" + kpp + '\'' +
+                ", name='" + name + '\'' +
+                ", ogrn='" + ogrn + '\'' +
+                '}';
+    }
 }

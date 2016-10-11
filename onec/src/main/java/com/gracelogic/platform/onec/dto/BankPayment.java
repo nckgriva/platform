@@ -1,7 +1,5 @@
 package com.gracelogic.platform.onec.dto;
 
-
-import java.beans.Transient;
 import java.util.Date;
 
 /**
@@ -14,7 +12,7 @@ public class BankPayment {
 
     private OrganizationAccount recipientBankAccount = new OrganizationAccount();
 
-    private Long amount;
+    private Double amount;
 
     private String description;
 
@@ -53,11 +51,11 @@ public class BankPayment {
         this.recipientBankAccount = recipientBankAccount;
     }
 
-    public Long getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(Long amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 
@@ -107,5 +105,20 @@ public class BankPayment {
 
     public void setDateIsNull(boolean dateIsNull) {
         this.dateIsNull = dateIsNull;
+    }
+
+    @Override
+    public String toString() {
+        return "BankPayment{" +
+                "number='" + number + '\'' +
+                ", payerBankAccount=" + payerBankAccount +
+                ", recipientBankAccount=" + recipientBankAccount +
+                ", amount=" + amount +
+                ", description='" + description + '\'' +
+                ", createDate=" + createDate +
+                ", processedDate=" + processedDate +
+                ", incomingDate=" + incomingDate +
+                ", outgoingDate=" + outgoingDate +
+                '}';
     }
 }

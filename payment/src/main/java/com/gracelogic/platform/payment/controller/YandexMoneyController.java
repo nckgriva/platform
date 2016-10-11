@@ -134,7 +134,7 @@ public class YandexMoneyController {
 
                     Payment result = null;
                     try {
-                        result = paymentService.processPayment(paymentSystem.getId(), paymentModel);
+                        result = paymentService.processPayment(paymentSystem.getId(), paymentModel, null);
                     } catch (Exception ignored) {
                     }
 

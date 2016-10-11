@@ -144,7 +144,7 @@ public class OneCServiceImpl implements OneCService {
                     throw new SumFieldEmptyException();
                 }
                 value = value.replaceAll(",", ".");
-                bankPayment.setAmount(FinanceUtils.toDecimal(Double.parseDouble(value)));
+                bankPayment.setAmount(Double.parseDouble(value));
                 break;
             case "Дата=":
                 if (StringUtils.isEmpty(value)) {

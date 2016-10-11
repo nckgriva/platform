@@ -127,7 +127,7 @@ public class SbrfController {
             paymentModel.setExternalTypeUID(null);
 
             try {
-                Payment result = paymentService.processPayment(paymentSystem.getId(), paymentModel);
+                Payment result = paymentService.processPayment(paymentSystem.getId(), paymentModel, null);
                 resp = String.format(RESPONSE_TEMPLATE, String.format("<CODE>0</CODE><MESSAGE>OK</MESSAGE><REG_DATE>%s</REG_DATE>", DATE_FORMAT.format(new Date())));
 
             } catch (PaymentAlreadyExistException e) {

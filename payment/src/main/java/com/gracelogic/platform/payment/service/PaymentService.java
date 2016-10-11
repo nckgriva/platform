@@ -8,6 +8,7 @@ import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentAlreadyExistException;
 import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentSystem;
+import com.gracelogic.platform.user.dto.AuthorizedUser;
 
 import java.util.UUID;
 
@@ -21,5 +22,5 @@ public interface PaymentService {
 
     CalcPaymentFeeResult calcPaymentFee(PaymentSystem paymentSystem, Double registeredAmount);
 
-    Payment processPayment(UUID paymentSystemId, ProcessPaymentRequest paymentModel) throws PaymentAlreadyExistException, AccountNotFoundException, InvalidPaymentSystemException;
+    Payment processPayment(UUID paymentSystemId, ProcessPaymentRequest paymentModel, AuthorizedUser executedBy) throws PaymentAlreadyExistException, AccountNotFoundException, InvalidPaymentSystemException;
 }

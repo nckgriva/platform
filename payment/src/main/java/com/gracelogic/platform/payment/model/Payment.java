@@ -70,6 +70,10 @@ public class Payment extends IdObject<UUID> {
     @Column(name = "TOTAL_AMOUNT", nullable = false)
     private Long totalAmount;
 
+    @ManyToOne
+    @JoinColumn(name = "EXECUTED_BY_USER_ID", nullable = true)
+    private User executedByUser;
+
     @Override
     public UUID getId() {
         return id;
@@ -186,5 +190,13 @@ public class Payment extends IdObject<UUID> {
 
     public void setAccount(Account account) {
         this.account = account;
+    }
+
+    public User getExecutedByUser() {
+        return executedByUser;
+    }
+
+    public void setExecutedByUser(User executedByUser) {
+        this.executedByUser = executedByUser;
     }
 }
