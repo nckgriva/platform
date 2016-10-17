@@ -284,9 +284,10 @@ public class UserServiceImpl implements UserService {
             templateParams.put("loginType", loginType);
             templateParams.put("login", login);
             templateParams.put("baseUrl", propertyService.getPropertyValue("web:base_url"));
-            templateParams.put("name", user.getName());
-            templateParams.put("surname", user.getSurname());
-            templateParams.put("patronymic", user.getPatronymic());
+            Map<String, String> fields = JsonUtils.jsonToMap(user.getAdditionalFields());
+            for (String key : fields.keySet()) {
+                templateParams.put(key, fields.get(key));
+            }
 
             boolean isActualCodeAvailable = isActualCodeAvailable(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue());
             AuthCode authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), false);
@@ -525,9 +526,11 @@ public class UserServiceImpl implements UserService {
             user.setApproved(true);
         }
 
-        user.setSurname(userModel.getSurname());
-        user.setName(userModel.getName());
-        user.setPatronymic(userModel.getPatronymic());
+        for (String key : userModel.getFields().keySet()) {
+            //TODO: validate this before
+
+        }
+        user.setAdditionalFields(JsonUtils.mapToJson(userModel.getFields()));
 
         if (!StringUtils.isEmpty(userModel.getEmail())) {
             user.setEmail(StringUtils.trim(StringUtils.lowerCase(userModel.getEmail())));
@@ -573,9 +576,10 @@ public class UserServiceImpl implements UserService {
         templateParams.put("userId", user.getId().toString());
         templateParams.put("loginType", loginType);
         templateParams.put("baseUrl", propertyService.getPropertyValue("web:base_url"));
-        templateParams.put("name", user.getName());
-        templateParams.put("surname", user.getSurname());
-        templateParams.put("patronymic", user.getPatronymic());
+        Map<String, String> fields = JsonUtils.jsonToMap(user.getAdditionalFields());
+        for (String key : fields.keySet()) {
+            templateParams.put(key, fields.get(key));
+        }
 
         if (StringUtils.equalsIgnoreCase(loginType, "phone") && !StringUtils.isEmpty(user.getPhone()) && !user.getPhoneVerified()) {
             AuthCode code = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PHONE_VERIFY.getValue(), false);
@@ -631,18 +635,20 @@ public class UserServiceImpl implements UserService {
             throw new IllegalParameterException("common.USER_NOT_FOUND");
         }
 
-        u.setName(user.getName());
-        u.setSurname(user.getSurname());
-        u.setPatronymic(user.getPatronymic());
+//        for (String key : user.getFields().keySet()) {
+//            u.getFields().setValue(key, user.getFields().get(key));
+//        }
+        u.setAdditionalFields(JsonUtils.mapToJson(user.getFields()));
+
 
         if (!u.getBlocked() && user.getBlocked()) {
             u.setBlockedByUser(idObjectService.getObjectById(User.class, executor.getId()));
-            u.setBlockedtDt(new Date());
+            u.setBlockedDt(new Date());
         }
 
         u.setBlocked(user.getBlocked());
         if (!u.getBlocked()) {
-            u.setBlockedtDt(null);
+            u.setBlockedDt(null);
             u.setBlockedByUser(null);
         }
 

@@ -1,11 +1,19 @@
 package com.gracelogic.platform.user.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gracelogic.platform.db.dto.IdObjectModel;
+import com.gracelogic.platform.db.model.json.JacksonUtil;
 import com.gracelogic.platform.user.model.User;
+import com.gracelogic.platform.user.service.JsonUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,16 +31,14 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
 
     private Boolean blocked;
 
-    private String name;
-    private String surname;
-    private String patronymic;
-
     //Transient fields
     private String password;
     private UUID userSessionId;
 
     private Set<String> grants = new HashSet<>();
     private Set<UUID> roles = new HashSet<>();
+    private Map<String, String> fields;
+
 
     public String getEmail() {
         return email;
@@ -72,30 +78,6 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
 
     public void setBlocked(Boolean blocked) {
         this.blocked = blocked;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public String getPatronymic() {
-        return patronymic;
-    }
-
-    public void setPatronymic(String patronymic) {
-        this.patronymic = patronymic;
     }
 
     public Boolean getEmailVerified() {
@@ -138,6 +120,24 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
         this.roles = roles;
     }
 
+    public Map<String, String> getFields() {
+        return fields;
+    }
+
+    public void setFields(Map<String, String> fields) {
+        this.fields = fields;
+    }
+
+    @JsonAnySetter
+    public void add(String key, String value) {
+        fields.put(key, value);
+    }
+
+    @JsonAnyGetter
+    public Map<String, String> getMap() {
+        return fields;
+    }
+
     public static AuthorizedUser prepare(User user, AuthorizedUser authorizedUser) {
         IdObjectModel.prepare(authorizedUser, user);
 
@@ -147,10 +147,9 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
         authorizedUser.setBlocked(user.getBlocked());
         authorizedUser.setEmailVerified(user.getEmailVerified());
         authorizedUser.setPhoneVerified(user.getPhoneVerified());
-
-        authorizedUser.setSurname(user.getSurname());
-        authorizedUser.setName(user.getName());
-        authorizedUser.setPatronymic(user.getPatronymic());
+        if (!StringUtils.isEmpty(user.getAdditionalFields())) {
+            authorizedUser.setFields(JsonUtils.jsonToMap(user.getAdditionalFields()));
+        }
 
         return authorizedUser;
     }

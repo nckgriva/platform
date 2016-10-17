@@ -49,9 +49,9 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
             authorizedUser.setEmail(authDTO.getEmail());
             authorizedUser.setPhone(!StringUtils.isEmpty(authDTO.getPhone()) ? authDTO.getPhone() : null);
 //            authorizedUser.setNickname(!StringUtils.isEmpty(authDTO.getNickname()) ? authDTO.getNickname() : authDTO.getUserId());
-            authorizedUser.setName(!StringUtils.isEmpty(authDTO.getFirstName()) ? authDTO.getFirstName() : null);
-            authorizedUser.setSurname(!StringUtils.isEmpty(authDTO.getLastName()) ? authDTO.getLastName() : null);
-            authorizedUser.setPatronymic(null);
+//            authorizedUser.setName(!StringUtils.isEmpty(authDTO.getFirstName()) ? authDTO.getFirstName() : null);
+//            authorizedUser.setSurname(!StringUtils.isEmpty(authDTO.getLastName()) ? authDTO.getLastName() : null);
+//            authorizedUser.setPatronymic(null);
 
             logger.info("Oauth registration: " + authorizedUser.toString());
 

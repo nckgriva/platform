@@ -2,7 +2,13 @@ package com.gracelogic.platform.user.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
+import com.gracelogic.platform.db.model.StringJsonUserType;
+import com.gracelogic.platform.db.model.json.JsonBinaryType;
+import com.gracelogic.platform.db.model.json.JsonStringType;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -17,6 +23,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "USER", schema = JPAProperties.DEFAULT_SCHEMA)
+@TypeDefs( {@TypeDef( name= "StringJsonObject", typeClass = StringJsonUserType.class)})
 public class User extends IdObject<UUID> {
     @Id
     @Column(name = ID)
@@ -64,7 +71,7 @@ public class User extends IdObject<UUID> {
     private Boolean blocked;
 
     @Column(name = "BLOCKED_DT", nullable = true)
-    private Date blockedtDt;
+    private Date blockedDt;
 
     @ManyToOne
     @JoinColumn(name = "BLOCKED_BY_USER_ID", nullable = true)
@@ -76,14 +83,9 @@ public class User extends IdObject<UUID> {
     @Column(name = "LAST_VISIT_IP", nullable = true)
     private String lastVisitIP;
 
-    @Column(name = "NAME", nullable = true)
-    private String name;
-
-    @Column(name = "SURNAME", nullable = true)
-    private String surname;
-
-    @Column(name = "PATRONYMIC", nullable = true)
-    private String patronymic;
+    @Type(type = "StringJsonObject")
+    @Column(columnDefinition = "json")
+    private String additionalFields;
 
     @Override
     public UUID getId() {
@@ -195,12 +197,12 @@ public class User extends IdObject<UUID> {
         this.blocked = blocked;
     }
 
-    public Date getBlockedtDt() {
-        return blockedtDt;
+    public Date getBlockedDt() {
+        return blockedDt;
     }
 
-    public void setBlockedtDt(Date blockedtDt) {
-        this.blockedtDt = blockedtDt;
+    public void setBlockedDt(Date blockedDt) {
+        this.blockedDt = blockedDt;
     }
 
     public User getBlockedByUser() {
@@ -227,27 +229,11 @@ public class User extends IdObject<UUID> {
         this.lastVisitIP = lastVisitIP;
     }
 
-    public String getName() {
-        return name;
+    public String getAdditionalFields() {
+        return additionalFields;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public String getPatronymic() {
-        return patronymic;
-    }
-
-    public void setPatronymic(String patronymic) {
-        this.patronymic = patronymic;
+    public void setAdditionalFields(String additionalFields) {
+        this.additionalFields = additionalFields;
     }
 }
