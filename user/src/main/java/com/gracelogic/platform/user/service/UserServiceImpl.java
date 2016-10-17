@@ -284,7 +284,7 @@ public class UserServiceImpl implements UserService {
             templateParams.put("loginType", loginType);
             templateParams.put("login", login);
             templateParams.put("baseUrl", propertyService.getPropertyValue("web:base_url"));
-            Map<String, String> fields = JsonUtils.jsonToMap(user.getAdditionalFields());
+            Map<String, String> fields = JsonUtils.jsonToMap(user.getFields());
             for (String key : fields.keySet()) {
                 templateParams.put(key, fields.get(key));
             }
@@ -530,7 +530,7 @@ public class UserServiceImpl implements UserService {
             //TODO: validate this before
 
         }
-        user.setAdditionalFields(JsonUtils.mapToJson(userModel.getFields()));
+        user.setFields(JsonUtils.mapToJson(userModel.getFields()));
 
         if (!StringUtils.isEmpty(userModel.getEmail())) {
             user.setEmail(StringUtils.trim(StringUtils.lowerCase(userModel.getEmail())));
@@ -576,7 +576,7 @@ public class UserServiceImpl implements UserService {
         templateParams.put("userId", user.getId().toString());
         templateParams.put("loginType", loginType);
         templateParams.put("baseUrl", propertyService.getPropertyValue("web:base_url"));
-        Map<String, String> fields = JsonUtils.jsonToMap(user.getAdditionalFields());
+        Map<String, String> fields = JsonUtils.jsonToMap(user.getFields());
         for (String key : fields.keySet()) {
             templateParams.put(key, fields.get(key));
         }
@@ -638,7 +638,7 @@ public class UserServiceImpl implements UserService {
 //        for (String key : user.getFields().keySet()) {
 //            u.getFields().setValue(key, user.getFields().get(key));
 //        }
-        u.setAdditionalFields(JsonUtils.mapToJson(user.getFields()));
+        u.setFields(JsonUtils.mapToJson(user.getFields()));
 
 
         if (!u.getBlocked() && user.getBlocked()) {

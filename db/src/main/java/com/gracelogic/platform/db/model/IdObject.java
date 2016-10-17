@@ -1,10 +1,5 @@
 package com.gracelogic.platform.db.model;
 
-import com.gracelogic.platform.db.model.json.JsonBinaryType;
-import com.gracelogic.platform.db.model.json.JsonStringType;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -13,10 +8,6 @@ import java.util.Date;
  * Date: 22.03.12
  * Time: 17:21
  */
-@TypeDefs({
-        @TypeDef(name = "json", typeClass = JsonStringType.class),
-        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-})
 public abstract class IdObject<E extends Comparable> implements Serializable {
     public static final String ID = "id";
     public static final String CREATED = "created_dt";

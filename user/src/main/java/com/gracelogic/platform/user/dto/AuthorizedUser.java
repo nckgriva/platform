@@ -1,21 +1,12 @@
 package com.gracelogic.platform.user.dto;
 
-
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gracelogic.platform.db.dto.IdObjectModel;
-import com.gracelogic.platform.db.model.json.JacksonUtil;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.service.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Author: Igor Parkhomenko
@@ -23,6 +14,9 @@ import java.util.UUID;
  * Time: 21:24
  */
 public class AuthorizedUser extends IdObjectModel implements Serializable {
+    public static final String FIELD_NAME = "name";
+    public static final String FIELD_SURNAME = "surname";
+
     private String email;
     private String phone;
     private Boolean emailVerified;
@@ -37,7 +31,7 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
 
     private Set<String> grants = new HashSet<>();
     private Set<UUID> roles = new HashSet<>();
-    private Map<String, String> fields;
+    private Map<String, String> fields = new HashMap<>();
 
 
     public String getEmail() {
@@ -128,16 +122,6 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
         this.fields = fields;
     }
 
-    @JsonAnySetter
-    public void add(String key, String value) {
-        fields.put(key, value);
-    }
-
-    @JsonAnyGetter
-    public Map<String, String> getMap() {
-        return fields;
-    }
-
     public static AuthorizedUser prepare(User user, AuthorizedUser authorizedUser) {
         IdObjectModel.prepare(authorizedUser, user);
 
@@ -147,8 +131,9 @@ public class AuthorizedUser extends IdObjectModel implements Serializable {
         authorizedUser.setBlocked(user.getBlocked());
         authorizedUser.setEmailVerified(user.getEmailVerified());
         authorizedUser.setPhoneVerified(user.getPhoneVerified());
-        if (!StringUtils.isEmpty(user.getAdditionalFields())) {
-            authorizedUser.setFields(JsonUtils.jsonToMap(user.getAdditionalFields()));
+
+        if (!StringUtils.isEmpty(user.getFields())) {
+            authorizedUser.setFields(JsonUtils.jsonToMap(user.getFields()));
         }
 
         return authorizedUser;

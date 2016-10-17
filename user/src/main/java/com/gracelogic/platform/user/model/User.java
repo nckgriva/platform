@@ -3,8 +3,6 @@ package com.gracelogic.platform.user.model;
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.db.model.StringJsonUserType;
-import com.gracelogic.platform.db.model.json.JsonBinaryType;
-import com.gracelogic.platform.db.model.json.JsonStringType;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -23,7 +21,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "USER", schema = JPAProperties.DEFAULT_SCHEMA)
-@TypeDefs( {@TypeDef( name= "StringJsonObject", typeClass = StringJsonUserType.class)})
+@TypeDefs({@TypeDef(name= "stringJsonObject", typeClass = StringJsonUserType.class)})
 public class User extends IdObject<UUID> {
     @Id
     @Column(name = ID)
@@ -83,9 +81,9 @@ public class User extends IdObject<UUID> {
     @Column(name = "LAST_VISIT_IP", nullable = true)
     private String lastVisitIP;
 
-    @Type(type = "StringJsonObject")
-    @Column(columnDefinition = "json")
-    private String additionalFields;
+    @Type(type = "stringJsonObject")
+    @Column(columnDefinition = "json", nullable = true)
+    private String fields;
 
     @Override
     public UUID getId() {
@@ -229,11 +227,11 @@ public class User extends IdObject<UUID> {
         this.lastVisitIP = lastVisitIP;
     }
 
-    public String getAdditionalFields() {
-        return additionalFields;
+    public String getFields() {
+        return fields;
     }
 
-    public void setAdditionalFields(String additionalFields) {
-        this.additionalFields = additionalFields;
+    public void setFields(String fields) {
+        this.fields = fields;
     }
 }
