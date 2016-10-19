@@ -1,5 +1,6 @@
 package com.gracelogic.platform.user.service;
 
+import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.notification.dto.Message;
@@ -11,6 +12,7 @@ import com.gracelogic.platform.template.dto.LoadedTemplate;
 import com.gracelogic.platform.template.service.TemplateService;
 import com.gracelogic.platform.user.dao.UserDao;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
+import com.gracelogic.platform.user.dto.UserDTO;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
@@ -468,7 +470,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User register(AuthorizedUser userModel, boolean trust) throws IllegalParameterException {
+    public User register(UserDTO userModel, boolean trust) throws IllegalParameterException {
         String userApproveMethod = propertyService.getPropertyValue("user:approve_method");
 
         if (!trust && !checkPassword(userModel.getPassword())) {
@@ -697,5 +699,29 @@ public class UserServiceImpl implements UserService {
                 idObjectService.save(userRole);
             }
         }
+    }
+
+    @Override
+    public EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        //TODO: order by translator
+
+        int totalCount = userDao.getUsersCount(phone, email, approved, blocked, fields);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<UserDTO> entityListResponse = new EntityListResponse<UserDTO>();
+        entityListResponse.setEntity("user");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<User> items = userDao.getUsers(phone, email, approved, blocked, fields, sortField, sortDir, startRecord, count);
+        entityListResponse.setPartCount(items.size());
+        for (User e : items) {
+            UserDTO el = UserDTO.prepare(e);
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
     }
 }

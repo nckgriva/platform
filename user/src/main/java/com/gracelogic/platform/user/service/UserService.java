@@ -3,6 +3,7 @@ package com.gracelogic.platform.user.service;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
+import com.gracelogic.platform.user.dto.UserDTO;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
@@ -49,7 +50,7 @@ public interface UserService {
 
     boolean isActualCodeAvailable(UUID userId, UUID codeTypeId);
 
-    User register(AuthorizedUser user, boolean trust) throws IllegalParameterException;
+    User register(UserDTO user, boolean trust) throws IllegalParameterException;
 
     void deleteUser(User user);
 
@@ -62,4 +63,6 @@ public interface UserService {
     List<UserRole> getUserRoles(UUID userId);
 
     void mergeUserRoles(UUID userId, Collection<UUID> activeRoles) throws IllegalParameterException;
+
+    EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir);
 }

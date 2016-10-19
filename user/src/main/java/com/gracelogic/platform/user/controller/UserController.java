@@ -210,7 +210,7 @@ public class UserController extends AbstractAuthorizedController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity register(@RequestBody AuthorizedUser userModel) {
+    public ResponseEntity register(@RequestBody UserDTO userModel) {
         try {
             lifecycleService.register(userModel, false);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);

@@ -5,10 +5,7 @@ import com.gracelogic.platform.user.model.AuthCode;
 import com.gracelogic.platform.user.model.IncorrectLoginAttempt;
 import com.gracelogic.platform.user.model.User;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Author: Igor Parkhomenko
@@ -25,4 +22,8 @@ public interface UserDao {
     void invalidateActualAuthCodes(UUID userId, UUID codeTypeId);
 
     List<AuthCode> findAuthCodes(UUID userId, Collection<UUID> codeTypeIds, Collection<UUID> codeStateIds);
+
+    Integer getUsersCount(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields);
+
+    List<User> getUsers(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage);
 }
