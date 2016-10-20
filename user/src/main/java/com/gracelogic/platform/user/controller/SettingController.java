@@ -1,7 +1,7 @@
 package com.gracelogic.platform.user.controller;
 
 import com.gracelogic.platform.user.Path;
-import com.gracelogic.platform.user.dto.UserSettingModel;
+import com.gracelogic.platform.user.dto.UserSettingDTO;
 import com.gracelogic.platform.user.model.UserSetting;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
@@ -40,7 +40,7 @@ public class SettingController extends AbstractAuthorizedController {
 
         UserSetting userSetting = userService.getUserSetting(getUser().getId(), key);
         if (userSetting != null) {
-            return new ResponseEntity<UserSettingModel>(UserSettingModel.prepare(userSetting), HttpStatus.OK);
+            return new ResponseEntity<UserSettingDTO>(UserSettingDTO.prepare(userSetting), HttpStatus.OK);
         } else {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("setting.NOT_FOUND", messageSource.getMessage("setting.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }

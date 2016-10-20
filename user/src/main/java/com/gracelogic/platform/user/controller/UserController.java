@@ -55,15 +55,15 @@ public class UserController extends AbstractAuthorizedController {
     private UserLifecycleService lifecycleService;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequest authRequest) {
+    public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         Exception exception = null;
-        if (authRequest != null) {
+        if (authRequestDTO != null) {
             AuthenticationToken authentication = null;
             try {
                 authentication = (AuthenticationToken) authenticationManager.authenticate(
-                        new AuthenticationToken(StringUtils.lowerCase(authRequest.getLogin()), authRequest.getPassword(), ServletUtils.getRemoteAddress(request), authRequest.getLoginType(), false)
+                        new AuthenticationToken(StringUtils.lowerCase(authRequestDTO.getLogin()), authRequestDTO.getPassword(), ServletUtils.getRemoteAddress(request), authRequestDTO.getLoginType(), false)
                 );
             } catch (Exception e) {
                 exception = e;
@@ -221,7 +221,7 @@ public class UserController extends AbstractAuthorizedController {
 
     @RequestMapping(value = "/sendRepairCode", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity sendRepairCode(@RequestBody RepairCodeRequest request) {
+    public ResponseEntity sendRepairCode(@RequestBody RepairCodeRequestDTO request) {
 
         try {
             userService.sendRepairCode(request.getLogin(), request.getLoginType(), null);
@@ -235,7 +235,7 @@ public class UserController extends AbstractAuthorizedController {
 
     @RequestMapping(value = "/changePassword", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity changePassword(@RequestBody ChangePasswordRequest request) {
+    public ResponseEntity changePassword(@RequestBody ChangePasswordRequestDTO request) {
         try {
             userService.changePassword(request.getLogin(), request.getLoginType(), request.getCode(), request.getNewPassword());
         } catch (IllegalParameterException e) {

@@ -7,7 +7,7 @@ import com.gracelogic.platform.web.dto.PlatformRequest;
  * Date: 30.12.2015
  * Time: 0:18
  */
-public class RepairCodeRequest extends PlatformRequest {
+public class RepairCodeRequestDTO extends PlatformRequest {
     private String login;
     private String loginType = "phone";
 

@@ -7,7 +7,7 @@ import com.gracelogic.platform.web.dto.PlatformRequest;
  * Date: 14.05.14
  * Time: 15:48
  */
-public class AuthRequest extends PlatformRequest {
+public class AuthRequestDTO extends PlatformRequest {
     private String login;
     private String password;
     private String loginType;
@@ -28,7 +28,7 @@ public class AuthRequest extends PlatformRequest {
         this.password = password;
     }
 
-    public AuthRequest(String login) {
+    public AuthRequestDTO(String login) {
         this.login = login;
     }
 
@@ -40,12 +40,12 @@ public class AuthRequest extends PlatformRequest {
         this.loginType = loginType;
     }
 
-    public AuthRequest() {
+    public AuthRequestDTO() {
     }
 
     @Override
     public String toString() {
-        return "AuthRequest{" +
+        return "AuthRequestDTO{" +
                 "login='" + login + '\'' +
                 ", password='" + password + '\'' +
                 ", loginType='" + loginType + '\'' +

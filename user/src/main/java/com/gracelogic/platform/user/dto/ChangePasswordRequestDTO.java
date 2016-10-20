@@ -5,7 +5,7 @@ package com.gracelogic.platform.user.dto;
  * Date: 30.12.2015
  * Time: 0:18
  */
-public class ChangePasswordRequest extends RepairCodeRequest {
+public class ChangePasswordRequestDTO extends RepairCodeRequestDTO {
     private String newPassword;
     private String code;
 
