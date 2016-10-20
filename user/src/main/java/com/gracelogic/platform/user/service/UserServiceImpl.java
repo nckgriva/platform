@@ -13,6 +13,7 @@ import com.gracelogic.platform.template.service.TemplateService;
 import com.gracelogic.platform.user.dao.UserDao;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.dto.UserDTO;
+import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
@@ -470,25 +471,25 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User register(UserDTO userModel, boolean trust) throws IllegalParameterException {
+    public User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws IllegalParameterException {
         String userApproveMethod = propertyService.getPropertyValue("user:approve_method");
 
-        if (!trust && !checkPassword(userModel.getPassword())) {
+        if (!trust && !checkPassword(userRegistrationDTO.getPassword())) {
             throw new IllegalParameterException("register.INVALID_PASSWORD");
         }
 
         if (!trust) {
-            if (StringUtils.isEmpty(userModel.getEmail()) && StringUtils.isEmpty(userModel.getPhone())) {
+            if (StringUtils.isEmpty(userRegistrationDTO.getEmail()) && StringUtils.isEmpty(userRegistrationDTO.getPhone())) {
                 throw new IllegalParameterException("register.PHONE_OR_EMAIL_IS_NECESSARY");
             }
         }
 
-        if (!StringUtils.isEmpty(userModel.getPhone())) {
-            if (!checkPhone(userModel.getPhone(), false)) {
+        if (!StringUtils.isEmpty(userRegistrationDTO.getPhone())) {
+            if (!checkPhone(userRegistrationDTO.getPhone(), false)) {
                 throw new IllegalParameterException("register.INVALID_PHONE");
             }
 
-            User anotherUser = getUserByField("phone", userModel.getPhone());
+            User anotherUser = getUserByField("phone", userRegistrationDTO.getPhone());
             if (anotherUser != null) {
                 if (!anotherUser.getApproved()) {
                     lifecycleService.delete(anotherUser);
@@ -501,12 +502,12 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        if (!StringUtils.isEmpty(userModel.getEmail())) {
-            if (!checkEmail(userModel.getEmail(), false)) {
+        if (!StringUtils.isEmpty(userRegistrationDTO.getEmail())) {
+            if (!checkEmail(userRegistrationDTO.getEmail(), false)) {
                 throw new IllegalParameterException("register.INVALID_EMAIL");
             }
 
-            User anotherUser = getUserByField("email", userModel.getEmail());
+            User anotherUser = getUserByField("email", userRegistrationDTO.getEmail());
             if (anotherUser != null) {
                 if (!anotherUser.getApproved()) {
                     lifecycleService.delete(anotherUser);
@@ -528,20 +529,16 @@ public class UserServiceImpl implements UserService {
             user.setApproved(true);
         }
 
-        for (String key : userModel.getFields().keySet()) {
-            //TODO: validate this before
+        user.setFields(JsonUtils.mapToJson(userRegistrationDTO.getFields()));
 
-        }
-        user.setFields(JsonUtils.mapToJson(userModel.getFields()));
-
-        if (!StringUtils.isEmpty(userModel.getEmail())) {
-            user.setEmail(StringUtils.trim(StringUtils.lowerCase(userModel.getEmail())));
+        if (!StringUtils.isEmpty(userRegistrationDTO.getEmail())) {
+            user.setEmail(StringUtils.trim(StringUtils.lowerCase(userRegistrationDTO.getEmail())));
             if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
                 user.setEmailVerified(true);
             }
         }
-        if (!StringUtils.isEmpty(userModel.getPhone())) {
-            user.setPhone(StringUtils.trim(userModel.getPhone()));
+        if (!StringUtils.isEmpty(userRegistrationDTO.getPhone())) {
+            user.setPhone(StringUtils.trim(userRegistrationDTO.getPhone()));
             if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
                 user.setPhoneVerified(true);
             }
@@ -549,7 +546,7 @@ public class UserServiceImpl implements UserService {
 
         user.setSalt(UserServiceImpl.generatePasswordSalt());
         if (!trust) {
-            user.setPassword(DigestUtils.shaHex(userModel.getPassword().concat(user.getSalt())));
+            user.setPassword(DigestUtils.shaHex(userRegistrationDTO.getPassword().concat(user.getSalt())));
         }
 
         return idObjectService.save(user);
@@ -703,7 +700,60 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        //TODO: order by translator
+        if (!StringUtils.isEmpty(sortField)) {
+            //Т.к. в данном методе запрос используется нативный и требуется сохранить единообразие - транслируем название jpa полей в нативные sql
+            if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
+                sortField = "id";
+            }
+            if (StringUtils.equalsIgnoreCase(sortField, "el.created")) {
+                sortField = "created_dt";
+            }
+            if (StringUtils.equalsIgnoreCase(sortField, "el.changed")) {
+                sortField = "changed_dt";
+            }
+            if (StringUtils.equalsIgnoreCase(sortField, "el.phone")) {
+                sortField = "phone";
+            }
+            if (StringUtils.equalsIgnoreCase(sortField, "el.phoneVerified")) {
+                sortField = "is_phone_verified";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.email")) {
+                sortField = "email";
+            }
+            if (StringUtils.equalsIgnoreCase(sortField, "el.emailVerified")) {
+                sortField = "is_email_verified";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.approved")) {
+                sortField = "is_approved";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.blocked")) {
+                sortField = "is_blocked";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.blockedDt")) {
+                sortField = "blocked_dt";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.blockedByUser")) {
+                sortField = "blocked_by_user_id";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.lastVisitDt")) {
+                sortField = "last_visit_dt";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.lastVisitIP")) {
+                sortField = "last_visit_ip";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.allowedAddresses")) {
+                sortField = "allowed_addresses";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.password")) {
+                sortField = "password";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.salt")) {
+                sortField = "salt";
+            }
+            else if (StringUtils.startsWithIgnoreCase(sortField, "el.fields")) {
+                sortField = sortField.substring("el.".length());
+            }
+        }
 
         int totalCount = userDao.getUsersCount(phone, email, approved, blocked, fields);
         int totalPages = ((totalCount / count)) + 1;

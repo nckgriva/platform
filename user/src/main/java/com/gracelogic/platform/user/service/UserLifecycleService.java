@@ -2,6 +2,7 @@ package com.gracelogic.platform.user.service;
 
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.dto.UserDTO;
+import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.User;
 
@@ -11,7 +12,7 @@ import com.gracelogic.platform.user.model.User;
  * Time: 22:27
  */
 public interface UserLifecycleService {
-    User register(UserDTO user, boolean trust) throws IllegalParameterException;
+    User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws IllegalParameterException;
 
     void delete(User user);
 }

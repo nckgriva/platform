@@ -85,4 +85,5 @@ public class EntityListResponse<E extends IdObjectModel> {
     public int getRecordsFiltered() {
         return getTotalCount();
     }
+
 }

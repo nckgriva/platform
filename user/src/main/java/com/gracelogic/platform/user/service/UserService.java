@@ -4,6 +4,7 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.dto.UserDTO;
+import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
@@ -50,7 +51,7 @@ public interface UserService {
 
     boolean isActualCodeAvailable(UUID userId, UUID codeTypeId);
 
-    User register(UserDTO user, boolean trust) throws IllegalParameterException;
+    User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws IllegalParameterException;
 
     void deleteUser(User user);
 

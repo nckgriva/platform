@@ -7,6 +7,7 @@ import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.oauth.model.AuthProviderLinkage;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
+import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.service.UserLifecycleService;
@@ -45,18 +46,18 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
             User user = null;
 
             //Register new user
-            AuthorizedUser authorizedUser = new AuthorizedUser();
-            authorizedUser.setEmail(authDTO.getEmail());
-            authorizedUser.setPhone(!StringUtils.isEmpty(authDTO.getPhone()) ? authDTO.getPhone() : null);
+            UserRegistrationDTO userRegistrationDTO = new UserRegistrationDTO();
+            userRegistrationDTO.setEmail(authDTO.getEmail());
+            userRegistrationDTO.setPhone(!StringUtils.isEmpty(authDTO.getPhone()) ? authDTO.getPhone() : null);
 
-            authorizedUser.getFields().put("name", !StringUtils.isEmpty(authDTO.getFirstName()) ? authDTO.getFirstName() : null);
-            authorizedUser.getFields().put("surname", !StringUtils.isEmpty(authDTO.getLastName()) ? authDTO.getLastName() : null);
-            authorizedUser.getFields().put("patronymic", null);
+            userRegistrationDTO.getFields().put("name", !StringUtils.isEmpty(authDTO.getFirstName()) ? authDTO.getFirstName() : null);
+            userRegistrationDTO.getFields().put("surname", !StringUtils.isEmpty(authDTO.getLastName()) ? authDTO.getLastName() : null);
+            userRegistrationDTO.getFields().put("patronymic", null);
 
-            logger.info("Oauth registration: " + authorizedUser.toString());
+            logger.info("Oauth registration: " + userRegistrationDTO.toString());
 
             try {
-                user = registrationService.register(authorizedUser, true);
+                user = registrationService.register(userRegistrationDTO, true);
             }
             catch (IllegalParameterException e) {
                 logger.error("Failed to register user via oauth", e);

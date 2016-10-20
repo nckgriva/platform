@@ -22,16 +22,8 @@ public class UserDTO extends IdObjectModel implements Serializable {
     private Boolean emailVerified;
     private Boolean phoneVerified;
     private Boolean approved;
-
     private Boolean blocked;
-
-    //Transient fields
-    private String password;
-
-
-
     private Map<String, String> fields = new HashMap<>();
-
 
     public String getEmail() {
         return email;
@@ -39,14 +31,6 @@ public class UserDTO extends IdObjectModel implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getPhone() {
@@ -89,8 +73,6 @@ public class UserDTO extends IdObjectModel implements Serializable {
         this.phoneVerified = phoneVerified;
     }
 
-
-
     public Map<String, String> getFields() {
         return fields;
     }
@@ -99,26 +81,26 @@ public class UserDTO extends IdObjectModel implements Serializable {
         this.fields = fields;
     }
 
-    public static UserDTO prepare(User user, UserDTO authorizedUser) {
-        IdObjectModel.prepare(authorizedUser, user);
+    public static UserDTO prepare(User user, UserDTO userDTO) {
+        IdObjectModel.prepare(userDTO, user);
 
-        authorizedUser.setApproved(user.getApproved());
-        authorizedUser.setPhone(user.getPhone());
-        authorizedUser.setEmail(user.getEmail());
-        authorizedUser.setBlocked(user.getBlocked());
-        authorizedUser.setEmailVerified(user.getEmailVerified());
-        authorizedUser.setPhoneVerified(user.getPhoneVerified());
+        userDTO.setApproved(user.getApproved());
+        userDTO.setPhone(user.getPhone());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setBlocked(user.getBlocked());
+        userDTO.setEmailVerified(user.getEmailVerified());
+        userDTO.setPhoneVerified(user.getPhoneVerified());
 
         if (!StringUtils.isEmpty(user.getFields())) {
-            authorizedUser.setFields(JsonUtils.jsonToMap(user.getFields()));
+            userDTO.setFields(JsonUtils.jsonToMap(user.getFields()));
         }
 
-        return authorizedUser;
+        return userDTO;
     }
 
     public static UserDTO prepare(User user) {
-        UserDTO authorizedUser = new UserDTO();
-        UserDTO.prepare(user, authorizedUser);
-        return authorizedUser;
+        UserDTO userDTO = new UserDTO();
+        UserDTO.prepare(user, userDTO);
+        return userDTO;
     }
 }
