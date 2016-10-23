@@ -7,6 +7,5 @@ package com.gracelogic.platform.db;
  */
 public class JPAProperties {
     public static final String TABLE_PREFIX = "CMN_";
-    public static final String DEFAULT_SCHEMA = "portal";
-
+    public static final String DEFAULT_SCHEMA = "main";
 }
