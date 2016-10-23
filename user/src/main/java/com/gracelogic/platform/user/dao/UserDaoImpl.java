@@ -1,5 +1,6 @@
 package com.gracelogic.platform.user.dao;
 
+import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -21,7 +22,7 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
     @Override
     public Integer getUsersCount(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields) {
         BigInteger count = null;
-        StringBuilder queryStr = new StringBuilder("select count(ID) from portal.cmn_user where 1=1 ");
+        StringBuilder queryStr = new StringBuilder(String.format("select count(ID) from %s.cmn_user where 1=1 ", JPAProperties.DEFAULT_SCHEMA));
 
         Map<String, Object> params = new HashMap<>();
         if (!StringUtils.isEmpty(phone)) {
@@ -64,7 +65,7 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
     @Override
     public List<User> getUsers(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
         List<User> users = Collections.emptyList();
-        StringBuilder queryStr = new StringBuilder("select * from portal.cmn_user where 1=1 ");
+        StringBuilder queryStr = new StringBuilder(String.format("select * from %s.cmn_user where 1=1 ", JPAProperties.DEFAULT_SCHEMA));
 
         Map<String, Object> params = new HashMap<>();
         if (!StringUtils.isEmpty(phone)) {
