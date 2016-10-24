@@ -9,5 +9,7 @@ public interface TaskService {
 
     void startNextTask();
 
+    void scheduleCronTasks();
+
     void updateLastExecutionDate(UUID taskId);
 }
