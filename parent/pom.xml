@@ -11,6 +11,7 @@
 
     <properties>
         <uiScope>compile</uiScope>
+        <swagger-maven-plugin.version>3.1.4</swagger-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -113,9 +114,9 @@
                 <version>3.2.9.RELEASE</version>
             </dependency>
             <!--<dependency>-->
-                <!--<groupId>org.springframework</groupId>-->
-                <!--<artifactId>spring-web-servlet</artifactId>-->
-                <!--<version>3.2.9.RELEASE</version>-->
+            <!--<groupId>org.springframework</groupId>-->
+            <!--<artifactId>spring-web-servlet</artifactId>-->
+            <!--<version>3.2.9.RELEASE</version>-->
             <!--</dependency>-->
             <dependency>
                 <groupId>org.aopalliance</groupId>
@@ -234,14 +235,14 @@
                 </exclusions>
             </dependency>
             <!--<dependency>-->
-                <!--<groupId>org.codehaus.jackson</groupId>-->
-                <!--<artifactId>jackson-mapper-asl</artifactId>-->
-                <!--<version>1.9.8</version>-->
+            <!--<groupId>org.codehaus.jackson</groupId>-->
+            <!--<artifactId>jackson-mapper-asl</artifactId>-->
+            <!--<version>1.9.8</version>-->
             <!--</dependency>-->
             <!--<dependency>-->
-                <!--<groupId>org.codehaus.jackson</groupId>-->
-                <!--<artifactId>jackson-core-asl</artifactId>-->
-                <!--<version>1.9.8</version>-->
+            <!--<groupId>org.codehaus.jackson</groupId>-->
+            <!--<artifactId>jackson-core-asl</artifactId>-->
+            <!--<version>1.9.8</version>-->
             <!--</dependency>-->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -339,7 +340,6 @@
             </dependency>
 
 
-
             <!--Test-->
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -361,6 +361,12 @@
                         <artifactId>log4j</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>1.5.5</version>
             </dependency>
 
 
