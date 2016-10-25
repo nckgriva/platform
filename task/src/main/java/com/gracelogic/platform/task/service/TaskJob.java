@@ -7,7 +7,8 @@ public class TaskJob {
     private TaskService taskService;
 
     public void run() {
+        taskService.scheduleCronTasks();
+
         taskService.startNextTask();
     }
-
 }

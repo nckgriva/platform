@@ -7,7 +7,9 @@ import com.gracelogic.platform.task.model.Task;
 import com.gracelogic.platform.task.model.TaskExecuteMethod;
 import com.gracelogic.platform.task.model.TaskExecuteState;
 import com.gracelogic.platform.task.model.TaskExecutionLog;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -57,6 +59,11 @@ public class TaskServiceImpl implements TaskService {
         return count > 0;
     }
 
+    protected void executeTaskInOtherTransaction(UUID taskId, String parameter, UUID method) {
+        TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
+        taskService.executeTask(taskId, parameter, method);
+    }
+
     protected void setTaskExecutionStateInOtherTransaction(UUID taskExecutionId, UUID stateId) {
         TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
         taskService.setTaskExecutionState(taskExecutionId, stateId);
@@ -84,7 +91,7 @@ public class TaskServiceImpl implements TaskService {
         Map<String, Object> params = new HashMap<>();
         params.put("state", DataConstants.TaskExecutionStates.CREATED.getValue());
 
-        List<TaskExecutionLog> executions = idObjectService.getList(TaskExecutionLog.class, null, "el.state.id=:state",  params, "el.created", "ASC", null, 1);
+        List<TaskExecutionLog> executions = idObjectService.getList(TaskExecutionLog.class, null, "el.state.id=:state", params, "el.created", "ASC", null, 1);
         if (executions.isEmpty()) {
             return;
         }
@@ -99,8 +106,7 @@ public class TaskServiceImpl implements TaskService {
 
             //Получить класс исполнителя и вызвать у него execute с параметрами
             setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.COMPLETED.getValue());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.FAIL.getValue());
             logger.error(String.format("Failed to complete task: %s", execution.getTask().getServiceName()), e);
         }
@@ -108,5 +114,29 @@ public class TaskServiceImpl implements TaskService {
         updateLastExecutionDateInOtherTransaction(execution.getTask().getId());
 
         idObjectService.save(execution);
+    }
+
+    @Override
+    public void scheduleCronTasks() {
+        Date currentDate = new Date();
+        List<Task> tasks = idObjectService.getList(Task.class, null, "el.active = true and el.cronExpression is not null", null, "el.lastExecutionDate", "ASC", null, null);
+
+        for (Task task : tasks) {
+            try {
+                if (!StringUtils.isEmpty(task.getCronExpression()) && !checkTaskExist(task.getId(), task.getParameter())) {
+                    Date lastExecutionDate = task.getLastExecutionDate() != null ? task.getLastExecutionDate() : currentDate;
+
+                    CronExpression cronExpression = new CronExpression(task.getCronExpression());
+                    Date nextExecutionDate = cronExpression.getNextValidTimeAfter(lastExecutionDate);
+
+                    if (nextExecutionDate.getTime() <= currentDate.getTime()) {
+                        executeTaskInOtherTransaction(task.getId(), task.getParameter(), DataConstants.TaskExecutionMethods.CRON.getValue());
+                    }
+                }
+            }
+            catch (Exception e) {
+                logger.error(String.format("Failed to schedule task %s", task.getId()), e);
+            }
+        }
     }
 }
