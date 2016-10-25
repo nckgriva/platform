@@ -41,7 +41,8 @@ import java.util.UUID;
 @Controller
 @RequestMapping(value = Path.API_USER)
 @Secured(PlatformRole.ANONYMOUS)
-@Api(value = Path.API_USER, description = "Базовый контроллер авторизации/аутентификации")
+@Api(value = Path.API_USER, description = "Базовый контроллер авторизации/аутентификации",
+        authorizations = @Authorization(value = "MybasicAuth"))
 public class UserController extends AbstractAuthorizedController {
   @Autowired
   private AuthenticationManager authenticationManager;
@@ -56,13 +57,6 @@ public class UserController extends AbstractAuthorizedController {
   @Autowired
   private UserLifecycleService lifecycleService;
 
-  @ApiOperation(
-          value = "Вход в систему"
-  )
-  @ApiResponses({
-          @ApiResponse(code = 200, message = "OK"),
-          @ApiResponse(code = 401, message = "Unauthorized"),
-          @ApiResponse(code = 500, message = "Something exceptional happened")})
   @RequestMapping(value = "/login", method = RequestMethod.POST)
   public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
     ObjectMapper objectMapper = new ObjectMapper();
@@ -145,6 +139,15 @@ public class UserController extends AbstractAuthorizedController {
     }
   }
 
+  @ApiOperation(
+          value = "logged",
+          notes = "Проверка залогирован ли пользователь",
+          response = ResponseEntity.class
+  )
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "OK"),
+          @ApiResponse(code = 401, message = "Unauthorized"),
+          @ApiResponse(code = 500, message = "Something exceptional happened")})
   @RequestMapping(value = "/logged", method = RequestMethod.POST)
   @ResponseBody
   public ResponseEntity logged() {
@@ -155,6 +158,15 @@ public class UserController extends AbstractAuthorizedController {
     }
   }
 
+  @ApiOperation(
+          value = "logout",
+          notes = "Разлогиниться",
+          response = ResponseEntity.class
+  )
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "OK"),
+          @ApiResponse(code = 401, message = "Unauthorized"),
+          @ApiResponse(code = 500, message = "Something exceptional happened")})
   @RequestMapping(value = "/logout", method = RequestMethod.POST)
   @ResponseBody
   public ResponseEntity logout(HttpServletRequest request) {
@@ -167,9 +179,20 @@ public class UserController extends AbstractAuthorizedController {
     return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
   }
 
+  @ApiOperation(
+          value = "emailValid",
+          notes = "Проверка валидности e-mail",
+          response = ResponseEntity.class
+  )
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "OK"),
+          @ApiResponse(code = 401, message = "Unauthorized"),
+          @ApiResponse(code = 500, message = "Something exceptional happened")})
   @RequestMapping(value = "/emailValid", method = RequestMethod.POST)
   @ResponseBody
-  public ResponseEntity isEMailValid(@RequestBody ValueRequest valueRequest) {
+  public ResponseEntity isEMailValid(@ApiParam(name = "valueRequest", value = "valueRequest")
+                                     @RequestBody
+                                     ValueRequest valueRequest) {
     if (!userService.checkEmail(valueRequest.getValue(), true)) {
       return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.INVALID_EMAIL", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
     } else {
@@ -177,9 +200,20 @@ public class UserController extends AbstractAuthorizedController {
     }
   }
 
+  @ApiOperation(
+          value = "phoneValid",
+          notes = "Проверка валидности телефона",
+          response = ResponseEntity.class
+  )
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "OK"),
+          @ApiResponse(code = 401, message = "Unauthorized"),
+          @ApiResponse(code = 500, message = "Something exceptional happened")})
   @RequestMapping(value = "/phoneValid", method = RequestMethod.POST)
   @ResponseBody
-  public ResponseEntity isPhoneValid(@RequestBody ValueRequest valueRequest) {
+  public ResponseEntity isPhoneValid(@ApiParam(name = "valueRequest", value = "valueRequest")
+                                     @RequestBody
+                                     ValueRequest valueRequest) {
     if (!userService.checkPhone(valueRequest.getValue(), true)) {
       return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
     } else {
@@ -187,10 +221,23 @@ public class UserController extends AbstractAuthorizedController {
     }
   }
 
+  @ApiOperation(
+          value = "verifyEmail",
+          notes = "Проверка email",
+          response = ResponseEntity.class
+  )
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "OK"),
+          @ApiResponse(code = 401, message = "Unauthorized"),
+          @ApiResponse(code = 500, message = "Something exceptional happened")})
   @RequestMapping(value = "/verifyEmail", method = RequestMethod.POST)
   @ResponseBody
-  public ResponseEntity verifyEmail(@RequestParam(value = "code", required = true) String code,
-                                    @RequestParam(value = "id", required = true) UUID id) {
+  public ResponseEntity verifyEmail(@ApiParam(name = "code", value = "code", required = true)
+                                    @RequestParam(value = "code", required = true)
+                                    String code,
+                                    @ApiParam(name = "id", value = "id", required = true)
+                                    @RequestParam(value = "id", required = true)
+                                    UUID id) {
     if (userService.verifyLogin(id, "email", code)) {
       if (getUser() != null) {
         getUser().setEmailVerified(true);
@@ -201,10 +248,23 @@ public class UserController extends AbstractAuthorizedController {
     }
   }
 
+  @ApiOperation(
+          value = "verifyPhone",
+          notes = "Проверка телефона",
+          response = ResponseEntity.class
+  )
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "OK"),
+          @ApiResponse(code = 401, message = "Unauthorized"),
+          @ApiResponse(code = 500, message = "Something exceptional happened")})
   @RequestMapping(value = "/verifyPhone", method = RequestMethod.POST)
   @ResponseBody
-  public ResponseEntity verifyPhone(@RequestParam(value = "code", required = true) String code,
-                                    @RequestParam(value = "id", required = true) UUID id) {
+  public ResponseEntity verifyPhone(@ApiParam(name = "code", value = "code", required = true)
+                                    @RequestParam(value = "code", required = true)
+                                    String code,
+                                    @ApiParam(name = "id", value = "id", required = true)
+                                    @RequestParam(value = "id", required = true)
+                                    UUID id) {
     if (userService.verifyLogin(id, "phone", code)) {
       if (getUser() != null) {
         getUser().setPhoneVerified(true);
@@ -216,9 +276,20 @@ public class UserController extends AbstractAuthorizedController {
     }
   }
 
+  @ApiOperation(
+          value = "register",
+          notes = "Зарегистрировать пользователя",
+          response = ResponseEntity.class
+  )
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "OK"),
+          @ApiResponse(code = 401, message = "Unauthorized"),
+          @ApiResponse(code = 500, message = "Something exceptional happened")})
   @RequestMapping(value = "/register", method = RequestMethod.POST)
   @ResponseBody
-  public ResponseEntity register(@RequestBody UserRegistrationDTO userRegistrationDTO) {
+  public ResponseEntity register(@ApiParam(name = "userRegistrationDTO", value = "userRegistrationDTO")
+                                 @RequestBody
+                                 UserRegistrationDTO userRegistrationDTO) {
     try {
       lifecycleService.register(userRegistrationDTO, false);
       return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
@@ -227,9 +298,20 @@ public class UserController extends AbstractAuthorizedController {
     }
   }
 
+  @ApiOperation(
+          value = "sendRepairCode",
+          notes = "Отправить код восстановления",
+          response = ResponseEntity.class
+  )
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "OK"),
+          @ApiResponse(code = 401, message = "Unauthorized"),
+          @ApiResponse(code = 500, message = "Something exceptional happened")})
   @RequestMapping(value = "/sendRepairCode", method = RequestMethod.POST)
   @ResponseBody
-  public ResponseEntity sendRepairCode(@RequestBody RepairCodeRequestDTO request) {
+  public ResponseEntity sendRepairCode(@ApiParam(name = "request", value = "request")
+                                       @RequestBody
+                                       RepairCodeRequestDTO request) {
 
     try {
       userService.sendRepairCode(request.getLogin(), request.getLoginType(), null);
@@ -241,9 +323,20 @@ public class UserController extends AbstractAuthorizedController {
     return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
   }
 
+  @ApiOperation(
+          value = "changePassword",
+          notes = "Изменить пароль",
+          response = ResponseEntity.class
+  )
+  @ApiResponses({
+          @ApiResponse(code = 200, message = "OK"),
+          @ApiResponse(code = 401, message = "Unauthorized"),
+          @ApiResponse(code = 500, message = "Something exceptional happened")})
   @RequestMapping(value = "/changePassword", method = RequestMethod.POST)
   @ResponseBody
-  public ResponseEntity changePassword(@RequestBody ChangePasswordRequestDTO request) {
+  public ResponseEntity changePassword(@ApiParam(name = "request", value = "request")
+                                       @RequestBody
+                                       ChangePasswordRequestDTO request) {
     try {
       userService.changePassword(request.getLogin(), request.getLoginType(), request.getCode(), request.getNewPassword());
     } catch (IllegalParameterException e) {
