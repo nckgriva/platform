@@ -402,6 +402,138 @@
                 </pluginManagement>
             </build>
         </profile>
+        <profile>
+            <id>swagger</id>
+            <activation>
+                <file>
+                    <exists>${basedir}/profiles/swagger</exists>
+                </file>
+            </activation>
+
+            <dependencies>
+                <dependency>
+                    <groupId>com.gracelogic.platform</groupId>
+                    <artifactId>swagger-ui</artifactId>
+                    <version>1.0</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-swagger-html</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>${project.build.directory}/ccredit-core-web-1.0/static/index.html
+                                            </file>
+                                            <type>html</type>
+                                        </artifact>
+                                        <artifact>
+                                            <file>${project.build.directory}/ccredit-core-web-1.0/static/swagger.json
+                                            </file>
+                                            <type>json</type>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.github.kongchen</groupId>
+                        <artifactId>swagger-maven-plugin</artifactId>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.gracelogic.platform</groupId>
+                                <artifactId>swagger-static</artifactId>
+                                <version>1.0</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <apiSources>
+                                <apiSource>
+                                    <springmvc>true</springmvc>
+                                    <basePath>/${war.final.name}</basePath>
+                                    <locations>
+                                        <location>com.gracelogic</location>
+                                    </locations>
+                                    <info>
+                                        <title>CCREDIT-CORE</title>
+                                        <version>v1</version>
+                                        <description>
+                                            This is a description of API.
+                                        </description>
+                                        <termsOfService>
+                                            http://www.gracelogic.com
+                                        </termsOfService>
+                                        <contact>
+                                            <email>ingvarparko@gmail.com</email>
+                                            <name>Igor Parkhomenko</name>
+                                            <url>http://gracelogic.com</url>
+                                        </contact>
+                                        <license>
+                                            <url>http://gracelogic.com</url>
+                                            <name>Commercial</name>
+                                        </license>
+                                    </info>
+                                    <templatePath>classpath:/strapdown.html.hbs</templatePath>
+                                    <outputPath>${project.build.directory}/ccredit-core-web-1.0/static/document.html
+                                    </outputPath>
+                                    <swaggerDirectory>${project.build.directory}/ccredit-core-web-1.0/static
+                                    </swaggerDirectory>
+                                    <securityDefinitions>
+                                        <securityDefinition>
+                                            <name>MybasicAuth</name>
+                                            <type>basic</type>
+                                        </securityDefinition>
+                                        <!--<securityDefinition>-->
+                                        <!--<json>/static/securityDefinition.json</json>-->
+                                        <!--</securityDefinition>-->
+                                    </securityDefinitions>
+                                </apiSource>
+                            </apiSources>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.1</version>
+                        <executions>
+                            <execution>
+                                <id>add-swagger-ui</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>unpack-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <includeArtifactIds>swagger-ui</includeArtifactIds>
+                                    <excludes>/META-INF/**</excludes>
+                                    <outputDirectory>${project.build.directory}/ccredit-core-web-1.0/static
+                                    </outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
     <repositories>
         <repository>
@@ -490,4 +622,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
