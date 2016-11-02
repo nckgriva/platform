@@ -16,6 +16,8 @@ public interface IdObjectService {
 
     <T extends IdObject> T lockObject(Class<T> clazz, Object id);
 
+    void refresh(Object object);
+
     <T extends IdObject> T getObjectById(Class<T> clazz, Object id);
 
     <T extends IdObject> T getObjectById(Class<T> clazz, String fetches, Object id);

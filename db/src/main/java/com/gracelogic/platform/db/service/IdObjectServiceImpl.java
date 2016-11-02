@@ -24,6 +24,11 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
+    public void refresh(Object object) {
+        idObjectDao.getEntityManager().refresh(object);
+    }
+
+    @Override
     public <T extends IdObject> T getObjectById(Class<T> clazz, Object id) {
         if (id == null) {
             return null;
