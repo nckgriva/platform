@@ -1,5 +1,6 @@
 package com.gracelogic.platform.payment.service;
 
+import com.gracelogic.platform.account.exception.IncorrectPaymentStateException;
 import com.gracelogic.platform.account.model.Account;
 import com.gracelogic.platform.payment.dto.CalcPaymentFeeResult;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
@@ -23,4 +24,8 @@ public interface PaymentService {
     CalcPaymentFeeResult calcPaymentFee(PaymentSystem paymentSystem, Double registeredAmount);
 
     Payment processPayment(UUID paymentSystemId, ProcessPaymentRequest paymentModel, AuthorizedUser executedBy) throws PaymentAlreadyExistException, AccountNotFoundException, InvalidPaymentSystemException;
+
+    void cancelPayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException;
+
+    void restorePayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException;
 }

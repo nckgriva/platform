@@ -15,4 +15,8 @@ public interface AccountResolver {
     Account getTargetAccount(User user, String accountNumber, PaymentSystem paymentSystem, String currency) throws AccountNotFoundException;
 
     void notifyPaymentReceived(Payment payment); //Событие поступления средств на счёт
+
+    void notifyPaymentCancelled(Payment payment); //Событие отмены платежа
+
+    void notifyPaymentRestored(Payment payment); //Событие восстановления отмененного ранее платежа
 }

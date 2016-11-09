@@ -1,5 +1,6 @@
 package com.gracelogic.platform.payment.service;
 
+import com.gracelogic.platform.account.exception.IncorrectPaymentStateException;
 import com.gracelogic.platform.account.exception.InsufficientFundsException;
 import com.gracelogic.platform.account.model.Account;
 import com.gracelogic.platform.account.service.AccountService;
@@ -123,6 +124,41 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         return payment;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void cancelPayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException {
+        Payment payment = idObjectService.getObjectById(Payment.class, paymentId);
+        if (!payment.getPaymentState().getId().equals(DataConstants.PaymentStates.ACTIVATED.getValue())) {
+            throw new IncorrectPaymentStateException("Payment must have state 'ACTIVATED'");
+        }
+
+        accountResolver.notifyPaymentCancelled(payment);
+        payment.setPaymentState(ds.get(PaymentState.class, DataConstants.PaymentStates.CANCELLED.getValue()));
+        idObjectService.save(payment);
+
+        try {
+            accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.CANCEL_PAYMENT.getValue(), -1 * payment.getAmount(), payment.getId(), true);
+        }
+        catch (InsufficientFundsException ignored) {}
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void restorePayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException {
+        Payment payment = idObjectService.getObjectById(Payment.class, paymentId);
+        if (!payment.getPaymentState().getId().equals(DataConstants.PaymentStates.CANCELLED.getValue())) {
+            throw new IncorrectPaymentStateException("Payment must have state 'CANCELLED'");
+        }
+        accountResolver.notifyPaymentRestored(payment);
+        payment.setPaymentState(ds.get(PaymentState.class, DataConstants.PaymentStates.ACTIVATED.getValue()));
+        idObjectService.save(payment);
+
+        try {
+            accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.RESTORE_PAYMENT.getValue(), payment.getAmount(), payment.getId(), true);
+        }
+        catch (InsufficientFundsException ignored) {}
     }
 
     @Override
