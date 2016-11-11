@@ -152,7 +152,7 @@ public class UserController extends AbstractAuthorizedController {
   @ResponseBody
   public ResponseEntity logged() {
     if (getUser() != null) {
-      return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+      return new ResponseEntity<AuthorizedUser>(getUser(), HttpStatus.OK);
     } else {
       return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
     }
