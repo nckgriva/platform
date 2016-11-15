@@ -15,6 +15,7 @@ import java.util.Set;
 public class RoleDTO extends IdObjectModel {
     private String code;
     private String name;
+    private String description;
     private Set<GrantDTO> grants = new HashSet<GrantDTO>();
 
     public String getCode() {
@@ -41,11 +42,20 @@ public class RoleDTO extends IdObjectModel {
         this.grants = grants;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public static RoleDTO prepare(Role role) {
         RoleDTO model = new RoleDTO();
         IdObjectModel.prepare(model, role);
         model.setCode(role.getCode());
         model.setName(role.getName());
+        model.setDescription(role.getDescription());
 
         return model;
     }

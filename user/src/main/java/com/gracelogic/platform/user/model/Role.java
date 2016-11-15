@@ -36,6 +36,9 @@ public class Role extends IdObject<UUID> implements Dictionary {
     @Column(name = NAME, nullable = false)
     private String name;
 
+    @Column(name = "DESCRIPTION", nullable = true, length = 4000)
+    private String description;
+
     @Column(name = CODE, nullable = false)
     private String code;
 
@@ -50,7 +53,6 @@ public class Role extends IdObject<UUID> implements Dictionary {
     public void setId(UUID id) {
         this.id = id;
     }
-
 
     @Override
     public Date getCreated() {
@@ -94,5 +96,13 @@ public class Role extends IdObject<UUID> implements Dictionary {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
