@@ -19,13 +19,11 @@ import java.util.Date;
  */
 @Component
 public class JsonDateDeserializer extends JsonDeserializer<Date> {
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-
     @Override
     public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
         String date = jsonParser.getText();
         try {
-            return dateFormat.parse(date);
+            return DateFormatConstants.DEFAULT_DATE_FORMAT.get().parse(date);
         } catch (ParseException e) {
             return null;
         }

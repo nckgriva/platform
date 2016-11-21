@@ -4,7 +4,7 @@ import com.gracelogic.platform.oauth.OauthConstants;
 import com.gracelogic.platform.oauth.Path;
 import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
 import com.gracelogic.platform.property.service.PropertyService;
-import com.gracelogic.platform.user.controller.AbstractAuthorizedController;
+import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.model.UserSession;

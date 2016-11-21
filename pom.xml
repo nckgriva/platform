@@ -27,5 +27,7 @@
         <module>tcp-server</module>
         <module>task</module>
         <module>onec</module>
+        <module>content</module>
+        <module>file-storage</module>
     </modules>
 </project>

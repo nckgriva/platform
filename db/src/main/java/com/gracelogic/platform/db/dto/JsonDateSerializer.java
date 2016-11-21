@@ -18,12 +18,10 @@ import java.util.Date;
  */
 @Component
 public class JsonDateSerializer extends JsonSerializer<Date> {
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-
     @Override
     public void serialize(Date date, JsonGenerator gen, SerializerProvider provider) throws IOException, JsonProcessingException {
         if (date != null) {
-            String formattedDate = dateFormat.format(date);
+            String formattedDate = DateFormatConstants.DEFAULT_DATE_FORMAT.get().format(date);
             gen.writeString(formattedDate);
         }
     }

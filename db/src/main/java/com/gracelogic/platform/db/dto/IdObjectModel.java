@@ -65,11 +65,11 @@ public class IdObjectModel implements Serializable {
         }
     }
 
-    public static IdObjectModel prepare(IdObjectModel model, IdObject<UUID> idObject) {
-        model.setId(idObject.getId());
-        model.setCreated(idObject.getCreated());
-        model.setChanged(idObject.getChanged());
+    public static IdObjectModel prepare(IdObjectModel dto, IdObject<UUID> idObject) {
+        dto.setId(idObject.getId());
+        dto.setCreated(idObject.getCreated());
+        dto.setChanged(idObject.getChanged());
 
-        return model;
+        return dto;
     }
 }

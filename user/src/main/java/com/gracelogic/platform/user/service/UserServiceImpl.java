@@ -705,22 +705,22 @@ public class UserServiceImpl implements UserService {
             if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
                 sortField = "id";
             }
-            if (StringUtils.equalsIgnoreCase(sortField, "el.created")) {
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.created")) {
                 sortField = "created_dt";
             }
-            if (StringUtils.equalsIgnoreCase(sortField, "el.changed")) {
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.changed")) {
                 sortField = "changed_dt";
             }
-            if (StringUtils.equalsIgnoreCase(sortField, "el.phone")) {
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.phone")) {
                 sortField = "phone";
             }
-            if (StringUtils.equalsIgnoreCase(sortField, "el.phoneVerified")) {
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.phoneVerified")) {
                 sortField = "is_phone_verified";
             }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.email")) {
                 sortField = "email";
             }
-            if (StringUtils.equalsIgnoreCase(sortField, "el.emailVerified")) {
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.emailVerified")) {
                 sortField = "is_email_verified";
             }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.approved")) {

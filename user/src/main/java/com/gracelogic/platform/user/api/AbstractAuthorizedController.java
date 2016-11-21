@@ -1,4 +1,4 @@
-package com.gracelogic.platform.user.controller;
+package com.gracelogic.platform.user.api;
 
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import org.apache.log4j.Logger;
