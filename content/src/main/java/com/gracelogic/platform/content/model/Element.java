@@ -18,6 +18,7 @@ import java.util.UUID;
 @Table(name = JPAProperties.TABLE_PREFIX + "ELEMENT", schema = JPAProperties.DEFAULT_SCHEMA)
 public class Element extends IdObject<UUID> {
     @Id
+    @Access(AccessType.PROPERTY)
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -43,6 +44,9 @@ public class Element extends IdObject<UUID> {
 
     @Column(name = "END_DT", nullable = true)
     private Date endDt;
+
+    @Column(name = "ELEMENT_DT", nullable = true)
+    private Date elementDt;
 
     @Column(name = "NAME", nullable = false)
     private String name;
@@ -138,5 +142,13 @@ public class Element extends IdObject<UUID> {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Date getElementDt() {
+        return elementDt;
+    }
+
+    public void setElementDt(Date elementDt) {
+        this.elementDt = elementDt;
     }
 }

@@ -14,7 +14,7 @@ import java.util.*;
  * Time: 17:10
  */
 public interface ContentDao {
-    Integer getElementsCount(UUID sectionId, Boolean active, Date validOnDate, Map<String, String> fields);
+    Integer getElementsCount(Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields);
 
-    List<Element> getElements(UUID sectionId, Boolean active, Date validOnDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage);
+    List<Element> getElements(Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage);
 }

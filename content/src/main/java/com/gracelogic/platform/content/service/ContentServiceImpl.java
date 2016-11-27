@@ -142,7 +142,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public EntityListResponse<ElementDTO> getElementsPaged(UUID sectionId, Boolean active, Date validOnDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<ElementDTO> getElementsPaged(Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         if (!StringUtils.isEmpty(sortField)) {
             //Т.к. в данном методе запрос используется нативный и требуется сохранить единообразие - транслируем название jpa полей в нативные sql
             if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
@@ -165,7 +165,7 @@ public class ContentServiceImpl implements ContentService {
             }
         }
 
-        int totalCount = contentDao.getElementsCount(sectionId, active, validOnDate, fields);
+        int totalCount = contentDao.getElementsCount(sectionIds, active, validOnDate, fields);
         int totalPages = ((totalCount / count)) + 1;
         int startRecord = page != null ? (page * count) - count : start;
 
@@ -175,7 +175,7 @@ public class ContentServiceImpl implements ContentService {
         entityListResponse.setPages(totalPages);
         entityListResponse.setTotalCount(totalCount);
 
-        List<Element> items = contentDao.getElements(sectionId, active, validOnDate, fields, sortField, sortDir, startRecord, count);
+        List<Element> items = contentDao.getElements(sectionIds, active, validOnDate, fields, sortField, sortDir, startRecord, count);
         entityListResponse.setPartCount(items.size());
         for (Element e : items) {
             ElementDTO el = ElementDTO.prepare(e);

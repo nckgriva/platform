@@ -2,6 +2,7 @@ package com.gracelogic.platform.content.dao;
 
 import com.gracelogic.platform.content.model.Element;
 import com.gracelogic.platform.db.JPAProperties;
+import com.gracelogic.platform.db.service.IdObjectServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
@@ -20,7 +21,7 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
     private static Logger logger = Logger.getLogger(ContentDaoImpl.class);
 
     @Override
-    public Integer getElementsCount(UUID sectionId, Boolean active, Date validOnDate, Map<String, String> fields) {
+    public Integer getElementsCount(Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields) {
         BigInteger count = null;
         StringBuilder queryStr = new StringBuilder(String.format("select count(ID) from %s.cmn_element where 1=1 ", JPAProperties.DEFAULT_SCHEMA));
 
@@ -29,9 +30,8 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
             queryStr.append("and is_active = :active ");
             params.put("active", active);
         }
-        if (sectionId != null) {
-            queryStr.append("and section_id = :sectionId ");
-            params.put("sectionId", sectionId);
+        if (sectionIds != null && !sectionIds.isEmpty()) {
+            queryStr.append(String.format("and section_id in (%s) ", IdObjectServiceImpl.valuesAsString(sectionIds)));
         }
         if (validOnDate != null) {
             queryStr.append("and start_dt <= :validOnDate and end_dt >= :validOnDate ");
@@ -60,7 +60,7 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
     }
 
     @Override
-    public List<Element> getElements(UUID sectionId, Boolean active, Date validOnDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
+    public List<Element> getElements(Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
         List<Element> elements = Collections.emptyList();
         StringBuilder queryStr = new StringBuilder(String.format("select * from %s.cmn_element where 1=1 ", JPAProperties.DEFAULT_SCHEMA));
 
@@ -69,9 +69,8 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
             queryStr.append("and is_active = :active ");
             params.put("active", active);
         }
-        if (sectionId != null) {
-            queryStr.append("and section_id = :sectionId ");
-            params.put("sectionId", sectionId);
+        if (sectionIds != null && !sectionIds.isEmpty()) {
+            queryStr.append(String.format("and section_id in (%s) ", IdObjectServiceImpl.valuesAsString(sectionIds)));
         }
         if (validOnDate != null) {
             queryStr.append("and start_dt <= :validOnDate and end_dt >= :validOnDate ");

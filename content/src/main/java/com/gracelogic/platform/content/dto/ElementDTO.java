@@ -1,7 +1,11 @@
 package com.gracelogic.platform.content.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.gracelogic.platform.content.model.Element;
 import com.gracelogic.platform.db.dto.IdObjectModel;
+import com.gracelogic.platform.db.dto.JsonDateDeserializer;
+import com.gracelogic.platform.db.dto.JsonDateSerializer;
 import com.gracelogic.platform.user.service.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,6 +21,7 @@ public class ElementDTO extends IdObjectModel {
     private Boolean active;
     private Date startDt;
     private Date endDt;
+    private Date elementDt;
     private Map<String, String> fields = new HashMap<>();
 
     public String getName() {
@@ -51,6 +56,8 @@ public class ElementDTO extends IdObjectModel {
         this.active = active;
     }
 
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getStartDt() {
         return startDt;
     }
@@ -59,6 +66,8 @@ public class ElementDTO extends IdObjectModel {
         this.startDt = startDt;
     }
 
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getEndDt() {
         return endDt;
     }
@@ -75,6 +84,16 @@ public class ElementDTO extends IdObjectModel {
         this.fields = fields;
     }
 
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    public Date getElementDt() {
+        return elementDt;
+    }
+
+    public void setElementDt(Date elementDt) {
+        this.elementDt = elementDt;
+    }
+
     public static ElementDTO prepare(Element element) {
         ElementDTO dto = new ElementDTO();
         IdObjectModel.prepare(dto, element);
@@ -84,6 +103,7 @@ public class ElementDTO extends IdObjectModel {
         dto.setActive(element.getActive());
         dto.setStartDt(element.getStartDt());
         dto.setEndDt(element.getEndDt());
+        dto.setElementDt(element.getElementDt());
 
         if (element.getSection() != null) {
             dto.setSectionId(element.getSection().getId());

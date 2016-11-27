@@ -18,6 +18,7 @@ import java.util.UUID;
         {@UniqueConstraint(columnNames = {"SECTION_PATTERN_ID", "CODE"})})
 public class SectionPatternField extends IdObject<UUID> {
     @Id
+    @Access(AccessType.PROPERTY)
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")

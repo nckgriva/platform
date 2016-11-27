@@ -17,6 +17,7 @@ import java.util.UUID;
 @Table(name = JPAProperties.TABLE_PREFIX + "SECTION_PATTERN", schema = JPAProperties.DEFAULT_SCHEMA)
 public class SectionPattern extends IdObject<UUID> {
     @Id
+    @Access(AccessType.PROPERTY)
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")

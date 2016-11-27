@@ -15,9 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Author: Igor Parkhomenko
@@ -46,7 +44,7 @@ public class ContentApi extends AbstractAuthorizedController {
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(value = "/elements", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getElements(@ApiParam(name = "sectionId", value = "sectionId") @RequestParam(value = "sectionId", required = true) UUID sectionId,
+    public ResponseEntity getElements(@ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
                                       @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false, defaultValue = "true") Boolean active,
                                       @ApiParam(name = "validOnDate", value = "validOnDate") @RequestParam(value = "validOnDate", required = false) String sValidOnDate,
                                       @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
@@ -64,7 +62,14 @@ public class ContentApi extends AbstractAuthorizedController {
         } catch (Exception ignored) {
         }
 
-        EntityListResponse<ElementDTO> elements = contentService.getElementsPaged(sectionId, active, validOnDate, null, length, page, start, sortField, sortDir);
+        List<UUID> sectionIds = new LinkedList<>();
+        if (!StringUtils.isEmpty(sSectionIds)) {
+            for (String s : sSectionIds.split(",")) {
+                sectionIds.add(UUID.fromString(s));
+            }
+        }
+
+        EntityListResponse<ElementDTO> elements = contentService.getElementsPaged(sectionIds, active, validOnDate, null, length, page, start, sortField, sortDir);
 
         return new ResponseEntity<EntityListResponse<ElementDTO>>(elements, HttpStatus.OK);
     }
