@@ -1,6 +1,6 @@
 package com.gracelogic.platform.oauth.service;
 
-import com.gracelogic.platform.oauth.OauthConstants;
+import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.AuthDTO;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
@@ -39,7 +39,7 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
 
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
-            sRedirectUri = getRedirectUrl(OauthConstants.AuthProviderConstants.OK.name());
+            sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.OK.name());
 
             try {
                 sRedirectUri = URLEncoder.encode(sRedirectUri, "UTF-8");
@@ -67,7 +67,7 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
         authDTO.setNickname(null);
         authDTO.setEmail(null);
 
-        return processAuth(OauthConstants.AuthProviderConstants.OK.getValue(), code, authDTO);
+        return processAuth(DataConstants.OAuthProviders.OK.getValue(), code, authDTO);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
 
     @Override
     public String buildRedirectUri(String additionalParameters) {
-        String sRedirectUri = getRedirectUrl(OauthConstants.AuthProviderConstants.OK.name());
+        String sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.OK.name());
         if (!StringUtils.isEmpty(additionalParameters)) {
             sRedirectUri = sRedirectUri + additionalParameters;
         }

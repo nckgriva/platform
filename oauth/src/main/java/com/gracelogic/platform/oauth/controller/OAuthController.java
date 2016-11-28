@@ -1,6 +1,6 @@
 package com.gracelogic.platform.oauth.controller;
 
-import com.gracelogic.platform.oauth.OauthConstants;
+import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.Path;
 import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
 import com.gracelogic.platform.property.service.PropertyService;
@@ -73,7 +73,7 @@ public class OAuthController extends AbstractAuthorizedController {
 
         User user = null;
 
-        if (authProvider.equalsIgnoreCase(OauthConstants.AuthProviderConstants.VK.name())) {
+        if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.VK.name())) {
             try {
                 String additionalParameters = null;
                 if (fwd != null) {
@@ -87,7 +87,7 @@ public class OAuthController extends AbstractAuthorizedController {
                 logger.error("Failed to process user via vk", e);
             }
         }
-        else if (authProvider.equalsIgnoreCase(OauthConstants.AuthProviderConstants.OK.name())) {
+        else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.OK.name())) {
             try {
                 String additionalParameters = null;
                 if (fwd != null) {
@@ -101,7 +101,7 @@ public class OAuthController extends AbstractAuthorizedController {
                 logger.error("Failed to process user via ok", e);
             }
         }
-        else if (authProvider.equalsIgnoreCase(OauthConstants.AuthProviderConstants.INSTAGRAM.name())) {
+        else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.INSTAGRAM.name())) {
             try {
                 String additionalParameters = null;
                 if (fwd != null) {

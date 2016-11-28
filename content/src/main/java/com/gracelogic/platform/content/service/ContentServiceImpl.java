@@ -154,6 +154,21 @@ public class ContentServiceImpl implements ContentService {
             else if (StringUtils.equalsIgnoreCase(sortField, "el.changed")) {
                 sortField = "changed_dt";
             }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.elementDt")) {
+                sortField = "element_dt";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.startDt")) {
+                sortField = "start_dt";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.endDt")) {
+                sortField = "end_dt";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.name")) {
+                sortField = "name";
+            }
+            else if (StringUtils.equalsIgnoreCase(sortField, "el.sortOrder")) {
+                sortField = "sort_order";
+            }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.section.id")) {
                 sortField = "section_id";
             }

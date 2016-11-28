@@ -1,6 +1,6 @@
 package com.gracelogic.platform.oauth.service;
 
-import com.gracelogic.platform.oauth.OauthConstants;
+import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.AuthDTO;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
@@ -35,7 +35,7 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
 
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
-            sRedirectUri = getRedirectUrl(OauthConstants.AuthProviderConstants.INSTAGRAM.name());
+            sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.INSTAGRAM.name());
 
             try {
                 sRedirectUri = URLEncoder.encode(sRedirectUri, "UTF-8");
@@ -76,7 +76,7 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
         authDTO.setNickname(null);
         authDTO.setEmail(null);
 
-        return processAuth(OauthConstants.AuthProviderConstants.INSTAGRAM.getValue(), code, authDTO);
+        return processAuth(DataConstants.OAuthProviders.INSTAGRAM.getValue(), code, authDTO);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
 
     @Override
     public String buildRedirectUri(String additionalParameters) {
-        String sRedirectUri = getRedirectUrl(OauthConstants.AuthProviderConstants.INSTAGRAM.name());
+        String sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.INSTAGRAM.name());
         if (!StringUtils.isEmpty(additionalParameters)) {
             sRedirectUri = sRedirectUri + additionalParameters;
         }

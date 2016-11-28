@@ -1,6 +1,6 @@
 package com.gracelogic.platform.oauth.service;
 
-import com.gracelogic.platform.oauth.OauthConstants;
+import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.AuthDTO;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
@@ -37,7 +37,7 @@ public class VkOAuthServiceProviderImpl extends AbstractOauthProvider implements
 
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
-            sRedirectUri = getRedirectUrl(OauthConstants.AuthProviderConstants.VK.name());
+            sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.VK.name());
 
             try {
                 sRedirectUri = URLEncoder.encode(sRedirectUri, "UTF-8");
@@ -67,7 +67,7 @@ public class VkOAuthServiceProviderImpl extends AbstractOauthProvider implements
         authDTO.setNickname(response.get("nickname") != null ? (String) response.get("nickname") : null);
 
 
-        return processAuth(OauthConstants.AuthProviderConstants.VK.getValue(), code, authDTO);
+        return processAuth(DataConstants.OAuthProviders.VK.getValue(), code, authDTO);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class VkOAuthServiceProviderImpl extends AbstractOauthProvider implements
 
     @Override
     public String buildRedirectUri(String additionalParameters) {
-        String sRedirectUri = getRedirectUrl(OauthConstants.AuthProviderConstants.VK.name());
+        String sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.VK.name());
         if (!StringUtils.isEmpty(additionalParameters)) {
             sRedirectUri = sRedirectUri + additionalParameters;
         }

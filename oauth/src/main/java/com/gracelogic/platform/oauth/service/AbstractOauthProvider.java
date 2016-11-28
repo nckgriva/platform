@@ -15,7 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Author: Igor Parkhomenko
@@ -35,8 +38,11 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
     private PropertyService propertyService;
 
 
-    protected User processAuth(Integer authProviderId, String code, AuthDTO authDTO) {
-        List<AuthProviderLinkage> linkages = idObjectService.getList(AuthProviderLinkage.class, String.format("el.externalUserId='%s' and el.authProvider.id=%d", authDTO.getUserId(), authProviderId), null, null, null, 1);
+    protected User processAuth(UUID authProviderId, String code, AuthDTO authDTO) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("externalUserId", authDTO.getUserId());
+        params.put("authProviderId", authProviderId);
+        List<AuthProviderLinkage> linkages = idObjectService.getList(AuthProviderLinkage.class, null, "el.externalUserId=:externalUserId and el.authProvider.id=:authProviderId", params, null, null, null, 1);
         if (!linkages.isEmpty() && linkages.size() == 1) {
             AuthProviderLinkage authProviderLinkage = linkages.iterator().next();
             //Existing user
