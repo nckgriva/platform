@@ -1,9 +1,9 @@
 package com.gracelogic.platform.content.api;
 
+import com.gracelogic.platform.content.Path;
 import com.gracelogic.platform.content.dto.ElementDTO;
 import com.gracelogic.platform.content.dto.SectionDTO;
 import com.gracelogic.platform.content.service.ContentService;
-import com.gracelogic.platform.content.Path;
 import com.gracelogic.platform.db.dto.DateFormatConstants;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
@@ -13,9 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Author: Igor Parkhomenko

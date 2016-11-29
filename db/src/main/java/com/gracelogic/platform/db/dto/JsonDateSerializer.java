@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**

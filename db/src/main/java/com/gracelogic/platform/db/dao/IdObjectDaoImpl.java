@@ -3,9 +3,6 @@ package com.gracelogic.platform.db.dao;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
-
 
 /**
  * Author: Igor Parkhomenko

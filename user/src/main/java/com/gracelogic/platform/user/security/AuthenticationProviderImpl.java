@@ -32,7 +32,7 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
     @Override
     public org.springframework.security.core.Authentication authenticate(org.springframework.security.core.Authentication authentication) throws AuthenticationException {
         if (authentication instanceof AuthenticationToken) {
-            User user = userService.login((String) authentication.getPrincipal(), ((AuthenticationToken) authentication).getLoginType(), (String) authentication.getCredentials(), ((AuthenticationToken) authentication).getRemoteAddress(), ((AuthenticationToken) authentication).isTrust());
+            User user = userService.login(authentication.getPrincipal(), ((AuthenticationToken) authentication).getLoginType(), (String) authentication.getCredentials(), ((AuthenticationToken) authentication).getRemoteAddress(), ((AuthenticationToken) authentication).isTrust());
             if (user != null) {
                 AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
 

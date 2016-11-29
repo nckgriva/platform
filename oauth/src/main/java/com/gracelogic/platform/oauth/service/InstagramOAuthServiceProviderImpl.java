@@ -1,7 +1,7 @@
 package com.gracelogic.platform.oauth.service;
 
 import com.gracelogic.platform.oauth.DataConstants;
-import com.gracelogic.platform.oauth.dto.AuthDTO;
+import com.gracelogic.platform.oauth.dto.OAuthDTO;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
@@ -49,12 +49,12 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
             return null;
         }
 
-        AuthDTO authDTO = new AuthDTO();
-        authDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
+        OAuthDTO OAuthDTO = new OAuthDTO();
+        OAuthDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
 
         response = (HashMap<Object, Object>) response.get("user");
 
-        authDTO.setUserId(response.get("id") != null ? (String) response.get("id") : null);
+        OAuthDTO.setUserId(response.get("id") != null ? (String) response.get("id") : null);
         String fullName = response.get("full_name") != null ? (String) response.get("full_name") : null;
         String name = null;
         String surname = null;
@@ -71,12 +71,10 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
             }
         }
 
-        authDTO.setFirstName(name);
-        authDTO.setLastName(surname);
-        authDTO.setNickname(null);
-        authDTO.setEmail(null);
+        OAuthDTO.setFirstName(name);
+        OAuthDTO.setLastName(surname);
 
-        return processAuth(DataConstants.OAuthProviders.INSTAGRAM.getValue(), code, authDTO);
+        return processAuth(DataConstants.OAuthProviders.INSTAGRAM.getValue(), code, OAuthDTO);
     }
 
     @Override

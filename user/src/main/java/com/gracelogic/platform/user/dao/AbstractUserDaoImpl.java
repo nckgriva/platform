@@ -21,7 +21,7 @@ public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
 
 
     @Override
-    public User getUserByField(String fieldName, String fieldValue) {
+    public User getUserByField(String fieldName, Object fieldValue) {
         User user = null;
         String query = String.format("select user from User user left join fetch user.userRoles where user.%s = :fieldValue", fieldName);
         try {

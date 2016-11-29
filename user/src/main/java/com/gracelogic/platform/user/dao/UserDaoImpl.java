@@ -8,7 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.Query;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Author: Igor Parkhomenko

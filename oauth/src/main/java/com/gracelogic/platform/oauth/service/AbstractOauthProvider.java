@@ -2,11 +2,10 @@ package com.gracelogic.platform.oauth.service;
 
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.oauth.Path;
-import com.gracelogic.platform.oauth.dto.AuthDTO;
+import com.gracelogic.platform.oauth.dto.OAuthDTO;
 import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.oauth.model.AuthProviderLinkage;
 import com.gracelogic.platform.property.service.PropertyService;
-import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.User;
@@ -38,9 +37,9 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
     private PropertyService propertyService;
 
 
-    protected User processAuth(UUID authProviderId, String code, AuthDTO authDTO) {
+    protected User processAuth(UUID authProviderId, String code, OAuthDTO OAuthDTO) {
         Map<String, Object> params = new HashMap<>();
-        params.put("externalUserId", authDTO.getUserId());
+        params.put("externalUserId", OAuthDTO.getUserId());
         params.put("authProviderId", authProviderId);
         List<AuthProviderLinkage> linkages = idObjectService.getList(AuthProviderLinkage.class, null, "el.externalUserId=:externalUserId and el.authProvider.id=:authProviderId", params, null, null, null, 1);
         if (!linkages.isEmpty() && linkages.size() == 1) {
@@ -53,12 +52,11 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
 
             //Register new user
             UserRegistrationDTO userRegistrationDTO = new UserRegistrationDTO();
-            userRegistrationDTO.setEmail(authDTO.getEmail());
-            userRegistrationDTO.setPhone(!StringUtils.isEmpty(authDTO.getPhone()) ? authDTO.getPhone() : null);
+            userRegistrationDTO.setEmail(!StringUtils.isEmpty(OAuthDTO.getEmail()) ? OAuthDTO.getEmail() : null);
+            userRegistrationDTO.setPhone(!StringUtils.isEmpty(OAuthDTO.getPhone()) ? OAuthDTO.getPhone() : null);
 
-            userRegistrationDTO.getFields().put("name", !StringUtils.isEmpty(authDTO.getFirstName()) ? authDTO.getFirstName() : null);
-            userRegistrationDTO.getFields().put("surname", !StringUtils.isEmpty(authDTO.getLastName()) ? authDTO.getLastName() : null);
-            userRegistrationDTO.getFields().put("patronymic", null);
+            userRegistrationDTO.getFields().put("name", !StringUtils.isEmpty(OAuthDTO.getFirstName()) ? OAuthDTO.getFirstName() : null);
+            userRegistrationDTO.getFields().put("surname", !StringUtils.isEmpty(OAuthDTO.getLastName()) ? OAuthDTO.getLastName() : null);
 
             logger.info("Oauth registration: " + userRegistrationDTO.toString());
 
@@ -73,7 +71,7 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
                 AuthProviderLinkage authProviderLinkage = new AuthProviderLinkage();
                 authProviderLinkage.setAuthProvider(idObjectService.getObjectById(AuthProvider.class, authProviderId));
                 authProviderLinkage.setUser(user);
-                authProviderLinkage.setExternalUserId(authDTO.getUserId());
+                authProviderLinkage.setExternalUserId(OAuthDTO.getUserId());
                 authProviderLinkage.setCode(code);
                 idObjectService.save(authProviderLinkage);
             }
@@ -83,6 +81,6 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
     }
 
     public String getRedirectUrl(String providerName) {
-        return String.format("%s/%s/%s", propertyService.getPropertyValue("web:base_url"), Path.OAUTH, providerName);
+        return String.format("%s%s/%s", propertyService.getPropertyValue("web:base_url"), Path.OAUTH, providerName);
     }
 }

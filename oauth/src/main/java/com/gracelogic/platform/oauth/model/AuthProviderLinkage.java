@@ -32,10 +32,10 @@ public class AuthProviderLinkage extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = "CODE", nullable = true)
+    @Column(name = "CODE", nullable = true, length = 4000)
     private String code;
 
-    @Column(name = "EXTERNAL_USER_ID", nullable = true)
+    @Column(name = "EXTERNAL_USER_ID", nullable = true, length = 4000)
     private String externalUserId;
 
     @ManyToOne

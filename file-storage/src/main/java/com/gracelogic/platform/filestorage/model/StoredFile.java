@@ -2,7 +2,6 @@ package com.gracelogic.platform.filestorage.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;

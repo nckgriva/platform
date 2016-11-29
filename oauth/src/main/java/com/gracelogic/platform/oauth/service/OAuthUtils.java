@@ -165,9 +165,12 @@ public class OAuthUtils {
         try {
             CloseableHttpResponse httpResult = httpClient.execute(method);
             logger.info("Request status: " + httpResult);
+
             HttpEntity entity = httpResult.getEntity();
             if (entity != null) {
-                response = EntityUtils.toString(entity);
+                if (httpResult.getStatusLine().getStatusCode() == 200) {
+                    response = EntityUtils.toString(entity);
+                }
                 EntityUtils.consume(entity);
                 logger.info("Response body: " + response);
             }
@@ -185,5 +188,36 @@ public class OAuthUtils {
 
         }
         return result;
+    }
+
+    public static String getQuery(String url) {
+        logger.info("Request to: " + url);
+
+        CloseableHttpClient httpClient = HttpClients.custom().build();
+
+        HttpGet method = new HttpGet(url);
+
+        method.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES);
+        method.getParams().setParameter("http.protocol.single-cookie-header", true);
+
+        String response = null;
+
+        try {
+            CloseableHttpResponse httpResult = httpClient.execute(method);
+            logger.info("Request status: " + httpResult);
+
+            HttpEntity entity = httpResult.getEntity();
+            if (entity != null) {
+                if (httpResult.getStatusLine().getStatusCode() == 200) {
+                    response = EntityUtils.toString(entity);
+                }
+                EntityUtils.consume(entity);
+                logger.info("Response body: " + response);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return response;
     }
 }

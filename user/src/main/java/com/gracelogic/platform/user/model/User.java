@@ -38,10 +38,10 @@ public class User extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = "PASSWORD", nullable = false)
+    @Column(name = "PASSWORD", nullable = true)
     private String password;
 
-    @Column(name = "SALT", nullable = false)
+    @Column(name = "SALT", nullable = true)
     private String salt;
 
     @Column(name = "EMAIL", nullable = true, unique = true)

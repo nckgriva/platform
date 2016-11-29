@@ -6,7 +6,8 @@ import com.gracelogic.platform.user.service.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Author: Igor Parkhomenko

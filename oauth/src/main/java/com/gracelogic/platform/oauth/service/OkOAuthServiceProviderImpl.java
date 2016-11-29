@@ -1,7 +1,7 @@
 package com.gracelogic.platform.oauth.service;
 
 import com.gracelogic.platform.oauth.DataConstants;
-import com.gracelogic.platform.oauth.dto.AuthDTO;
+import com.gracelogic.platform.oauth.dto.OAuthDTO;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -53,21 +53,19 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
             return null;
         }
 
-        AuthDTO authDTO = new AuthDTO();
-        authDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
+        OAuthDTO OAuthDTO = new OAuthDTO();
+        OAuthDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
 
         String s = String.format("application_key=%sformat=jsonmethod=users.getCurrentUser", PUBLIC_KEY);
-        String md51 = DigestUtils.md5Hex(String.format("%s%s", authDTO.getAccessToken(), CLIENT_SECRET));
+        String md51 = DigestUtils.md5Hex(String.format("%s%s", OAuthDTO.getAccessToken(), CLIENT_SECRET));
         String sign = DigestUtils.md5Hex(String.format("%s%s", s, md51));
 
-        response = OAuthUtils.postJsonQuery(String.format("%s?application_key=%s&method=users.getCurrentUser&format=json&access_token=%s&sig=%s", API_ENDPOINT, PUBLIC_KEY, authDTO.getAccessToken(), sign), null);
-        authDTO.setUserId(response.get("uid") != null ? (String) response.get("uid") : null);
-        authDTO.setFirstName(response.get("first_name") != null ? (String) response.get("first_name") : null);
-        authDTO.setLastName(response.get("last_name") != null ? (String) response.get("last_name") : null);
-        authDTO.setNickname(null);
-        authDTO.setEmail(null);
+        response = OAuthUtils.postJsonQuery(String.format("%s?application_key=%s&method=users.getCurrentUser&format=json&access_token=%s&sig=%s", API_ENDPOINT, PUBLIC_KEY, OAuthDTO.getAccessToken(), sign), null);
+        OAuthDTO.setUserId(response.get("uid") != null ? (String) response.get("uid") : null);
+        OAuthDTO.setFirstName(response.get("first_name") != null ? (String) response.get("first_name") : null);
+        OAuthDTO.setLastName(response.get("last_name") != null ? (String) response.get("last_name") : null);
 
-        return processAuth(DataConstants.OAuthProviders.OK.getValue(), code, authDTO);
+        return processAuth(DataConstants.OAuthProviders.OK.getValue(), code, OAuthDTO);
     }
 
     @Override

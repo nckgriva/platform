@@ -1,7 +1,7 @@
 package com.gracelogic.platform.oauth.service;
 
 import com.gracelogic.platform.oauth.DataConstants;
-import com.gracelogic.platform.oauth.dto.AuthDTO;
+import com.gracelogic.platform.oauth.dto.OAuthDTO;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
@@ -52,22 +52,20 @@ public class VkOAuthServiceProviderImpl extends AbstractOauthProvider implements
             return null;
         }
 
-        AuthDTO authDTO = new AuthDTO();
-        authDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
-        authDTO.setUserId(response.get("user_id") != null ? String.valueOf(response.get("user_id")) : null);
-        authDTO.setEmail(response.get("email") != null ? (String) response.get("email") : null);
+        OAuthDTO OAuthDTO = new OAuthDTO();
+        OAuthDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
+        OAuthDTO.setUserId(response.get("user_id") != null ? String.valueOf(response.get("user_id")) : null);
+        OAuthDTO.setEmail(response.get("email") != null ? (String) response.get("email") : null);
 
-        response = OAuthUtils.getJsonQuery(String.format("%s?user_ids=%s&v=5.27&fields=photo_100,city,verified,contacts&access_token=%s", API_ENDPOINT, authDTO.getUserId(), authDTO.getAccessToken()));
+        response = OAuthUtils.getJsonQuery(String.format("%s?user_ids=%s&v=5.27&fields=photo_100,city,verified,contacts&access_token=%s", API_ENDPOINT, OAuthDTO.getUserId(), OAuthDTO.getAccessToken()));
 
         response = (Map<Object, Object>) ((ArrayList) response.get("response")).iterator().next();
 
-        authDTO.setFirstName(response.get("first_name") != null ? (String) response.get("first_name") : null);
-        authDTO.setLastName(response.get("last_name") != null ? (String) response.get("last_name") : null);
-        authDTO.setPhone(response.get("mobile_phone") != null ? (String) response.get("mobile_phone") : null);
-        authDTO.setNickname(response.get("nickname") != null ? (String) response.get("nickname") : null);
+        OAuthDTO.setFirstName(response.get("first_name") != null ? (String) response.get("first_name") : null);
+        OAuthDTO.setLastName(response.get("last_name") != null ? (String) response.get("last_name") : null);
+        OAuthDTO.setPhone(response.get("mobile_phone") != null ? (String) response.get("mobile_phone") : null);
 
-
-        return processAuth(DataConstants.OAuthProviders.VK.getValue(), code, authDTO);
+        return processAuth(DataConstants.OAuthProviders.VK.getValue(), code, OAuthDTO);
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.gracelogic.platform.account.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import com.gracelogic.platform.user.model.User;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;

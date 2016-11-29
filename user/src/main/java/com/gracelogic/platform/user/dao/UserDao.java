@@ -13,7 +13,7 @@ import java.util.*;
  * Time: 17:10
  */
 public interface UserDao {
-    User getUserByField(String fieldName, String fieldValue);
+    User getUserByField(String fieldName, Object fieldValue);
 
     Long getIncorrectLoginAttemptCount(UUID userId, Date startDate, Date endDate);
 

@@ -1,7 +1,5 @@
 package com.gracelogic.platform.oauth.service;
 
-import com.gracelogic.platform.user.dto.AuthorizedUser;
-import com.gracelogic.platform.user.dto.UserDTO;
 import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.User;

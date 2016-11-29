@@ -5,16 +5,13 @@ package com.gracelogic.platform.oauth.dto;
  * Date: 21.10.2015
  * Time: 14:23
  */
-public class AuthDTO {
+public class OAuthDTO {
     private String accessToken;
     private String userId;
-    private String error;
-    private String info;
     private String email;
     private String phone;
     private String lastName;
     private String firstName;
-    private String nickname;
 
     public String getAccessToken() {
         return accessToken;
@@ -30,22 +27,6 @@ public class AuthDTO {
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public String getInfo() {
-        return info;
-    }
-
-    public void setInfo(String info) {
-        this.info = info;
     }
 
     public String getEmail() {
@@ -78,13 +59,5 @@ public class AuthDTO {
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
     }
 }

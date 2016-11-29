@@ -21,9 +21,9 @@ import java.util.UUID;
  * Time: 13:09
  */
 public interface UserService {
-    User getUserByField(String fieldName, String fieldValue);
+    User getUserByField(String fieldName, Object fieldValue);
 
-    User login(String login, String loginField, String password, String remoteAddress, boolean trust);
+    User login(Object login, String loginField, String password, String remoteAddress, boolean trust);
 
     void changeUserPassword(UUID userId, String newPassword);
 

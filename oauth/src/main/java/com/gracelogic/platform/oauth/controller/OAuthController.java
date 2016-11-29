@@ -47,6 +47,10 @@ public class OAuthController extends AbstractAuthorizedController {
     @Autowired
     private OAuthServiceProvider instagram;
 
+    @Qualifier("facebook")
+    @Autowired
+    private OAuthServiceProvider facebook;
+
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -67,7 +71,7 @@ public class OAuthController extends AbstractAuthorizedController {
                       @RequestParam(value = "fwd", required = false) String fwd) throws IOException {
 
         if (StringUtils.isEmpty(code)) {
-            response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("web:base_url"), "content/oauth-error-code"));
+            response.sendRedirect(propertyService.getPropertyValue("oauth:redirect_fail_url"));
             return;
         }
 
@@ -115,15 +119,30 @@ public class OAuthController extends AbstractAuthorizedController {
                 logger.error("Failed to process user via instagram", e);
             }
         }
+        else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.FACEBOOK.name())) {
+            try {
+                String additionalParameters = null;
+                if (fwd != null) {
+                    additionalParameters = "?fwd=" + fwd;
+                }
+                String requestUri = facebook.buildRedirectUri(additionalParameters);
+                logger.info("REQUEST_URI: " + requestUri);
+
+                user = facebook.accessToken(code, requestUri);
+            } catch (Exception e) {
+                logger.error("Failed to process user via facebook", e);
+            }
+        }
         else {
             try {
-                response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("web:base_url"), "content/oauth-error"));
+                response.sendRedirect(propertyService.getPropertyValue("oauth:redirect_fail_url"));
+                return;
             } catch (Exception ignored) {
             }
         }
 
         if (user == null) {
-            response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("web:base_url"), "content/oauth-error"));
+            response.sendRedirect(propertyService.getPropertyValue("oauth:redirect_fail_url"));
             return;
         }
 
@@ -159,13 +178,12 @@ public class OAuthController extends AbstractAuthorizedController {
         }
 
         if (exception != null) {
-            response.sendRedirect(String.format("%s/%s", propertyService.getPropertyValue("web:base_url"), "content/oauth-error"));
+            response.sendRedirect(propertyService.getPropertyValue("oauth:redirect_fail_url"));
             return;
-
         }
 
         if (StringUtils.isEmpty(fwd)) {
-            fwd = propertyService.getPropertyValue("web:base_url");
+            fwd = propertyService.getPropertyValue("oauth:redirect_success_url");
         }
 
         response.sendRedirect(fwd);

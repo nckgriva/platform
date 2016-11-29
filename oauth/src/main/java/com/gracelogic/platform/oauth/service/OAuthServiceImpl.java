@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Author: Igor Parkhomenko
  * Date: 18.07.2016
@@ -20,6 +23,8 @@ public class OAuthServiceImpl implements OAuthService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteAuthProviderLinkages(User user) {
-        idObjectService.delete(AuthProviderLinkage.class, String.format("el.user.id='%s'", user.getId()));
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", user.getId());
+        idObjectService.delete(AuthProviderLinkage.class, "el.user.id=:userId", params);
     }
 }

@@ -61,15 +61,15 @@ public class UserServiceImpl implements UserService {
     private TemplateService templateService;
 
     @Override
-    public User getUserByField(String fieldName, String fieldValue) {
+    public User getUserByField(String fieldName, Object fieldValue) {
         return userDao.getUserByField(fieldName, fieldValue);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User login(String login, String loginField, String password, String remoteAddress, boolean trust) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotActivatedException {
-        User user = userDao.getUserByField(loginField, login.toLowerCase().trim());
-
+    public User login(Object login, String loginField, String password, String remoteAddress, boolean trust) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotActivatedException {
+        User user = userDao.getUserByField(loginField, login);
+//        logger.info("USER: " + user != null ? user.getId().toString() : "NULL");
         if (user != null) {
             boolean loginTypeVerified = false;
             if (trust) {
@@ -80,11 +80,6 @@ public class UserServiceImpl implements UserService {
                 } else if (loginField.equalsIgnoreCase("phone")) {
                     loginTypeVerified = user.getPhoneVerified();
                 }
-            }
-            if (loginField.equalsIgnoreCase("email")) {
-                loginTypeVerified = user.getEmailVerified();
-            } else if (loginField.equalsIgnoreCase("phone")) {
-                loginTypeVerified = user.getPhoneVerified();
             }
 
             if (!user.getApproved()) {
@@ -105,8 +100,7 @@ public class UserServiceImpl implements UserService {
 
                 Long incorrectLoginAttemptCount = userDao.getIncorrectLoginAttemptCount(user.getId(), startDate, endDate);
                 if (incorrectLoginAttemptCount < propertyService.getPropertyValueAsInteger("user:attempts_to_block")) {
-                    String passwordAndSalt = password.concat(user.getSalt());
-                    if (user.getPassword().equals(DigestUtils.shaHex(passwordAndSalt))) {
+                    if (trust || user.getPassword() != null && user.getPassword().equals(DigestUtils.shaHex(password.concat(user.getSalt())))) {
                         user.setLastVisitDt(new Date());
                         user.setLastVisitIP(remoteAddress);
                         user = idObjectService.save(user);
@@ -474,15 +468,22 @@ public class UserServiceImpl implements UserService {
     public User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws IllegalParameterException {
         String userApproveMethod = propertyService.getPropertyValue("user:approve_method");
 
-        if (!trust && !checkPassword(userRegistrationDTO.getPassword())) {
-            throw new IllegalParameterException("register.INVALID_PASSWORD");
-        }
-
         if (!trust) {
+            if (!checkPassword(userRegistrationDTO.getPassword())) {
+                throw new IllegalParameterException("register.INVALID_PASSWORD");
+            }
+
             if (StringUtils.isEmpty(userRegistrationDTO.getEmail()) && StringUtils.isEmpty(userRegistrationDTO.getPhone())) {
                 throw new IllegalParameterException("register.PHONE_OR_EMAIL_IS_NECESSARY");
             }
         }
+
+
+        User user = new User();
+        user.setEmailVerified(false);
+        user.setPhoneVerified(false);
+        user.setApproved(false);
+        user.setBlocked(false);
 
         if (!StringUtils.isEmpty(userRegistrationDTO.getPhone())) {
             if (!checkPhone(userRegistrationDTO.getPhone(), false)) {
@@ -499,6 +500,11 @@ public class UserServiceImpl implements UserService {
                 else {
                     throw new IllegalParameterException("register.INVALID_PHONE");
                 }
+            }
+
+            user.setPhone(StringUtils.trim(userRegistrationDTO.getPhone()));
+            if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
+                user.setPhoneVerified(true);
             }
         }
 
@@ -517,36 +523,22 @@ public class UserServiceImpl implements UserService {
                     throw new IllegalParameterException("register.INVALID_EMAIL");
                 }
             }
-        }
 
-        User user = new User();
-        user.setEmailVerified(false);
-        user.setPhoneVerified(false);
-        user.setApproved(false);
-        user.setBlocked(false);
-
-        if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
-            user.setApproved(true);
-        }
-
-        user.setFields(JsonUtils.mapToJson(userRegistrationDTO.getFields()));
-
-        if (!StringUtils.isEmpty(userRegistrationDTO.getEmail())) {
             user.setEmail(StringUtils.trim(StringUtils.lowerCase(userRegistrationDTO.getEmail())));
             if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
                 user.setEmailVerified(true);
             }
         }
-        if (!StringUtils.isEmpty(userRegistrationDTO.getPhone())) {
-            user.setPhone(StringUtils.trim(userRegistrationDTO.getPhone()));
-            if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
-                user.setPhoneVerified(true);
-            }
+
+        user.setFields(JsonUtils.mapToJson(userRegistrationDTO.getFields()));
+
+        if (!trust) {
+            user.setSalt(UserServiceImpl.generatePasswordSalt());
+            user.setPassword(DigestUtils.shaHex(userRegistrationDTO.getPassword().concat(user.getSalt())));
         }
 
-        user.setSalt(UserServiceImpl.generatePasswordSalt());
-        if (!trust) {
-            user.setPassword(DigestUtils.shaHex(userRegistrationDTO.getPassword().concat(user.getSalt())));
+        if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
+            user.setApproved(true);
         }
 
         return idObjectService.save(user);

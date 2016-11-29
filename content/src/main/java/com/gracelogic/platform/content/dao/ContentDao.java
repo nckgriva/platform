@@ -2,9 +2,6 @@ package com.gracelogic.platform.content.dao;
 
 
 import com.gracelogic.platform.content.model.Element;
-import com.gracelogic.platform.user.model.AuthCode;
-import com.gracelogic.platform.user.model.IncorrectLoginAttempt;
-import com.gracelogic.platform.user.model.User;
 
 import java.util.*;
 
