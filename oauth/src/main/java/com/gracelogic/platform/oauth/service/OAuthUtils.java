@@ -30,7 +30,7 @@ import java.util.Map;
 public class OAuthUtils {
     private static Logger logger = Logger.getLogger(OAuthUtils.class);
 
-    public static Map<Object, Object> postJsonQuery(String url, HashMap<String, String> params) {
+    public static Map<Object, Object> postJsonBodyReturnJson(String url, HashMap<String, String> params) {
         logger.info("Request to: " + url);
 
         CloseableHttpClient httpClient = HttpClients.custom().build();
@@ -72,7 +72,9 @@ public class OAuthUtils {
             logger.info("Request status: " + httpResult);
             HttpEntity entity = httpResult.getEntity();
             if (entity != null) {
-                response = EntityUtils.toString(entity);
+                if (httpResult.getStatusLine().getStatusCode() == 200) {
+                    response = EntityUtils.toString(entity);
+                }
                 EntityUtils.consume(entity);
                 logger.info("Response body: " + response);
             }
@@ -92,7 +94,7 @@ public class OAuthUtils {
         return result;
     }
 
-    public static Map<Object, Object> postHttpQuery(String url, String body) {
+    public static Map<Object, Object> postTextBodyReturnJson(String url, String body) {
         logger.info("Request to: " + url);
 
         CloseableHttpClient httpClient = HttpClients.custom().build();
@@ -126,7 +128,9 @@ public class OAuthUtils {
             logger.info("Request status: " + httpResult);
             HttpEntity entity = httpResult.getEntity();
             if (entity != null) {
-                response = EntityUtils.toString(entity);
+                if (httpResult.getStatusLine().getStatusCode() == 200) {
+                    response = EntityUtils.toString(entity);
+                }
                 EntityUtils.consume(entity);
                 logger.info("Response body: " + response);
             }
@@ -146,7 +150,7 @@ public class OAuthUtils {
         return result;
     }
 
-    public static Map<Object, Object> getJsonQuery(String url) {
+    public static Map<Object, Object> getQueryReturnJson(String url) {
         logger.info("Request to: " + url);
 
         CloseableHttpClient httpClient = HttpClients.custom().build();
@@ -190,7 +194,7 @@ public class OAuthUtils {
         return result;
     }
 
-    public static String getQuery(String url) {
+    public static String getQueryReturnText(String url) {
         logger.info("Request to: " + url);
 
         CloseableHttpClient httpClient = HttpClients.custom().build();

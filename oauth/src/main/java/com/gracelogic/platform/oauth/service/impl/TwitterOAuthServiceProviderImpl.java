@@ -1,7 +1,10 @@
-package com.gracelogic.platform.oauth.service;
+package com.gracelogic.platform.oauth.service.impl;
 
 import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.OAuthDTO;
+import com.gracelogic.platform.oauth.service.AbstractOauthProvider;
+import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
+import com.gracelogic.platform.oauth.service.OAuthUtils;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -20,13 +23,13 @@ import java.util.StringTokenizer;
  * Date: 21.10.2015
  * Time: 13:15
  */
-@Service("facebook")
-public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
-    private static Logger logger = Logger.getLogger(FacebookOAuthServiceProviderImpl.class);
+@Service("twitter")
+public class TwitterOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
+    private static Logger logger = Logger.getLogger(TwitterOAuthServiceProviderImpl.class);
 
-    //private static final String CLIENT_ID = "1845606962375917";
-    //private static final String CLIENT_SECRET = "88bec87320505bbf7f0a5ef1112524dd";
-    private static final String ACCESS_TOKEN_ENDPOINT = "https://graph.facebook.com/oauth/access_token?client_id=%s&redirect_uri=%s&client_secret=%s&code=%s";
+    //private static final String CLIENT_ID = "mJjBt5aJi935Miaqz7kDKJYt2";
+    //private static final String CLIENT_SECRET = "2L7vV9hMdyRMMEKJbR9DT5FtlNeQT3vktQWDGsB2106gzmi94I";
+    private static final String ACCESS_TOKEN_ENDPOINT = "https://api.twitter.com/oauth/request_token";
     private static final String API_ENDPOINT = "https://graph.facebook.com/me?access_token=%s&fields=id,name,last_name,first_name,email";
 
     @Autowired
@@ -35,19 +38,19 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
     @Transactional(rollbackFor = Exception.class)
     @Override
     public User accessToken(String code, String redirectUri) {
-        String CLIENT_ID = propertyService.getPropertyValue("oauth:facebook_client_id");
-        String CLIENT_SECRET = propertyService.getPropertyValue("oauth:facebook_client_secret");
+        String CLIENT_ID = propertyService.getPropertyValue("oauth:twitter_client_id");
+        String CLIENT_SECRET = propertyService.getPropertyValue("oauth:twitter_client_secret");
 
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
-            sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.FACEBOOK.name());
+            sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.TWITTER.name());
 
             try {
                 sRedirectUri = URLEncoder.encode(sRedirectUri, "UTF-8");
             }
             catch (Exception ignored) {}
         }
-        String accessTokenResponse = OAuthUtils.getQuery(String.format(ACCESS_TOKEN_ENDPOINT, CLIENT_ID, sRedirectUri, CLIENT_SECRET, code));
+        String accessTokenResponse = OAuthUtils.getQueryReturnText(String.format(ACCESS_TOKEN_ENDPOINT, CLIENT_ID, sRedirectUri, CLIENT_SECRET, code));
         String accessToken = null;
         if (!StringUtils.isEmpty(accessTokenResponse)) {
             StringTokenizer st = new StringTokenizer(accessTokenResponse, "&");
@@ -67,13 +70,13 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
         OAuthDTO OAuthDTO = new OAuthDTO();
         OAuthDTO.setAccessToken(accessToken);
 
-        Map<Object, Object> response = OAuthUtils.getJsonQuery(String.format(API_ENDPOINT, OAuthDTO.getAccessToken()));
+        Map<Object, Object> response = OAuthUtils.getQueryReturnJson(String.format(API_ENDPOINT, OAuthDTO.getAccessToken()));
         OAuthDTO.setUserId(response.get("id") != null ? StringEscapeUtils.unescapeJava((String) response.get("id")) : null);
         OAuthDTO.setFirstName(response.get("first_name") != null ? StringEscapeUtils.unescapeJava((String) response.get("first_name")) : null);
         OAuthDTO.setLastName(response.get("last_name") != null ? StringEscapeUtils.unescapeJava((String) response.get("last_name")) : null);
         OAuthDTO.setEmail(response.get("email") != null ? StringEscapeUtils.unescapeJava((String) response.get("email")) : null);
 
-        return processAuth(DataConstants.OAuthProviders.FACEBOOK.getValue(), code, OAuthDTO);
+        return processAuth(DataConstants.OAuthProviders.TWITTER.getValue(), code, OAuthDTO);
     }
 
     @Override
@@ -86,7 +89,7 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
 
     @Override
     public String buildRedirectUri(String additionalParameters) {
-        String sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.FACEBOOK.name());
+        String sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.TWITTER.name());
         if (!StringUtils.isEmpty(additionalParameters)) {
             sRedirectUri = sRedirectUri + additionalParameters;
         }

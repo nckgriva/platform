@@ -1,7 +1,10 @@
-package com.gracelogic.platform.oauth.service;
+package com.gracelogic.platform.oauth.service.impl;
 
 import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.OAuthDTO;
+import com.gracelogic.platform.oauth.service.AbstractOauthProvider;
+import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
+import com.gracelogic.platform.oauth.service.OAuthUtils;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
@@ -10,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -43,7 +45,7 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
             catch (Exception ignored) {}
         }
 
-        Map<Object, Object> response = OAuthUtils.postHttpQuery(ACCESS_TOKEN_ENDPOINT, String.format("grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s", CLIENT_ID, CLIENT_SECRET, code, sRedirectUri));
+        Map response = OAuthUtils.postTextBodyReturnJson(ACCESS_TOKEN_ENDPOINT, String.format("grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s", CLIENT_ID, CLIENT_SECRET, code, sRedirectUri));
 
         if (response == null) {
             return null;
@@ -52,7 +54,7 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
         OAuthDTO OAuthDTO = new OAuthDTO();
         OAuthDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
 
-        response = (HashMap<Object, Object>) response.get("user");
+        response = (Map) response.get("user");
 
         OAuthDTO.setUserId(response.get("id") != null ? (String) response.get("id") : null);
         String fullName = response.get("full_name") != null ? (String) response.get("full_name") : null;

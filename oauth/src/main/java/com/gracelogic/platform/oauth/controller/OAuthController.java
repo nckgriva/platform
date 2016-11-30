@@ -51,6 +51,14 @@ public class OAuthController extends AbstractAuthorizedController {
     @Autowired
     private OAuthServiceProvider facebook;
 
+    @Qualifier("google")
+    @Autowired
+    private OAuthServiceProvider google;
+
+    @Qualifier("linkedin")
+    @Autowired
+    private OAuthServiceProvider linkedin;
+
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -69,6 +77,10 @@ public class OAuthController extends AbstractAuthorizedController {
                       @PathVariable(value = "authProvider") String authProvider,
                       @RequestParam(value = "code", required = false) String code,
                       @RequestParam(value = "fwd", required = false) String fwd) throws IOException {
+
+        logger.info("OAUTH request");
+        logger.info("provider: " + authProvider);
+        logger.info("code: " + code);
 
         if (StringUtils.isEmpty(code)) {
             response.sendRedirect(propertyService.getPropertyValue("oauth:redirect_fail_url"));
@@ -131,6 +143,35 @@ public class OAuthController extends AbstractAuthorizedController {
                 user = facebook.accessToken(code, requestUri);
             } catch (Exception e) {
                 logger.error("Failed to process user via facebook", e);
+            }
+        }
+        else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.GOOGLE.name())) {
+            try {
+                String additionalParameters = null;
+                if (fwd != null) {
+                    additionalParameters = "?fwd=" + fwd;
+                }
+                String requestUri = google.buildRedirectUri(additionalParameters);
+                logger.info("REQUEST_URI: " + requestUri);
+
+                user = google.accessToken(code, requestUri);
+            } catch (Exception e) {
+                logger.error("Failed to process user via google", e);
+            }
+        }
+        else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.LINKEDIN.name())) {
+            logger.info("LINKEDIN eq");
+            try {
+                String additionalParameters = null;
+                if (fwd != null) {
+                    additionalParameters = "?fwd=" + fwd;
+                }
+                String requestUri = linkedin.buildRedirectUri(additionalParameters);
+                logger.info("REQUEST_URI: " + requestUri);
+
+                user = linkedin.accessToken(code, requestUri);
+            } catch (Exception e) {
+                logger.error("Failed to process user via linkedin", e);
             }
         }
         else {

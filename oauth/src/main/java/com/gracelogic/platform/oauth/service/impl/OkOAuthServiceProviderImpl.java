@@ -1,7 +1,10 @@
-package com.gracelogic.platform.oauth.service;
+package com.gracelogic.platform.oauth.service.impl;
 
 import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.OAuthDTO;
+import com.gracelogic.platform.oauth.service.AbstractOauthProvider;
+import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
+import com.gracelogic.platform.oauth.service.OAuthUtils;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -47,7 +50,7 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
             catch (Exception ignored) {}
         }
 
-        Map<Object, Object> response = OAuthUtils.postJsonQuery(String.format("%s?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s", ACCESS_TOKEN_ENDPOINT, CLIENT_ID, CLIENT_SECRET, code, sRedirectUri), null);
+        Map response = OAuthUtils.postJsonBodyReturnJson(String.format("%s?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s", ACCESS_TOKEN_ENDPOINT, CLIENT_ID, CLIENT_SECRET, code, sRedirectUri), null);
 
         if (response == null) {
             return null;
@@ -60,7 +63,8 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
         String md51 = DigestUtils.md5Hex(String.format("%s%s", OAuthDTO.getAccessToken(), CLIENT_SECRET));
         String sign = DigestUtils.md5Hex(String.format("%s%s", s, md51));
 
-        response = OAuthUtils.postJsonQuery(String.format("%s?application_key=%s&method=users.getCurrentUser&format=json&access_token=%s&sig=%s", API_ENDPOINT, PUBLIC_KEY, OAuthDTO.getAccessToken(), sign), null);
+        response = OAuthUtils.postJsonBodyReturnJson(String.format("%s?application_key=%s&method=users.getCurrentUser&format=json&access_token=%s&sig=%s", API_ENDPOINT, PUBLIC_KEY, OAuthDTO.getAccessToken(), sign), null);
+
         OAuthDTO.setUserId(response.get("uid") != null ? (String) response.get("uid") : null);
         OAuthDTO.setFirstName(response.get("first_name") != null ? (String) response.get("first_name") : null);
         OAuthDTO.setLastName(response.get("last_name") != null ? (String) response.get("last_name") : null);
