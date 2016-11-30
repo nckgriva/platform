@@ -29,7 +29,7 @@ public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider impl
     //private static final String CLIENT_ID = "78qkahnfqw17u8";
     //private static final String CLIENT_SECRET = "tIf3q6Vl6XXd460V";
     private static final String ACCESS_TOKEN_ENDPOINT = "https://www.linkedin.com/oauth/v2/accessToken";
-    private static final String API_ENDPOINT = "https://api.linkedin.com/v1/people/~:(id,first-name,last-name,email-address)?oauth2_access_token=%s";
+    private static final String API_ENDPOINT = "https://api.linkedin.com/v1/people/~:(id,first-name,last-name,email-address)?oauth2_access_token=%s&format=json";
 
     @Autowired
     private PropertyService propertyService;
@@ -63,9 +63,9 @@ public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider impl
         response = OAuthUtils.getQueryReturnJson(String.format(API_ENDPOINT, OAuthDTO.getAccessToken()));
         OAuthDTO.setUserId(response.get("id") != null ? (String) response.get("id") : null);
         logger.info("3");
-        OAuthDTO.setFirstName(response.get("first-name") != null ? (String) response.get("first-name") : null);
-        OAuthDTO.setLastName(response.get("last-name") != null ? (String) response.get("last-name") : null);
-        OAuthDTO.setEmail(response.get("email-address") != null ? (String) response.get("email-address") : null);
+        OAuthDTO.setFirstName(response.get("firstName") != null ? (String) response.get("firstName") : null);
+        OAuthDTO.setLastName(response.get("lastName") != null ? (String) response.get("lastName") : null);
+        OAuthDTO.setEmail(response.get("emailAddress") != null ? (String) response.get("emailAddress") : null);
 
         return processAuth(DataConstants.OAuthProviders.LINKEDIN.getValue(), code, OAuthDTO);
     }
