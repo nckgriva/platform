@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -54,6 +55,18 @@ public class DictionaryServiceImpl implements DictionaryService {
             if (dictionary.containsKey(id)) {
                 return (T) dictionary.get(id);
             }
+        }
+        else {
+            logger.error(String.format("Dictionary for class %s is not found", clazz.getSimpleName()));
+        }
+        return null;
+    }
+
+    @Override
+    public <T> Collection<T> getList(Class<T> clazz) {
+        if (dictionaries.containsKey(clazz)) {
+            HashMap<Object, IdObject> dictionary = dictionaries.get(clazz);
+            return (Collection<T>) dictionaries.get(clazz).values();
         }
         else {
             logger.error(String.format("Dictionary for class %s is not found", clazz.getSimpleName()));

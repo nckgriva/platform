@@ -2,6 +2,8 @@ package com.gracelogic.platform.dictionary.service;
 
 import com.gracelogic.platform.db.model.IdObject;
 
+import java.util.Collection;
+
 /**
  * Author: Igor Parkhomenko
  * Date: 16.03.2016
@@ -9,4 +11,6 @@ import com.gracelogic.platform.db.model.IdObject;
  */
 public interface DictionaryService {
     <T extends IdObject> T get(Class<T> clazz, Object id);
+
+    <T> Collection<T> getList(Class<T> clazz);
 }
