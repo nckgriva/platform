@@ -90,9 +90,16 @@ public class Role extends IdObject<UUID> implements Dictionary {
         this.name = name;
     }
 
+    @Override
     public String getCode() {
         return code;
     }
+
+    @Override
+    public Integer getSortOrder() {
+        return 0;
+    }
+
 
     public void setCode(String code) {
         this.code = code;

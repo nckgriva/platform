@@ -15,8 +15,6 @@ import java.util.UUID;
  */
 public class AuthorizedUser extends UserDTO implements Serializable {
     private Set<String> grants = new HashSet<>();
-    private Set<UUID> roles = new HashSet<>();
-
     private UUID userSessionId;
 
     public Set<String> getGrants() {
@@ -25,14 +23,6 @@ public class AuthorizedUser extends UserDTO implements Serializable {
 
     public void setGrants(Set<String> grants) {
         this.grants = grants;
-    }
-
-    public Set<UUID> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<UUID> roles) {
-        this.roles = roles;
     }
 
     public UUID getUserSessionId() {

@@ -6,8 +6,7 @@ import com.gracelogic.platform.user.service.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Author: Igor Parkhomenko
@@ -25,6 +24,7 @@ public class UserDTO extends IdObjectModel implements Serializable {
     private Boolean approved;
     private Boolean blocked;
     private Map<String, String> fields = new HashMap<>();
+    private Set<UUID> roles = new HashSet<>();
 
     public String getEmail() {
         return email;
@@ -80,6 +80,14 @@ public class UserDTO extends IdObjectModel implements Serializable {
 
     public void setFields(Map<String, String> fields) {
         this.fields = fields;
+    }
+
+    public Set<UUID> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<UUID> roles) {
+        this.roles = roles;
     }
 
     public static UserDTO prepare(User user, UserDTO userDTO) {

@@ -6,6 +6,7 @@ import com.gracelogic.platform.oauth.dto.OAuthDTO;
 import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.oauth.model.AuthProviderLinkage;
 import com.gracelogic.platform.property.service.PropertyService;
+import com.gracelogic.platform.user.dto.UserDTO;
 import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.exception.IllegalParameterException;
 import com.gracelogic.platform.user.model.User;
@@ -55,8 +56,8 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
             userRegistrationDTO.setEmail(!StringUtils.isEmpty(OAuthDTO.getEmail()) ? OAuthDTO.getEmail() : null);
             userRegistrationDTO.setPhone(!StringUtils.isEmpty(OAuthDTO.getPhone()) ? OAuthDTO.getPhone() : null);
 
-            userRegistrationDTO.getFields().put("name", !StringUtils.isEmpty(OAuthDTO.getFirstName()) ? OAuthDTO.getFirstName() : null);
-            userRegistrationDTO.getFields().put("surname", !StringUtils.isEmpty(OAuthDTO.getLastName()) ? OAuthDTO.getLastName() : null);
+            userRegistrationDTO.getFields().put(UserDTO.FIELD_NAME, !StringUtils.isEmpty(OAuthDTO.getFirstName()) ? OAuthDTO.getFirstName() : null);
+            userRegistrationDTO.getFields().put(UserDTO.FIELD_SURNAME, !StringUtils.isEmpty(OAuthDTO.getLastName()) ? OAuthDTO.getLastName() : null);
 
             logger.info("Oauth registration: " + userRegistrationDTO.toString());
 

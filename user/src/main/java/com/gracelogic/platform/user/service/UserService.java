@@ -59,11 +59,13 @@ public interface UserService {
 
     void addRoleToUser(User user, Collection<UUID> roleIds);
 
-    User saveUser(AuthorizedUser user, boolean mergeRoles, AuthorizedUser executor) throws IllegalParameterException;
+    User saveUser(UserDTO user, boolean mergeRoles, AuthorizedUser executor) throws IllegalParameterException;
 
     List<UserRole> getUserRoles(UUID userId);
 
     void mergeUserRoles(UUID userId, Collection<UUID> activeRoles) throws IllegalParameterException;
 
-    EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
+
+    UserDTO getUser(UUID userId);
 }

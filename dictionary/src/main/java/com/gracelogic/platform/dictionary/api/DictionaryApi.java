@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Author: Igor Parkhomenko
@@ -57,6 +55,13 @@ public class DictionaryApi {
                 for (Dictionary d : dictionaries) {
                     dtos.add(DictionaryDTO.prepare(d));
                 }
+
+                Collections.sort(dtos, new Comparator<DictionaryDTO>() {
+                    @Override
+                    public int compare(final DictionaryDTO o1, final DictionaryDTO o2) {
+                        return o1 == null ? 1 : o2 == null ? -1 : o1.getSortOrder().compareTo(o2.getSortOrder());
+                    }
+                });
 
                 return new ResponseEntity<List<DictionaryDTO>>(dtos, HttpStatus.OK);
             }

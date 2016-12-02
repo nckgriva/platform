@@ -82,4 +82,14 @@ public class PaymentState extends IdObject<UUID> implements Dictionary {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    @Override
+    public String getCode() {
+        return null;
+    }
+
+    @Override
+    public Integer getSortOrder() {
+        return 0;
+    }
 }

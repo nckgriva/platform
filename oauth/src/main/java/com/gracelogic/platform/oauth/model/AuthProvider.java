@@ -85,4 +85,14 @@ public class AuthProvider extends IdObject<UUID> implements Dictionary {
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
+
+    @Override
+    public String getCode() {
+        return null;
+    }
+
+    @Override
+    public Integer getSortOrder() {
+        return 0;
+    }
 }

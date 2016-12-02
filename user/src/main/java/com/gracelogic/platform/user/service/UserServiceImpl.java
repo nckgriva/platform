@@ -617,7 +617,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User saveUser(AuthorizedUser user, boolean mergeRoles, AuthorizedUser executor) throws IllegalParameterException {
+    public User saveUser(UserDTO user, boolean mergeRoles, AuthorizedUser executor) throws IllegalParameterException {
         if (user.getId() == null) {
             throw new IllegalParameterException("common.USER_NOT_FOUND");
         }
@@ -626,10 +626,8 @@ public class UserServiceImpl implements UserService {
             throw new IllegalParameterException("common.USER_NOT_FOUND");
         }
 
-//        for (String key : user.getFields().keySet()) {
-//            u.getFields().setValue(key, user.getFields().get(key));
-//        }
         u.setFields(JsonUtils.mapToJson(user.getFields()));
+        u.setApproved(user.getApproved());
 
 
         if (!u.getBlocked() && user.getBlocked()) {
@@ -691,7 +689,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         if (!StringUtils.isEmpty(sortField)) {
             //Т.к. в данном методе запрос используется нативный и требуется сохранить единообразие - транслируем название jpa полей в нативные sql
             if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
@@ -757,13 +755,49 @@ public class UserServiceImpl implements UserService {
         entityListResponse.setPages(totalPages);
         entityListResponse.setTotalCount(totalCount);
 
+
         List<User> items = userDao.getUsers(phone, email, approved, blocked, fields, sortField, sortDir, startRecord, count);
+        List<UserRole> userRoles = Collections.emptyList();
+        if (fetchRoles) {
+            Set<UUID> userIds = new HashSet<>();
+            for (User u : items) {
+                userIds.add(u.getId());
+            }
+            Map<String, Object> params = new HashMap<>();
+            params.put("userIds", userIds);
+            userRoles = idObjectService.getList(UserRole.class, null, "el.user.id in (:userIds)", params, null, null, null, null);
+        }
+
         entityListResponse.setPartCount(items.size());
         for (User e : items) {
             UserDTO el = UserDTO.prepare(e);
+            for (UserRole ur : userRoles) {
+                if (ur.getUser().getId().equals(e.getId())) {
+                    el.getRoles().add(ur.getRole().getId());
+                }
+            }
             entityListResponse.addData(el);
         }
 
         return entityListResponse;
+    }
+
+    @Override
+    public UserDTO getUser(UUID userId) {
+        User user = idObjectService.getObjectById(User.class, userId);
+        if (user != null) {
+            UserDTO el = UserDTO.prepare(user);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            List<UserRole> userRoles = idObjectService.getList(UserRole.class, null, "el.user.id=:userId", params, null, null, null, null);
+            for (UserRole ur : userRoles) {
+                if (ur.getUser().getId().equals(userId)) {
+                    el.getRoles().add(ur.getRole().getId());
+                }
+            }
+            return el;
+        }
+        return null;
     }
 }

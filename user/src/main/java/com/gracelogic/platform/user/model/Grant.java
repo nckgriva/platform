@@ -72,10 +72,16 @@ public class Grant extends IdObject<UUID> implements Dictionary {
         return name;
     }
 
+    @Override
+    public Integer getSortOrder() {
+        return 0;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getCode() {
         return code;
     }

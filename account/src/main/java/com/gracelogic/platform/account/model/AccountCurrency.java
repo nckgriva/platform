@@ -73,4 +73,14 @@ public class AccountCurrency extends IdObject<UUID> implements Dictionary {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String getCode() {
+        return null;
+    }
+
+    @Override
+    public Integer getSortOrder() {
+        return 0;
+    }
 }
