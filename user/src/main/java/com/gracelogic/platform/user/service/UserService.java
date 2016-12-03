@@ -55,6 +55,8 @@ public interface UserService {
 
     void deleteUser(User user);
 
+    void deleteUserViaLifecycleService(UUID userId);
+
     void sendVerificationCode(User user, String loginType, Map<String, String> templateParams) throws IllegalParameterException, SendingException;
 
     void addRoleToUser(User user, Collection<UUID> roleIds);
@@ -67,5 +69,5 @@ public interface UserService {
 
     EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
-    UserDTO getUser(UUID userId);
+    UserDTO getUser(UUID userId, boolean fetchRoles) throws IllegalParameterException;
 }

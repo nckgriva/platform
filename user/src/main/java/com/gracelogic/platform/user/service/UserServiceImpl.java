@@ -496,8 +496,7 @@ public class UserServiceImpl implements UserService {
                     lifecycleService.delete(anotherUser);
                 } else if (!anotherUser.getPhoneVerified()) {
                     idObjectService.updateFieldValue(User.class, anotherUser.getId(), "phone", null);
-                }
-                else {
+                } else {
                     throw new IllegalParameterException("register.INVALID_PHONE");
                 }
             }
@@ -556,6 +555,12 @@ public class UserServiceImpl implements UserService {
         idObjectService.delete(UserRole.class, "el.user.id=:userId", params);
         idObjectService.delete(UserSetting.class, "el.user.id=:userId", params);
         idObjectService.delete(User.class, user.getId());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteUserViaLifecycleService(UUID userId) {
+        lifecycleService.delete(idObjectService.getObjectById(User.class, userId));
     }
 
     @Override
@@ -694,53 +699,37 @@ public class UserServiceImpl implements UserService {
             //Т.к. в данном методе запрос используется нативный и требуется сохранить единообразие - транслируем название jpa полей в нативные sql
             if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
                 sortField = "id";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.created")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.created")) {
                 sortField = "created_dt";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.changed")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.changed")) {
                 sortField = "changed_dt";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.phone")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.phone")) {
                 sortField = "phone";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.phoneVerified")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.phoneVerified")) {
                 sortField = "is_phone_verified";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.email")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.email")) {
                 sortField = "email";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.emailVerified")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.emailVerified")) {
                 sortField = "is_email_verified";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.approved")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.approved")) {
                 sortField = "is_approved";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.blocked")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.blocked")) {
                 sortField = "is_blocked";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.blockedDt")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.blockedDt")) {
                 sortField = "blocked_dt";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.blockedByUser")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.blockedByUser")) {
                 sortField = "blocked_by_user_id";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.lastVisitDt")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.lastVisitDt")) {
                 sortField = "last_visit_dt";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.lastVisitIP")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.lastVisitIP")) {
                 sortField = "last_visit_ip";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.allowedAddresses")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.allowedAddresses")) {
                 sortField = "allowed_addresses";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.password")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.password")) {
                 sortField = "password";
-            }
-            else if (StringUtils.equalsIgnoreCase(sortField, "el.salt")) {
+            } else if (StringUtils.equalsIgnoreCase(sortField, "el.salt")) {
                 sortField = "salt";
-            }
-            else if (StringUtils.startsWithIgnoreCase(sortField, "el.fields")) {
+            } else if (StringUtils.startsWithIgnoreCase(sortField, "el.fields")) {
                 sortField = sortField.substring("el.".length());
             }
         }
@@ -783,11 +772,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO getUser(UUID userId) {
+    public UserDTO getUser(UUID userId, boolean fetchRoles) throws IllegalParameterException {
         User user = idObjectService.getObjectById(User.class, userId);
-        if (user != null) {
-            UserDTO el = UserDTO.prepare(user);
+        if (user == null) {
+            throw new IllegalParameterException("common.USER_NOT_FOUND");
+        }
 
+        UserDTO el = UserDTO.prepare(user);
+        if (fetchRoles) {
             Map<String, Object> params = new HashMap<>();
             params.put("userId", userId);
             List<UserRole> userRoles = idObjectService.getList(UserRole.class, null, "el.user.id=:userId", params, null, null, null, null);
@@ -796,8 +788,7 @@ public class UserServiceImpl implements UserService {
                     el.getRoles().add(ur.getRole().getId());
                 }
             }
-            return el;
         }
-        return null;
+        return el;
     }
 }

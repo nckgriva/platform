@@ -1,11 +1,14 @@
 package com.gracelogic.platform.user.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gracelogic.platform.db.dto.EntityListResponse;
+import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
+import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.model.UserSession;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 import com.gracelogic.platform.user.service.UserLifecycleService;
@@ -23,6 +26,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -31,6 +35,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -56,6 +62,9 @@ public class UserApi extends AbstractAuthorizedController {
 
     @Autowired
     private UserLifecycleService lifecycleService;
+
+    @Autowired
+    private IdObjectService idObjectService;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
@@ -343,5 +352,80 @@ public class UserApi extends AbstractAuthorizedController {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+    }
+
+    @ApiOperation(
+            value = "getUsers",
+            notes = "Получить список пользователей на основе критерием",
+            response = ResponseEntity.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
+    @PreAuthorize("hasAuthority('USER:SHOW')")
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity getUsers(@ApiParam(name = "phone", value = "phone") @RequestParam(value = "phone", required = false) String phone,
+                                   @ApiParam(name = "email", value = "email") @RequestParam(value = "email", required = false) String email,
+                                   @ApiParam(name = "approved", value = "approved") @RequestParam(value = "approved", required = false) Boolean approved,
+                                   @ApiParam(name = "blocked", value = "blocked") @RequestParam(value = "blocked", required = false) Boolean blocked,
+                                   @ApiParam(name = "fetchRoles", value = "fetchRoles") @RequestParam(value = "fetchRoles", required = false) Boolean fetchRoles,
+                                   @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                   @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
+                                   @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                   @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                   @ApiParam(name = "feilds", value = "fields") @RequestParam Map<String, String> allRequestParams) {
+
+        Map<String, String> fields = new HashMap<String, String>();
+        if (allRequestParams != null) {
+            for (String paramName : allRequestParams.keySet()) {
+                if (StringUtils.startsWithIgnoreCase(paramName, "fields.")) {
+                    fields.put(paramName.substring("fields.".length()), allRequestParams.get(paramName));
+                }
+            }
+        }
+
+        EntityListResponse<UserDTO> users = userService.getUsersPaged(phone, email, approved, blocked, fields, fetchRoles != null ? fetchRoles : false, length, null, start, sortField, sortDir);
+        return new ResponseEntity<EntityListResponse<UserDTO>>(users, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('USER:SHOW')")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    @ResponseBody
+    public ResponseEntity getUser(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
+        try {
+            UserDTO userDTO = userService.getUser(id, true);
+            return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
+        } catch (IllegalParameterException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @PreAuthorize("hasAuthority('USER:SAVE')")
+    @RequestMapping(method = RequestMethod.POST, value = "/save")
+    @ResponseBody
+    public ResponseEntity saveUser(@ApiParam(name = "user", value = "user") @RequestBody UserDTO userDTO) {
+        try {
+            userService.saveUser(userDTO, true, getUser());
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (IllegalParameterException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasAuthority('USER:DELETE')")
+    @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
+    @ResponseBody
+    public ResponseEntity deleteUser(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
+        try {
+            userService.deleteUserViaLifecycleService(id);
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.FAILED_TO_DELETE_USER", messageSource.getMessage("common.FAILED_TO_DELETE_USER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+
     }
 }
