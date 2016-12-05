@@ -2,6 +2,7 @@ package com.gracelogic.platform.payment.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
+import com.gracelogic.platform.dictionary.model.Dictionary;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -15,7 +16,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "PAYMENT_SYSTEM", schema = JPAProperties.DEFAULT_SCHEMA)
-public class PaymentSystem extends IdObject<UUID> {
+public class PaymentSystem extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
@@ -82,6 +83,16 @@ public class PaymentSystem extends IdObject<UUID> {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public Integer getSortOrder() {
+        return 0;
+    }
+
+    @Override
+    public String getCode() {
+        return null;
     }
 
     public void setName(String name) {
