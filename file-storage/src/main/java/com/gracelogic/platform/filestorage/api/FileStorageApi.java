@@ -50,7 +50,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
 
     @ApiOperation(value = "downloadFile", notes = "Загрузить содержимое файла")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 403, message = "Forbidden"), @ApiResponse(code = 404, message = "Not Found"), @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}/download", method = RequestMethod.GET)
     public void downloadFile(@PathVariable(value = "id") String id,
                              HttpServletRequest request,
                              HttpServletResponse response) {
@@ -79,7 +79,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(value = "elements", notes = "Получить список элементов")
+    @ApiOperation(value = "getStoredFiles", notes = "Получить список элементов")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody

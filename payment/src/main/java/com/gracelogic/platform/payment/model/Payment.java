@@ -24,6 +24,7 @@ public class Payment extends IdObject<UUID> {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @org.hibernate.annotations.Type(type = "pg-uuid")
+    @Access(AccessType.PROPERTY)
     private UUID id;
 
     @Column(name = CREATED, nullable = false)
