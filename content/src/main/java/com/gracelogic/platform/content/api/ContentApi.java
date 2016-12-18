@@ -3,20 +3,26 @@ package com.gracelogic.platform.content.api;
 import com.gracelogic.platform.content.Path;
 import com.gracelogic.platform.content.dto.ElementDTO;
 import com.gracelogic.platform.content.dto.SectionDTO;
+import com.gracelogic.platform.content.dto.SectionPatternDTO;
 import com.gracelogic.platform.content.service.ContentService;
 import com.gracelogic.platform.db.dto.DateFormatConstants;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
+import com.gracelogic.platform.user.exception.CustomLocalizedException;
+import com.gracelogic.platform.user.exception.ObjectNotFoundException;
+import com.gracelogic.platform.web.dto.EmptyResponse;
+import com.gracelogic.platform.web.dto.ErrorResponse;
+import com.gracelogic.platform.web.service.LocaleHolder;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -35,6 +41,10 @@ public class ContentApi extends AbstractAuthorizedController {
     @Autowired
     private ContentService contentService;
 
+    @Autowired
+    @Qualifier("contentMessageSource")
+    private ResourceBundleMessageSource messageSource;
+
     @ApiOperation(value = "sections", notes = "Получить список секций в иерархическом виде")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(value = "/sections", method = RequestMethod.GET)
@@ -48,7 +58,7 @@ public class ContentApi extends AbstractAuthorizedController {
 
     @ApiOperation(value = "elements", notes = "Получить список элементов")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = "/elements", method = RequestMethod.GET)
+    @RequestMapping(value = {"/elements", "/"}, method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getElements(@ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
                                       @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false, defaultValue = "true") Boolean active,
@@ -78,6 +88,53 @@ public class ContentApi extends AbstractAuthorizedController {
         EntityListResponse<ElementDTO> elements = contentService.getElementsPaged(sectionIds, active, validOnDate, null, length, page, start, sortField, sortDir);
 
         return new ResponseEntity<EntityListResponse<ElementDTO>>(elements, HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    @ResponseBody
+    public ResponseEntity getElement(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
+        try {
+            ElementDTO elementDTO = contentService.getElement(id);
+            return new ResponseEntity<ElementDTO>(elementDTO, HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/sectionPattern/{id}")
+    @ResponseBody
+    public ResponseEntity getSectionPattern(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
+        try {
+            SectionPatternDTO sectionPatternDTO = contentService.getSectionPattern(id);
+            return new ResponseEntity<SectionPatternDTO>(sectionPatternDTO, HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasAuthority('ELEMENT:SAVE')")
+    @RequestMapping(method = RequestMethod.POST, value = "/save")
+    @ResponseBody
+    public ResponseEntity saveElement(@ApiParam(name = "user", value = "user") @RequestBody ElementDTO elementDTO) {
+        try {
+            contentService.saveElement(elementDTO);
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PreAuthorize("hasAuthority('ELEMENT:DELETE')")
+    @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
+    @ResponseBody
+    public ResponseEntity deleteElement(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
+        try {
+            contentService.deleteElement(id);
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.FAILED_TO_DELETE_ELEMENT", messageSource.getMessage("content.FAILED_TO_DELETE_ELEMENT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+
     }
 
 

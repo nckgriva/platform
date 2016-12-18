@@ -1,10 +1,10 @@
 package com.gracelogic.platform.user.exception;
 
-public class IllegalParameterException extends Exception {
+public class CustomLocalizedException extends Exception {
 
     private String message;
 
-    public IllegalParameterException(String message) {
+    public CustomLocalizedException(String message) {
         super(message);
         this.message = message;
     }

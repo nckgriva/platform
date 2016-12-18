@@ -1,7 +1,7 @@
 package com.gracelogic.platform.user.service;
 
 import com.gracelogic.platform.user.dto.UserRegistrationDTO;
-import com.gracelogic.platform.user.exception.IllegalParameterException;
+import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.User;
 
 /**
@@ -13,7 +13,7 @@ public abstract class AbstractLifecycleService implements UserLifecycleService {
     protected abstract UserService getUserService();
 
     @Override
-    public User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws IllegalParameterException {
+    public User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException, CustomLocalizedException {
         return getUserService().register(userRegistrationDTO, trust);
     }
 

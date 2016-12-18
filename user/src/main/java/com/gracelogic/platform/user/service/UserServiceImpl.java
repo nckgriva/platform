@@ -270,7 +270,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void sendRepairCode(String login, String loginType, Map<String, String> templateParams) throws IllegalParameterException, SendingException {
+    public void sendRepairCode(String login, String loginType, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException, SendingException {
         User user = getUserByField(loginType, login);
 
         if (user != null && user.getApproved()) {
@@ -314,16 +314,16 @@ public class UserServiceImpl implements UserService {
                     }
                 }
             } else {
-                throw new IllegalParameterException("common.TOO_FAST_OPERATION");
+                throw new TooFastOperationException();
             }
         } else {
-            throw new IllegalParameterException("common.USER_NOT_FOUND");
+            throw new ObjectNotFoundException();
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void changePassword(String login, String loginType, String code, String newPassword) throws IllegalParameterException {
+    public void changePassword(String login, String loginType, String code, String newPassword) throws ObjectNotFoundException, IncorrectAuthCodeException {
         User user = getUserByField(loginType, login);
 
         if (user != null && isActualCodeAvailable(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue())) {
@@ -333,10 +333,10 @@ public class UserServiceImpl implements UserService {
             if (code != null && authCode.getCode().equalsIgnoreCase(code) && !StringUtils.isEmpty(newPassword)) {
                 changeUserPassword(user.getId(), newPassword);
             } else {
-                throw new IllegalParameterException("common.AUTH_CODE_IS_INCORRECT");
+                throw new IncorrectAuthCodeException();
             }
         } else {
-            throw new IllegalParameterException("common.USER_NOT_FOUND");
+            throw new ObjectNotFoundException();
         }
     }
 
@@ -465,16 +465,16 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws IllegalParameterException {
+    public User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException {
         String userApproveMethod = propertyService.getPropertyValue("user:approve_method");
 
         if (!trust) {
             if (!checkPassword(userRegistrationDTO.getPassword())) {
-                throw new IllegalParameterException("register.INVALID_PASSWORD");
+                throw new InvalidPasswordException();
             }
 
             if (StringUtils.isEmpty(userRegistrationDTO.getEmail()) && StringUtils.isEmpty(userRegistrationDTO.getPhone())) {
-                throw new IllegalParameterException("register.PHONE_OR_EMAIL_IS_NECESSARY");
+                throw new PhoneOrEmailIsNecessaryException();
             }
         }
 
@@ -487,7 +487,7 @@ public class UserServiceImpl implements UserService {
 
         if (!StringUtils.isEmpty(userRegistrationDTO.getPhone())) {
             if (!checkPhone(userRegistrationDTO.getPhone(), false)) {
-                throw new IllegalParameterException("register.INVALID_PHONE");
+                throw new InvalidPhoneException();
             }
 
             User anotherUser = getUserByField("phone", userRegistrationDTO.getPhone());
@@ -497,7 +497,7 @@ public class UserServiceImpl implements UserService {
                 } else if (!anotherUser.getPhoneVerified()) {
                     idObjectService.updateFieldValue(User.class, anotherUser.getId(), "phone", null);
                 } else {
-                    throw new IllegalParameterException("register.INVALID_PHONE");
+                    throw new InvalidPhoneException();
                 }
             }
 
@@ -509,7 +509,7 @@ public class UserServiceImpl implements UserService {
 
         if (!StringUtils.isEmpty(userRegistrationDTO.getEmail())) {
             if (!checkEmail(userRegistrationDTO.getEmail(), false)) {
-                throw new IllegalParameterException("register.INVALID_EMAIL");
+                throw new InvalidEmailException();
             }
 
             User anotherUser = getUserByField("email", userRegistrationDTO.getEmail());
@@ -519,7 +519,7 @@ public class UserServiceImpl implements UserService {
                 } else if (!anotherUser.getEmailVerified()) {
                     idObjectService.updateFieldValue(User.class, anotherUser.getId(), "email", null);
                 } else {
-                    throw new IllegalParameterException("register.INVALID_EMAIL");
+                    throw new InvalidEmailException();
                 }
             }
 
@@ -565,7 +565,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void sendVerificationCode(User user, String loginType, Map<String, String> templateParams) throws IllegalParameterException, SendingException {
+    public void sendVerificationCode(User user, String loginType, Map<String, String> templateParams) throws SendingException {
         if (templateParams == null) {
             templateParams = new HashMap<>();
         }
@@ -622,13 +622,13 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User saveUser(UserDTO user, boolean mergeRoles, AuthorizedUser executor) throws IllegalParameterException {
+    public User saveUser(UserDTO user, boolean mergeRoles, AuthorizedUser executor) throws ObjectNotFoundException {
         if (user.getId() == null) {
-            throw new IllegalParameterException("common.USER_NOT_FOUND");
+            throw new ObjectNotFoundException();
         }
         User u = idObjectService.getObjectById(User.class, user.getId());
         if (u == null) {
-            throw new IllegalParameterException("common.USER_NOT_FOUND");
+            throw new ObjectNotFoundException();
         }
 
         u.setFields(JsonUtils.mapToJson(user.getFields()));
@@ -665,7 +665,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void mergeUserRoles(UUID userId, Collection<UUID> activeRoles) throws IllegalParameterException {
+    public void mergeUserRoles(UUID userId, Collection<UUID> activeRoles) {
         User user = idObjectService.getObjectById(User.class, userId);
         Set<UUID> currentRoles = new HashSet<>();
         for (UserRole userRole : getUserRoles(userId)) {
@@ -772,10 +772,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO getUser(UUID userId, boolean fetchRoles) throws IllegalParameterException {
+    public UserDTO getUser(UUID userId, boolean fetchRoles) throws ObjectNotFoundException {
         User user = idObjectService.getObjectById(User.class, userId);
         if (user == null) {
-            throw new IllegalParameterException("common.USER_NOT_FOUND");
+            throw new ObjectNotFoundException();
         }
 
         UserDTO el = UserDTO.prepare(user);

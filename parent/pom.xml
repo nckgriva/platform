@@ -413,7 +413,7 @@
             <dependencies>
                 <dependency>
                     <groupId>com.gracelogic.platform</groupId>
-                    <artifactId>swagger-ui</artifactId>
+                    <artifactId>platform-swagger-ui</artifactId>
                     <version>1.0</version>
                     <scope>provided</scope>
                 </dependency>
@@ -453,7 +453,7 @@
                         <dependencies>
                             <dependency>
                                 <groupId>com.gracelogic.platform</groupId>
-                                <artifactId>swagger-static</artifactId>
+                                <artifactId>platform-swagger-static</artifactId>
                                 <version>1.0</version>
                             </dependency>
                         </dependencies>
@@ -523,7 +523,7 @@
                                     <goal>unpack-dependencies</goal>
                                 </goals>
                                 <configuration>
-                                    <includeArtifactIds>swagger-ui</includeArtifactIds>
+                                    <includeArtifactIds>platform-swagger-ui</includeArtifactIds>
                                     <excludes>/META-INF/**</excludes>
                                     <outputDirectory>${project.build.directory}/ccredit-core-web-1.0/static
                                     </outputDirectory>

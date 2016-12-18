@@ -3,13 +3,21 @@ package com.gracelogic.platform.content.service;
 import com.gracelogic.platform.content.dao.ContentDao;
 import com.gracelogic.platform.content.dto.ElementDTO;
 import com.gracelogic.platform.content.dto.SectionDTO;
+import com.gracelogic.platform.content.dto.SectionPatternDTO;
+import com.gracelogic.platform.content.dto.SectionPatternFieldDTO;
 import com.gracelogic.platform.content.model.Element;
 import com.gracelogic.platform.content.model.Section;
+import com.gracelogic.platform.content.model.SectionPattern;
+import com.gracelogic.platform.content.model.SectionPatternField;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
+import com.gracelogic.platform.user.exception.CustomLocalizedException;
+import com.gracelogic.platform.user.exception.ObjectNotFoundException;
+import com.gracelogic.platform.user.service.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -199,4 +207,66 @@ public class ContentServiceImpl implements ContentService {
 
         return entityListResponse;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Element saveElement(ElementDTO dto) throws ObjectNotFoundException {
+        Element element;
+        if (dto.getId() != null) {
+            element = idObjectService.getObjectById(Element.class, dto.getId());
+            if (element == null) {
+                throw new ObjectNotFoundException();
+            }
+        }
+        else {
+            element = new Element();
+        }
+
+        element.setName(dto.getName());
+        element.setActive(dto.getActive());
+        element.setSortOrder(dto.getSortOrder());
+        element.setStartDt(dto.getStartDt());
+        element.setEndDt(dto.getEndDt());
+        element.setElementDt(dto.getElementDt());
+        element.setSection(idObjectService.getObjectById(Section.class, dto.getSectionId()));
+        element.setFields(JsonUtils.mapToJson(dto.getFields()));
+
+        return idObjectService.save(element);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteElement(UUID id) {
+        idObjectService.delete(Element.class, id);
+    }
+
+    @Override
+    public SectionPatternDTO getSectionPattern(UUID sectionPatternId) throws ObjectNotFoundException {
+        SectionPattern sectionPattern = idObjectService.getObjectById(SectionPattern.class, sectionPatternId);
+        if (sectionPattern == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        SectionPatternDTO dto = SectionPatternDTO.prepare(sectionPattern);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("sectionPatternId", sectionPatternId);
+        List<SectionPatternField> fields = idObjectService.getList(SectionPatternField.class, null, "el.sectionPattern.id=:sectionPatternId", params, null, null, null, null);
+        for (SectionPatternField field : fields) {
+            dto.getFields().add(SectionPatternFieldDTO.prepare(field));
+        }
+
+        return dto;
+    }
+
+    @Override
+    public ElementDTO getElement(UUID id) throws ObjectNotFoundException {
+        Element element = idObjectService.getObjectById(Element.class, id);
+        if (element == null) {
+            throw new ObjectNotFoundException();
+        }
+        return ElementDTO.prepare(element);
+    }
+
+
 }

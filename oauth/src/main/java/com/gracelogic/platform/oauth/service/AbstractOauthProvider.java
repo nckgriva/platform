@@ -8,7 +8,7 @@ import com.gracelogic.platform.oauth.model.AuthProviderLinkage;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.dto.UserDTO;
 import com.gracelogic.platform.user.dto.UserRegistrationDTO;
-import com.gracelogic.platform.user.exception.IllegalParameterException;
+import com.gracelogic.platform.user.exception.CustomLocalizedException;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.service.UserLifecycleService;
 import org.apache.commons.lang3.StringUtils;
@@ -64,7 +64,7 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
             try {
                 user = registrationService.register(userRegistrationDTO, true);
             }
-            catch (IllegalParameterException e) {
+            catch (Exception e) {
                 logger.error("Failed to register user via oauth", e);
             }
 

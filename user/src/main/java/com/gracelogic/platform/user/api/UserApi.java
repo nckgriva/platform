@@ -2,13 +2,11 @@ package com.gracelogic.platform.user.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gracelogic.platform.db.dto.EntityListResponse;
-import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
-import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.model.UserSession;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 import com.gracelogic.platform.user.service.UserLifecycleService;
@@ -62,9 +60,6 @@ public class UserApi extends AbstractAuthorizedController {
 
     @Autowired
     private UserLifecycleService lifecycleService;
-
-    @Autowired
-    private IdObjectService idObjectService;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
@@ -302,7 +297,15 @@ public class UserApi extends AbstractAuthorizedController {
         try {
             lifecycleService.register(userRegistrationDTO, false);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
-        } catch (IllegalParameterException e) {
+        } catch (PhoneOrEmailIsNecessaryException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.PHONE_OR_EMAIL_IS_NECESSARY", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (InvalidPasswordException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PASSWORD", messageSource.getMessage("register.INVALID_PASSWORD", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (InvalidPhoneException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (InvalidEmailException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (CustomLocalizedException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
@@ -326,8 +329,10 @@ public class UserApi extends AbstractAuthorizedController {
             userService.sendRepairCode(request.getLogin(), request.getLoginType(), null);
         } catch (SendingException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.SENDING_ERROR", messageSource.getMessage("common.SENDING_ERROR", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        } catch (IllegalParameterException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (TooFastOperationException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.TOO_FAST_OPERATION", messageSource.getMessage("common.TOO_FAST_OPERATION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
@@ -348,15 +353,17 @@ public class UserApi extends AbstractAuthorizedController {
                                          ChangePasswordRequestDTO request) {
         try {
             userService.changePassword(request.getLogin(), request.getLoginType(), request.getCode(), request.getNewPassword());
-        } catch (IllegalParameterException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (IncorrectAuthCodeException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.AUTH_CODE_IS_INCORRECT", messageSource.getMessage("common.AUTH_CODE_IS_INCORRECT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 
     @ApiOperation(
             value = "getUsers",
-            notes = "Получить список пользователей на основе критерием",
+            notes = "Получить список пользователей на основе критериев",
             response = ResponseEntity.class
     )
     @ApiResponses({
@@ -398,10 +405,9 @@ public class UserApi extends AbstractAuthorizedController {
         try {
             UserDTO userDTO = userService.getUser(id, true);
             return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
-        } catch (IllegalParameterException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @PreAuthorize("hasAuthority('USER:SAVE')")
@@ -411,8 +417,8 @@ public class UserApi extends AbstractAuthorizedController {
         try {
             userService.saveUser(userDTO, true, getUser());
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
-        } catch (IllegalParameterException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
