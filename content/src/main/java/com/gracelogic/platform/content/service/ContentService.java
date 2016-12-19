@@ -21,5 +21,5 @@ public interface ContentService {
 
     SectionPatternDTO getSectionPattern(UUID sectionPatternId) throws ObjectNotFoundException;
 
-    ElementDTO getElement(UUID id) throws ObjectNotFoundException;
+    ElementDTO getElement(UUID id, boolean includeSectionPattern) throws ObjectNotFoundException;
 }

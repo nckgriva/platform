@@ -260,12 +260,17 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public ElementDTO getElement(UUID id) throws ObjectNotFoundException {
-        Element element = idObjectService.getObjectById(Element.class, id);
+    public ElementDTO getElement(UUID id, boolean includeSectionPattern) throws ObjectNotFoundException {
+        Element element = idObjectService.getObjectById(Element.class, includeSectionPattern ? "left join fetch el.section" : null, id);
         if (element == null) {
             throw new ObjectNotFoundException();
         }
-        return ElementDTO.prepare(element);
+
+        ElementDTO dto = ElementDTO.prepare(element);
+        if (includeSectionPattern) {
+            dto.setSectionPattern(getSectionPattern(element.getSection().getSectionPattern().getId()));
+        }
+        return dto;
     }
 
 

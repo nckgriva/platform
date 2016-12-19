@@ -24,6 +24,8 @@ public class ElementDTO extends IdObjectModel {
     private Date elementDt;
     private Map<String, String> fields = new HashMap<>();
 
+    private SectionPatternDTO sectionPattern;
+
     public String getName() {
         return name;
     }
@@ -92,6 +94,14 @@ public class ElementDTO extends IdObjectModel {
 
     public void setElementDt(Date elementDt) {
         this.elementDt = elementDt;
+    }
+
+    public SectionPatternDTO getSectionPattern() {
+        return sectionPattern;
+    }
+
+    public void setSectionPattern(SectionPatternDTO sectionPattern) {
+        this.sectionPattern = sectionPattern;
     }
 
     public static ElementDTO prepare(Element element) {
