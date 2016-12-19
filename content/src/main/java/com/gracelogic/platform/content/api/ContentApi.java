@@ -61,7 +61,7 @@ public class ContentApi extends AbstractAuthorizedController {
     @RequestMapping(value = {"/elements", "/"}, method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getElements(@ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
-                                      @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false, defaultValue = "true") Boolean active,
+                                      @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false) Boolean active,
                                       @ApiParam(name = "validOnDate", value = "validOnDate") @RequestParam(value = "validOnDate", required = false) String sValidOnDate,
                                       @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                       @ApiParam(name = "page", value = "page") @RequestParam(value = "page", required = false) Integer page,
