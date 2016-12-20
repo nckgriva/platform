@@ -109,14 +109,25 @@ public class ContentApi extends AbstractAuthorizedController {
             SectionPatternDTO sectionPatternDTO = contentService.getSectionPattern(id);
             return new ResponseEntity<SectionPatternDTO>(sectionPatternDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.PATTERN_NOT_FOUND", messageSource.getMessage("content.PATTERN_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/sectionPatternBySection/{id}")
+    @ResponseBody
+    public ResponseEntity getSectionPatternBySection(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
+        try {
+            SectionPatternDTO sectionPatternDTO = contentService.getSectionPatternBySection(id);
+            return new ResponseEntity<SectionPatternDTO>(sectionPatternDTO, HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.PATTERN_NOT_FOUND", messageSource.getMessage("content.PATTERN_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PreAuthorize("hasAuthority('ELEMENT:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
-    public ResponseEntity saveElement(@ApiParam(name = "user", value = "user") @RequestBody ElementDTO elementDTO) {
+    public ResponseEntity saveElement(@ApiParam(name = "elementDTO", value = "elementDTO") @RequestBody ElementDTO elementDTO) {
         try {
             contentService.saveElement(elementDTO);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
