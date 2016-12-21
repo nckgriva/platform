@@ -48,6 +48,7 @@ public class IdObjectModel implements Serializable {
         this.changed = changed;
     }
 
+    @Deprecated
     public String idAsString() {
         if (id == null) {
             return null;
@@ -55,10 +56,12 @@ public class IdObjectModel implements Serializable {
         return id.toString();
     }
 
+    @Deprecated
     public String getIdAsString() {
         return idAsString();
     }
 
+    @Deprecated
     public void setIdAsString(String value) {
         if (!StringUtils.isEmpty(value)) {
             id = UUID.fromString(value);
