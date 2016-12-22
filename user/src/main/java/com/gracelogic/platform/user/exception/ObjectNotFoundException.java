@@ -19,6 +19,4 @@ public class ObjectNotFoundException extends AuthenticationException {
     public ObjectNotFoundException(String msg, Throwable t) {
         super(msg, t);
     }
-
-
 }

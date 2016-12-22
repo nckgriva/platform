@@ -29,5 +29,6 @@
         <module>onec</module>
         <module>content</module>
         <module>file-storage</module>
+        <module>suggestion</module>
     </modules>
 </project>

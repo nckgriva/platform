@@ -32,7 +32,7 @@ public class DictionaryApi {
     private DictionaryService dictionaryService;
 
     @ApiOperation(
-            value = "doctionary",
+            value = "getDictionary",
             notes = "Получить содержание справочника"
     )
     @ApiResponses({
