@@ -34,32 +34,42 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public StoredFile storeFile(UUID storeModeId, UUID referenceObjectId, byte[] data, String extension) throws UnsupportedStoreModeException, IOException {
-        if (storeModeId == null || !storeModeId.equals(DataConstants.StoreModes.LOCAL.getValue())) {
-            throw new UnsupportedStoreModeException("UnsupportedStoreModeException");
+    public StoredFile storeFile(UUID storeModeId, UUID referenceObjectId, byte[] data, String extension, String meta) throws UnsupportedStoreModeException, IOException {
+        if (storeModeId != null) {
+            if (storeModeId.equals(DataConstants.StoreModes.LOCAL.getValue())) {
+                if (referenceObjectId == null) {
+                    referenceObjectId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+                }
+
+                StoredFile storedFile = new StoredFile();
+                storedFile.setStoreMode(ds.get(StoreMode.class, storeModeId));
+                storedFile.setExtension(extension);
+                storedFile.setReferenceObjectId(referenceObjectId);
+                storedFile.setDataAvailable(true);
+                storedFile = idObjectService.save(storedFile);
+
+                String basePath = propertyService.getPropertyValue("file-storage:local_store_path");
+                basePath = String.format("%s/%s", basePath, referenceObjectId.toString());
+                java.io.File file = new java.io.File(basePath);
+                file.mkdirs();
+
+                file = new java.io.File(String.format("%s/%s.%s", basePath, storedFile.getId().toString(), extension));
+
+                FileUtils.writeByteArrayToFile(file, data);
+
+                return storedFile;
+            }
+            else if (storeModeId.equals(DataConstants.StoreModes.EXTERNAL_LINK.getValue())) {
+                StoredFile storedFile = new StoredFile();
+                storedFile.setStoreMode(ds.get(StoreMode.class, storeModeId));
+                storedFile.setExtension(extension);
+                storedFile.setReferenceObjectId(referenceObjectId);
+                storedFile.setDataAvailable(true);
+                storedFile.setMeta(meta);
+                storedFile = idObjectService.save(storedFile);
+            }
         }
-
-        if (referenceObjectId == null) {
-            referenceObjectId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        }
-
-        StoredFile storedFile = new StoredFile();
-        storedFile.setStoreMode(ds.get(StoreMode.class, storeModeId));
-        storedFile.setExtension(extension);
-        storedFile.setReferenceObjectId(referenceObjectId);
-        storedFile.setDataAvailable(true);
-        storedFile = idObjectService.save(storedFile);
-
-        String basePath = propertyService.getPropertyValue("file-storage:local_store_path");
-        basePath = String.format("%s/%s", basePath, referenceObjectId.toString());
-        java.io.File file = new java.io.File(basePath);
-        file.mkdirs();
-
-        file = new java.io.File(String.format("%s/%s.%s", basePath, storedFile.getId().toString(), extension));
-
-        FileUtils.writeByteArrayToFile(file, data);
-
-        return storedFile;
+        throw new UnsupportedStoreModeException("UnsupportedStoreModeException");
     }
 
     @Override

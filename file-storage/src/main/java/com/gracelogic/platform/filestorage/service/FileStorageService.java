@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 public interface FileStorageService {
-    StoredFile storeFile(UUID storeModeId, UUID referenceObjectId, byte[] data, String extension) throws UnsupportedStoreModeException, IOException;
+    StoredFile storeFile(UUID storeModeId, UUID referenceObjectId, byte[] data, String extension, String meta) throws UnsupportedStoreModeException, IOException;
 
     EntityListResponse<StoredFileDTO> getStoredFilesPaged(UUID referenceObjectId, Boolean dataAvailable, Collection<UUID> storeModeIds, Integer count, Integer page, Integer start, String sortField, String sortDir);
 

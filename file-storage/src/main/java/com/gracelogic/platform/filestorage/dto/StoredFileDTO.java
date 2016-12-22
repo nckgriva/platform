@@ -9,6 +9,7 @@ public class StoredFileDTO extends IdObjectModel {
     private String extension;
     private UUID referenceObjectId;
     private UUID storeModeId;
+    private String meta;
 
     public String getExtension() {
         return extension;
@@ -34,12 +35,21 @@ public class StoredFileDTO extends IdObjectModel {
         this.storeModeId = storeModeId;
     }
 
+    public String getMeta() {
+        return meta;
+    }
+
+    public void setMeta(String meta) {
+        this.meta = meta;
+    }
+
     public static StoredFileDTO prepare(StoredFile storedFile) {
         StoredFileDTO dto = new StoredFileDTO();
         IdObjectModel.prepare(dto, storedFile);
 
         dto.setReferenceObjectId(storedFile.getReferenceObjectId());
         dto.setExtension(storedFile.getExtension());
+        dto.setMeta(storedFile.getMeta());
         if (storedFile.getStoreMode() != null) {
             dto.setStoreModeId(storedFile.getStoreMode().getId());
         }

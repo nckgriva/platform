@@ -45,6 +45,9 @@ public class StoredFile extends IdObject<UUID> {
     @org.hibernate.annotations.Type(type = "pg-uuid")
     private UUID referenceObjectId;
 
+    @Column(name = "META", nullable = true, length = 4000)
+    private String meta;
+
     @Override
     public UUID getId() {
         return id;
@@ -105,5 +108,13 @@ public class StoredFile extends IdObject<UUID> {
 
     public void setDataAvailable(Boolean dataAvailable) {
         this.dataAvailable = dataAvailable;
+    }
+
+    public String getMeta() {
+        return meta;
+    }
+
+    public void setMeta(String meta) {
+        this.meta = meta;
     }
 }

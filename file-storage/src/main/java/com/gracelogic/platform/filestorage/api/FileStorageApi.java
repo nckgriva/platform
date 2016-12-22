@@ -5,6 +5,7 @@ import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.filestorage.Path;
 import com.gracelogic.platform.filestorage.dto.StoredFileDTO;
 import com.gracelogic.platform.filestorage.model.StoredFile;
+import com.gracelogic.platform.filestorage.service.DataConstants;
 import com.gracelogic.platform.filestorage.service.DownloadServiceImpl;
 import com.gracelogic.platform.filestorage.service.FilePermissionResolver;
 import com.gracelogic.platform.filestorage.service.FileStorageService;
@@ -66,16 +67,25 @@ public class FileStorageApi extends AbstractAuthorizedController {
             return;
         }
 
+        if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
+            String basePath = propertyService.getPropertyValue("file-storage:local_store_path");
+            basePath = String.format("%s/%s", basePath, storedFile.getReferenceObjectId().toString());
 
-        String basePath = propertyService.getPropertyValue("file-storage:local_store_path");
-        basePath = String.format("%s/%s", basePath, storedFile.getReferenceObjectId().toString());
+            File file = new File(String.format("%s/%s.%s", basePath, storedFile.getId().toString(), storedFile.getExtension()));
 
-        File file = new File(String.format("%s/%s.%s", basePath, storedFile.getId().toString(), storedFile.getExtension()));
-
-        try {
-            downloadService.processRequest(file, request, response, true);
-        } catch (IOException e) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            try {
+                downloadService.processRequest(file, request, response, true);
+            } catch (IOException e) {
+                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            }
+        }
+        else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.EXTERNAL_LINK.getValue())) {
+            try {
+                response.sendRedirect(storedFile.getMeta());
+            }
+            catch (IOException e) {
+                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            }
         }
     }
 
