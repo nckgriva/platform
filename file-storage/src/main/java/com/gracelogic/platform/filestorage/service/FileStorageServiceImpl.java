@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -34,42 +35,45 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public StoredFile storeFile(UUID storeModeId, UUID referenceObjectId, byte[] data, String extension, String meta) throws UnsupportedStoreModeException, IOException {
+    public StoredFile storeFile(UUID storeModeId, UUID referenceObjectId, InputStream is, String extension, String meta) throws UnsupportedStoreModeException, IOException {
         if (storeModeId != null) {
+            StoredFile storedFile = new StoredFile();
+            storedFile.setStoreMode(ds.get(StoreMode.class, storeModeId));
+            storedFile.setExtension(extension);
+            storedFile.setReferenceObjectId(referenceObjectId);
+            storedFile.setDataAvailable(true);
+            storedFile.setMeta(meta);
+            storedFile = idObjectService.save(storedFile);
+
             if (storeModeId.equals(DataConstants.StoreModes.LOCAL.getValue())) {
-                if (referenceObjectId == null) {
-                    referenceObjectId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-                }
-
-                StoredFile storedFile = new StoredFile();
-                storedFile.setStoreMode(ds.get(StoreMode.class, storeModeId));
-                storedFile.setExtension(extension);
-                storedFile.setReferenceObjectId(referenceObjectId);
-                storedFile.setDataAvailable(true);
-                storedFile = idObjectService.save(storedFile);
-
-                String basePath = propertyService.getPropertyValue("file-storage:local_store_path");
-                basePath = String.format("%s/%s", basePath, referenceObjectId.toString());
-                java.io.File file = new java.io.File(basePath);
-                file.mkdirs();
-
-                file = new java.io.File(String.format("%s/%s.%s", basePath, storedFile.getId().toString(), extension));
-
-                FileUtils.writeByteArrayToFile(file, data);
-
-                return storedFile;
+                storeDataLocally(is, storedFile.getId(), referenceObjectId, extension);
             }
             else if (storeModeId.equals(DataConstants.StoreModes.EXTERNAL_LINK.getValue())) {
-                StoredFile storedFile = new StoredFile();
-                storedFile.setStoreMode(ds.get(StoreMode.class, storeModeId));
-                storedFile.setExtension(extension);
-                storedFile.setReferenceObjectId(referenceObjectId);
-                storedFile.setDataAvailable(true);
-                storedFile.setMeta(meta);
-                storedFile = idObjectService.save(storedFile);
+                //Nothing to do
             }
+            else {
+                throw new UnsupportedStoreModeException("UnsupportedStoreModeException");
+            }
+
+            return storedFile;
         }
         throw new UnsupportedStoreModeException("UnsupportedStoreModeException");
+    }
+
+    protected void storeDataLocally(InputStream is, UUID storedFileId, UUID referenceObjectId, String extension) throws IOException {
+        if (referenceObjectId == null) {
+            referenceObjectId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        }
+
+        //Create dir
+        String basePath = propertyService.getPropertyValue("file-storage:local_store_path");
+        basePath = String.format("%s/%s", basePath, referenceObjectId.toString());
+        java.io.File file = new java.io.File(basePath);
+        file.mkdirs();
+
+        //Save file
+        file = new java.io.File(buildLocalStoringPath(storedFileId, referenceObjectId, extension));
+        FileUtils.copyInputStreamToFile(is, file);
     }
 
     @Override
@@ -120,10 +124,29 @@ public class FileStorageServiceImpl implements FileStorageService {
             throw new StoredFileDataUnavailableException("StoredFileDataUnavailableException");
         }
 
-        String basePath = propertyService.getPropertyValue("file-storage:local_store_path");
-        basePath = String.format("%s/%s", basePath, storedFile.getReferenceObjectId().toString());
-        File file = new File(String.format("%s/%s.%s", basePath, storedFile.getId().toString(), storedFile.getExtension()));
+        File file = new File(buildLocalStoringPath(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension()));
 
         return FileUtils.readFileToByteArray(file);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteStoredFile(UUID id, boolean withContent) {
+        StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, id);
+        if (withContent) {
+            if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
+                java.io.File file = new java.io.File(buildLocalStoringPath(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension()));
+                file.delete();
+            }
+        }
+
+        idObjectService.delete(StoredFile.class, id);
+    }
+
+    @Override
+    public String buildLocalStoringPath(UUID id, UUID referenceObjectId, String extension) {
+        String basePath = propertyService.getPropertyValue("file-storage:local_store_path");
+        basePath = String.format("%s/%s", basePath, referenceObjectId.toString());
+        return String.format("%s/%s.%s", basePath, id.toString(), extension);
     }
 }

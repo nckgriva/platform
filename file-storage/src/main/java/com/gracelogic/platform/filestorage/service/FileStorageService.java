@@ -7,13 +7,18 @@ import com.gracelogic.platform.filestorage.exception.UnsupportedStoreModeExcepti
 import com.gracelogic.platform.filestorage.model.StoredFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.UUID;
 
 public interface FileStorageService {
-    StoredFile storeFile(UUID storeModeId, UUID referenceObjectId, byte[] data, String extension, String meta) throws UnsupportedStoreModeException, IOException;
+    StoredFile storeFile(UUID storeModeId, UUID referenceObjectId, InputStream is, String extension, String meta) throws UnsupportedStoreModeException, IOException;
 
     EntityListResponse<StoredFileDTO> getStoredFilesPaged(UUID referenceObjectId, Boolean dataAvailable, Collection<UUID> storeModeIds, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     byte[] getStoredFileData(StoredFile storedFile) throws UnsupportedStoreModeException, StoredFileDataUnavailableException, IOException;
+
+    void deleteStoredFile(UUID id, boolean withContent);
+
+    String buildLocalStoringPath(UUID id, UUID referenceObjectId, String extension);
 }

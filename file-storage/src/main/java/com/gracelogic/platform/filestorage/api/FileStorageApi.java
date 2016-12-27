@@ -68,10 +68,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
         }
 
         if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
-            String basePath = propertyService.getPropertyValue("file-storage:local_store_path");
-            basePath = String.format("%s/%s", basePath, storedFile.getReferenceObjectId().toString());
-
-            File file = new File(String.format("%s/%s.%s", basePath, storedFile.getId().toString(), storedFile.getExtension()));
+            File file = new File(fileStorageService.buildLocalStoringPath(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension()));
 
             try {
                 downloadService.processRequest(file, request, response, true);
