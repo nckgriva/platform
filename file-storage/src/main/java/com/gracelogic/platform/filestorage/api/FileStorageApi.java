@@ -4,17 +4,21 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.filestorage.Path;
 import com.gracelogic.platform.filestorage.dto.StoredFileDTO;
+import com.gracelogic.platform.filestorage.dto.StoreRequestDTO;
 import com.gracelogic.platform.filestorage.model.StoredFile;
-import com.gracelogic.platform.filestorage.service.DataConstants;
-import com.gracelogic.platform.filestorage.service.DownloadServiceImpl;
-import com.gracelogic.platform.filestorage.service.FilePermissionResolver;
-import com.gracelogic.platform.filestorage.service.FileStorageService;
-import com.gracelogic.platform.property.service.PropertyService;
+import com.gracelogic.platform.filestorage.service.*;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
+import com.gracelogic.platform.user.exception.ObjectNotFoundException;
+import com.gracelogic.platform.web.dto.EmptyResponse;
+import com.gracelogic.platform.web.dto.ErrorResponse;
+import com.gracelogic.platform.web.service.LocaleHolder;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,26 +48,56 @@ public class FileStorageApi extends AbstractAuthorizedController {
     private FilePermissionResolver filePermissionResolver;
 
     @Autowired
-    private PropertyService propertyService;
-
-    @Autowired
     private FileStorageService fileStorageService;
 
-    @ApiOperation(value = "downloadFile", notes = "Загрузить содержимое файла")
+    @Autowired
+    @Qualifier("filestorageMessageSource")
+    private ResourceBundleMessageSource messageSource;
+
+    @ApiOperation(value = "updateStoredFile", notes = "Обновить содержимое файла")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 403, message = "Forbidden"), @ApiResponse(code = 404, message = "Not Found"), @ApiResponse(code = 500, message = "Something exceptional happened")})
+    @RequestMapping(method = RequestMethod.POST, value = "{id}/update")
+    @ResponseBody
+    public ResponseEntity updateStoredFile(@PathVariable(value = "id") UUID id,
+                                 @ModelAttribute StoreRequestDTO dto,
+                                 HttpServletRequest request,
+                                 HttpServletResponse response) {
+        StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, id);
+
+        if (storedFile == null) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+        }
+
+        if (!filePermissionResolver.canWrite(storedFile, getUser())) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.FORBIDDEN", messageSource.getMessage("fileStorage.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            fileStorageService.updateStoredFile(id, dto.getContent() != null ? dto.getContent().getInputStream() : null, dto.getContent() != null ? FileStorageUtils.getFileExtension(dto.getContent().getOriginalFilename()) : "", dto.getMeta());
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+        } catch (IOException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "downloadStoredFile", notes = "Скачать содержимое файла")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 403, message = "Forbidden"), @ApiResponse(code = 404, message = "Not Found"), @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(value = "/{id}/download", method = RequestMethod.GET)
-    public void downloadFile(@PathVariable(value = "id") String id,
-                             HttpServletRequest request,
-                             HttpServletResponse response) {
-        StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, UUID.fromString(id));
-
-        if (!filePermissionResolver.canRead(storedFile, getUser())) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            return;
-        }
+    public void downloadStoredFile(@PathVariable(value = "id") UUID id,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response) {
+        StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, id);
 
         if (storedFile == null) {
             response.setStatus(HttpStatus.NOT_FOUND.value());
+            return;
+        }
+
+        if (!filePermissionResolver.canRead(storedFile, getUser())) {
+            response.setStatus(HttpStatus.FORBIDDEN.value());
             return;
         }
 
@@ -75,12 +109,10 @@ public class FileStorageApi extends AbstractAuthorizedController {
             } catch (IOException e) {
                 response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
-        }
-        else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.EXTERNAL_LINK.getValue())) {
+        } else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.EXTERNAL_LINK.getValue())) {
             try {
                 response.sendRedirect(storedFile.getMeta());
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
         }
@@ -88,6 +120,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
 
     @ApiOperation(value = "getStoredFiles", notes = "Получить список элементов")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
+    @PreAuthorize("hasAuthority('FILE_STORAGE:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getStoredFiles(@ApiParam(name = "referenceObjectId", value = "referenceObjectId") @RequestParam(value = "referenceObjectId", required = true) UUID referenceObjectId,

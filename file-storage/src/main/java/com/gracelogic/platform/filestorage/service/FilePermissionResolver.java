@@ -5,4 +5,6 @@ import com.gracelogic.platform.user.dto.AuthorizedUser;
 
 public interface FilePermissionResolver {
     boolean canRead(StoredFile storedFile, AuthorizedUser user);
+
+    boolean canWrite(StoredFile storedFile, AuthorizedUser user);
 }
