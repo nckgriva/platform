@@ -35,7 +35,7 @@ public class StoredFile extends IdObject<UUID> {
     @JoinColumn(name = "STORE_MODE_ID", nullable = false)
     private StoreMode storeMode;
 
-    @Column(name = "EXTENSION", nullable = false)
+    @Column(name = "EXTENSION", nullable = true)
     private String extension;
 
     @Column(name = "IS_DATA_AVAILABLE", nullable = false)

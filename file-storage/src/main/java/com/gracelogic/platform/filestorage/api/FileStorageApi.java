@@ -13,6 +13,7 @@ import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.service.LocaleHolder;
 import io.swagger.annotations.*;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -54,6 +55,8 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @Qualifier("filestorageMessageSource")
     private ResourceBundleMessageSource messageSource;
 
+    private static Logger logger = Logger.getLogger(FileStorageApi.class);
+
     @ApiOperation(value = "updateStoredFile", notes = "Обновить содержимое файла")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 403, message = "Forbidden"), @ApiResponse(code = 404, message = "Not Found"), @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(method = RequestMethod.POST, value = "{id}/update")
@@ -77,6 +80,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
         } catch (IOException e) {
+            logger.error("Failed to update file", e);
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
         }
 
@@ -126,13 +130,14 @@ public class FileStorageApi extends AbstractAuthorizedController {
     public ResponseEntity getStoredFiles(@ApiParam(name = "referenceObjectId", value = "referenceObjectId") @RequestParam(value = "referenceObjectId", required = true) UUID referenceObjectId,
                                          @ApiParam(name = "storeModeId", value = "storeModeId") @RequestParam(value = "storeModeId", required = false) UUID storeModeId,
                                          @ApiParam(name = "dataAvailable", value = "dataAvailable") @RequestParam(value = "dataAvailable", required = false) Boolean dataAvailable,
+                                         @ApiParam(name = "enrich", value = "enrich") @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
                                          @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                          @ApiParam(name = "page", value = "page") @RequestParam(value = "page", required = false) Integer page,
                                          @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
                                          @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                          @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<StoredFileDTO> storedFiles = fileStorageService.getStoredFilesPaged(referenceObjectId, dataAvailable, storeModeId != null ? Collections.singletonList(storeModeId) : null, length, page, start, sortField, sortDir);
+        EntityListResponse<StoredFileDTO> storedFiles = fileStorageService.getStoredFilesPaged(referenceObjectId, dataAvailable, storeModeId != null ? Collections.singletonList(storeModeId) : null, enrich, length, page, start, sortField, sortDir);
 
         return new ResponseEntity<EntityListResponse<StoredFileDTO>>(storedFiles, HttpStatus.OK);
     }

@@ -9,7 +9,9 @@ public class StoredFileDTO extends IdObjectModel {
     private String extension;
     private UUID referenceObjectId;
     private UUID storeModeId;
+    private String storeModeName;
     private String meta;
+    private Boolean dataAvailable;
 
     public String getExtension() {
         return extension;
@@ -43,15 +45,40 @@ public class StoredFileDTO extends IdObjectModel {
         this.meta = meta;
     }
 
+    public String getStoreModeName() {
+        return storeModeName;
+    }
+
+    public void setStoreModeName(String storeModeName) {
+        this.storeModeName = storeModeName;
+    }
+
+    public Boolean getDataAvailable() {
+        return dataAvailable;
+    }
+
+    public void setDataAvailable(Boolean dataAvailable) {
+        this.dataAvailable = dataAvailable;
+    }
+
     public static StoredFileDTO prepare(StoredFile storedFile) {
         StoredFileDTO dto = new StoredFileDTO();
         IdObjectModel.prepare(dto, storedFile);
 
         dto.setReferenceObjectId(storedFile.getReferenceObjectId());
         dto.setExtension(storedFile.getExtension());
+        dto.setDataAvailable(storedFile.getDataAvailable());
         dto.setMeta(storedFile.getMeta());
         if (storedFile.getStoreMode() != null) {
             dto.setStoreModeId(storedFile.getStoreMode().getId());
+        }
+
+        return dto;
+    }
+
+    public static StoredFileDTO enrich(StoredFileDTO dto, StoredFile storedFile) {
+        if (storedFile.getStoreMode() != null) {
+            dto.setStoreModeName(storedFile.getStoreMode().getName());
         }
 
         return dto;
