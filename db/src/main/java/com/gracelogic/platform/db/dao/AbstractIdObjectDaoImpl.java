@@ -22,8 +22,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
     public <T extends IdObject> T getObjectById(Class<T> clazz, String fetches, Object id) {
         if (StringUtils.isEmpty(fetches)) {
             return getEntityManager().find(clazz, id);
-        }
-        else {
+        } else {
             String query = "select el from %s el %s where el.id = :id";
             query = String.format(query, clazz.getSimpleName(), fetches);
 
@@ -89,10 +88,9 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
         String query = "delete from %s where id = :id";
         query = String.format(query, clazz.getSimpleName());
 
-        try{
+        try {
             getEntityManager().createQuery(query).setParameter("id", id).executeUpdate();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Failed to delete IdObject with id:" + id.toString(), e);
         }
     }
@@ -103,8 +101,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
 
         try {
             getEntityManager().createQuery(query).setParameter("offsetValue", offsetValue).setParameter("id", id).executeUpdate();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Failed to offset field value", e);
         }
     }
@@ -115,8 +112,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
 
         try {
             getEntityManager().createQuery(query).setParameter("val", val).setParameter("id", id).executeUpdate();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Failed to update field value", e);
         }
     }
@@ -127,8 +123,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
 
         try {
             getEntityManager().createQuery(query).setParameter("val1", val1).setParameter("val2", val2).setParameter("id", id).executeUpdate();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Failed to update field value", e);
         }
     }
@@ -144,7 +139,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
             query += "where " + cause;
         }
 
-        try{
+        try {
 
             Query query1 = getEntityManager().createQuery(query);
             if (params != null) {
@@ -154,8 +149,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
                 }
             }
             count = (Long) query1.getSingleResult();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Failed to get count", e);
         }
 
@@ -178,7 +172,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
         }
 
 
-        try{
+        try {
             Query query1 = getEntityManager().createQuery(query);
             if (params != null) {
                 for (String paramName : params.keySet()) {
@@ -187,8 +181,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
                 }
             }
             count = (Long) query1.getSingleResult();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Failed to get count", e);
         }
 
@@ -200,19 +193,26 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
     }
 
     @Override
-    public Integer getMaxInteger(Class clazz, String fieldName, String cause) {
+    public Integer getMaxInteger(Class clazz, String fieldName, String cause, Map<String, Object> params) {
         Integer count = null;
-        String query = "select max(%s) from %s ";
+        String query = "select max(%s) from %s el ";
         query = String.format(query, fieldName, clazz.getSimpleName());
         if (cause != null && !cause.isEmpty()) {
             query += "where " + cause;
         }
 
 
-        try{
-            count = (Integer) getEntityManager().createQuery(query).getSingleResult();
-        }
-        catch (Exception e) {
+        try {
+            Query query1 = getEntityManager().createQuery(query);
+            if (params != null) {
+                for (String paramName : params.keySet()) {
+                    Object paramValue = params.get(paramName);
+                    query1.setParameter(paramName, paramValue);
+                }
+            }
+
+            count = (Integer) query1.getSingleResult();
+        } catch (Exception e) {
             logger.error("Failed to get max int", e);
         }
 
@@ -224,19 +224,25 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
     }
 
     @Override
-    public Date getMaxDate(Class clazz, String fieldName, String cause) {
+    public Date getMaxDate(Class clazz, String fieldName, String cause, Map<String, Object> params) {
         Date date = null;
-        String query = "select max(%s) from %s ";
+        String query = "select max(%s) from %s el ";
         query = String.format(query, fieldName, clazz.getSimpleName());
         if (cause != null && !cause.isEmpty()) {
             query += "where " + cause;
         }
 
+        try {
+            Query query1 = getEntityManager().createQuery(query);
+            if (params != null) {
+                for (String paramName : params.keySet()) {
+                    Object paramValue = params.get(paramName);
+                    query1.setParameter(paramName, paramValue);
+                }
+            }
 
-        try{
-            date = (Date) getEntityManager().createQuery(query).getSingleResult();
-        }
-        catch (Exception e) {
+            date = (Date) query1.getSingleResult();
+        } catch (Exception e) {
             logger.error("Failed to get max date", e);
         }
 

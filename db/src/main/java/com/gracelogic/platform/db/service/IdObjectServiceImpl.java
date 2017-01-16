@@ -163,13 +163,13 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
-    public Integer getMaxInteger(Class clazz, String fieldName, String cause) {
-        return idObjectDao.getMaxInteger(clazz, fieldName, cause);
+    public Integer getMaxInteger(Class clazz, String fieldName, String cause, Map<String, Object> params) {
+        return idObjectDao.getMaxInteger(clazz, fieldName, cause, params);
     }
 
     @Override
-    public Date getMaxDate(Class clazz, String fieldName, String cause) {
-        return idObjectDao.getMaxDate(clazz, fieldName, cause);
+    public Date getMaxDate(Class clazz, String fieldName, String cause, Map<String, Object> params) {
+        return idObjectDao.getMaxDate(clazz, fieldName, cause, params);
     }
 
     @Override

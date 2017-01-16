@@ -63,9 +63,9 @@ public interface IdObjectService {
 
     <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
 
-    Integer getMaxInteger(Class clazz, String fieldName, String cause);
+    Integer getMaxInteger(Class clazz, String fieldName, String cause, Map<String, Object> params);
 
-    Date getMaxDate(Class clazz, String fieldName, String cause);
+    Date getMaxDate(Class clazz, String fieldName, String cause, Map<String, Object> params);
 
     void updateFieldValue(Class clazz, Object id, String fieldName, Object val);
 

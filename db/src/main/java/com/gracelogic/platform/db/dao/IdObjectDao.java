@@ -46,9 +46,9 @@ public interface IdObjectDao {
 
     void updateTwoFieldValue(Class clazz, Object id, String field1Name, Object val1, String field2Name, Object val2);
 
-    Integer getMaxInteger(Class clazz, String fieldName, String cause);
+    Integer getMaxInteger(Class clazz, String fieldName, String cause, Map<String, Object> params);
 
-    Date getMaxDate(Class clazz, String fieldName, String cause);
+    Date getMaxDate(Class clazz, String fieldName, String cause, Map<String, Object> params);
 
     void delete(Class clazz, String cause, Map<String, Object> params);
 
