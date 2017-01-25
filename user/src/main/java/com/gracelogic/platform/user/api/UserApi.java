@@ -7,6 +7,7 @@ import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
+import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.model.UserSession;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 import com.gracelogic.platform.user.service.UserLifecycleService;
@@ -14,6 +15,7 @@ import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.ServletUtils;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
+import com.gracelogic.platform.web.dto.IDResponse;
 import com.gracelogic.platform.web.dto.ValueRequest;
 import com.gracelogic.platform.web.service.LocaleHolder;
 import io.swagger.annotations.*;
@@ -415,8 +417,8 @@ public class UserApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity saveUser(@ApiParam(name = "user", value = "user") @RequestBody UserDTO userDTO) {
         try {
-            userService.saveUser(userDTO, true, getUser());
-            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+            User user = userService.saveUser(userDTO, true, getUser());
+            return new ResponseEntity<IDResponse>(new IDResponse(user.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }

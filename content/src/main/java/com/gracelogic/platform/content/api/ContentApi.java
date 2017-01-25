@@ -4,14 +4,15 @@ import com.gracelogic.platform.content.Path;
 import com.gracelogic.platform.content.dto.ElementDTO;
 import com.gracelogic.platform.content.dto.SectionDTO;
 import com.gracelogic.platform.content.dto.SectionPatternDTO;
+import com.gracelogic.platform.content.model.Element;
 import com.gracelogic.platform.content.service.ContentService;
 import com.gracelogic.platform.db.dto.DateFormatConstants;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
-import com.gracelogic.platform.user.exception.CustomLocalizedException;
 import com.gracelogic.platform.user.exception.ObjectNotFoundException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
+import com.gracelogic.platform.web.dto.IDResponse;
 import com.gracelogic.platform.web.service.LocaleHolder;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
@@ -129,8 +130,8 @@ public class ContentApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity saveElement(@ApiParam(name = "elementDTO", value = "elementDTO") @RequestBody ElementDTO elementDTO) {
         try {
-            contentService.saveElement(elementDTO);
-            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+            Element element = contentService.saveElement(elementDTO);
+            return new ResponseEntity<IDResponse>(new IDResponse(element.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
