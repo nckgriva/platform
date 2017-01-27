@@ -1,11 +1,11 @@
 package com.gracelogic.platform.suggestion.dto;
 
-import com.gracelogic.platform.db.dto.IdObjectModel;
+import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.db.model.IdObject;
 
 import java.util.Map;
 
-public class SuggestedVariant extends IdObjectModel {
+public class SuggestedVariant extends IdObjectDTO {
     private String name;
     private String description;
     private Map<String, String> tags;
@@ -36,7 +36,7 @@ public class SuggestedVariant extends IdObjectModel {
 
     public static SuggestedVariant prepare(IdObject entity, String name, String description) {
         SuggestedVariant variant = new SuggestedVariant();
-        IdObjectModel.prepare(variant, entity);
+        IdObjectDTO.prepare(variant, entity);
 
         variant.setName(name);
         variant.setDescription(description);

@@ -1,9 +1,9 @@
 package com.gracelogic.platform.user.dto;
 
-import com.gracelogic.platform.db.dto.IdObjectModel;
+import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.user.model.UserSetting;
 
-public class UserSettingDTO extends IdObjectModel {
+public class UserSettingDTO extends IdObjectDTO {
     private String key;
     private String value;
 
@@ -25,7 +25,7 @@ public class UserSettingDTO extends IdObjectModel {
 
     public static UserSettingDTO prepare(UserSetting userSetting) {
         UserSettingDTO model = new UserSettingDTO();
-        IdObjectModel.prepare(model, userSetting);
+        IdObjectDTO.prepare(model, userSetting);
 
         model.setKey(userSetting.getKey());
         model.setValue(userSetting.getValue());

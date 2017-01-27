@@ -1,6 +1,6 @@
 package com.gracelogic.platform.user.dto;
 
-import com.gracelogic.platform.db.dto.IdObjectModel;
+import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.service.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +13,7 @@ import java.util.*;
  * Date: 11.08.12
  * Time: 21:24
  */
-public class UserDTO extends IdObjectModel implements Serializable {
+public class UserDTO extends IdObjectDTO implements Serializable {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_SURNAME = "surname";
 
@@ -91,7 +91,7 @@ public class UserDTO extends IdObjectModel implements Serializable {
     }
 
     public static UserDTO prepare(User user, UserDTO userDTO) {
-        IdObjectModel.prepare(userDTO, user);
+        IdObjectDTO.prepare(userDTO, user);
 
         userDTO.setApproved(user.getApproved());
         userDTO.setPhone(user.getPhone());

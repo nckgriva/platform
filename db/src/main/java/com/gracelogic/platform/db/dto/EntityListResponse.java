@@ -7,7 +7,7 @@ import java.util.LinkedList;
  * Date: 31.01.2015
  * Time: 14:29
  */
-public class EntityListResponse<E extends IdObjectModel> {
+public class EntityListResponse<E extends IdObjectDTO> {
     private Integer pages = 0;
     private Integer page = 1;
     private String entity;

@@ -25,41 +25,21 @@ public interface IdObjectService {
 
     Integer checkExist(Class clazz, String fetches, String cause, Map<String, Object> params, Integer maxCount);
 
-    <T> T saveOrUpdate(T entity);
-
     <T> List<T> getList(Class<T> clazz);
 
     void delete(Class clazz, Object id);
 
     void delete(Class clazz, String cause, Map<String, Object> params);
 
-    Integer getCount(Class clazz, String cause);
-
-    Long getSum(Class clazz, String fieldName, String cause);
-
-    Long getSum(Class clazz, String fieldName, String cause, Map<String, Object> params);
 
     Long getSum(Class clazz, String fieldName, String fetches, String cause, Map<String, Object> params);
 
-    Integer getCount(Class clazz, String fetches, String cause);
-
-    Integer getCount(Class clazz, String fetches, String cause, Map<String, Object> params);
 
     Integer getCount(Class clazz, String column, String fetches, String cause, Map<String, Object> params);
 
     <T extends IdObject> T setIfModified(Class<T> clazz, T oldObject, Object newId);
 
-    <T> List<T> getList(Class<T> clazz, String fieldName, String search);
-
-    <T> List<T> getListByFieldId(Class<T> clazz, String fieldName, Integer id);
-
-    <T> List<T> getListByFieldId(Class<T> clazz, String fieldName, Integer id, Integer pageSize);
-
-    void offsetFieldValue(Class clazz, Object id, String fieldName, Integer offsetValue);
-
-    <T> List<T> getList(Class<T> clazz, String cause, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
-
-    <T> List<T> getList(Class<T> clazz, String fetches, String cause, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
+    void offsetFieldValue(Class clazz, Object id, String fieldName, Integer offsetValuet);
 
     <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
 

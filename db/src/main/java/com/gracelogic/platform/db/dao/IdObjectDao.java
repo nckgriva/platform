@@ -16,19 +16,19 @@ import java.util.Map;
 public interface IdObjectDao {
     <T extends IdObject> T getObjectById(Class<T> clazz, String fetches, Object id);
 
-    <T extends IdObject> T save(T entity);
+    Integer checkExist(Class clazz, String fetches, String cause, Map<String, Object> params, Integer maxCount);
 
     <T extends IdObject> T lockObject(Class<T> clazz, Object id);
 
-    Integer checkExist(Class clazz, String fetches, String cause, Map<String, Object> params, Integer maxCount);
 
-    <T> T saveOrUpdate(T entity);
+    <T extends IdObject> T save(T entity);
+
+
 
     <T> List<T> getList(Class<T> clazz);
 
     <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
 
-    <T> List<T> getList(Class<T> clazz, String fieldName, String search);
 
     void delete(Class clazz, Object id);
 
@@ -36,9 +36,6 @@ public interface IdObjectDao {
 
     Integer getCount(Class clazz, String column, String fetches, String cause, Map<String, Object> params);
 
-    <T> List<T> getListByFieldId(Class<T> clazz, String fieldName, Integer id);
-
-    <T> List<T> getListByFieldId(Class<T> clazz, String fieldName, Integer id, Integer pageSize);
 
     void offsetFieldValue(Class clazz, Object id, String fieldName, Integer offsetValue);
 
@@ -46,11 +43,14 @@ public interface IdObjectDao {
 
     void updateTwoFieldValue(Class clazz, Object id, String field1Name, Object val1, String field2Name, Object val2);
 
+
     Integer getMaxInteger(Class clazz, String fieldName, String cause, Map<String, Object> params);
 
     Date getMaxDate(Class clazz, String fieldName, String cause, Map<String, Object> params);
 
     void delete(Class clazz, String cause, Map<String, Object> params);
+
+
 
     EntityManager getEntityManager();
 }

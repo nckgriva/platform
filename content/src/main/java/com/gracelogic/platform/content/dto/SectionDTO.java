@@ -1,12 +1,12 @@
 package com.gracelogic.platform.content.dto;
 
 import com.gracelogic.platform.content.model.Section;
-import com.gracelogic.platform.db.dto.IdObjectModel;
+import com.gracelogic.platform.db.dto.IdObjectDTO;
 
 import java.util.LinkedList;
 import java.util.UUID;
 
-public class SectionDTO extends IdObjectModel {
+public class SectionDTO extends IdObjectDTO {
     private String name;
     private String description;
     private Boolean active;
@@ -101,7 +101,7 @@ public class SectionDTO extends IdObjectModel {
 
     public static SectionDTO prepare(Section section) {
         SectionDTO dto = new SectionDTO();
-        IdObjectModel.prepare(dto, section);
+        IdObjectDTO.prepare(dto, section);
 
         dto.setName(section.getName());
         dto.setDescription(section.getDescription());

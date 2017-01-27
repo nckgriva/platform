@@ -145,7 +145,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             params.put("storeModeIds", storeModeIds);
         }
 
-        int totalCount = idObjectService.getCount(StoredFile.class, null, cause, params);
+        int totalCount = idObjectService.getCount(StoredFile.class, null, null, cause, params);
         int totalPages = ((totalCount / count)) + 1;
         int startRecord = page != null ? (page * count) - count : start;
 

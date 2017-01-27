@@ -1,11 +1,11 @@
 package com.gracelogic.platform.filestorage.dto;
 
-import com.gracelogic.platform.db.dto.IdObjectModel;
+import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.filestorage.model.StoredFile;
 
 import java.util.UUID;
 
-public class StoredFileDTO extends IdObjectModel {
+public class StoredFileDTO extends IdObjectDTO {
     private String extension;
     private UUID referenceObjectId;
     private UUID storeModeId;
@@ -63,7 +63,7 @@ public class StoredFileDTO extends IdObjectModel {
 
     public static StoredFileDTO prepare(StoredFile storedFile) {
         StoredFileDTO dto = new StoredFileDTO();
-        IdObjectModel.prepare(dto, storedFile);
+        IdObjectDTO.prepare(dto, storedFile);
 
         dto.setReferenceObjectId(storedFile.getReferenceObjectId());
         dto.setExtension(storedFile.getExtension());

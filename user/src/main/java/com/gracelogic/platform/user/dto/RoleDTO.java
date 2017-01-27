@@ -1,6 +1,6 @@
 package com.gracelogic.platform.user.dto;
 
-import com.gracelogic.platform.db.dto.IdObjectModel;
+import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.user.model.Role;
 import com.gracelogic.platform.user.model.UserRole;
 
@@ -12,7 +12,7 @@ import java.util.Set;
  * Date: 10.08.2016
  * Time: 9:28
  */
-public class RoleDTO extends IdObjectModel {
+public class RoleDTO extends IdObjectDTO {
     private String code;
     private String name;
     private String description;
@@ -52,7 +52,7 @@ public class RoleDTO extends IdObjectModel {
 
     public static RoleDTO prepare(Role role) {
         RoleDTO model = new RoleDTO();
-        IdObjectModel.prepare(model, role);
+        IdObjectDTO.prepare(model, role);
         model.setCode(role.getCode());
         model.setName(role.getName());
         model.setDescription(role.getDescription());

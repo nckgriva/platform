@@ -60,11 +60,6 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
-    public <T> T saveOrUpdate(T entity) {
-        return idObjectDao.saveOrUpdate(entity);
-    }
-
-    @Override
     public <T> List<T> getList(Class<T> clazz) {
         return idObjectDao.getList(clazz);
     }
@@ -80,33 +75,8 @@ public class IdObjectServiceImpl implements IdObjectService {
     }
 
     @Override
-    public Integer getCount(Class clazz, String cause) {
-        return idObjectDao.getCount(clazz, null, null, cause, null);
-    }
-
-    @Override
-    public Long getSum(Class clazz, String fieldName, String cause) {
-        return idObjectDao.getSum(clazz, fieldName, null, cause, null);
-    }
-
-    @Override
-    public Long getSum(Class clazz, String fieldName, String cause, Map<String, Object> params) {
-        return idObjectDao.getSum(clazz, fieldName, null, cause, params);
-    }
-
-    @Override
     public Long getSum(Class clazz, String fieldName, String fetches, String cause, Map<String, Object> params) {
         return idObjectDao.getSum(clazz, fieldName, fetches, cause, params);
-    }
-
-    @Override
-    public Integer getCount(Class clazz, String fetches, String cause) {
-        return idObjectDao.getCount(clazz, null, fetches, cause, null);
-    }
-
-    @Override
-    public Integer getCount(Class clazz, String fetches, String cause, Map<String, Object> params) {
-        return idObjectDao.getCount(clazz, null, fetches, cause, params);
     }
 
     @Override
@@ -127,34 +97,10 @@ public class IdObjectServiceImpl implements IdObjectService {
         }
     }
 
-    @Override
-    public <T> List<T> getList(Class<T> clazz, String fieldName, String search) {
-        return idObjectDao.getList(clazz, fieldName, search);
-    }
-
-    @Override
-    public <T> List<T> getListByFieldId(Class<T> clazz, String fieldName, Integer id) {
-        return idObjectDao.getListByFieldId(clazz, fieldName, id);
-    }
-
-    @Override
-    public <T> List<T> getListByFieldId(Class<T> clazz, String fieldName, Integer id, Integer pageSize) {
-        return idObjectDao.getListByFieldId(clazz, fieldName, id, pageSize);
-    }
 
     @Override
     public void offsetFieldValue(Class clazz, Object id, String fieldName, Integer offsetValue) {
         idObjectDao.offsetFieldValue(clazz, id, fieldName, offsetValue);
-    }
-
-    @Override
-    public <T> List<T> getList(Class<T> clazz, String cause, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
-        return idObjectDao.getList(clazz, null, cause, null, sortField, sortDirection, startRecord, maxResult);
-    }
-
-    @Override
-    public <T> List<T> getList(Class<T> clazz, String fetches, String cause, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
-        return idObjectDao.getList(clazz, fetches, cause, null, sortField, sortDirection, startRecord, maxResult);
     }
 
     @Override

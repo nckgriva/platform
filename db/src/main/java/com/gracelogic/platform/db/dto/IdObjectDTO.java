@@ -15,7 +15,7 @@ import java.util.UUID;
  * Time: 12:33
  */
 //@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
-public class IdObjectModel implements Serializable {
+public class IdObjectDTO implements Serializable {
     private UUID id;
     private Date created;
     private Date changed;
@@ -68,7 +68,7 @@ public class IdObjectModel implements Serializable {
         }
     }
 
-    public static IdObjectModel prepare(IdObjectModel dto, IdObject<UUID> idObject) {
+    public static IdObjectDTO prepare(IdObjectDTO dto, IdObject<UUID> idObject) {
         dto.setId(idObject.getId());
         dto.setCreated(idObject.getCreated());
         dto.setChanged(idObject.getChanged());

@@ -3,7 +3,7 @@ package com.gracelogic.platform.content.dto;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.gracelogic.platform.content.model.Element;
-import com.gracelogic.platform.db.dto.IdObjectModel;
+import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.db.dto.JsonDateDeserializer;
 import com.gracelogic.platform.db.dto.JsonDateSerializer;
 import com.gracelogic.platform.user.service.JsonUtils;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ElementDTO extends IdObjectModel {
+public class ElementDTO extends IdObjectDTO {
     private String name;
     private Integer sortOrder;
     private UUID sectionId;
@@ -106,7 +106,7 @@ public class ElementDTO extends IdObjectModel {
 
     public static ElementDTO prepare(Element element) {
         ElementDTO dto = new ElementDTO();
-        IdObjectModel.prepare(dto, element);
+        IdObjectDTO.prepare(dto, element);
 
         dto.setName(element.getName());
         dto.setSortOrder(element.getSortOrder());

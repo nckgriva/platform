@@ -1,7 +1,7 @@
 package com.gracelogic.platform.content.dto;
 
 import com.gracelogic.platform.content.model.SectionPatternField;
-import com.gracelogic.platform.db.dto.IdObjectModel;
+import com.gracelogic.platform.db.dto.IdObjectDTO;
 
 import java.util.UUID;
 
@@ -10,7 +10,7 @@ import java.util.UUID;
  * Date: 18.12.2016
  * Time: 23:12
  */
-public class SectionPatternFieldDTO extends IdObjectModel {
+public class SectionPatternFieldDTO extends IdObjectDTO {
     private String code;
     private String name;
     private Boolean nullable;
@@ -50,7 +50,7 @@ public class SectionPatternFieldDTO extends IdObjectModel {
 
     public static SectionPatternFieldDTO prepare(SectionPatternField field) {
         SectionPatternFieldDTO dto = new SectionPatternFieldDTO();
-        IdObjectModel.prepare(dto, field);
+        IdObjectDTO.prepare(dto, field);
 
         dto.setCode(field.getCode());
         dto.setName(field.getName());
