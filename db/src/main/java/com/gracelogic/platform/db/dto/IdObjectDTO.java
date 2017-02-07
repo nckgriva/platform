@@ -3,7 +3,6 @@ package com.gracelogic.platform.db.dto;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.gracelogic.platform.db.model.IdObject;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -46,26 +45,6 @@ public class IdObjectDTO implements Serializable {
 
     public void setChanged(Date changed) {
         this.changed = changed;
-    }
-
-    @Deprecated
-    public String idAsString() {
-        if (id == null) {
-            return null;
-        }
-        return id.toString();
-    }
-
-    @Deprecated
-    public String getIdAsString() {
-        return idAsString();
-    }
-
-    @Deprecated
-    public void setIdAsString(String value) {
-        if (!StringUtils.isEmpty(value)) {
-            id = UUID.fromString(value);
-        }
     }
 
     public static IdObjectDTO prepare(IdObjectDTO dto, IdObject<UUID> idObject) {
