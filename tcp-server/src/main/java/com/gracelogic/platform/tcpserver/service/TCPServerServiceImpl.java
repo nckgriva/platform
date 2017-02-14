@@ -46,23 +46,25 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
     }
 
     @Override
-    public void addMessageToQueue(Client client, String message) {
-        if (!running) {
-            return;
-        }
-
-        synchronized (connections) {
-            for (Connection connection : connections) {
-                if (client != null && connection.client.getId().equals(client.getId())) {
-                    logger.info(String.format("[%s] - sending message: '%s'", client.getId().toString(), message));
-                    try {
-                        connection.send(message.getBytes());
-                    } catch (Exception e) {
-                        logger.warn(String.format("[%s] - failed to send message", client.getId().toString()), e);
+    public boolean addMessageToQueue(Client client, String message) {
+        boolean result = false;
+        if (running) {
+            synchronized (connections) {
+                for (Connection connection : connections) {
+                    if (client != null && connection.client.getId().equals(client.getId())) {
+                        logger.info(String.format("[%s] - sending message: '%s'", client.getId().toString(), message));
+                        try {
+                            connection.send(message.getBytes());
+                            result = true;
+                        } catch (Exception e) {
+                            logger.warn(String.format("[%s] - failed to send message", client.getId().toString()), e);
+                        }
                     }
                 }
             }
         }
+
+        return result;
     }
 
     @Override
@@ -194,14 +196,12 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
                             if (processedBytes == newProcessedBytes) {
                                 error = true;
                                 break;
-                            }
-                            else {
+                            } else {
                                 processedBytes = newProcessedBytes;
                             }
 
                             offset = processedBytes;
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             error = true;
                             break;
                         }
