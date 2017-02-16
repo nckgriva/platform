@@ -11,7 +11,7 @@ import java.util.List;
  * Time: 13:09
  */
 public interface TCPServerService {
-    boolean addMessageToQueue(Client client, String message);
+    boolean addMessageToQueue(Client client, Message message);
 
     List<Client> addBroadcastMessageToQueue(Message message);
 

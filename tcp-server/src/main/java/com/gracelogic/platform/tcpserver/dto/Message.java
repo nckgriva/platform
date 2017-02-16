@@ -17,7 +17,12 @@ public class Message {
     }
 
     public Message(byte[] bytes) {
-
         this.bytes = bytes;
+    }
+
+    public Message(String message) {
+        if (message != null) {
+            this.bytes = message.getBytes();
+        }
     }
 }

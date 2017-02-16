@@ -46,18 +46,20 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
     }
 
     @Override
-    public boolean addMessageToQueue(Client client, String message) {
+    public boolean addMessageToQueue(Client client, Message message) {
         boolean result = false;
-        if (running) {
-            synchronized (connections) {
-                for (Connection connection : connections) {
-                    if (client != null && connection.client.getId().equals(client.getId())) {
-                        logger.info(String.format("[%s] - sending message: '%s'", client.getId().toString(), message));
-                        try {
-                            connection.send(message.getBytes());
-                            result = true;
-                        } catch (Exception e) {
-                            logger.warn(String.format("[%s] - failed to send message", client.getId().toString()), e);
+        if (message != null) {
+            if (running) {
+                synchronized (connections) {
+                    for (Connection connection : connections) {
+                        if (client != null && connection.client.getId().equals(client.getId())) {
+                            logger.info(String.format("[%s] - sending message: '%s'", client.getId().toString(), message));
+                            try {
+                                connection.send(message.getBytes());
+                                result = true;
+                            } catch (Exception e) {
+                                logger.warn(String.format("[%s] - failed to send message", client.getId().toString()), e);
+                            }
                         }
                     }
                 }

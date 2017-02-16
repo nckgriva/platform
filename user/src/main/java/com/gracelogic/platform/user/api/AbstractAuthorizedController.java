@@ -4,6 +4,7 @@ import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.model.UserSetting;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.service.LocaleHolder;
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,8 +23,6 @@ public abstract class AbstractAuthorizedController {
     @Autowired
     private UserService userService;
 
-    private Locale currentLocale = null;
-
     protected AuthorizedUser getUser() {
         if (SecurityContextHolder.getContext().getAuthentication() != null && SecurityContextHolder.getContext().getAuthentication().getDetails() != null
                 && SecurityContextHolder.getContext().getAuthentication().getDetails() instanceof AuthorizedUser) {
@@ -38,7 +37,7 @@ public abstract class AbstractAuthorizedController {
             UserSetting storedLocale = userService.getUserSetting(getUser().getId(), "CURRENT_LOCALE"); //Todo: возможно стоит локаль кэшировать а не запрашивать её постоянно
             if (storedLocale != null) {
                 try {
-                    locale = Locale.forLanguageTag(storedLocale.getValue());
+                    locale = LocaleUtils.toLocale(storedLocale.getValue());
                 }
                 catch (Exception e) {
                     logger.warn(String.format("Failed to resolve locale '%s'", storedLocale.getValue()), e);
