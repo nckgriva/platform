@@ -103,31 +103,31 @@ public class UserApi extends AbstractAuthorizedController {
             if (exception instanceof UserBlockedException) {
                 response.setStatus(HttpStatus.LOCKED.value());
                 try {
-                    resp = objectMapper.writeValueAsString(new ErrorResponse("USER_BLOCKED", messageSource.getMessage("auth.USER_BLOCKED", null, LocaleHolder.getLocale())));
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("USER_BLOCKED", messageSource.getMessage("auth.USER_BLOCKED", null, getUserLocale())));
                 } catch (Exception ignored) {
                 }
             } else if (exception instanceof TooManyAttemptsException) {
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
                 try {
-                    resp = objectMapper.writeValueAsString(new ErrorResponse("TOO_MANY_ATTEMPTS", messageSource.getMessage("auth.TO_MANY_ATTEMPTS", null, LocaleHolder.getLocale())));
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("TOO_MANY_ATTEMPTS", messageSource.getMessage("auth.TO_MANY_ATTEMPTS", null, getUserLocale())));
                 } catch (Exception ignored) {
                 }
             } else if (exception instanceof UserNotActivatedException) {
                 response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
                 try {
-                    resp = objectMapper.writeValueAsString(new ErrorResponse("NOT_ACTIVATED", messageSource.getMessage("auth.NOT_ACTIVATED", null, LocaleHolder.getLocale())));
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("NOT_ACTIVATED", messageSource.getMessage("auth.NOT_ACTIVATED", null, getUserLocale())));
                 } catch (Exception ignored) {
                 }
             } else if (exception instanceof NotAllowedIPException) {
                 response.setStatus(HttpStatus.NOT_EXTENDED.value());
                 try {
-                    resp = objectMapper.writeValueAsString(new ErrorResponse("NOT_ALLOWED_IP", messageSource.getMessage("auth.NOT_ALLOWED_ID", null, LocaleHolder.getLocale())));
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("NOT_ALLOWED_IP", messageSource.getMessage("auth.NOT_ALLOWED_ID", null, getUserLocale())));
                 } catch (Exception ignored) {
                 }
             } else {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 try {
-                    resp = objectMapper.writeValueAsString(new ErrorResponse("INVALID_CREDENTIALS", messageSource.getMessage("auth.INVALID_CREDENTIALS", null, LocaleHolder.getLocale())));
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("INVALID_CREDENTIALS", messageSource.getMessage("auth.INVALID_CREDENTIALS", null, getUserLocale())));
                 } catch (Exception ignored) {
                 }
             }
@@ -160,7 +160,7 @@ public class UserApi extends AbstractAuthorizedController {
         if (getUser() != null) {
             return new ResponseEntity<AuthorizedUser>(getUser(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, getUserLocale())), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -200,7 +200,7 @@ public class UserApi extends AbstractAuthorizedController {
                                        @RequestBody
                                        ValueRequest valueRequest) {
         if (!userService.checkEmail(valueRequest.getValue(), true)) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.INVALID_EMAIL", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.INVALID_EMAIL", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } else {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         }
@@ -221,7 +221,7 @@ public class UserApi extends AbstractAuthorizedController {
                                        @RequestBody
                                        ValueRequest valueRequest) {
         if (!userService.checkPhone(valueRequest.getValue(), true)) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } else {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         }
@@ -250,7 +250,7 @@ public class UserApi extends AbstractAuthorizedController {
             }
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_CODE", messageSource.getMessage("register.INVALID_CODE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_CODE", messageSource.getMessage("register.INVALID_CODE", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -278,7 +278,7 @@ public class UserApi extends AbstractAuthorizedController {
 
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_CODE", messageSource.getMessage("register.INVALID_CODE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_CODE", messageSource.getMessage("register.INVALID_CODE", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -300,15 +300,15 @@ public class UserApi extends AbstractAuthorizedController {
             lifecycleService.register(userRegistrationDTO, false);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (PhoneOrEmailIsNecessaryException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.PHONE_OR_EMAIL_IS_NECESSARY", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.PHONE_OR_EMAIL_IS_NECESSARY", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidPasswordException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PASSWORD", messageSource.getMessage("register.INVALID_PASSWORD", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PASSWORD", messageSource.getMessage("register.INVALID_PASSWORD", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidPhoneException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidEmailException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } catch (CustomLocalizedException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -330,11 +330,11 @@ public class UserApi extends AbstractAuthorizedController {
         try {
             userService.sendRepairCode(request.getLogin(), request.getLoginType(), null);
         } catch (SendingException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.SENDING_ERROR", messageSource.getMessage("common.SENDING_ERROR", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.SENDING_ERROR", messageSource.getMessage("common.SENDING_ERROR", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } catch (TooFastOperationException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.TOO_FAST_OPERATION", messageSource.getMessage("common.TOO_FAST_OPERATION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.TOO_FAST_OPERATION", messageSource.getMessage("common.TOO_FAST_OPERATION", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
@@ -356,9 +356,9 @@ public class UserApi extends AbstractAuthorizedController {
         try {
             userService.changePassword(request.getLogin(), request.getLoginType(), request.getCode(), request.getNewPassword());
         } catch (IncorrectAuthCodeException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.AUTH_CODE_IS_INCORRECT", messageSource.getMessage("common.AUTH_CODE_IS_INCORRECT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.AUTH_CODE_IS_INCORRECT", messageSource.getMessage("common.AUTH_CODE_IS_INCORRECT", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
@@ -408,7 +408,7 @@ public class UserApi extends AbstractAuthorizedController {
             UserDTO userDTO = userService.getUser(id, true);
             return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -420,7 +420,7 @@ public class UserApi extends AbstractAuthorizedController {
             User user = userService.saveUser(userDTO, true, getUser());
             return new ResponseEntity<IDResponse>(new IDResponse(user.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -432,7 +432,7 @@ public class UserApi extends AbstractAuthorizedController {
             userService.deleteUserViaLifecycleService(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.FAILED_TO_DELETE_USER", messageSource.getMessage("common.FAILED_TO_DELETE_USER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.FAILED_TO_DELETE_USER", messageSource.getMessage("common.FAILED_TO_DELETE_USER", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }

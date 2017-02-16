@@ -99,7 +99,7 @@ public class ContentApi extends AbstractAuthorizedController {
             ElementDTO elementDTO = contentService.getElement(id, includeSectionPattern);
             return new ResponseEntity<ElementDTO>(elementDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -110,7 +110,7 @@ public class ContentApi extends AbstractAuthorizedController {
             SectionPatternDTO sectionPatternDTO = contentService.getSectionPattern(id);
             return new ResponseEntity<SectionPatternDTO>(sectionPatternDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.PATTERN_NOT_FOUND", messageSource.getMessage("content.PATTERN_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.PATTERN_NOT_FOUND", messageSource.getMessage("content.PATTERN_NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -121,7 +121,7 @@ public class ContentApi extends AbstractAuthorizedController {
             SectionPatternDTO sectionPatternDTO = contentService.getSectionPatternBySection(id);
             return new ResponseEntity<SectionPatternDTO>(sectionPatternDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.PATTERN_NOT_FOUND", messageSource.getMessage("content.PATTERN_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.PATTERN_NOT_FOUND", messageSource.getMessage("content.PATTERN_NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -133,7 +133,7 @@ public class ContentApi extends AbstractAuthorizedController {
             Element element = contentService.saveElement(elementDTO);
             return new ResponseEntity<IDResponse>(new IDResponse(element.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -145,7 +145,7 @@ public class ContentApi extends AbstractAuthorizedController {
             contentService.deleteElement(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.FAILED_TO_DELETE_ELEMENT", messageSource.getMessage("content.FAILED_TO_DELETE_ELEMENT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.FAILED_TO_DELETE_ELEMENT", messageSource.getMessage("content.FAILED_TO_DELETE_ELEMENT", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }

@@ -68,20 +68,20 @@ public class FileStorageApi extends AbstractAuthorizedController {
         StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, id);
 
         if (storedFile == null) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, getUserLocale())), HttpStatus.NOT_FOUND);
         }
 
         if (!filePermissionResolver.canWrite(storedFile, getUser())) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.FORBIDDEN", messageSource.getMessage("fileStorage.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.FORBIDDEN", messageSource.getMessage("fileStorage.FORBIDDEN", null, getUserLocale())), HttpStatus.NOT_FOUND);
         }
 
         try {
             fileStorageService.updateStoredFile(id, dto.getContent() != null ? dto.getContent().getInputStream() : null, dto.getContent() != null ? FileStorageUtils.getFileExtension(dto.getContent().getOriginalFilename()) : "", dto.getMeta());
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, getUserLocale())), HttpStatus.NOT_FOUND);
         } catch (IOException e) {
             logger.error("Failed to update file", e);
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, getUserLocale())), HttpStatus.NOT_FOUND);
         }
 
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
