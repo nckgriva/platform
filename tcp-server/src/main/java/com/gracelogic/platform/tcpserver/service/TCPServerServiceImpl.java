@@ -53,10 +53,10 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
                 synchronized (connections) {
                     for (Connection connection : connections) {
                         if (client != null && connection.client.getId().equals(client.getId())) {
-                            logger.info(String.format("[%s] - sending message: '%s'", client.getId().toString(), message));
                             try {
                                 connection.send(message.getBytes());
                                 result = true;
+                                logger.info(String.format("[%s] - sent message: '%s'", client.getId().toString(), message));
                             } catch (Exception e) {
                                 logger.warn(String.format("[%s] - failed to send message", client.getId().toString()), e);
                             }
