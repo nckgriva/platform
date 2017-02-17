@@ -76,13 +76,15 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
         }
 
         LinkedList<Client> onlineMachines = new LinkedList<Client>();
-        synchronized (connections) {
-            for (Connection connection : connections) {
-                if (connection.client != null) {
-                    try {
-                        connection.send(message.getBytes());
-                        onlineMachines.add(connection.client);
-                    } catch (IOException ignored) {
+        if (message != null) {
+            synchronized (connections) {
+                for (Connection connection : connections) {
+                    if (connection.client != null) {
+                        try {
+                            connection.send(message.getBytes());
+                            onlineMachines.add(connection.client);
+                        } catch (IOException ignored) {
+                        }
                     }
                 }
             }
@@ -118,7 +120,6 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
         public DataOutputStream out;
         private LinkedList<Package> packages = new LinkedList<Package>();
         private Client client = new Client();
-        private long lastMessageCheck = 0;
 
         public Connection(Socket sock) {
             this.sock = sock;
