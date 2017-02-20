@@ -1,5 +1,7 @@
 package com.gracelogic.platform.web.service;
 
+import org.apache.commons.lang3.LocaleUtils;
+
 import java.util.Locale;
 
 public class LocaleHolder {
@@ -19,6 +21,9 @@ public class LocaleHolder {
     }
 
     public static void setLocale(String l) {
-        locale.set(Locale.forLanguageTag(l));
+        try {
+            locale.set(LocaleUtils.toLocale(l));
+        }
+        catch (Exception ignored) {}
     }
 }

@@ -19,6 +19,7 @@ import java.util.Locale;
  */
 public abstract class AbstractAuthorizedController {
     protected static final Logger logger = Logger.getLogger(AbstractAuthorizedController.class);
+    public static final String CURRENT_LOCALE = "CURRENT_LOCALE";
 
     @Autowired
     private UserService userService;
@@ -34,13 +35,13 @@ public abstract class AbstractAuthorizedController {
     protected Locale getUserLocale() {
        Locale locale = null;
         if (getUser() != null) {
-            UserSetting storedLocale = userService.getUserSetting(getUser().getId(), "CURRENT_LOCALE"); //Todo: возможно стоит локаль кэшировать а не запрашивать её постоянно
+            UserSetting storedLocale = userService.getUserSetting(getUser().getId(), CURRENT_LOCALE); //Todo: возможно стоит локаль кэшировать а не запрашивать её постоянно
             if (storedLocale != null) {
                 try {
                     locale = LocaleUtils.toLocale(storedLocale.getValue());
                 }
                 catch (Exception e) {
-                    logger.warn(String.format("Failed to resolve locale '%s'", storedLocale.getValue()), e);
+                    logger.debug(String.format("Failed to resolve locale '%s'", storedLocale.getValue()), e);
                 }
             }
         }

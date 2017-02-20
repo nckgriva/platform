@@ -20,8 +20,6 @@ public class LocaleFilter implements Filter {
 
             if (header != null) {
                 LocaleHolder.setLocale(header);
-            } else {
-                LocaleHolder.setLocale(Locale.ENGLISH);
             }
 
             filterChain.doFilter(servletRequest, servletResponse);
