@@ -46,7 +46,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             storedFile.setStoreMode(ds.get(StoreMode.class, storeModeId));
             storedFile.setExtension(extension);
             storedFile.setReferenceObjectId(referenceObjectId);
-            storedFile.setDataAvailable(storeModeId.equals(DataConstants.StoreModes.LOCAL.getValue()) && is != null);
+            storedFile.setDataAvailable(storeModeId.equals(DataConstants.StoreModes.LOCAL.getValue()) && is != null && is.available() > 0);
             storedFile.setMeta(meta);
             storedFile = idObjectService.save(storedFile);
 
@@ -81,7 +81,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             }
         }
 
-        storedFile.setDataAvailable(storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue()) && is != null);
+        storedFile.setDataAvailable(storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue()) && is != null && is.available() > 0);
         storedFile.setMeta(meta);
         storedFile.setExtension(extension);
         idObjectService.save(storedFile);
