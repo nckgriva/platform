@@ -50,6 +50,9 @@ public class User extends IdObject<UUID> {
     @Column(name = "PHONE", nullable = true, unique = true)
     private String phone;
 
+    @Column(name = "NICK", nullable = true, unique = true)
+    private String nick;
+
     @Column(name = "IS_PHONE_VERIFIED", nullable = false)
     private Boolean phoneVerified;
 
@@ -233,5 +236,13 @@ public class User extends IdObject<UUID> {
 
     public void setFields(String fields) {
         this.fields = fields;
+    }
+
+    public String getNick() {
+        return nick;
+    }
+
+    public void setNick(String nick) {
+        this.nick = nick;
     }
 }

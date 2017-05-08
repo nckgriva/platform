@@ -31,6 +31,8 @@ public interface UserService {
 
     boolean checkEmail(String email, boolean fullCheck);
 
+    boolean checkNick(String nick, boolean fullCheck);
+
     boolean checkPassword(String email);
 
     boolean verifyLogin(UUID userId, String loginType, String code);
@@ -51,7 +53,7 @@ public interface UserService {
 
     boolean isActualCodeAvailable(UUID userId, UUID codeTypeId);
 
-    User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException;
+    User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException, InvalidNickException;
 
     void deleteUser(User user);
 

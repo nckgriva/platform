@@ -1,7 +1,5 @@
 package com.gracelogic.platform.oauth.service;
 
-import com.gracelogic.platform.user.dto.UserRegistrationDTO;
-import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.service.AbstractLifecycleService;
 import com.gracelogic.platform.user.service.UserLifecycleService;
@@ -13,11 +11,6 @@ import com.gracelogic.platform.user.service.UserLifecycleService;
  */
 public abstract class AbstractLifecycleWithOauthService extends AbstractLifecycleService implements UserLifecycleService {
     protected abstract OAuthService getOAuthService();
-
-    @Override
-    public User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException, CustomLocalizedException {
-        return super.register(userRegistrationDTO, trust);
-    }
 
     @Override
     public void delete(User user) {

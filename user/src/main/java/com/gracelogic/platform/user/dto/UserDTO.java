@@ -19,6 +19,7 @@ public class UserDTO extends IdObjectDTO implements Serializable {
 
     private String email;
     private String phone;
+    private String nick;
     private Boolean emailVerified;
     private Boolean phoneVerified;
     private Boolean approved;
@@ -40,6 +41,14 @@ public class UserDTO extends IdObjectDTO implements Serializable {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getNick() {
+        return nick;
+    }
+
+    public void setNick(String nick) {
+        this.nick = nick;
     }
 
     public Boolean getApproved() {
@@ -96,6 +105,7 @@ public class UserDTO extends IdObjectDTO implements Serializable {
         userDTO.setApproved(user.getApproved());
         userDTO.setPhone(user.getPhone());
         userDTO.setEmail(user.getEmail());
+        userDTO.setNick(user.getNick());
         userDTO.setBlocked(user.getBlocked());
         userDTO.setEmailVerified(user.getEmailVerified());
         userDTO.setPhoneVerified(user.getPhoneVerified());

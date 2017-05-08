@@ -138,14 +138,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean checkPhone(String phone, boolean fullCheck) {
-        if (!StringUtils.isEmpty(phone) && phone.length() > 5) {
-            Pattern p = Pattern.compile("^7\\d{10}$");
-            Matcher m = p.matcher(phone.trim());
+    public boolean checkPhone(String value, boolean fullCheck) {
+        if (!StringUtils.isEmpty(value) && value.length() > 5 && value.length() < 128) {
+            //^7\\d{10}$
+            Pattern p = Pattern.compile(propertyService.getPropertyValue("PHONE_VALIDATION_REGEX"));
+            Matcher m = p.matcher(value.trim());
             boolean result = m.find();
             if (fullCheck) {
                 Map<String, Object> params = new HashMap<>();
-                params.put("phone", StringUtils.trim(phone));
+                params.put("phone", StringUtils.trim(value));
 
                 return result && idObjectService.checkExist(User.class, null, "el.phone=:phone and el.phoneVerified=true", params, 1) == 0;
             }
@@ -155,17 +156,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean checkEmail(String email, boolean fullCheck) {
-        if (!StringUtils.isEmpty(email) && email.length() > 5 && email.length() < 128) {
-            Pattern p = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" +
-                    "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
-            Matcher m = p.matcher(email.trim());
+    public boolean checkEmail(String value, boolean fullCheck) {
+        if (!StringUtils.isEmpty(value) && value.length() > 5 && value.length() < 128) {
+            //^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$
+            Pattern p = Pattern.compile(propertyService.getPropertyValue("EMAIL_VALIDATION_REGEX"));
+            Matcher m = p.matcher(value.trim());
             boolean result = m.find();
             if (fullCheck) {
                 Map<String, Object> params = new HashMap<>();
-                params.put("email", StringUtils.trim(email));
+                params.put("email", StringUtils.trim(value));
 
                 return result && idObjectService.checkExist(User.class, null, "el.email=:email and el.emailVerified=true", params, 1) == 0;
+            }
+            return result;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkNick(String value, boolean fullCheck) {
+        if (!StringUtils.isEmpty(value) && value.length() > 5 && value.length() < 128) {
+            Pattern p = Pattern.compile(propertyService.getPropertyValue("NICK_VALIDATION_REGEX"));
+            Matcher m = p.matcher(value.trim());
+            boolean result = m.find();
+            if (fullCheck) {
+                Map<String, Object> params = new HashMap<>();
+                params.put("nick", StringUtils.trim(value));
+
+                return result && idObjectService.checkExist(User.class, null, "el.nick=:nick", params, 1) == 0;
             }
             return result;
         }
@@ -465,7 +483,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException {
+    public User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException, InvalidNickException {
         String userApproveMethod = propertyService.getPropertyValue("user:approve_method");
 
         if (!trust) {
@@ -527,6 +545,23 @@ public class UserServiceImpl implements UserService {
             if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
                 user.setEmailVerified(true);
             }
+        }
+
+        if (!StringUtils.isEmpty(userRegistrationDTO.getNick())) {
+            if (!checkNick(userRegistrationDTO.getNick(), false)) {
+                throw new InvalidNickException();
+            }
+
+            User anotherUser = getUserByField("nick", userRegistrationDTO.getNick());
+            if (anotherUser != null) {
+                if (!anotherUser.getApproved()) {
+                    lifecycleService.delete(anotherUser);
+                } else {
+                    throw new InvalidNickException();
+                }
+            }
+
+            user.setNick(StringUtils.trim(StringUtils.lowerCase(userRegistrationDTO.getNick())));
         }
 
         user.setFields(JsonUtils.mapToJson(userRegistrationDTO.getFields()));

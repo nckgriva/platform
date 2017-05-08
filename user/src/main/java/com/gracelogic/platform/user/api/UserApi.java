@@ -228,8 +228,29 @@ public class UserApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
+            value = "nickValid",
+            notes = "Проверка валидности ника",
+            response = ResponseEntity.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
+    @RequestMapping(value = "/nickValid", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity isNickValid(@ApiParam(name = "valueRequest", value = "valueRequest")
+                                       @RequestBody
+                                       ValueRequest valueRequest) {
+        if (!userService.checkNick(valueRequest.getValue(), true)) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_NICK", messageSource.getMessage("register.INVALID_NICK", null, getUserLocale())), HttpStatus.BAD_REQUEST);
+        } else {
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        }
+    }
+
+    @ApiOperation(
             value = "verifyEmail",
-            notes = "Проверка email",
+            notes = "Подтверждение email",
             response = ResponseEntity.class
     )
     @ApiResponses({
@@ -256,7 +277,7 @@ public class UserApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "verifyPhone",
-            notes = "Проверка телефона",
+            notes = "Подтверждение телефона",
             response = ResponseEntity.class
     )
     @ApiResponses({
@@ -304,10 +325,13 @@ public class UserApi extends AbstractAuthorizedController {
         } catch (InvalidPasswordException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PASSWORD", messageSource.getMessage("register.INVALID_PASSWORD", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidPhoneException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, getUserLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidEmailException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, getUserLocale())), HttpStatus.BAD_REQUEST);
-        } catch (CustomLocalizedException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.INVALID_EMAIL", null, getUserLocale())), HttpStatus.BAD_REQUEST);
+        } catch (InvalidNickException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_NICK", messageSource.getMessage("register.INVALID_NICK", null, getUserLocale())), HttpStatus.BAD_REQUEST);
+        }
+        catch (CustomLocalizedException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
@@ -417,7 +441,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity saveUser(@ApiParam(name = "user", value = "user") @RequestBody UserDTO userDTO) {
         try {
-            User user = userService.saveUser(userDTO, true, getUser());
+            User user = lifecycleService.save(userDTO, true, getUser());
             return new ResponseEntity<IDResponse>(new IDResponse(user.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
