@@ -132,21 +132,21 @@ public class UserServiceImpl implements UserService {
         idObjectService.delete(IncorrectLoginAttempt.class, "el.user.id=:userId", params);
     }
 
-    public static String generatePasswordSalt() {
+    private static String generatePasswordSalt() {
         Random random = new Random(System.currentTimeMillis());
         return DigestUtils.md5Hex(String.valueOf(random.nextLong()));
     }
 
     @Override
-    public boolean checkPhone(String value, boolean fullCheck) {
-        if (!StringUtils.isEmpty(value) && value.length() > 5 && value.length() < 128) {
+    public boolean checkPhone(String value, boolean checkAvailability) {
+        if (!StringUtils.isEmpty(value) && value.length() > 0) {
             //^7\\d{10}$
-            Pattern p = Pattern.compile(propertyService.getPropertyValue("PHONE_VALIDATION_REGEX"));
-            Matcher m = p.matcher(value.trim());
+            Pattern p = Pattern.compile(propertyService.getPropertyValue("user:phone_validation_exp"));
+            Matcher m = p.matcher(value);
             boolean result = m.find();
-            if (fullCheck) {
+            if (checkAvailability) {
                 Map<String, Object> params = new HashMap<>();
-                params.put("phone", StringUtils.trim(value));
+                params.put("phone", value);
 
                 return result && idObjectService.checkExist(User.class, null, "el.phone=:phone and el.phoneVerified=true", params, 1) == 0;
             }
@@ -156,15 +156,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean checkEmail(String value, boolean fullCheck) {
-        if (!StringUtils.isEmpty(value) && value.length() > 5 && value.length() < 128) {
+    public boolean checkEmail(String value, boolean checkAvailability) {
+        if (!StringUtils.isEmpty(value) && value.length() > 0) {
             //^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$
-            Pattern p = Pattern.compile(propertyService.getPropertyValue("EMAIL_VALIDATION_REGEX"));
-            Matcher m = p.matcher(value.trim());
+            Pattern p = Pattern.compile(propertyService.getPropertyValue("user:email_validation_exp"));
+            Matcher m = p.matcher(value);
             boolean result = m.find();
-            if (fullCheck) {
+            if (checkAvailability) {
                 Map<String, Object> params = new HashMap<>();
-                params.put("email", StringUtils.trim(value));
+                params.put("email", value);
 
                 return result && idObjectService.checkExist(User.class, null, "el.email=:email and el.emailVerified=true", params, 1) == 0;
             }
@@ -174,25 +174,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean checkNick(String value, boolean fullCheck) {
-        if (!StringUtils.isEmpty(value) && value.length() > 5 && value.length() < 128) {
-            Pattern p = Pattern.compile(propertyService.getPropertyValue("NICK_VALIDATION_REGEX"));
-            Matcher m = p.matcher(value.trim());
-            boolean result = m.find();
-            if (fullCheck) {
-                Map<String, Object> params = new HashMap<>();
-                params.put("nick", StringUtils.trim(value));
-
-                return result && idObjectService.checkExist(User.class, null, "el.nick=:nick", params, 1) == 0;
-            }
-            return result;
+    public boolean checkPassword(String value) {
+        boolean result = false;
+        if (!StringUtils.isEmpty(value) && value.length() > 0) {
+            //.+
+            Pattern p = Pattern.compile(propertyService.getPropertyValue("user:password_validation_exp"));
+            Matcher m = p.matcher(value);
+            result = m.find();
         }
-        return false;
-    }
-
-    @Override
-    public boolean checkPassword(String password) {
-        return !StringUtils.isEmpty(password) && password.length() > 5;
+        return result;
     }
 
 
@@ -289,7 +279,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void sendRepairCode(String login, String loginType, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException, SendingException {
-        User user = getUserByField(loginType, login);
+        User user = userDao.getUserByField(loginType, login);
 
         if (user != null && user.getApproved()) {
             if (templateParams == null) {
@@ -342,7 +332,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void changePassword(String login, String loginType, String code, String newPassword) throws ObjectNotFoundException, IncorrectAuthCodeException {
-        User user = getUserByField(loginType, login);
+        User user = userDao.getUserByField(loginType, login);
 
         if (user != null && isActualCodeAvailable(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue())) {
             AuthCode authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), false);
@@ -508,7 +498,7 @@ public class UserServiceImpl implements UserService {
                 throw new InvalidPhoneException();
             }
 
-            User anotherUser = getUserByField("phone", userRegistrationDTO.getPhone());
+            User anotherUser = userDao.getUserByField("phone", userRegistrationDTO.getPhone());
             if (anotherUser != null) {
                 if (!anotherUser.getApproved()) {
                     lifecycleService.delete(anotherUser);
@@ -530,7 +520,7 @@ public class UserServiceImpl implements UserService {
                 throw new InvalidEmailException();
             }
 
-            User anotherUser = getUserByField("email", userRegistrationDTO.getEmail());
+            User anotherUser = userDao.getUserByField("email", userRegistrationDTO.getEmail());
             if (anotherUser != null) {
                 if (!anotherUser.getApproved()) {
                     lifecycleService.delete(anotherUser);
@@ -545,23 +535,6 @@ public class UserServiceImpl implements UserService {
             if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
                 user.setEmailVerified(true);
             }
-        }
-
-        if (!StringUtils.isEmpty(userRegistrationDTO.getNick())) {
-            if (!checkNick(userRegistrationDTO.getNick(), false)) {
-                throw new InvalidNickException();
-            }
-
-            User anotherUser = getUserByField("nick", userRegistrationDTO.getNick());
-            if (anotherUser != null) {
-                if (!anotherUser.getApproved()) {
-                    lifecycleService.delete(anotherUser);
-                } else {
-                    throw new InvalidNickException();
-                }
-            }
-
-            user.setNick(StringUtils.trim(StringUtils.lowerCase(userRegistrationDTO.getNick())));
         }
 
         user.setFields(JsonUtils.mapToJson(userRegistrationDTO.getFields()));
@@ -590,12 +563,6 @@ public class UserServiceImpl implements UserService {
         idObjectService.delete(UserRole.class, "el.user.id=:userId", params);
         idObjectService.delete(UserSetting.class, "el.user.id=:userId", params);
         idObjectService.delete(User.class, user.getId());
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteUserViaLifecycleService(UUID userId) {
-        lifecycleService.delete(idObjectService.getObjectById(User.class, userId));
     }
 
     @Override

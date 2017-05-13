@@ -2,6 +2,7 @@ package com.gracelogic.platform.user.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gracelogic.platform.db.dto.EntityListResponse;
+import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
@@ -62,6 +63,9 @@ public class UserApi extends AbstractAuthorizedController {
 
     @Autowired
     private UserLifecycleService lifecycleService;
+
+    @Autowired
+    private IdObjectService idObjectService;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
@@ -222,27 +226,6 @@ public class UserApi extends AbstractAuthorizedController {
                                        ValueRequest valueRequest) {
         if (!userService.checkPhone(valueRequest.getValue(), true)) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, getUserLocale())), HttpStatus.BAD_REQUEST);
-        } else {
-            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
-        }
-    }
-
-    @ApiOperation(
-            value = "nickValid",
-            notes = "Проверка валидности ника",
-            response = ResponseEntity.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = "/nickValid", method = RequestMethod.POST)
-    @ResponseBody
-    public ResponseEntity isNickValid(@ApiParam(name = "valueRequest", value = "valueRequest")
-                                       @RequestBody
-                                       ValueRequest valueRequest) {
-        if (!userService.checkNick(valueRequest.getValue(), true)) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_NICK", messageSource.getMessage("register.INVALID_NICK", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } else {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         }
@@ -453,11 +436,10 @@ public class UserApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity deleteUser(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
         try {
-            userService.deleteUserViaLifecycleService(id);
+            lifecycleService.delete(idObjectService.getObjectById(User.class, id));
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.FAILED_TO_DELETE_USER", messageSource.getMessage("common.FAILED_TO_DELETE_USER", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
-
     }
 }

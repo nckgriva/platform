@@ -27,13 +27,11 @@ public interface UserService {
 
     void changeUserPassword(UUID userId, String newPassword);
 
-    boolean checkPhone(String phone, boolean fullCheck);
+    boolean checkPhone(String phone, boolean checkAvailability);
 
-    boolean checkEmail(String email, boolean fullCheck);
+    boolean checkEmail(String email, boolean checkAvailability);
 
-    boolean checkNick(String nick, boolean fullCheck);
-
-    boolean checkPassword(String email);
+    boolean checkPassword(String value);
 
     boolean verifyLogin(UUID userId, String loginType, String code);
 
@@ -56,8 +54,6 @@ public interface UserService {
     User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException, InvalidNickException;
 
     void deleteUser(User user);
-
-    void deleteUserViaLifecycleService(UUID userId);
 
     void sendVerificationCode(User user, String loginType, Map<String, String> templateParams) throws SendingException;
 
