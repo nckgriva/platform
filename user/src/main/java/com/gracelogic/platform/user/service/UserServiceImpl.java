@@ -143,7 +143,7 @@ public class UserServiceImpl implements UserService {
             //^7\\d{10}$
             Pattern p = Pattern.compile(propertyService.getPropertyValue("user:phone_validation_exp"));
             Matcher m = p.matcher(value);
-            boolean result = m.find();
+            boolean result = m.matches();
             if (checkAvailability) {
                 Map<String, Object> params = new HashMap<>();
                 params.put("phone", value);
@@ -161,7 +161,7 @@ public class UserServiceImpl implements UserService {
             //^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$
             Pattern p = Pattern.compile(propertyService.getPropertyValue("user:email_validation_exp"));
             Matcher m = p.matcher(value);
-            boolean result = m.find();
+            boolean result = m.matches();
             if (checkAvailability) {
                 Map<String, Object> params = new HashMap<>();
                 params.put("email", value);
@@ -180,7 +180,7 @@ public class UserServiceImpl implements UserService {
             //.+
             Pattern p = Pattern.compile(propertyService.getPropertyValue("user:password_validation_exp"));
             Matcher m = p.matcher(value);
-            result = m.find();
+            result = m.matches();
         }
         return result;
     }
