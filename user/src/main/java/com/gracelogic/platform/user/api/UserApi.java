@@ -311,8 +311,6 @@ public class UserApi extends AbstractAuthorizedController {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidEmailException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.INVALID_EMAIL", null, getUserLocale())), HttpStatus.BAD_REQUEST);
-        } catch (InvalidNickException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_NICK", messageSource.getMessage("register.INVALID_NICK", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
         catch (CustomLocalizedException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, getUserLocale())), HttpStatus.BAD_REQUEST);

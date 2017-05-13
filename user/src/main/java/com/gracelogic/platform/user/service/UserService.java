@@ -51,7 +51,7 @@ public interface UserService {
 
     boolean isActualCodeAvailable(UUID userId, UUID codeTypeId);
 
-    User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException, InvalidNickException;
+    User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException;
 
     void deleteUser(User user);
 
