@@ -156,7 +156,7 @@ public class PaymentServiceImpl implements PaymentService {
         idObjectService.save(payment);
 
         try {
-            accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.RESTORE_PAYMENT.getValue(), payment.getAmount(), payment.getId(), true);
+            accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.INCOMING_PAYMENT.getValue(), payment.getAmount(), payment.getId(), true);
         }
         catch (InsufficientFundsException ignored) {}
     }
