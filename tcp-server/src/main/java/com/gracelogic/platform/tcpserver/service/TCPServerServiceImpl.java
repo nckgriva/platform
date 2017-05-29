@@ -1,6 +1,5 @@
 package com.gracelogic.platform.tcpserver.service;
 
-import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.tcpserver.Constants;
 import com.gracelogic.platform.tcpserver.TcpServerUtils;
 import com.gracelogic.platform.tcpserver.dto.Client;
@@ -26,12 +25,14 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
     @Autowired
     private TCPServerMessageProcessor TCPServerMessageProcessor;
 
-    @Autowired
-    private PropertyService propertyService;
-
     private boolean running = false;
+    private int serverPort = 8001;
     private ServerSocket listenSocket = null;
     private LinkedList<Connection> connections = new LinkedList<Connection>();
+
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
+    }
 
     @PostConstruct
     public void startService() {
@@ -244,10 +245,9 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
 
     public void run() {
         running = true;
-        int port = propertyService.getPropertyValueAsInteger("tcp-server:port");
-        logger.info("Binding to port: " + port + ";");
 
-        bind(port);
+        logger.info("Binding to port: " + serverPort + ";");
+        bind(serverPort);
         listen();
     }
 
