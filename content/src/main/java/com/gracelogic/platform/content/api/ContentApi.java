@@ -57,6 +57,17 @@ public class ContentApi extends AbstractAuthorizedController {
         return new ResponseEntity<List<SectionDTO>>(sectionDTOs, HttpStatus.OK);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/section/{id}")
+    @ResponseBody
+    public ResponseEntity getElement(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
+        try {
+            SectionDTO sectionDTO = contentService.getSection(id);
+            return new ResponseEntity<SectionDTO>(sectionDTO, HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @ApiOperation(value = "elements", notes = "Получить список элементов")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(value = {"/elements", "/"}, method = RequestMethod.GET)

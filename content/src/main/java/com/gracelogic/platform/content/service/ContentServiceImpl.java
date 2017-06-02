@@ -150,6 +150,16 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
+    public SectionDTO getSection(UUID id) throws ObjectNotFoundException {
+        Section section = idObjectService.getObjectById(Section.class, id);
+        if (section == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        return SectionDTO.prepare(section);
+    }
+
+    @Override
     public EntityListResponse<ElementDTO> getElementsPaged(Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         if (!StringUtils.isEmpty(sortField)) {
             //Т.к. в данном методе запрос используется нативный и требуется сохранить единообразие - транслируем название jpa полей в нативные sql
