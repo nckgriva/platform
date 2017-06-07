@@ -2,6 +2,8 @@ package com.gracelogic.platform.payment.dto;
 
 import com.gracelogic.platform.web.dto.PlatformRequest;
 
+import java.util.UUID;
+
 /**
  * Author: Igor Parkhomenko
  * Date: 05.03.2015
@@ -17,6 +19,7 @@ public class ProcessPaymentRequest extends PlatformRequest {
     private String description;
     private String externalTypeUID;
     private String currency;
+    private UUID accountId; //accountId or accountNumber is necessary
 
     public String getPaymentUID() {
         return paymentUID;
@@ -88,6 +91,14 @@ public class ProcessPaymentRequest extends PlatformRequest {
 
     public void setFee(Double fee) {
         this.fee = fee;
+    }
+
+    public UUID getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(UUID accountId) {
+        this.accountId = accountId;
     }
 
     public ProcessPaymentRequest() {
