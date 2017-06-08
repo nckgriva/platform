@@ -5,7 +5,6 @@ import com.gracelogic.platform.web.service.LocaleHolder;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Locale;
 
 public class LocaleFilter implements Filter {
     @Override

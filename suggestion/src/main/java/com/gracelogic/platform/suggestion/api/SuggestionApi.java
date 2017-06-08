@@ -7,7 +7,10 @@ import com.gracelogic.platform.suggestion.exception.SuggestionProcessorNotFoundE
 import com.gracelogic.platform.suggestion.service.SuggestionService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.ErrorResponse;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Author: Igor Parkhomenko

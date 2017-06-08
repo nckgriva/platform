@@ -18,7 +18,6 @@ import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
 import com.gracelogic.platform.web.dto.ValueRequest;
-import com.gracelogic.platform.web.service.LocaleHolder;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

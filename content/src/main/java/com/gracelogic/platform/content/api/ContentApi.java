@@ -13,7 +13,6 @@ import com.gracelogic.platform.user.exception.ObjectNotFoundException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import com.gracelogic.platform.web.service.LocaleHolder;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +45,9 @@ public class ContentApi extends AbstractAuthorizedController {
     @Qualifier("contentMessageSource")
     private ResourceBundleMessageSource messageSource;
 
-    @ApiOperation(value = "sections", notes = "Получить список секций в иерархическом виде")
+    @ApiOperation(value = "section", notes = "Получить список секций в иерархическом виде")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = "/sections", method = RequestMethod.GET)
+    @RequestMapping(value = "/section", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getSections(@ApiParam(name = "parentId", value = "parentId") @RequestParam(value = "parentId", required = false) UUID parentId,
                                       @ApiParam(name = "onlyActive", value = "onlyActive") @RequestParam(value = "onlyActive", required = false, defaultValue = "true") Boolean onlyActive) {
@@ -59,7 +58,7 @@ public class ContentApi extends AbstractAuthorizedController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/section/{id}")
     @ResponseBody
-    public ResponseEntity getElement(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
+    public ResponseEntity getSection(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
         try {
             SectionDTO sectionDTO = contentService.getSection(id);
             return new ResponseEntity<SectionDTO>(sectionDTO, HttpStatus.OK);
@@ -70,7 +69,7 @@ public class ContentApi extends AbstractAuthorizedController {
 
     @ApiOperation(value = "elements", notes = "Получить список элементов")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = {"/elements", "/"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/elements"}, method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getElements(@ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
                                       @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false) Boolean active,
@@ -102,7 +101,7 @@ public class ContentApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<ElementDTO>>(elements, HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    @RequestMapping(method = RequestMethod.GET, value = "element/{id}")
     @ResponseBody
     public ResponseEntity getElement(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id,
                                      @ApiParam(name = "includeSectionPattern", value = "includeSectionPattern") @RequestParam(value = "includeSectionPattern", required = false, defaultValue = "false") Boolean includeSectionPattern) {
@@ -114,7 +113,7 @@ public class ContentApi extends AbstractAuthorizedController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/sectionPattern/{id}")
+    @RequestMapping(method = RequestMethod.GET, value = "/pattern/{id}")
     @ResponseBody
     public ResponseEntity getSectionPattern(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
         try {
@@ -125,7 +124,7 @@ public class ContentApi extends AbstractAuthorizedController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/sectionPatternBySection/{id}")
+    @RequestMapping(method = RequestMethod.GET, value = "/section/{id}/pattern")
     @ResponseBody
     public ResponseEntity getSectionPatternBySection(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
         try {
@@ -137,7 +136,7 @@ public class ContentApi extends AbstractAuthorizedController {
     }
 
     @PreAuthorize("hasAuthority('ELEMENT:SAVE')")
-    @RequestMapping(method = RequestMethod.POST, value = "/save")
+    @RequestMapping(method = RequestMethod.POST, value = "/element/save")
     @ResponseBody
     public ResponseEntity saveElement(@ApiParam(name = "elementDTO", value = "elementDTO") @RequestBody ElementDTO elementDTO) {
         try {
@@ -149,7 +148,7 @@ public class ContentApi extends AbstractAuthorizedController {
     }
 
     @PreAuthorize("hasAuthority('ELEMENT:DELETE')")
-    @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
+    @RequestMapping(method = RequestMethod.POST, value = "/element/{id}/delete")
     @ResponseBody
     public ResponseEntity deleteElement(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
         try {

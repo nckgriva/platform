@@ -7,7 +7,6 @@ import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.ValueRequest;
-import com.gracelogic.platform.web.service.LocaleHolder;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
