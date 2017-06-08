@@ -69,7 +69,7 @@ public class ContentApi extends AbstractAuthorizedController {
 
     @ApiOperation(value = "elements", notes = "Получить список элементов")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = {"/elements"}, method = RequestMethod.GET)
+    @RequestMapping(value = "/element", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getElements(@ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
                                       @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false) Boolean active,
@@ -101,7 +101,7 @@ public class ContentApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<ElementDTO>>(elements, HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "element/{id}")
+    @RequestMapping(method = RequestMethod.GET, value = "/element/{id}")
     @ResponseBody
     public ResponseEntity getElement(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id,
                                      @ApiParam(name = "includeSectionPattern", value = "includeSectionPattern") @RequestParam(value = "includeSectionPattern", required = false, defaultValue = "false") Boolean includeSectionPattern) {
