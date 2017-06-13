@@ -1,10 +1,14 @@
 package com.gracelogic.platform.property.service;
 
+import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.property.dto.PropertyModel;
 import com.gracelogic.platform.property.model.Property;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.gracelogic.platform.property.dto.PropertyDTO;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -68,6 +72,63 @@ public class PropertyServiceImpl implements PropertyService {
         }
 
         return propertyModel;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Property saveProperty(PropertyDTO dto) {
+        Property entity;
+        if (dto.getId() != null) {
+            entity = idObjectService.getObjectById(Property.class, dto.getId());
+        } else {
+            entity = new Property();
+        }
+
+        entity.setName(dto.getName());
+        entity.setValue(dto.getValue());
+        entity.setLifetime(dto.getLifetime());
+        entity.setVisible(dto.getVisible());
+
+        return idObjectService.save(entity);
+    }
+
+    @Override
+    public EntityListResponse<PropertyDTO> getPropertiesPaged(String name, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = "";
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        if (name != null) {
+            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+            cause += " and lower(el.name) like :name";
+        }
+
+        int totalCount = idObjectService.getCount(Property.class, null, countFetches, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<PropertyDTO> entityListResponse = new EntityListResponse<PropertyDTO>();
+        entityListResponse.setEntity("property");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<Property> items = idObjectService.getList(Property.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        entityListResponse.setPartCount(items.size());
+        for (Property e : items) {
+            PropertyDTO el = PropertyDTO.prepare(e);
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public PropertyDTO getProperty(UUID id) {
+        Property entity = idObjectService.getObjectById(Property.class, id);
+        PropertyDTO dto = PropertyDTO.prepare(entity);
+        return dto;
     }
 
     @Override

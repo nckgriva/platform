@@ -1,46 +1,28 @@
-package com.gracelogic.platform.property.model;
+package com.gracelogic.platform.property.dto;
 
-import com.gracelogic.platform.db.JPAProperties;
-import com.gracelogic.platform.db.model.IdObject;
-import org.hibernate.annotations.GenericGenerator;
+import com.gracelogic.platform.db.dto.IdObjectDTO;
+import com.gracelogic.platform.property.model.Property;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
 /**
- * Author: Igor Parkhomenko
- * Date: 25.06.12
- * Time: 18:30
+ * Created by Igor Parkhomenko on 09.06.2017.
  */
-@Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "PROPERTY", schema = JPAProperties.DEFAULT_SCHEMA)
-public class Property extends IdObject<UUID> {
-    @Id
-    @Column(name = ID)
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "pg-uuid")
-    @Access(AccessType.PROPERTY)
+public class PropertyDTO extends IdObjectDTO {
+
     private UUID id;
 
-    @Column(name = CREATED, nullable = false)
     private Date created;
 
-    @Version
-    @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = "NAME", nullable = false, unique = true)
     private String name;
 
-    @Column(name = "VALUE", nullable = true, length = 4000)
     private String value;
 
-    @Column(name = "LIFETIME", nullable = true)
     private Long lifetime;
 
-    @Column(name = "IS_VISIBLE", nullable = true)
     private Boolean visible;
 
     @Override
@@ -100,4 +82,15 @@ public class Property extends IdObject<UUID> {
     public Boolean getVisible() {return visible;}
 
     public void setVisible(Boolean visible) {this.visible = visible;}
+
+    public static PropertyDTO prepare(Property property) {
+        PropertyDTO propertyDTO = new PropertyDTO();
+        IdObjectDTO.prepare(propertyDTO, property);
+
+        propertyDTO.setName(property.getName());
+        propertyDTO.setValue(property.getValue());
+        propertyDTO.setVisible(property.getVisible());
+
+        return propertyDTO;
+    }
 }
