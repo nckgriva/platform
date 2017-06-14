@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.gracelogic.platform.property.dto.PropertyDTO;
+import com.gracelogic.platform.db.dto.ObjectNotFoundException;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -76,10 +77,13 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Property saveProperty(PropertyDTO dto) {
+    public Property saveProperty(PropertyDTO dto) throws ObjectNotFoundException {
         Property entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Property.class, dto.getId());
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
         } else {
             entity = new Property();
         }
@@ -125,8 +129,11 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public PropertyDTO getProperty(UUID id) {
+    public PropertyDTO getProperty(UUID id) throws ObjectNotFoundException {
         Property entity = idObjectService.getObjectById(Property.class, id);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
         PropertyDTO dto = PropertyDTO.prepare(entity);
         return dto;
     }

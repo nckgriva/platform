@@ -3,6 +3,7 @@ package com.gracelogic.platform.property.service;
 import com.gracelogic.platform.property.dto.PropertyDTO;
 import com.gracelogic.platform.property.model.Property;
 import com.gracelogic.platform.db.dto.EntityListResponse;
+import com.gracelogic.platform.db.dto.ObjectNotFoundException;
 
 import java.util.UUID;
 
@@ -24,9 +25,9 @@ public interface PropertyService {
 
     UUID getPropertyValueAsUUID(String propertyName);
 
-    Property saveProperty(PropertyDTO dto);
+    Property saveProperty(PropertyDTO dto) throws ObjectNotFoundException;
 
-    PropertyDTO getProperty(UUID id);
+    PropertyDTO getProperty(UUID id) throws ObjectNotFoundException;
 
     EntityListResponse<PropertyDTO> getPropertiesPaged(String name, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
 }
