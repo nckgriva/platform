@@ -5,7 +5,7 @@ import com.gracelogic.platform.content.dto.SectionDTO;
 import com.gracelogic.platform.content.dto.SectionPatternDTO;
 import com.gracelogic.platform.content.model.Element;
 import com.gracelogic.platform.db.dto.EntityListResponse;
-import com.gracelogic.platform.user.exception.ObjectNotFoundException;
+import com.gracelogic.platform.db.dto.ObjectNotFoundException;
 
 import java.util.*;
 

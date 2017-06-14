@@ -1,6 +1,7 @@
 package com.gracelogic.platform.user.service;
 
 import com.gracelogic.platform.db.dto.EntityListResponse;
+import com.gracelogic.platform.db.dto.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.notification.dto.Message;

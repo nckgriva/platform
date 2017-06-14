@@ -2,6 +2,7 @@ package com.gracelogic.platform.user.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gracelogic.platform.db.dto.EntityListResponse;
+import com.gracelogic.platform.db.dto.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.Path;

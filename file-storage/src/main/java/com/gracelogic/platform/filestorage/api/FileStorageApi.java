@@ -8,7 +8,7 @@ import com.gracelogic.platform.filestorage.dto.StoredFileDTO;
 import com.gracelogic.platform.filestorage.model.StoredFile;
 import com.gracelogic.platform.filestorage.service.*;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
-import com.gracelogic.platform.user.exception.ObjectNotFoundException;
+import com.gracelogic.platform.db.dto.ObjectNotFoundException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import io.swagger.annotations.*;

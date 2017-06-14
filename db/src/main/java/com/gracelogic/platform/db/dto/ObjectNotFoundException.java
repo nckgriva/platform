@@ -1,13 +1,11 @@
-package com.gracelogic.platform.user.exception;
-
-import org.springframework.security.core.AuthenticationException;
+package com.gracelogic.platform.db.dto;
 
 /**
  * Author: Igor Parkhomenko
  * Date: 28.08.2015
  * Time: 17:06
  */
-public class ObjectNotFoundException extends AuthenticationException {
+public class ObjectNotFoundException extends Exception {
     public ObjectNotFoundException() {
         super("");
     }

@@ -5,7 +5,7 @@ import com.gracelogic.platform.filestorage.dto.StoredFileDTO;
 import com.gracelogic.platform.filestorage.exception.StoredFileDataUnavailableException;
 import com.gracelogic.platform.filestorage.exception.UnsupportedStoreModeException;
 import com.gracelogic.platform.filestorage.model.StoredFile;
-import com.gracelogic.platform.user.exception.ObjectNotFoundException;
+import com.gracelogic.platform.db.dto.ObjectNotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;
