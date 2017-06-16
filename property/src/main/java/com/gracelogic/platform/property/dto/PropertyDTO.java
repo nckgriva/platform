@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Created by Igor Parkhomenko on 09.06.2017.
+ * Created by Ilya Bokarev on 09.06.2017.
  */
 public class PropertyDTO extends IdObjectDTO {
 

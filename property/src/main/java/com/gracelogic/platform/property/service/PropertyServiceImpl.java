@@ -97,7 +97,7 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public EntityListResponse<PropertyDTO> getPropertiesPaged(String name, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<PropertyDTO> getPropertiesPaged(String name, Boolean visible, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -106,6 +106,9 @@ public class PropertyServiceImpl implements PropertyService {
             params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
             cause += " and lower(el.name) like :name";
         }
+
+        params.put("visible", visible);
+        cause += " and :visible";
 
         int totalCount = idObjectService.getCount(Property.class, null, countFetches, cause, params);
         int totalPages = ((totalCount / count)) + 1;
@@ -137,6 +140,13 @@ public class PropertyServiceImpl implements PropertyService {
         PropertyDTO dto = PropertyDTO.prepare(entity);
         return dto;
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteProperty(UUID id) {
+        idObjectService.delete(Property.class, id);
+    }
+
 
     @Override
     public Integer getPropertyValueAsInteger(String propertyName) {
