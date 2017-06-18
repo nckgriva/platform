@@ -9,7 +9,7 @@ import com.gracelogic.platform.filestorage.exception.UnsupportedStoreModeExcepti
 import com.gracelogic.platform.filestorage.model.StoreMode;
 import com.gracelogic.platform.filestorage.model.StoredFile;
 import com.gracelogic.platform.property.service.PropertyService;
-import com.gracelogic.platform.db.dto.ObjectNotFoundException;
+import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

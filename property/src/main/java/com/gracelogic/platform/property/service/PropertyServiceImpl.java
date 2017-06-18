@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.gracelogic.platform.property.dto.PropertyDTO;
-import com.gracelogic.platform.db.dto.ObjectNotFoundException;
+import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -102,13 +102,15 @@ public class PropertyServiceImpl implements PropertyService {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
-        if (name != null) {
+        if (!StringUtils.isEmpty(name)) {
             params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
             cause += " and lower(el.name) like :name";
         }
 
-        params.put("visible", visible);
-        cause += " and :visible";
+        if (visible != null) {
+            cause += " and el.visible = :visible";
+            params.put("visible", visible);
+        }
 
         int totalCount = idObjectService.getCount(Property.class, null, countFetches, cause, params);
         int totalPages = ((totalCount / count)) + 1;
@@ -131,7 +133,6 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public PropertyDTO getProperty(UUID id) throws ObjectNotFoundException {
         Property entity = idObjectService.getObjectById(Property.class, id);
         if (entity == null) {
@@ -146,7 +147,6 @@ public class PropertyServiceImpl implements PropertyService {
     public void deleteProperty(UUID id) {
         idObjectService.delete(Property.class, id);
     }
-
 
     @Override
     public Integer getPropertyValueAsInteger(String propertyName) {

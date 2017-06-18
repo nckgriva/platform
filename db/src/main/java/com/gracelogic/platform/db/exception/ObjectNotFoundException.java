@@ -1,4 +1,4 @@
-package com.gracelogic.platform.db.dto;
+package com.gracelogic.platform.db.exception;
 
 /**
  * Author: Igor Parkhomenko

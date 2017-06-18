@@ -9,7 +9,7 @@ import com.gracelogic.platform.content.service.ContentService;
 import com.gracelogic.platform.db.dto.DateFormatConstants;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
-import com.gracelogic.platform.db.dto.ObjectNotFoundException;
+import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;

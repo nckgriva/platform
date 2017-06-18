@@ -3,7 +3,7 @@ package com.gracelogic.platform.property.service;
 import com.gracelogic.platform.property.dto.PropertyDTO;
 import com.gracelogic.platform.property.model.Property;
 import com.gracelogic.platform.db.dto.EntityListResponse;
-import com.gracelogic.platform.db.dto.ObjectNotFoundException;
+import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 
 import java.util.UUID;
 
