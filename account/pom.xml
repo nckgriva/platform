@@ -25,6 +25,11 @@
             <artifactId>platform-user</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.gracelogic.platform</groupId>
+            <artifactId>platform-finance</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>

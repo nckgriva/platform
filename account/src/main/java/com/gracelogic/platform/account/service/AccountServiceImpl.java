@@ -1,17 +1,19 @@
 package com.gracelogic.platform.account.service;
 
+import com.gracelogic.platform.account.dto.TransactionDTO;
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.account.exception.InsufficientFundsException;
 import com.gracelogic.platform.account.model.Account;
 import com.gracelogic.platform.account.model.Transaction;
 import com.gracelogic.platform.account.model.TransactionType;
+import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -46,5 +48,45 @@ public class AccountServiceImpl implements AccountService {
 
         transaction.setBalanceAfter(account.getBalance());
         idObjectService.save(transaction);
+    }
+
+    @Override
+    public EntityListResponse<TransactionDTO> getTransactionsPaged(UUID userId, UUID accountId, Collection<UUID> transactionTypeIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        if (accountId != null) {
+            cause += "and el.account.id=:accountId ";
+            params.put("accountId", accountId);
+        }
+        if (userId != null) {
+            cause += "and el.account.user.id=:userId ";
+            params.put("userId", userId);
+        }
+        if (transactionTypeIds != null && !transactionTypeIds.isEmpty()) {
+            cause += "and el.transactionType.id in (:transactionTypeIds) ";
+            params.put("transactionTypeIds", transactionTypeIds);
+        }
+
+        int totalCount = idObjectService.getCount(Transaction.class, null, null, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<TransactionDTO> entityListResponse = new EntityListResponse<TransactionDTO>();
+        entityListResponse.setEntity("transaction");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<Transaction> items = idObjectService.getList(Transaction.class, null, cause, params, sortField, sortDir, startRecord, count);
+        entityListResponse.setPartCount(items.size());
+        for (Transaction e : items) {
+            TransactionDTO el = TransactionDTO.prepare(e);
+            if (enrich) {
+            }
+
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
     }
 }

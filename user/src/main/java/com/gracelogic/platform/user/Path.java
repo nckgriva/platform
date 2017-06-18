@@ -11,4 +11,6 @@ public class Path extends PlatformPath {
     public static final String API_USER = PLATFORM_API + "/user";
 
     public static final String API_SETTING = PLATFORM_API + "/setting";
+
+    public static final String API_PROPERTY = PLATFORM_API + "/property";
 }

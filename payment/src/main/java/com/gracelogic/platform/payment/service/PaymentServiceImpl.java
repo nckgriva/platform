@@ -5,11 +5,13 @@ import com.gracelogic.platform.account.exception.IncorrectPaymentStateException;
 import com.gracelogic.platform.account.exception.InsufficientFundsException;
 import com.gracelogic.platform.account.model.Account;
 import com.gracelogic.platform.account.service.AccountService;
+import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.payment.DataConstants;
 import com.gracelogic.platform.payment.dto.CalcPaymentFeeResult;
+import com.gracelogic.platform.payment.dto.PaymentDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentAlreadyExistException;
@@ -18,15 +20,18 @@ import com.gracelogic.platform.payment.model.PaymentState;
 import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.model.User;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Author: Igor Parkhomenko
@@ -188,5 +193,49 @@ public class PaymentServiceImpl implements PaymentService {
         response.setFee(fee);
         response.setTotalAmount(totalAmount);
         return response;
+    }
+
+    @Override
+    public EntityListResponse<PaymentDTO> getPaymentsPaged(UUID userId, UUID accountId, UUID paymentSystemId, Collection<UUID> paymentStateIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        if (userId != null) {
+            cause += "and el.user.id=:userId ";
+            params.put("userId", userId);
+        }
+        if (accountId != null) {
+            cause += "and el.account.id=:accountId ";
+            params.put("accountId", accountId);
+        }
+        if (paymentSystemId != null) {
+            cause += "and el.paymentSystem.id=:paymentSystemId ";
+            params.put("paymentSystemId", paymentSystemId);
+        }
+        if (paymentStateIds != null && !paymentStateIds.isEmpty()) {
+            cause += "and el.paymentState.id in (:paymentStateIds) ";
+            params.put("paymentStateIds", paymentStateIds);
+        }
+
+        int totalCount = idObjectService.getCount(Payment.class, null, null, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<PaymentDTO> entityListResponse = new EntityListResponse<PaymentDTO>();
+        entityListResponse.setEntity("payment");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<Payment> items = idObjectService.getList(Payment.class, null, cause, params, sortField, sortDir, startRecord, count);
+        entityListResponse.setPartCount(items.size());
+        for (Payment e : items) {
+            PaymentDTO el = PaymentDTO.prepare(e);
+            if (enrich) {
+            }
+
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
     }
 }

@@ -13,4 +13,7 @@ public class Path extends PlatformPath {
     public static final String PAYMENT_YANDEX_MONEY = PLATFORM_PAYMENT + "/yandex-money";
     public static final String PAYMENT_SBRF = PLATFORM_PAYMENT + "/sbrf";
     public static final String PAYMENT_ELECSNET = PLATFORM_PAYMENT + "/elecsnet";
+
+    public static final String API_PAYMENT = PLATFORM_API + "/payment";
+
 }
