@@ -93,7 +93,9 @@ public class PropertyServiceImpl implements PropertyService {
         entity.setLifetime(dto.getLifetime());
         entity.setVisible(dto.getVisible());
 
-        return idObjectService.save(entity);
+        Property property = idObjectService.save(entity);
+        reloadProperty(property.getName());
+        return property;
     }
 
     @Override
