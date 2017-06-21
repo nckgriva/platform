@@ -89,6 +89,7 @@ public class PropertyDTO extends IdObjectDTO {
 
         propertyDTO.setName(property.getName());
         propertyDTO.setValue(property.getValue());
+        propertyDTO.setLifetime(property.getLifetime());
         propertyDTO.setVisible(property.getVisible());
 
         return propertyDTO;
