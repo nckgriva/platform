@@ -150,7 +150,7 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
 
         public void run() {
             try {
-                while (active) {
+                while (active && !Thread.currentThread().isInterrupted()) {
                     byte[] stream = TcpServerUtils.readBytes(in);
 
                     if (stream == null) break;
