@@ -3,18 +3,13 @@ package com.gracelogic.platform.user.service;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.notification.exception.SendingException;
-import com.gracelogic.platform.user.dto.AuthorizedUser;
-import com.gracelogic.platform.user.dto.UserDTO;
-import com.gracelogic.platform.user.dto.UserRegistrationDTO;
+import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 
 import javax.servlet.http.HttpSession;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Author: Igor Parkhomenko
@@ -69,4 +64,12 @@ public interface UserService {
     EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     UserDTO getUser(UUID userId, boolean fetchRoles) throws ObjectNotFoundException;
+
+    EntityListResponse<RoleDTO> getRolesPaged(String code, String name, Set<GrantDTO> grants, Integer count, Integer page, Integer start, String sortField, String sortDir);
+
+    Role saveRole(RoleDTO dto) throws ObjectNotFoundException;
+
+    RoleDTO getRole(UUID roleId) throws ObjectNotFoundException;
+
+    void deleteRole(UUID roleId);
 }

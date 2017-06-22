@@ -12,9 +12,7 @@ import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.template.dto.LoadedTemplate;
 import com.gracelogic.platform.template.service.TemplateService;
 import com.gracelogic.platform.user.dao.UserDao;
-import com.gracelogic.platform.user.dto.AuthorizedUser;
-import com.gracelogic.platform.user.dto.UserDTO;
-import com.gracelogic.platform.user.dto.UserRegistrationDTO;
+import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
@@ -793,5 +791,90 @@ public class UserServiceImpl implements UserService {
             }
         }
         return el;
+    }
+
+    @Override
+    public EntityListResponse<RoleDTO> getRolesPaged(String code, String name, Set<GrantDTO> grants, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = "";
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (!StringUtils.isEmpty(code)) {
+            params.put("code", "%%" + StringUtils.lowerCase(name) + "%%");
+            cause += " and lower(el.code) like :code";
+        }
+
+
+        if (!StringUtils.isEmpty(name)) {
+            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+            cause += " and lower(el.name) like :name";
+        }
+
+        if (grants != null) {
+            cause += " and el.grant in :grants";
+            params.put("visible", grants);
+        }
+
+        int totalCount = idObjectService.getCount(Role.class, null, countFetches, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<RoleDTO> entityListResponse = new EntityListResponse<RoleDTO>();
+        entityListResponse.setEntity("role");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<Role> items = idObjectService.getList(Role.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        entityListResponse.setPartCount(items.size());
+        for (Role e : items) {
+            RoleDTO el = RoleDTO.prepare(e);
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    //нерабочий метод, доделать
+    public Role saveRole(RoleDTO dto) throws ObjectNotFoundException {
+        Role entity;
+        if (dto.getId() != null) {
+            entity = idObjectService.getObjectById(Role.class, dto.getId());
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
+        } else {
+            entity = new Role();
+        }
+
+        entity.setCode(dto.getCode());
+        entity.setName(dto.getName());
+
+        /*Set<RoleGrant> rg_set = new HashSet<RoleGrant>();
+        for(GrantDTO gd: dto.getGrants()) {
+            RoleGrant rg = new RoleGrant();
+        }
+        entity.setRoleGrantSet(rg_set);*/
+
+        return entity;
+    }
+
+    @Override
+    public RoleDTO getRole(UUID roleId) throws ObjectNotFoundException {
+        Role entity = idObjectService.getObjectById(Role.class, roleId);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+        RoleDTO dto = RoleDTO.prepare(entity);
+        return dto;
+    }
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteRole(UUID roleId) {
+        idObjectService.delete(Role.class, roleId);
     }
 }
