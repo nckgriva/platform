@@ -794,7 +794,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EntityListResponse<RoleDTO> getRolesPaged(String code, String name, Set<GrantDTO> grants, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<RoleDTO> getRolesPaged(String code, String name, Collection<UUID> grantsIds, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -811,9 +811,9 @@ public class UserServiceImpl implements UserService {
             cause += " and lower(el.name) like :name";
         }
 
-        if (grants != null) {
+        if (grantsIds != null) {
             cause += " and el.grant in :grants";
-            params.put("visible", grants);
+            params.put("grants", grantsIds);
         }
 
         int totalCount = idObjectService.getCount(Role.class, null, countFetches, cause, params);
@@ -839,11 +839,14 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    //нерабочий метод, доделать
     public Role saveRole(RoleDTO dto) throws ObjectNotFoundException {
         Role entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Role.class, dto.getId());
+            String query = "el.role.id=:roleId";
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("roleId", dto.getId());
+            idObjectService.delete(RoleGrant.class, query, params);
             if (entity == null) {
                 throw new ObjectNotFoundException();
             }
@@ -854,11 +857,12 @@ public class UserServiceImpl implements UserService {
         entity.setCode(dto.getCode());
         entity.setName(dto.getName());
 
-        /*Set<RoleGrant> rg_set = new HashSet<RoleGrant>();
-        for(GrantDTO gd: dto.getGrants()) {
+        for(Grant grant:dto.getGrants()) {
             RoleGrant rg = new RoleGrant();
+            rg.setRole(entity);
+            rg.setGrant(idObjectService.getObjectById(Grant.class, grant.getId()));
+            idObjectService.save(rg);
         }
-        entity.setRoleGrantSet(rg_set);*/
 
         return entity;
     }
@@ -875,6 +879,11 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteRole(UUID roleId) {
+        String query = "el.role.id=:roleId";
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("roleId", roleId);
+
+        idObjectService.delete(RoleGrant.class, query, params);
         idObjectService.delete(Role.class, roleId);
     }
 }

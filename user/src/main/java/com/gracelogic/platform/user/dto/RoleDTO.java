@@ -1,6 +1,7 @@
 package com.gracelogic.platform.user.dto;
 
 import com.gracelogic.platform.db.dto.IdObjectDTO;
+import com.gracelogic.platform.user.model.Grant;
 import com.gracelogic.platform.user.model.Role;
 import com.gracelogic.platform.user.model.UserRole;
 
@@ -16,7 +17,7 @@ public class RoleDTO extends IdObjectDTO {
     private String code;
     private String name;
     private String description;
-    private Set<GrantDTO> grants = new HashSet<GrantDTO>();
+    private Set<Grant> grants = new HashSet<Grant>();
 
     public String getCode() {
         return code;
@@ -34,11 +35,11 @@ public class RoleDTO extends IdObjectDTO {
         this.name = name;
     }
 
-    public Set<GrantDTO> getGrants() {
+    public Set<Grant> getGrants() {
         return grants;
     }
 
-    public void setGrants(Set<GrantDTO> grants) {
+    public void setGrants(Set<Grant> grants) {
         this.grants = grants;
     }
 

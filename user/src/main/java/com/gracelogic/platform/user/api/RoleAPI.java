@@ -19,12 +19,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_ROLE)
-public class RoleAPI extends AbstractAuthorizedController{
+public class RoleApi extends AbstractAuthorizedController{
     @Autowired
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource messageSource;
@@ -37,15 +38,14 @@ public class RoleAPI extends AbstractAuthorizedController{
     @ResponseBody
     public ResponseEntity getRoles(@RequestParam(value = "code", required = false) String code,
                                         @RequestParam(value = "name", required = false) String name,
-                                        @RequestParam(value="grants", required = false) Set<GrantDTO> grants,
+                                        @RequestParam(value="grantId", required = false) UUID grantId,
                                         @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                         @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                         @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                         @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<RoleDTO> roles = userService.getRolesPaged(code, name, grants, count, null, start, sortField, sortDir);
+        EntityListResponse<RoleDTO> roles = userService.getRolesPaged(code, name, grantId != null ? Collections.singletonList(grantId) : null, count, null, start, sortField, sortDir);
         return new ResponseEntity<>(roles, HttpStatus.OK);
-
     }
 
     @PreAuthorize("hasAuthority('ROLE:SHOW')")
@@ -78,6 +78,7 @@ public class RoleAPI extends AbstractAuthorizedController{
     @ResponseBody
     public ResponseEntity deleteRole(@PathVariable(value = "id") UUID id) {
         try {
+
             userService.deleteRole(id);
             return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
