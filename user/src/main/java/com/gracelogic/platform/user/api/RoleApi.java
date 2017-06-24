@@ -2,7 +2,6 @@ package com.gracelogic.platform.user.api;
 
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
-import com.gracelogic.platform.user.dto.GrantDTO;
 import com.gracelogic.platform.user.dto.RoleDTO;
 import com.gracelogic.platform.user.model.Role;
 import com.gracelogic.platform.user.service.UserService;
@@ -25,7 +24,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_ROLE)
-public class RoleApi extends AbstractAuthorizedController{
+public class RoleApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource messageSource;
@@ -37,23 +36,25 @@ public class RoleApi extends AbstractAuthorizedController{
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getRoles(@RequestParam(value = "code", required = false) String code,
-                                        @RequestParam(value = "name", required = false) String name,
-                                        @RequestParam(value="grantId", required = false) UUID grantId,
-                                        @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                        @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                        @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                        @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                   @RequestParam(value = "name", required = false) String name,
+                                   @RequestParam(value = "grantId", required = false) UUID grantId,
+                                   @RequestParam(value = "fetchGrants", required = false, defaultValue = "false") Boolean fetchGrants,
+                                   @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                   @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                   @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                   @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<RoleDTO> roles = userService.getRolesPaged(code, name, grantId != null ? Collections.singletonList(grantId) : null, count, null, start, sortField, sortDir);
+        EntityListResponse<RoleDTO> roles = userService.getRolesPaged(code, name, grantId != null ? Collections.singletonList(grantId) : null, fetchGrants, count, null, start, sortField, sortDir);
         return new ResponseEntity<>(roles, HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('ROLE:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
-    public ResponseEntity getRole(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity getRole(@PathVariable(value = "id") UUID id,
+                                  @RequestParam(value = "fetchGrants", required = false, defaultValue = "false") Boolean fetchGrants) {
         try {
-            RoleDTO roleDTO = userService.getRole(id);
+            RoleDTO roleDTO = userService.getRole(id, fetchGrants);
             return new ResponseEntity<>(roleDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);

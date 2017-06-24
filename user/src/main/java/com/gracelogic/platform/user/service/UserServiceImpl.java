@@ -804,15 +804,12 @@ public class UserServiceImpl implements UserService {
             params.put("code", "%%" + StringUtils.lowerCase(name) + "%%");
             cause += " and lower(el.code) like :code";
         }
-
-
         if (!StringUtils.isEmpty(name)) {
             params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
             cause += " and lower(el.name) like :name";
         }
-
-        if (grantIds != null) {
-            cause += " and el.grant.id in :grants";
+        if (grantIds != null && !grantIds.isEmpty()) {
+            cause += " and el.grant.id in (:grants)";
             params.put("grants", grantIds);
         }
 
@@ -866,10 +863,12 @@ public class UserServiceImpl implements UserService {
             entity = new Role();
         }
 
-        String query = "el.role.id=:roleId";
-        HashMap<String, Object> params = new HashMap<>();
-        params.put("roleId", entity.getId());
-        idObjectService.delete(RoleGrant.class, query, params);
+        if (entity.getId() != null) {
+            String query = "el.role.id=:roleId";
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("roleId", entity.getId());
+            idObjectService.delete(RoleGrant.class, query, params);
+        }
 
         entity.setCode(dto.getCode());
         entity.setName(dto.getName());
