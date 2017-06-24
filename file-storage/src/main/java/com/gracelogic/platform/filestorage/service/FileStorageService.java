@@ -7,8 +7,10 @@ import com.gracelogic.platform.filestorage.exception.UnsupportedStoreModeExcepti
 import com.gracelogic.platform.filestorage.model.StoredFile;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -24,4 +26,8 @@ public interface FileStorageService {
     void deleteStoredFile(UUID id, boolean withContent);
 
     String buildLocalStoringPath(UUID id, UUID referenceObjectId, String extension);
+
+    File getFile(StoredFile storedFile) throws UnsupportedStoreModeException, StoredFileDataUnavailableException;
+
+    void writeStoredFileDataToOutputStream(StoredFile storedFile, OutputStream os) throws UnsupportedStoreModeException, StoredFileDataUnavailableException, IOException;
 }

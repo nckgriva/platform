@@ -1,5 +1,6 @@
 package com.gracelogic.platform.filestorage.service;
 
+import com.google.common.io.Files;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -172,6 +174,16 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public byte[] getStoredFileData(StoredFile storedFile) throws UnsupportedStoreModeException, StoredFileDataUnavailableException, IOException {
+        return FileUtils.readFileToByteArray(getFile(storedFile));
+    }
+
+    @Override
+    public void writeStoredFileDataToOutputStream(StoredFile storedFile, OutputStream os) throws UnsupportedStoreModeException, StoredFileDataUnavailableException, IOException {
+        Files.copy(getFile(storedFile), os);
+    }
+
+    @Override
+    public File getFile(StoredFile storedFile) throws UnsupportedStoreModeException, StoredFileDataUnavailableException {
         if (!storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
             throw new UnsupportedStoreModeException("UnsupportedStoreModeException");
         }
@@ -179,9 +191,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             throw new StoredFileDataUnavailableException("StoredFileDataUnavailableException");
         }
 
-        File file = new File(buildLocalStoringPath(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension()));
-
-        return FileUtils.readFileToByteArray(file);
+        return new File(buildLocalStoringPath(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension()));
     }
 
     @Transactional(rollbackFor = Exception.class)
