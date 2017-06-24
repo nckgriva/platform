@@ -7,6 +7,7 @@ import com.gracelogic.platform.user.model.UserRole;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Author: Igor Parkhomenko
@@ -17,7 +18,7 @@ public class RoleDTO extends IdObjectDTO {
     private String code;
     private String name;
     private String description;
-    private Set<Grant> grants = new HashSet<Grant>();
+    private Set<UUID> grants = new HashSet<UUID>();
 
     public String getCode() {
         return code;
@@ -35,11 +36,11 @@ public class RoleDTO extends IdObjectDTO {
         this.name = name;
     }
 
-    public Set<Grant> getGrants() {
+    public Set<UUID> getGrants() {
         return grants;
     }
 
-    public void setGrants(Set<Grant> grants) {
+    public void setGrants(Set<UUID> grants) {
         this.grants = grants;
     }
 

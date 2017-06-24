@@ -794,7 +794,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EntityListResponse<RoleDTO> getRolesPaged(String code, String name, Collection<UUID> grantsIds, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<RoleDTO> getRolesPaged(String code, String name, Collection<UUID> grantIds, boolean fetchGrants, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -811,9 +811,9 @@ public class UserServiceImpl implements UserService {
             cause += " and lower(el.name) like :name";
         }
 
-        if (grantsIds != null) {
-            cause += " and el.grant in :grants";
-            params.put("grants", grantsIds);
+        if (grantIds != null) {
+            cause += " and el.grant.id in :grants";
+            params.put("grants", grantIds);
         }
 
         int totalCount = idObjectService.getCount(Role.class, null, countFetches, cause, params);
@@ -827,9 +827,25 @@ public class UserServiceImpl implements UserService {
         entityListResponse.setTotalCount(totalCount);
 
         List<Role> items = idObjectService.getList(Role.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        List<RoleGrant> roleGrants = Collections.emptyList();
+        if (fetchGrants) {
+            Set<UUID> roleIds = new HashSet<>();
+            for (Role r : items) {
+                roleIds.add(r.getId());
+            }
+            Map<String, Object> grantParams = new HashMap<>();
+            grantParams.put("roleIds", roleIds);
+            roleGrants = idObjectService.getList(RoleGrant.class, null, "el.role.id in (:userIds)", grantParams, null, null, null, null);
+        }
+
         entityListResponse.setPartCount(items.size());
         for (Role e : items) {
             RoleDTO el = RoleDTO.prepare(e);
+            for (RoleGrant rg : roleGrants) {
+                if (rg.getRole().getId().equals(e.getId())) {
+                    el.getGrants().add(rg.getGrant().getId());
+                }
+            }
             entityListResponse.addData(el);
         }
 
@@ -843,10 +859,6 @@ public class UserServiceImpl implements UserService {
         Role entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Role.class, dto.getId());
-            String query = "el.role.id=:roleId";
-            HashMap<String, Object> params = new HashMap<>();
-            params.put("roleId", dto.getId());
-            idObjectService.delete(RoleGrant.class, query, params);
             if (entity == null) {
                 throw new ObjectNotFoundException();
             }
@@ -854,36 +866,54 @@ public class UserServiceImpl implements UserService {
             entity = new Role();
         }
 
+        String query = "el.role.id=:roleId";
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("roleId", entity.getId());
+        idObjectService.delete(RoleGrant.class, query, params);
+
         entity.setCode(dto.getCode());
         entity.setName(dto.getName());
+        idObjectService.save(entity);
 
-        for(Grant grant:dto.getGrants()) {
+        for (UUID grantId : dto.getGrants()) {
             RoleGrant rg = new RoleGrant();
             rg.setRole(entity);
-            rg.setGrant(idObjectService.getObjectById(Grant.class, grant.getId()));
+            rg.setGrant(idObjectService.getObjectById(Grant.class, grantId));
             idObjectService.save(rg);
         }
 
         return entity;
     }
 
-    @Override
-    public RoleDTO getRole(UUID roleId) throws ObjectNotFoundException {
-        Role entity = idObjectService.getObjectById(Role.class, roleId);
-        if (entity == null) {
-            throw new ObjectNotFoundException();
-        }
-        RoleDTO dto = RoleDTO.prepare(entity);
-        return dto;
-    }
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public void deleteRole(UUID roleId) {
-        String query = "el.role.id=:roleId";
-        HashMap<String, Object> params = new HashMap<>();
-        params.put("roleId", roleId);
 
-        idObjectService.delete(RoleGrant.class, query, params);
-        idObjectService.delete(Role.class, roleId);
+        @Override
+        public RoleDTO getRole (UUID roleId, boolean fetchGrants)throws ObjectNotFoundException {
+            Role entity = idObjectService.getObjectById(Role.class, roleId);
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
+            RoleDTO el = RoleDTO.prepare(entity);
+
+            if (fetchGrants) {
+                Map<String, Object> params = new HashMap<>();
+                params.put("roleId", roleId);
+                List<RoleGrant> roleGrants = idObjectService.getList(RoleGrant.class, null, "el.role.id=:roleId", params, null, null, null, null);
+                for (RoleGrant rg : roleGrants) {
+                    if (rg.getRole().getId().equals(roleId)) {
+                        el.getGrants().add(rg.getGrant().getId());
+                    }
+                }
+            }
+            return el;
+        }
+        @Transactional(rollbackFor = Exception.class)
+        @Override
+        public void deleteRole (UUID roleId){
+            String query = "el.role.id=:roleId";
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("roleId", roleId);
+
+            idObjectService.delete(RoleGrant.class, query, params);
+            idObjectService.delete(Role.class, roleId);
+        }
     }
-}

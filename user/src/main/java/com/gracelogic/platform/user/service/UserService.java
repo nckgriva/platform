@@ -65,11 +65,11 @@ public interface UserService {
 
     UserDTO getUser(UUID userId, boolean fetchRoles) throws ObjectNotFoundException;
 
-    EntityListResponse<RoleDTO> getRolesPaged(String code, String name, Collection<UUID> grantsIds, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<RoleDTO> getRolesPaged(String code, String name, Collection<UUID> grantIds, boolean fetchGrants, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     Role saveRole(RoleDTO dto) throws ObjectNotFoundException;
 
-    RoleDTO getRole(UUID roleId) throws ObjectNotFoundException;
+    RoleDTO getRole(UUID roleId, boolean fetchGrants) throws ObjectNotFoundException;
 
     void deleteRole(UUID roleId);
 }
