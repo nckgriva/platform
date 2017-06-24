@@ -29,6 +29,7 @@
         <module>onec</module>
         <module>content</module>
         <module>file-storage</module>
+        <module>file-storage-auth</module>
         <module>suggestion</module>
     </modules>
 </project>
