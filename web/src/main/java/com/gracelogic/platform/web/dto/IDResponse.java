@@ -8,9 +8,9 @@ import java.util.UUID;
  * Time: 22:38
  */
 public class IDResponse extends PlatformRequest {
-    private UUID id;
+    private Object id;
 
-    public UUID getId() {
+    public Object getId() {
         return id;
     }
 
@@ -25,7 +25,7 @@ public class IDResponse extends PlatformRequest {
                 '}';
     }
 
-    public IDResponse(UUID id) {
+    public IDResponse(Object id) {
         this.id = id;
     }
 }
