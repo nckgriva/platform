@@ -825,14 +825,14 @@ public class UserServiceImpl implements UserService {
 
         List<Role> items = idObjectService.getList(Role.class, fetches, cause, params, sortField, sortDir, startRecord, count);
         List<RoleGrant> roleGrants = Collections.emptyList();
-        if (fetchGrants) {
+        if (fetchGrants && !items.isEmpty()) {
             Set<UUID> roleIds = new HashSet<>();
             for (Role r : items) {
                 roleIds.add(r.getId());
             }
             Map<String, Object> grantParams = new HashMap<>();
             grantParams.put("roleIds", roleIds);
-            roleGrants = idObjectService.getList(RoleGrant.class, null, "el.role.id in (:userIds)", grantParams, null, null, null, null);
+            roleGrants = idObjectService.getList(RoleGrant.class, null, "el.role.id in (:roleIds)", grantParams, null, null, null, null);
         }
 
         entityListResponse.setPartCount(items.size());
