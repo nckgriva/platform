@@ -17,7 +17,7 @@ import java.util.UUID;
  * Time: 12:32
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "AUTH_PROVIDER", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "AUTH_PROVIDER")
 public class AuthProvider extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)

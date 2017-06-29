@@ -14,7 +14,7 @@ import java.util.UUID;
  * Time: 12:32
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "STORED_FILE", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "STORED_FILE")
 public class StoredFile extends IdObject<UUID> {
     @Id
     @Column(name = ID)

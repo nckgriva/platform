@@ -20,7 +20,7 @@ import java.util.UUID;
  * Time: 14:43
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "USER", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "USER")
 @TypeDefs({@TypeDef(name= "stringJsonObject", typeClass = StringJsonUserType.class)})
 public class User extends IdObject<UUID> {
     @Id

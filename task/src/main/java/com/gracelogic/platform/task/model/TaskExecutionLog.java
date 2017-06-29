@@ -15,7 +15,7 @@ import java.util.UUID;
  * Time: 12:34
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "TASK_EXECUTION_LOG", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "TASK_EXECUTION_LOG")
 public class TaskExecutionLog extends IdObject<UUID> {
     @Id
     @Column(name = ID)

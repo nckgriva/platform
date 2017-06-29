@@ -36,6 +36,10 @@
                         <groupId>dom4j</groupId>
                         <artifactId>dom4j</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.javassist</groupId>
+                        <artifactId>javassist</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>

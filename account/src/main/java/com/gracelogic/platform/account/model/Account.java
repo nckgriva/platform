@@ -16,7 +16,7 @@ import java.util.UUID;
  * Time: 12:34
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT")
 public class Account extends IdObject<UUID> {
     @Id
     @Column(name = ID)

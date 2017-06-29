@@ -1,7 +1,6 @@
 package com.gracelogic.platform.content.dao;
 
 import com.gracelogic.platform.content.model.Element;
-import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.service.IdObjectServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -23,7 +22,7 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
     @Override
     public Integer getElementsCount(Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields) {
         BigInteger count = null;
-        StringBuilder queryStr = new StringBuilder(String.format("select count(ID) from %s.cmn_element where 1=1 ", JPAProperties.DEFAULT_SCHEMA));
+        StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_element where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
         if (active != null) {
@@ -62,7 +61,7 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
     @Override
     public List<Element> getElements(Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
         List<Element> elements = Collections.emptyList();
-        StringBuilder queryStr = new StringBuilder(String.format("select * from %s.cmn_element where 1=1 ", JPAProperties.DEFAULT_SCHEMA));
+        StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_element where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
         if (active != null) {

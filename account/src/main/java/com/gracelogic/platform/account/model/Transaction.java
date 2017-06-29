@@ -15,7 +15,7 @@ import java.util.UUID;
  * Time: 12:34
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "TRANSACTION", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "TRANSACTION")
 public class Transaction extends IdObject<UUID> {
     @Id
     @Column(name = ID)

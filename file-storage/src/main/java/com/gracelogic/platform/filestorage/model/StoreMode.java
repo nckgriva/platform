@@ -15,7 +15,7 @@ import java.util.UUID;
  * Time: 12:32
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "STORE_MODE", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "STORE_MODE")
 public class StoreMode extends IdObject<UUID> implements Dictionary {
     @Id
     @Access(AccessType.PROPERTY)

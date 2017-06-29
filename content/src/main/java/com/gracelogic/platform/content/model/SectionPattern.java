@@ -14,7 +14,7 @@ import java.util.UUID;
  * Time: 10:56
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "SECTION_PATTERN", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "SECTION_PATTERN")
 public class SectionPattern extends IdObject<UUID> {
     @Id
     @Access(AccessType.PROPERTY)

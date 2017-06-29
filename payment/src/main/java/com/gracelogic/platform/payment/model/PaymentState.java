@@ -15,7 +15,7 @@ import java.util.UUID;
  * Time: 12:32
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "PAYMENT_STATE", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "PAYMENT_STATE")
 public class PaymentState extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)

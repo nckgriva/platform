@@ -15,7 +15,7 @@ import java.util.UUID;
  * Time: 18:30
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "GRANT", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "GRANT")
 public class Grant extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)

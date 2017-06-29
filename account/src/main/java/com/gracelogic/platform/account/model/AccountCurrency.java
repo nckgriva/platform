@@ -16,7 +16,7 @@ import java.util.UUID;
  * Time: 12:32
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT_CURRENCY", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT_CURRENCY")
 public class AccountCurrency extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)

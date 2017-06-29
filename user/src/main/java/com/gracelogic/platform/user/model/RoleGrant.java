@@ -14,7 +14,7 @@ import java.util.UUID;
  * Time: 11:50
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "ROLE_GRANT", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "ROLE_GRANT")
 public class RoleGrant extends IdObject<UUID> {
     @Id
     @Column(name = ID)

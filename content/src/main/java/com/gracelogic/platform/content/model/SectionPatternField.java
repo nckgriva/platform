@@ -14,7 +14,7 @@ import java.util.UUID;
  * Time: 10:56
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "SECTION_PATTERN_FIELD", schema = JPAProperties.DEFAULT_SCHEMA, uniqueConstraints =
+@Table(name = JPAProperties.TABLE_PREFIX + "SECTION_PATTERN_FIELD", uniqueConstraints =
         {@UniqueConstraint(columnNames = {"SECTION_PATTERN_ID", "CODE"})})
 public class SectionPatternField extends IdObject<UUID> {
     @Id

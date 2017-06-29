@@ -14,7 +14,7 @@ import java.util.UUID;
  * Time: 18:30
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "USER_SESSION", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "USER_SESSION")
 public class UserSession extends IdObject<UUID> {
     @Id
     @Column(name = ID)

@@ -15,7 +15,7 @@ import java.util.UUID;
  * Time: 12:32
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "AUTH_CODE_STATE", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "AUTH_CODE_STATE")
 public class AuthCodeState extends IdObject<UUID> implements Dictionary {
     @Id
     @Access(AccessType.PROPERTY)

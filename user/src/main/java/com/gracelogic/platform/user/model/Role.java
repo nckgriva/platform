@@ -17,7 +17,7 @@ import java.util.UUID;
  * Time: 18:38
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "ROLE", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "ROLE")
 public class Role extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)

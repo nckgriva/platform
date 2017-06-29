@@ -15,7 +15,7 @@ import java.util.UUID;
  * Time: 10:56
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "ELEMENT", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "ELEMENT")
 public class Element extends IdObject<UUID> {
     @Id
     @Access(AccessType.PROPERTY)

@@ -14,7 +14,7 @@ import java.util.UUID;
  * Time: 10:56
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "INCORRECT_LOGIN_ATTEMPT", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "INCORRECT_LOGIN_ATTEMPT")
 public class IncorrectLoginAttempt extends IdObject<UUID> {
     @Id
     @Column(name = ID)

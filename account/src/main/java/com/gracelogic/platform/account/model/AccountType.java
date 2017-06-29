@@ -17,7 +17,7 @@ import java.util.UUID;
  * Time: 12:32
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT_TYPE", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT_TYPE")
 public class AccountType extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)

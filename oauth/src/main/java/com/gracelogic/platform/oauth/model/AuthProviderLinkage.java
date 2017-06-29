@@ -16,7 +16,7 @@ import java.util.UUID;
  * Time: 18:30
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "AUTH_PROVIDER_LKG", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "AUTH_PROVIDER_LKG")
 public class AuthProviderLinkage extends IdObject<UUID> {
     @Id
     @Column(name = ID)

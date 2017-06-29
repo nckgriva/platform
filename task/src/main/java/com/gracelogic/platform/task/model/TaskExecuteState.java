@@ -16,7 +16,7 @@ import java.util.UUID;
  * Time: 12:32
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "TASK_EXECUTE_STATE", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "TASK_EXECUTE_STATE")
 public class TaskExecuteState extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)

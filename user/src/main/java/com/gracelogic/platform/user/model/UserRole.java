@@ -14,7 +14,7 @@ import java.util.UUID;
  * Time: 11:58
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "USER_ROLE", schema = JPAProperties.DEFAULT_SCHEMA)
+@Table(name = JPAProperties.TABLE_PREFIX + "USER_ROLE")
 public class UserRole extends IdObject<UUID> {
     @Id
     @Column(name = ID)

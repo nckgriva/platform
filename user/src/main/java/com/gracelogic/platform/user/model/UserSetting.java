@@ -14,7 +14,7 @@ import java.util.UUID;
  * Time: 18:30
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "USER_SETTING", schema = JPAProperties.DEFAULT_SCHEMA,
+@Table(name = JPAProperties.TABLE_PREFIX + "USER_SETTING",
         uniqueConstraints = @UniqueConstraint(columnNames={"USER_ID", "KEY"})
 )
 public class UserSetting extends IdObject<UUID> {
