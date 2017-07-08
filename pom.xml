@@ -31,5 +31,6 @@
         <module>file-storage</module>
         <module>file-storage-auth</module>
         <module>suggestion</module>
+        <module>task-auth</module>
     </modules>
 </project>

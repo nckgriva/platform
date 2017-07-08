@@ -198,6 +198,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public EntityListResponse<PaymentDTO> getPaymentsPaged(UUID userId, UUID accountId, UUID paymentSystemId, Collection<UUID> paymentStateIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
+        String countFetches = "";
         HashMap<String, Object> params = new HashMap<String, Object>();
         if (userId != null) {
             cause += "and el.user.id=:userId ";
@@ -216,7 +217,7 @@ public class PaymentServiceImpl implements PaymentService {
             params.put("paymentStateIds", paymentStateIds);
         }
 
-        int totalCount = idObjectService.getCount(Payment.class, null, null, cause, params);
+        int totalCount = idObjectService.getCount(Payment.class, null, countFetches, cause, params);
         int totalPages = ((totalCount / count)) + 1;
         int startRecord = page != null ? (page * count) - count : start;
 
@@ -230,9 +231,6 @@ public class PaymentServiceImpl implements PaymentService {
         entityListResponse.setPartCount(items.size());
         for (Payment e : items) {
             PaymentDTO el = PaymentDTO.prepare(e);
-            if (enrich) {
-            }
-
             entityListResponse.addData(el);
         }
 

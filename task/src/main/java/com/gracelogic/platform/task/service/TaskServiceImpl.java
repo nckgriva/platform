@@ -1,8 +1,12 @@
 package com.gracelogic.platform.task.service;
 
+import com.gracelogic.platform.db.dto.EntityListResponse;
+import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.task.DataConstants;
+import com.gracelogic.platform.task.dto.TaskDTO;
+import com.gracelogic.platform.task.dto.TaskExecutionLogDTO;
 import com.gracelogic.platform.task.model.Task;
 import com.gracelogic.platform.task.model.TaskExecuteMethod;
 import com.gracelogic.platform.task.model.TaskExecuteState;
@@ -138,5 +142,140 @@ public class TaskServiceImpl implements TaskService {
                 logger.error(String.format("Failed to schedule task %s", task.getId()), e);
             }
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Task saveTask(TaskDTO dto) throws ObjectNotFoundException {
+        Task entity;
+        if (dto.getId() != null) {
+            entity = idObjectService.getObjectById(Task.class, dto.getId());
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
+        } else {
+            entity = new Task();
+        }
+
+        entity.setName(dto.getName());
+        entity.setServiceName(dto.getServiceName());
+        entity.setCronExpression(dto.getCronExpression());
+        entity.setParameter(dto.getParameter());
+        entity.setActive(dto.getActive());
+        entity.setLastExecutionDate(dto.getLastExecutionDate());
+
+        Task task = idObjectService.save(entity);
+        return task;
+    }
+
+    @Override
+    public TaskDTO getTask(UUID id) throws ObjectNotFoundException {
+        Task entity = idObjectService.getObjectById(Task.class, id);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        TaskDTO dto = TaskDTO.prepare(entity);
+        return dto;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteTask(UUID id) {
+        idObjectService.delete(Task.class, id);
+    }
+
+    @Override
+    public EntityListResponse<TaskDTO> getTaskPaged(String name, String serviceName, Boolean active, boolean enrich,
+                                                    Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = "";
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (!StringUtils.isEmpty(name)) {
+            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+            cause += " and lower(el.name) like :name";
+        }
+
+        if (!StringUtils.isEmpty(serviceName)) {
+            params.put("name", "%%" + StringUtils.lowerCase(serviceName) + "%%");
+            cause += " and lower(el.serviceName) like :serviceName";
+        }
+
+        if (active != null) {
+            cause += " and el.active = :active";
+            params.put("active", active);
+        }
+
+        int totalCount = idObjectService.getCount(Task.class, null, countFetches, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<TaskDTO> entityListResponse = new EntityListResponse<TaskDTO>();
+        entityListResponse.setEntity("task");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<Task> items = idObjectService.getList(Task.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        entityListResponse.setPartCount(items.size());
+        for (Task e : items) {
+            TaskDTO el = TaskDTO.prepare(e);
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
+
+    @Override
+    public EntityListResponse<TaskExecutionLogDTO> getTaskExecutionLog(UUID taskId, Collection<UUID> methodIds, Collection<UUID> stateIds, String parameter,//methodId и stateId поменять на Collection<UUID>
+                                                                boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = "";
+        String countFetches = enrich ? "left join fetch el.task left join fetch el.method left join el.state" : "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (taskId != null) {
+            cause += "and el.task.id = :taskId ";
+            params.put("taskId", taskId);
+        }
+
+        if (methodIds != null && !methodIds.isEmpty()) {
+            cause += "and el.method.id in (:methodIds) ";
+            params.put("methodIds", methodIds);
+        }
+
+        if (taskId != null) {
+            cause += "and el.state.id in (:stateIds) ";
+            params.put("stateIds", stateIds);
+        }
+
+        if (!StringUtils.isEmpty(parameter)) {
+            params.put("parameter", "%%" + StringUtils.lowerCase(parameter) + "%%");
+            cause += "and lower(el.parameter) like :parameter" ;
+        }
+
+        int totalCount = idObjectService.getCount(TaskExecutionLog.class, null, countFetches, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<TaskExecutionLogDTO> entityListResponse = new EntityListResponse<TaskExecutionLogDTO>();
+        entityListResponse.setEntity("taskExecutionLog");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<TaskExecutionLog> items = idObjectService.getList(TaskExecutionLog.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        entityListResponse.setPartCount(items.size());
+        for (TaskExecutionLog e : items) {
+            TaskExecutionLogDTO el = TaskExecutionLogDTO.prepare(e);
+            if (enrich) {
+                TaskExecutionLogDTO.enrich(el, e);
+            }
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
     }
 }

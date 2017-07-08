@@ -824,6 +824,7 @@ public class UserServiceImpl implements UserService {
         entityListResponse.setTotalCount(totalCount);
 
         List<Role> items = idObjectService.getList(Role.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+
         List<RoleGrant> roleGrants = Collections.emptyList();
         if (fetchGrants && !items.isEmpty()) {
             Set<UUID> roleIds = new HashSet<>();
