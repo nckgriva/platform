@@ -897,34 +897,35 @@ public class UserServiceImpl implements UserService {
     }
 
 
-        @Override
-        public RoleDTO getRole (UUID roleId, boolean fetchGrants)throws ObjectNotFoundException {
-            Role entity = idObjectService.getObjectById(Role.class, roleId);
-            if (entity == null) {
-                throw new ObjectNotFoundException();
-            }
-            RoleDTO el = RoleDTO.prepare(entity);
+    @Override
+    public RoleDTO getRole(UUID roleId, boolean fetchGrants) throws ObjectNotFoundException {
+        Role entity = idObjectService.getObjectById(Role.class, roleId);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+        RoleDTO el = RoleDTO.prepare(entity);
 
-            if (fetchGrants) {
-                Map<String, Object> params = new HashMap<>();
-                params.put("roleId", roleId);
-                List<RoleGrant> roleGrants = idObjectService.getList(RoleGrant.class, null, "el.role.id=:roleId", params, null, null, null, null);
-                for (RoleGrant rg : roleGrants) {
-                    if (rg.getRole().getId().equals(roleId)) {
-                        el.getGrants().add(rg.getGrant().getId());
-                    }
+        if (fetchGrants) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("roleId", roleId);
+            List<RoleGrant> roleGrants = idObjectService.getList(RoleGrant.class, null, "el.role.id=:roleId", params, null, null, null, null);
+            for (RoleGrant rg : roleGrants) {
+                if (rg.getRole().getId().equals(roleId)) {
+                    el.getGrants().add(rg.getGrant().getId());
                 }
             }
-            return el;
         }
-        @Transactional(rollbackFor = Exception.class)
-        @Override
-        public void deleteRole (UUID roleId){
-            String query = "el.role.id=:roleId";
-            HashMap<String, Object> params = new HashMap<>();
-            params.put("roleId", roleId);
-
-            idObjectService.delete(RoleGrant.class, query, params);
-            idObjectService.delete(Role.class, roleId);
-        }
+        return el;
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteRole(UUID roleId) {
+        String query = "el.role.id=:roleId";
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("roleId", roleId);
+
+        idObjectService.delete(RoleGrant.class, query, params);
+        idObjectService.delete(Role.class, roleId);
+    }
+}
