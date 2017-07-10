@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.*;
@@ -58,6 +59,16 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private TemplateService templateService;
+
+    @PostConstruct
+    private void init() {
+        //Load user name format
+        String userNameFormat = propertyService.getPropertyValue("user:user_name_format");
+        if (!StringUtils.isEmpty(userNameFormat)) {
+            UserDTO.setUserNameFormat(userNameFormat);
+        }
+
+    }
 
     @Override
     public User getUserByField(String fieldName, Object fieldValue) {

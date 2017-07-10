@@ -3,6 +3,7 @@ package com.gracelogic.platform.account.dto;
 import com.gracelogic.platform.account.model.Transaction;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.finance.FinanceUtils;
+import com.gracelogic.platform.user.dto.UserDTO;
 
 import java.util.UUID;
 
@@ -106,15 +107,9 @@ public class TransactionDTO extends IdObjectDTO {
 
         if (transaction.getAccount() != null) {
             model.setAccountId(transaction.getAccount().getId());
-            model.setAccountExternalIdentifier(transaction.getAccount().getExternalIdentifier());
-            if (transaction.getAccount().getUser() != null) {
-                model.setUserId(transaction.getAccount().getUser().getId());
-//                model.setUserName(ExtendedUserDTO.formatUserName(transaction.getAccount().getUser()));
-            }
         }
         if (transaction.getTransactionType() != null) {
             model.setTransactionTypeId(transaction.getTransactionType().getId());
-            model.setTransactionTypeName(transaction.getTransactionType().getName());
         }
 
         model.setAmount(FinanceUtils.toFractional(transaction.getAmount()));
@@ -123,4 +118,19 @@ public class TransactionDTO extends IdObjectDTO {
 
         return model;
     }
+
+    public static void enrich(TransactionDTO model, Transaction entity) {
+        if (entity.getAccount() != null) {
+            model.setAccountExternalIdentifier(entity.getAccount().getExternalIdentifier());
+
+            if (entity.getAccount().getUser() != null) {
+                model.setUserId(entity.getAccount().getUser().getId());
+                model.setUserName(UserDTO.formatUserName(entity.getAccount().getUser()));
+            }
+        }
+        if (entity.getTransactionType() != null) {
+            model.setTransactionTypeName(entity.getTransactionType().getName());
+        }
+    }
+
 }

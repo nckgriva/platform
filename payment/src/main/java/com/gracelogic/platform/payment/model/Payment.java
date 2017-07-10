@@ -34,19 +34,15 @@ public class Payment extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @ManyToOne
-    @JoinColumn(name = "USER_ID", nullable = false)
-    private User user;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "ACCOUNT_ID", nullable = false)
     private Account account;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "PAYMENT_SYSTEM_ID", nullable = false)
     private PaymentSystem paymentSystem;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "PAYMENT_STATE_ID", nullable = false)
     private PaymentState paymentState;
 
@@ -103,14 +99,6 @@ public class Payment extends IdObject<UUID> {
     @Override
     public void setCreated(Date created) {
         this.created = created;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public PaymentSystem getPaymentSystem() {

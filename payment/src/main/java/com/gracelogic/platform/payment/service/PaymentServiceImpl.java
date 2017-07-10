@@ -20,7 +20,6 @@ import com.gracelogic.platform.payment.model.PaymentState;
 import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.model.User;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +100,6 @@ public class PaymentServiceImpl implements PaymentService {
         User user = account.getUser();
 
         payment.setAccount(account);
-        payment.setUser(user);
         payment.setPaymentUID(paymentModel.getPaymentUID());
         payment.setDescription(paymentModel.getDescription());
         payment.setExternalTypeUID(paymentModel.getExternalTypeUID());
@@ -199,6 +197,7 @@ public class PaymentServiceImpl implements PaymentService {
     public EntityListResponse<PaymentDTO> getPaymentsPaged(UUID userId, UUID accountId, UUID paymentSystemId, Collection<UUID> paymentStateIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
         String countFetches = "";
+        String fetches = enrich ? "left join fetch el.account acc left join fetch acc.user usr left join fetch el.paymentSystem pss left join fetch el.paymentState pst" : null;
         HashMap<String, Object> params = new HashMap<String, Object>();
         if (userId != null) {
             cause += "and el.user.id=:userId ";
@@ -227,10 +226,13 @@ public class PaymentServiceImpl implements PaymentService {
         entityListResponse.setPages(totalPages);
         entityListResponse.setTotalCount(totalCount);
 
-        List<Payment> items = idObjectService.getList(Payment.class, null, cause, params, sortField, sortDir, startRecord, count);
+        List<Payment> items = idObjectService.getList(Payment.class, fetches, cause, params, sortField, sortDir, startRecord, count);
         entityListResponse.setPartCount(items.size());
         for (Payment e : items) {
             PaymentDTO el = PaymentDTO.prepare(e);
+            if (enrich) {
+                PaymentDTO.enrich(el, e);
+            }
             entityListResponse.addData(el);
         }
 

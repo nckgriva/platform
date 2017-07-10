@@ -32,11 +32,11 @@ public class Transaction extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "TRANSACTION_TYPE_ID", nullable = false)
     private TransactionType transactionType;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "ACCOUNT_ID", nullable = false)
     private Account account;
 

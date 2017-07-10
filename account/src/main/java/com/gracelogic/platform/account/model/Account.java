@@ -36,15 +36,15 @@ public class Account extends IdObject<UUID> {
     @Column(name = "BALANCE", nullable = false)
     private Long balance;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "ACCOUNT_TYPE_ID", nullable = false)
     private AccountType accountType;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "ACCOUNT_CURRENCY_ID", nullable = true)
     private AccountCurrency accountCurrency;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 

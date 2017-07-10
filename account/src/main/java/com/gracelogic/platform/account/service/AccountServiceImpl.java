@@ -9,6 +9,7 @@ import com.gracelogic.platform.account.model.TransactionType;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public EntityListResponse<TransactionDTO> getTransactionsPaged(UUID userId, UUID accountId, Collection<UUID> transactionTypeIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = "left join fetch el.account acc left join fetch acc.user usr left join fetch el.transactionType ttp";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
         if (accountId != null) {
@@ -77,11 +79,12 @@ public class AccountServiceImpl implements AccountService {
         entityListResponse.setPages(totalPages);
         entityListResponse.setTotalCount(totalCount);
 
-        List<Transaction> items = idObjectService.getList(Transaction.class, null, cause, params, sortField, sortDir, startRecord, count);
+        List<Transaction> items = idObjectService.getList(Transaction.class, fetches, cause, params, sortField, sortDir, startRecord, count);
         entityListResponse.setPartCount(items.size());
         for (Transaction e : items) {
             TransactionDTO el = TransactionDTO.prepare(e);
             if (enrich) {
+                TransactionDTO.enrich(el, e);
             }
 
             entityListResponse.addData(el);

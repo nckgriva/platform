@@ -3,6 +3,7 @@ package com.gracelogic.platform.payment.dto;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.payment.model.Payment;
+import com.gracelogic.platform.user.dto.UserDTO;
 
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ public class PaymentDTO extends IdObjectDTO {
     private UUID userId;
     private String userName;
     private UUID accountId;
+    private String accountExternalIdentifier;
     private UUID paymentSystemId;
     private String paymentSystemName;
     private UUID paymentStateId;
@@ -126,21 +128,23 @@ public class PaymentDTO extends IdObjectDTO {
         this.userName = userName;
     }
 
+    public String getAccountExternalIdentifier() {
+        return accountExternalIdentifier;
+    }
+
+    public void setAccountExternalIdentifier(String accountExternalIdentifier) {
+        this.accountExternalIdentifier = accountExternalIdentifier;
+    }
+
     public static PaymentDTO prepare(Payment payment) {
         PaymentDTO model = new PaymentDTO();
         IdObjectDTO.prepare(model, payment);
 
-        if (payment.getUser() != null) {
-            model.setUserId(payment.getUser().getId());
-//            model.setUserName(ExtendedUserDTO.formatUserName(payment.getUser()));
-        }
         if (payment.getPaymentSystem() != null) {
             model.setPaymentSystemId(payment.getPaymentSystem().getId());
-            model.setPaymentSystemName(payment.getPaymentSystem().getName());
         }
         if (payment.getPaymentState() != null) {
             model.setPaymentStateId(payment.getPaymentState().getId());
-            model.setPaymentStateName(payment.getPaymentState().getName());
         }
         if (payment.getAccount() != null) {
             model.setAccountId(payment.getAccount().getId());
@@ -154,5 +158,21 @@ public class PaymentDTO extends IdObjectDTO {
         model.setPaymentUID(payment.getPaymentUID());
 
         return model;
+    }
+
+    public static void enrich(PaymentDTO model, Payment entity) {
+        if (entity.getPaymentSystem() != null) {
+            model.setPaymentSystemName(entity.getPaymentSystem().getName());
+        }
+        if (entity.getPaymentState() != null) {
+            model.setPaymentStateName(entity.getPaymentState().getName());
+        }
+        if (entity.getAccount() != null) {
+            model.setAccountExternalIdentifier(entity.getAccount().getExternalIdentifier());
+            if (entity.getAccount().getUser() != null) {
+                model.setUserId(entity.getAccount().getUser().getId());
+                model.setUserName(UserDTO.formatUserName(entity.getAccount().getUser()));
+            }
+        }
     }
 }
