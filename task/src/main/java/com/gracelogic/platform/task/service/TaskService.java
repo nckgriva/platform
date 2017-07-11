@@ -30,9 +30,11 @@ public interface TaskService {
 
     void deleteTask(UUID id);
 
-    EntityListResponse<TaskDTO> getTaskPaged(String name, String serviceName, Boolean active, boolean enrich,
+    EntityListResponse<TaskDTO> getTasksPaged(String name, String serviceName, Boolean active, boolean enrich,
                                              Integer count, Integer page, Integer start, String sortField, String sortDir);
 
-    EntityListResponse<TaskExecutionLogDTO> getTaskExecutionLog(UUID task, Collection<UUID> methodIds, Collection<UUID> stateIds, String parameter,
+    EntityListResponse<TaskExecutionLogDTO> getTelsPaged(UUID task, Collection<UUID> methodIds, Collection<UUID> stateIds, String parameter,
                                                                 boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
+
+    void resetTaskExecution(UUID telId) throws ObjectNotFoundException;
 }

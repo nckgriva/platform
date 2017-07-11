@@ -146,6 +146,20 @@ public class TaskServiceImpl implements TaskService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
+    public void resetTaskExecution(UUID telId) throws ObjectNotFoundException {
+        TaskExecutionLog entity = idObjectService.getObjectById(TaskExecutionLog.class, telId);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        if (entity.getState().getId() == DataConstants.TaskExecutionStates.CREATED.getValue() || entity.getState().getId() == DataConstants.TaskExecutionStates.IN_PROGRESS.getValue()) {
+            entity.setState(ds.get(TaskExecuteState.class, DataConstants.TaskExecutionStates.FAIL.getValue()));
+            idObjectService.save(entity);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public Task saveTask(TaskDTO dto) throws ObjectNotFoundException {
         Task entity;
         if (dto.getId() != null) {
@@ -186,7 +200,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public EntityListResponse<TaskDTO> getTaskPaged(String name, String serviceName, Boolean active, boolean enrich,
+    public EntityListResponse<TaskDTO> getTasksPaged(String name, String serviceName, Boolean active, boolean enrich,
                                                     Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
         String countFetches = "";
@@ -229,7 +243,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public EntityListResponse<TaskExecutionLogDTO> getTaskExecutionLog(UUID taskId, Collection<UUID> methodIds, Collection<UUID> stateIds, String parameter,//methodId и stateId поменять на Collection<UUID>
+    public EntityListResponse<TaskExecutionLogDTO> getTelsPaged(UUID taskId, Collection<UUID> methodIds, Collection<UUID> stateIds, String parameter,
                                                                 boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
         String countFetches = enrich ? "left join fetch el.task left join fetch el.method left join el.state" : "";
