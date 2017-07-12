@@ -35,17 +35,17 @@ public class TaskApi extends AbstractAuthorizedController {
     private  TaskService taskService;
 
     @PreAuthorize("hasAuthority('TASK:SHOW')")
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET, value = "/taskExecutionLog")
     @ResponseBody
     public ResponseEntity getTels(@RequestParam(value = "taskId", required = false) UUID taskId,
-                                   @RequestParam(value = "methodId", required = false) UUID methodId,
+                                  @RequestParam(value = "methodId", required = false) UUID methodId,
                                   @RequestParam(value = "stateId", required = false) UUID stateId,
-                                   @RequestParam(value = "parameter", required = false) String parameter,
-                                   @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
-                                   @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                   @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                   @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                   @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                  @RequestParam(value = "parameter", required = false) String parameter,
+                                  @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                  @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                  @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                  @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                  @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
         EntityListResponse<TaskExecutionLogDTO> tels =
                 taskService.getTelsPaged(taskId, methodId != null ? Collections.singletonList(methodId) : null, stateId != null ? Collections.singletonList(stateId) : null, parameter, enrich, count, null, start, sortField, sortDir);
@@ -107,7 +107,7 @@ public class TaskApi extends AbstractAuthorizedController {
     }
 
     @PreAuthorize("hasAuthority('TASK:RESET')")
-    @RequestMapping(method = RequestMethod.POST, value = "/{id}/reset")
+    @RequestMapping(method = RequestMethod.POST, value = "/taskExecutionLog/{id}/reset")
     @ResponseBody
     public ResponseEntity resetTaskExecution(@PathVariable(value = "id") UUID id) {
         try {
