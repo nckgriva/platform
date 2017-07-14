@@ -101,35 +101,35 @@ public class TransactionDTO extends IdObjectDTO {
         this.userName = userName;
     }
 
-    public static TransactionDTO prepare(Transaction transaction) {
-        TransactionDTO model = new TransactionDTO();
-        IdObjectDTO.prepare(model, transaction);
+    public static TransactionDTO prepare(Transaction model) {
+        TransactionDTO dto = new TransactionDTO();
+        IdObjectDTO.prepare(dto, model);
 
-        if (transaction.getAccount() != null) {
-            model.setAccountId(transaction.getAccount().getId());
+        if (model.getAccount() != null) {
+            dto.setAccountId(model.getAccount().getId());
         }
-        if (transaction.getTransactionType() != null) {
-            model.setTransactionTypeId(transaction.getTransactionType().getId());
+        if (model.getTransactionType() != null) {
+            dto.setTransactionTypeId(model.getTransactionType().getId());
         }
 
-        model.setAmount(FinanceUtils.toFractional(transaction.getAmount()));
-        model.setBalanceBefore(FinanceUtils.toFractional(transaction.getBalanceBefore()));
-        model.setBalanceAfter(FinanceUtils.toFractional(transaction.getBalanceAfter()));
+        dto.setAmount(FinanceUtils.toFractional(model.getAmount()));
+        dto.setBalanceBefore(FinanceUtils.toFractional(model.getBalanceBefore()));
+        dto.setBalanceAfter(FinanceUtils.toFractional(model.getBalanceAfter()));
 
-        return model;
+        return dto;
     }
 
-    public static void enrich(TransactionDTO model, Transaction entity) {
-        if (entity.getAccount() != null) {
-            model.setAccountExternalIdentifier(entity.getAccount().getExternalIdentifier());
+    public static void enrich(TransactionDTO dto, Transaction model) {
+        if (model.getAccount() != null) {
+            dto.setAccountExternalIdentifier(model.getAccount().getExternalIdentifier());
 
-            if (entity.getAccount().getUser() != null) {
-                model.setUserId(entity.getAccount().getUser().getId());
-                model.setUserName(UserDTO.formatUserName(entity.getAccount().getUser()));
+            if (model.getAccount().getUser() != null) {
+                dto.setUserId(model.getAccount().getUser().getId());
+                dto.setUserName(UserDTO.formatUserName(model.getAccount().getUser()));
             }
         }
-        if (entity.getTransactionType() != null) {
-            model.setTransactionTypeName(entity.getTransactionType().getName());
+        if (model.getTransactionType() != null) {
+            dto.setTransactionTypeName(model.getTransactionType().getName());
         }
     }
 

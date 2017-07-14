@@ -136,42 +136,42 @@ public class PaymentDTO extends IdObjectDTO {
         this.accountExternalIdentifier = accountExternalIdentifier;
     }
 
-    public static PaymentDTO prepare(Payment payment) {
-        PaymentDTO model = new PaymentDTO();
-        IdObjectDTO.prepare(model, payment);
+    public static PaymentDTO prepare(Payment model) {
+        PaymentDTO dto = new PaymentDTO();
+        IdObjectDTO.prepare(dto, model);
 
-        if (payment.getPaymentSystem() != null) {
-            model.setPaymentSystemId(payment.getPaymentSystem().getId());
+        if (model.getPaymentSystem() != null) {
+            dto.setPaymentSystemId(model.getPaymentSystem().getId());
         }
-        if (payment.getPaymentState() != null) {
-            model.setPaymentStateId(payment.getPaymentState().getId());
+        if (model.getPaymentState() != null) {
+            dto.setPaymentStateId(model.getPaymentState().getId());
         }
-        if (payment.getAccount() != null) {
-            model.setAccountId(payment.getAccount().getId());
+        if (model.getAccount() != null) {
+            dto.setAccountId(model.getAccount().getId());
         }
 
-        model.setRegisteredAmount(FinanceUtils.toFractional(payment.getRegisteredAmount()));
-        model.setAmount(FinanceUtils.toFractional(payment.getAmount()));
-        model.setTotalAmount(FinanceUtils.toFractional(payment.getTotalAmount()));
-        model.setFee(FinanceUtils.toFractional(payment.getFee()));
-        model.setDescription(payment.getDescription());
-        model.setPaymentUID(payment.getPaymentUID());
+        dto.setRegisteredAmount(FinanceUtils.toFractional(model.getRegisteredAmount()));
+        dto.setAmount(FinanceUtils.toFractional(model.getAmount()));
+        dto.setTotalAmount(FinanceUtils.toFractional(model.getTotalAmount()));
+        dto.setFee(FinanceUtils.toFractional(model.getFee()));
+        dto.setDescription(model.getDescription());
+        dto.setPaymentUID(model.getPaymentUID());
 
-        return model;
+        return dto;
     }
 
-    public static void enrich(PaymentDTO model, Payment entity) {
-        if (entity.getPaymentSystem() != null) {
-            model.setPaymentSystemName(entity.getPaymentSystem().getName());
+    public static void enrich(PaymentDTO dto, Payment model) {
+        if (model.getPaymentSystem() != null) {
+            dto.setPaymentSystemName(model.getPaymentSystem().getName());
         }
-        if (entity.getPaymentState() != null) {
-            model.setPaymentStateName(entity.getPaymentState().getName());
+        if (model.getPaymentState() != null) {
+            dto.setPaymentStateName(model.getPaymentState().getName());
         }
-        if (entity.getAccount() != null) {
-            model.setAccountExternalIdentifier(entity.getAccount().getExternalIdentifier());
-            if (entity.getAccount().getUser() != null) {
-                model.setUserId(entity.getAccount().getUser().getId());
-                model.setUserName(UserDTO.formatUserName(entity.getAccount().getUser()));
+        if (model.getAccount() != null) {
+            dto.setAccountExternalIdentifier(model.getAccount().getExternalIdentifier());
+            if (model.getAccount().getUser() != null) {
+                dto.setUserId(model.getAccount().getUser().getId());
+                dto.setUserName(UserDTO.formatUserName(model.getAccount().getUser()));
             }
         }
     }

@@ -43,7 +43,9 @@ public class TaskExecutionLogDTO extends IdObjectDTO {
     }
 
     @Override
-    public void setCreated(Date created) { this.created = created; }
+    public void setCreated(Date created) {
+        this.created = created;
+    }
 
     @Override
     public Date getChanged() {
@@ -87,48 +89,57 @@ public class TaskExecutionLogDTO extends IdObjectDTO {
         this.stateId = stateId;
     }
 
-    public String getTaskName() { return taskName; }
+    public String getTaskName() {
+        return taskName;
+    }
 
-    public void setTaskName(String taskName) { this.taskName = taskName; }
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
+    }
 
-    public String getMethodName() { return methodName; }
+    public String getMethodName() {
+        return methodName;
+    }
 
-    public void setMethodName(String methodName) { this.methodName = methodName; }
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
 
-    public String getStateName() { return stateName; }
+    public String getStateName() {
+        return stateName;
+    }
 
-    public void setStateName(String stateName) { this.stateName = stateName; }
+    public void setStateName(String stateName) {
+        this.stateName = stateName;
+    }
 
-    public static TaskExecutionLogDTO prepare(TaskExecutionLog tel) {
-
+    public static TaskExecutionLogDTO prepare(TaskExecutionLog model) {
         TaskExecutionLogDTO dto = new TaskExecutionLogDTO();
-        IdObjectDTO.prepare(dto, tel);
+        IdObjectDTO.prepare(dto, model);
 
-        dto.setParameter(tel.getParameter());
-        if (tel.getTask() != null) {
-            dto.setTaskId(tel.getTask().getId());
+        dto.setParameter(model.getParameter());
+        if (model.getTask() != null) {
+            dto.setTaskId(model.getTask().getId());
         }
-        if (tel.getMethod() != null) {
-            dto.setMethodId(tel.getMethod().getId());
+        if (model.getMethod() != null) {
+            dto.setMethodId(model.getMethod().getId());
         }
-        if (tel.getState() != null) {
-            dto.setStateId(tel.getState().getId());
+        if (model.getState() != null) {
+            dto.setStateId(model.getState().getId());
         }
 
         return dto;
     }
 
-    public static TaskExecutionLogDTO enrich(TaskExecutionLogDTO dto, TaskExecutionLog tel) {
-        if (tel.getTask() != null) {
-            dto.setTaskName(tel.getTask().getName());
+    public static void enrich(TaskExecutionLogDTO dto, TaskExecutionLog model) {
+        if (model.getTask() != null) {
+            dto.setTaskName(model.getTask().getName());
         }
-        if (tel.getMethod() != null) {
-            dto.setMethodName(tel.getMethod().getName());
+        if (model.getMethod() != null) {
+            dto.setMethodName(model.getMethod().getName());
         }
-        if (tel.getState() != null) {
-            dto.setStateName(tel.getState().getName());
+        if (model.getState() != null) {
+            dto.setStateName(model.getState().getName());
         }
-
-        return dto;
     }
 }

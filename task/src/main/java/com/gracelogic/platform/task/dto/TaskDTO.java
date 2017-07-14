@@ -104,16 +104,16 @@ public class TaskDTO extends IdObjectDTO {
         this.lastExecutionDate = lastExecutionDate;
     }
 
-    public static TaskDTO prepare(Task task) {
+    public static TaskDTO prepare(Task model) {
         TaskDTO taskDTO = new TaskDTO();
-        IdObjectDTO.prepare(taskDTO, task);
+        IdObjectDTO.prepare(taskDTO, model);
 
-        taskDTO.setName(task.getName());
-        taskDTO.setServiceName(task.getServiceName());
-        taskDTO.setCronExpression(task.getCronExpression());
-        taskDTO.setParameter(task.getParameter());
-        taskDTO.setActive(task.getActive());
-        taskDTO.setLastExecutionDate(task.getLastExecutionDate());
+        taskDTO.setName(model.getName());
+        taskDTO.setServiceName(model.getServiceName());
+        taskDTO.setCronExpression(model.getCronExpression());
+        taskDTO.setParameter(model.getParameter());
+        taskDTO.setActive(model.getActive());
+        taskDTO.setLastExecutionDate(model.getLastExecutionDate());
 
         return taskDTO;
     }
