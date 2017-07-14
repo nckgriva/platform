@@ -215,6 +215,14 @@ public class PaymentServiceImpl implements PaymentService {
             cause += "and el.paymentState.id in (:paymentStateIds) ";
             params.put("paymentStateIds", paymentStateIds);
         }
+        if (startDate != null) {
+            cause += "and el.created >= :startDate ";
+            params.put("startDate", startDate);
+        }
+        if (endDate != null) {
+            cause += "and el.created <= :endDate ";
+            params.put("endDate", endDate);
+        }
 
         int totalCount = idObjectService.getCount(Payment.class, null, countFetches, cause, params);
         int totalPages = ((totalCount / count)) + 1;

@@ -32,7 +32,7 @@ public class TaskExecutionLog extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "TASK_ID", nullable = false)
     private Task task;
 

@@ -243,10 +243,10 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public EntityListResponse<TaskExecutionLogDTO> getTelsPaged(UUID taskId, Collection<UUID> methodIds, Collection<UUID> stateIds, String parameter,
+    public EntityListResponse<TaskExecutionLogDTO> getTelsPaged(UUID taskId, Collection<UUID> methodIds, Collection<UUID> stateIds, String parameter, Date startDate, Date endDate,
                                                                 boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = "";
-        String countFetches = enrich ? "left join fetch el.task left join fetch el.method left join el.state" : "";
+        String fetches = enrich ? "left join fetch el.task left join fetch el.method left join fetch el.state" : "";
+        String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
 
@@ -260,7 +260,7 @@ public class TaskServiceImpl implements TaskService {
             params.put("methodIds", methodIds);
         }
 
-        if (taskId != null) {
+        if (stateIds != null && !stateIds.isEmpty()) {
             cause += "and el.state.id in (:stateIds) ";
             params.put("stateIds", stateIds);
         }
@@ -268,6 +268,14 @@ public class TaskServiceImpl implements TaskService {
         if (!StringUtils.isEmpty(parameter)) {
             params.put("parameter", "%%" + StringUtils.lowerCase(parameter) + "%%");
             cause += "and lower(el.parameter) like :parameter" ;
+        }
+        if (startDate != null) {
+            cause += "and el.created >= :startDate ";
+            params.put("startDate", startDate);
+        }
+        if (endDate != null) {
+            cause += "and el.created <= :endDate ";
+            params.put("endDate", endDate);
         }
 
         int totalCount = idObjectService.getCount(TaskExecutionLog.class, null, countFetches, cause, params);

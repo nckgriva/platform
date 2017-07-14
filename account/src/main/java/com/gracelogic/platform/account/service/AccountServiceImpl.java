@@ -64,6 +64,14 @@ public class AccountServiceImpl implements AccountService {
             cause += "and el.account.user.id=:userId ";
             params.put("userId", userId);
         }
+        if (startDate != null) {
+            cause += "and el.created >= :startDate ";
+            params.put("startDate", startDate);
+        }
+        if (endDate != null) {
+            cause += "and el.created <= :endDate ";
+            params.put("endDate", endDate);
+        }
         if (transactionTypeIds != null && !transactionTypeIds.isEmpty()) {
             cause += "and el.transactionType.id in (:transactionTypeIds) ";
             params.put("transactionTypeIds", transactionTypeIds);
