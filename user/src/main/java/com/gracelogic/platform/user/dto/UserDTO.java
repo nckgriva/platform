@@ -14,7 +14,7 @@ import java.io.StringWriter;
 import java.util.*;
 
 public class UserDTO extends IdObjectDTO implements Serializable {
-    private static String USER_NAME_FORMAT = "{name} {surname}";
+    private static String USER_NAME_FORMAT = "{{name}} {{surname}}";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_SURNAME = "surname";
 

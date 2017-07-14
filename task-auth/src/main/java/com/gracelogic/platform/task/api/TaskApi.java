@@ -6,7 +6,6 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.task.dto.TaskDTO;
 import com.gracelogic.platform.task.dto.TaskExecutionLogDTO;
 import com.gracelogic.platform.task.model.Task;
-import com.gracelogic.platform.task.model.TaskExecutionLog;
 import com.gracelogic.platform.task.service.*;
 import com.gracelogic.platform.task.Path;
 import com.gracelogic.platform.web.dto.EmptyResponse;
@@ -40,17 +39,17 @@ public class TaskApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('TASK:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/taskExecutionLog")
     @ResponseBody
-    public ResponseEntity getTels(@RequestParam(value = "taskId", required = false) UUID taskId,
-                                  @RequestParam(value = "methodId", required = false) UUID methodId,
-                                  @RequestParam(value = "stateId", required = false) UUID stateId,
-                                  @RequestParam(value = "parameter", required = false) String parameter,
-                                  @RequestParam(value = "startDate", required = false) String sStartDate,
-                                  @RequestParam(value = "endDate", required = false) String sEndDate,
-                                  @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
-                                  @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                  @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                  @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                  @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+    public ResponseEntity getTaskExecutionLogs(@RequestParam(value = "taskId", required = false) UUID taskId,
+                                               @RequestParam(value = "methodId", required = false) UUID methodId,
+                                               @RequestParam(value = "stateId", required = false) UUID stateId,
+                                               @RequestParam(value = "parameter", required = false) String parameter,
+                                               @RequestParam(value = "startDate", required = false) String sStartDate,
+                                               @RequestParam(value = "endDate", required = false) String sEndDate,
+                                               @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                               @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                               @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                               @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                               @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
         Date startDate = null;
         Date endDate = null;
@@ -66,7 +65,7 @@ public class TaskApi extends AbstractAuthorizedController {
         }
 
         EntityListResponse<TaskExecutionLogDTO> tels =
-                taskService.getTelsPaged(taskId, methodId != null ? Collections.singletonList(methodId) : null, stateId != null ? Collections.singletonList(stateId) : null, parameter, startDate,
+                taskService.getTaskExecutionLogsPaged(taskId, methodId != null ? Collections.singletonList(methodId) : null, stateId != null ? Collections.singletonList(stateId) : null, parameter, startDate,
                         endDate, enrich, count, null, start, sortField, sortDir);
         return new ResponseEntity<>(tels, HttpStatus.OK);
     }

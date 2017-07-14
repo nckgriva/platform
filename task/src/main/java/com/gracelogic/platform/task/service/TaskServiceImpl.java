@@ -137,8 +137,7 @@ public class TaskServiceImpl implements TaskService {
                         executeTaskInOtherTransaction(task.getId(), task.getParameter(), DataConstants.TaskExecutionMethods.CRON.getValue());
                     }
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 logger.error(String.format("Failed to schedule task %s", task.getId()), e);
             }
         }
@@ -146,8 +145,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void resetTaskExecution(UUID telId) throws ObjectNotFoundException {
-        TaskExecutionLog entity = idObjectService.getObjectById(TaskExecutionLog.class, telId);
+    public void resetTaskExecution(UUID taskExecutionLogId) throws ObjectNotFoundException {
+        TaskExecutionLog entity = idObjectService.getObjectById(TaskExecutionLog.class, taskExecutionLogId);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -178,8 +177,7 @@ public class TaskServiceImpl implements TaskService {
         entity.setActive(dto.getActive());
         entity.setLastExecutionDate(dto.getLastExecutionDate());
 
-        Task task = idObjectService.save(entity);
-        return task;
+        return idObjectService.save(entity);
     }
 
     @Override
@@ -189,8 +187,7 @@ public class TaskServiceImpl implements TaskService {
             throw new ObjectNotFoundException();
         }
 
-        TaskDTO dto = TaskDTO.prepare(entity);
-        return dto;
+        return TaskDTO.prepare(entity);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -201,7 +198,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public EntityListResponse<TaskDTO> getTasksPaged(String name, String serviceName, Boolean active, boolean enrich,
-                                                    Integer count, Integer page, Integer start, String sortField, String sortDir) {
+                                                     Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -243,8 +240,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public EntityListResponse<TaskExecutionLogDTO> getTelsPaged(UUID taskId, Collection<UUID> methodIds, Collection<UUID> stateIds, String parameter, Date startDate, Date endDate,
-                                                                boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<TaskExecutionLogDTO> getTaskExecutionLogsPaged(UUID taskId, Collection<UUID> methodIds, Collection<UUID> stateIds, String parameter, Date startDate, Date endDate,
+                                                                             boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? "left join fetch el.task left join fetch el.method left join fetch el.state" : "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -267,7 +264,7 @@ public class TaskServiceImpl implements TaskService {
 
         if (!StringUtils.isEmpty(parameter)) {
             params.put("parameter", "%%" + StringUtils.lowerCase(parameter) + "%%");
-            cause += "and lower(el.parameter) like :parameter" ;
+            cause += "and lower(el.parameter) like :parameter";
         }
         if (startDate != null) {
             cause += "and el.created >= :startDate ";
