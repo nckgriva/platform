@@ -10,11 +10,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 18.12.14
- * Time: 12:37
- */
 @Service
 public class IdObjectServiceImpl implements IdObjectService {
 

@@ -10,11 +10,6 @@ import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.*;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 12.07.12
- * Time: 21:50
- */
 @Repository
 public class ContentDaoImpl extends AbstractContentDaoImpl {
     private static Logger logger = Logger.getLogger(ContentDaoImpl.class);

@@ -2,11 +2,6 @@ package com.gracelogic.platform.filestorage.dto;
 
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 27.02.2015
- * Time: 11:22
- */
 public class StoreRequestDTO {
     private CommonsMultipartFile content;
     private String meta;

@@ -20,11 +20,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 17.07.2016
- * Time: 16:45
- */
 @Service
 public class TemplateServiceImpl implements TemplateService {
     private static final String SUBJECT_REGEX = "<!-- subject: (.*?) -->";

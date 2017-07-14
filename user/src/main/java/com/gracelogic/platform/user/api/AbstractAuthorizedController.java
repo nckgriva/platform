@@ -11,12 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Locale;
 
-
-/**
- * Author: Igor Parkhomenko
- * Date: 18.12.14
- * Time: 16:50
- */
 public abstract class AbstractAuthorizedController {
     protected static final Logger logger = Logger.getLogger(AbstractAuthorizedController.class);
     public static final String CURRENT_LOCALE = "CURRENT_LOCALE";

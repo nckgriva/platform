@@ -10,11 +10,6 @@ import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 23.03.12
- * Time: 9:55
- */
 public abstract class BaseDao {
     @PersistenceContext
     private EntityManager entityManager;

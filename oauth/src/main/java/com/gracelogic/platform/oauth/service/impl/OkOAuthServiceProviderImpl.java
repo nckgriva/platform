@@ -16,11 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.URLEncoder;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 21.10.2015
- * Time: 13:15
- */
 @Service("ok")
 public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
     //private static final String CLIENT_ID = "1174674176";

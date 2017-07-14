@@ -14,11 +14,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 26.06.12
- * Time: 14:43
- */
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "USER")
 @TypeDefs({@TypeDef(name= "stringJsonObject", typeClass = StringJsonUserType.class)})

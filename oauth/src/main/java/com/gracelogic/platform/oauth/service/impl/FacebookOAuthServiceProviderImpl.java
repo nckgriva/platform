@@ -18,11 +18,6 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 21.10.2015
- * Time: 13:15
- */
 @Service("facebook")
 public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
     private static Logger logger = Logger.getLogger(FacebookOAuthServiceProviderImpl.class);

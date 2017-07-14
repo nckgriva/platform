@@ -17,11 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 27.02.2015
- * Time: 14:09
- */
 @Service
 public class PropertyServiceImpl implements PropertyService {
     @Autowired

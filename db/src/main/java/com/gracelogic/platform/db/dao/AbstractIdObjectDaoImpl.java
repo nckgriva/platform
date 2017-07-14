@@ -11,11 +11,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 12.07.12
- * Time: 21:44
- */
 public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjectDao {
     private static Logger logger = Logger.getLogger(AbstractIdObjectDaoImpl.class);
 

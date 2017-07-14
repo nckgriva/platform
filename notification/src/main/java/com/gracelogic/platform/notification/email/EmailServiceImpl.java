@@ -14,11 +14,6 @@ import javax.mail.internet.MimeMultipart;
 import java.util.Date;
 import java.util.Properties;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 13.11.12
- * Time: 20:58
- */
 @Service
 public class EmailServiceImpl implements EmailService {
     private static Logger logger = Logger.getLogger(EmailServiceImpl.class);

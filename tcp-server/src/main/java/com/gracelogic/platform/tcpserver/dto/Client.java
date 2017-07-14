@@ -2,11 +2,6 @@ package com.gracelogic.platform.tcpserver.dto;
 
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 07.07.2016
- * Time: 17:20
- */
 public class Client {
     private UUID id = UUID.randomUUID();
 

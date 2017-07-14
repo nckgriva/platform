@@ -2,11 +2,6 @@ package com.gracelogic.platform.tcpserver.dto;
 
 import java.util.Arrays;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 23.03.12
- * Time: 15:22
- */
 public class Message {
     private byte [] bytes;
     private boolean dataInitializedAsString = false; //for toString only

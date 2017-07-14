@@ -16,11 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 16.07.2016
- * Time: 21:58
- */
 @Controller
 @RequestMapping(value = Path.API_SETTING)
 @Api(value = Path.API_SETTING, description = "Базовый контроллер управления пользовательскими настройками",

@@ -1,10 +1,5 @@
 package com.gracelogic.platform.user.dto;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 30.12.2015
- * Time: 0:18
- */
 public class ChangePasswordRequestDTO extends RepairCodeRequestDTO {
     private String newPassword;
     private String code;

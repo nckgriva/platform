@@ -8,11 +8,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 18.12.14
- * Time: 12:33
- */
 //@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 public class IdObjectDTO implements Serializable {
     private UUID id;

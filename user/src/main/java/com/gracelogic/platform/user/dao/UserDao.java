@@ -7,11 +7,6 @@ import com.gracelogic.platform.user.model.User;
 
 import java.util.*;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 20.07.13
- * Time: 17:10
- */
 public interface UserDao {
     User getUserByField(String fieldName, Object fieldValue);
 

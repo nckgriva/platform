@@ -8,11 +8,6 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 10.06.14
- * Time: 10:56
- */
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "INCORRECT_LOGIN_ATTEMPT")
 public class IncorrectLoginAttempt extends IdObject<UUID> {

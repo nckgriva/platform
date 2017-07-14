@@ -7,11 +7,6 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 27.02.2015
- * Time: 14:09
- */
 public interface PropertyService {
     String getPropertyValue(String propertyName);
 

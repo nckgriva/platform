@@ -6,9 +6,6 @@ import com.gracelogic.platform.property.model.Property;
 import java.util.Date;
 import java.util.UUID;
 
-/**
- * Created by Ilya Bokarev on 09.06.2017.
- */
 public class PropertyDTO extends IdObjectDTO {
 
     private UUID id;

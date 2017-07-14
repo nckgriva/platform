@@ -5,11 +5,6 @@ import com.gracelogic.platform.db.dto.IdObjectDTO;
 
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 18.12.2016
- * Time: 23:12
- */
 public class SectionPatternFieldDTO extends IdObjectDTO {
     private String code;
     private String name;

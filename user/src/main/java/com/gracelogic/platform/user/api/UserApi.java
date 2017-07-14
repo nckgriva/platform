@@ -40,11 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 16.07.2016
- * Time: 21:58
- */
 @Controller
 @RequestMapping(value = Path.API_USER)
 @Secured(PlatformRole.ANONYMOUS)

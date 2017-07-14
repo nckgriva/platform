@@ -22,11 +22,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 27.10.2015
- * Time: 9:25
- */
 public class OAuthUtils {
     private static Logger logger = Logger.getLogger(OAuthUtils.class);
 

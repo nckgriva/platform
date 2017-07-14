@@ -14,11 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 16.03.2016
- * Time: 18:42
- */
 @Service
 public class DictionaryServiceImpl implements DictionaryService {
     private static Set<Class<? extends Dictionary>> dictionaryClasses;

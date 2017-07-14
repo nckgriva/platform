@@ -5,11 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 13.06.14
- * Time: 22:01
- */
 public class HostFilter implements Filter {
     private static final String LOCAL_HOST = "localhost";
     private static final String GENERAL_HOST = "sp.join-and-buy.ru";

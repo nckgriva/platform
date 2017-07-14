@@ -11,11 +11,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 04.01.2015
- * Time: 12:23
- */
 @Component
 public class JsonDateDeserializer extends JsonDeserializer<Date> {
     @Override

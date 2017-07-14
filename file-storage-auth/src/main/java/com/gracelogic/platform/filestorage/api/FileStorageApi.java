@@ -29,11 +29,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 16.07.2016
- * Time: 21:58
- */
 @Controller
 @RequestMapping(value = Path.API_FILE_STORAGE)
 @Api(value = Path.API_FILE_STORAGE, description = "Контроллер по работе с сохраненными файлами", authorizations = @Authorization(value = "MybasicAuth"))

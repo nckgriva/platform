@@ -11,11 +11,6 @@ import com.gracelogic.platform.user.security.AuthenticationToken;
 import javax.servlet.http.HttpSession;
 import java.util.*;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 23.07.13
- * Time: 13:09
- */
 public interface UserService {
     User getUserByField(String fieldName, Object fieldValue);
 

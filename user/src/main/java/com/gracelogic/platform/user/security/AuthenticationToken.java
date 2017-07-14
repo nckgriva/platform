@@ -5,11 +5,6 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 13.06.14
- * Time: 22:01
- */
 public class AuthenticationToken extends UsernamePasswordAuthenticationToken {
     private String remoteAddress = null;
     private String loginType = null;

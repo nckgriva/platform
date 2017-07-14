@@ -8,11 +8,6 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 25.06.12
- * Time: 18:30
- */
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "AUTH_CODE", uniqueConstraints =
         {@UniqueConstraint(columnNames = {"AUTH_CODE", "CODE_TYPE_ID", "USER_ID"})})

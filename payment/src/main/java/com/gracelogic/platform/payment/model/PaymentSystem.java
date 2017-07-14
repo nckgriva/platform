@@ -9,11 +9,6 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 11.12.14
- * Time: 13:17
- */
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "PAYMENT_SYSTEM")
 public class PaymentSystem extends IdObject<UUID> implements Dictionary {

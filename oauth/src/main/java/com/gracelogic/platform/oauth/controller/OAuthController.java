@@ -27,11 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 21.10.2015
- * Time: 18:33
- */
 @Controller
 @RequestMapping(value = Path.OAUTH)
 public class OAuthController extends AbstractAuthorizedController {

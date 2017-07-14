@@ -29,11 +29,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 16.07.2016
- * Time: 21:58
- */
 @Controller
 @RequestMapping(value = Path.API_CONTENT)
 @Api(value = Path.API_CONTENT, description = "Контроллер управления контентом", authorizations = @Authorization(value = "MybasicAuth"))

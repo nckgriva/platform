@@ -2,11 +2,6 @@ package com.gracelogic.platform.user.dto;
 
 import com.gracelogic.platform.web.dto.PlatformRequest;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 30.12.2015
- * Time: 0:18
- */
 public class RepairCodeRequestDTO extends PlatformRequest {
     private String login;
     private String loginType = "phone";

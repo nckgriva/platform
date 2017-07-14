@@ -1,10 +1,5 @@
 package com.gracelogic.platform.oauth.dto;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 21.10.2015
- * Time: 14:23
- */
 public class OAuthDTO {
     private String accessToken;
     private String userId;

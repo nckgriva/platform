@@ -2,11 +2,6 @@ package com.gracelogic.platform.property.dto;
 
 import com.gracelogic.platform.property.model.Property;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 27.08.2015
- * Time: 16:26
- */
 public class PropertyModel {
     private String value;
     private Long lifetime;

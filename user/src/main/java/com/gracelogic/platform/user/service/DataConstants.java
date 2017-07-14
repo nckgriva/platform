@@ -2,11 +2,6 @@ package com.gracelogic.platform.user.service;
 
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 21.03.2015
- * Time: 16:39
- */
 public class DataConstants {
 
     public enum AuthCodeTypes {

@@ -3,11 +3,6 @@ package com.gracelogic.platform.db.model;
 import java.io.Serializable;
 import java.util.Date;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 22.03.12
- * Time: 17:21
- */
 public abstract class IdObject<E extends Comparable> implements Serializable {
     public static final String ID = "id";
     public static final String CREATED = "created_dt";

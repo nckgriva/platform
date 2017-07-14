@@ -21,11 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 16.07.2016
- * Time: 21:58
- */
 @Controller
 @RequestMapping(value = Path.API_SUGGESTION)
 @Api(value = Path.API_SUGGESTION, description = "Контроллер для поиска нужного элемента")

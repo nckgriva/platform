@@ -8,11 +8,6 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 09.04.2015
- * Time: 23:12
- */
 public class HttpSessionCollector implements HttpSessionListener {
     public void sessionCreated(HttpSessionEvent event) {
         if (event.getSession() != null) {

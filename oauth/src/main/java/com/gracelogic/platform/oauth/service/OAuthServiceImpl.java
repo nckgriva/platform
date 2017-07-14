@@ -10,11 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 18.07.2016
- * Time: 10:43
- */
 @Service
 public class OAuthServiceImpl implements OAuthService {
     @Autowired

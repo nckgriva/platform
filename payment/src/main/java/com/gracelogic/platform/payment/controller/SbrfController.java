@@ -26,11 +26,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 23.06.2015
- * Time: 21:50
- */
 @Controller
 @RequestMapping(value = Path.PAYMENT_SBRF)
 public class SbrfController {

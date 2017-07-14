@@ -2,11 +2,6 @@ package com.gracelogic.platform.payment;
 
 import com.gracelogic.platform.web.PlatformPath;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 18.07.2016
- * Time: 14:32
- */
 public class Path extends PlatformPath {
     public static final String PLATFORM_PAYMENT = PLATFORM + "/payment";
 

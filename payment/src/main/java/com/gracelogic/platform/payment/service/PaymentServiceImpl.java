@@ -32,11 +32,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 18.07.2016
- * Time: 14:49
- */
 @Service
 public class PaymentServiceImpl implements PaymentService {
     private static Logger logger = Logger.getLogger(PaymentServiceImpl.class);

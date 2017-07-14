@@ -8,11 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 11.08.12
- * Time: 21:24
- */
 public class AuthorizedUser extends UserDTO implements Serializable {
     private Set<String> grants = new HashSet<>();
     private UUID userSessionId;

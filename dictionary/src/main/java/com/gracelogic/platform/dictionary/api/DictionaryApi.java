@@ -18,11 +18,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.*;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 16.07.2016
- * Time: 21:58
- */
 @Controller
 @RequestMapping(value = Path.API_DICTIONARY)
 @Api(value = Path.API_DICTIONARY, description = "Контроллер для получения данных системных справочников")

@@ -15,11 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.URLEncoder;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 21.10.2015
- * Time: 13:15
- */
 @Service("instagram")
 public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
     //private static final String CLIENT_ID = "6e538b20833949b6ab179e8fbcb48eef";

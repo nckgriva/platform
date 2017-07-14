@@ -4,11 +4,6 @@ import com.gracelogic.platform.web.dto.PlatformRequest;
 
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 05.03.2015
- * Time: 14:52
- */
 public class ProcessPaymentRequest extends PlatformRequest {
     private String accountNumber;
     private String paymentUID;

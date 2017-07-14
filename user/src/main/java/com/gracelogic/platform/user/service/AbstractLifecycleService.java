@@ -7,11 +7,6 @@ import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.User;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 17.07.2016
- * Time: 22:47
- */
 public abstract class AbstractLifecycleService implements UserLifecycleService {
     protected abstract UserService getUserService();
 

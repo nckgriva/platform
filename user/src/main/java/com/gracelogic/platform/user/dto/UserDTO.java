@@ -13,11 +13,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.*;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 11.08.12
- * Time: 21:24
- */
 public class UserDTO extends IdObjectDTO implements Serializable {
     private static String USER_NAME_FORMAT = "{name} {surname}";
     public static final String FIELD_NAME = "name";

@@ -17,11 +17,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 18.07.2016
- * Time: 14:38
- */
 public interface PaymentService {
     Account checkPaymentAbility(UUID paymentSystemId, String accountNumber, String currency) throws InvalidPaymentSystemException, AccountNotFoundException;
 

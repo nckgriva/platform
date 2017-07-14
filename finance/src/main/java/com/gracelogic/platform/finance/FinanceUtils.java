@@ -6,11 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.DecimalFormat;
 import java.util.*;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 15.05.14
- * Time: 14:32
- */
 public class FinanceUtils {
 
     public static double calcLoanRate(double totalDebtAmount, double totalDebtInterestRateSum, int term) {

@@ -11,12 +11,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-
-/**
- * Author: Igor Parkhomenko
- * Date: 20.07.12
- * Time: 21:28
- */
 public class ServletUtils {
     private static Logger logger = Logger.getLogger(ServletUtils.class);
 

@@ -18,12 +18,6 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.Set;
 
-
-/**
- * Author: Igor Parkhomenko
- * Date: 29.06.12
- * Time: 14:59
- */
 @Service(value = "defaultAuthenticationProvider")
 public class AuthenticationProviderImpl implements AuthenticationProvider {
     @Autowired

@@ -1,10 +1,5 @@
 package com.gracelogic.platform.payment.dto;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 06.04.2015
- * Time: 14:41
- */
 public class CalcPaymentFeeResult {
     private Double amount;
     private Double totalAmount;

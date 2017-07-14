@@ -8,11 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 09.11.14
- * Time: 15:21
- */
 public interface IdObjectDao {
     <T extends IdObject> T getObjectById(Class<T> clazz, String fetches, Object id);
 

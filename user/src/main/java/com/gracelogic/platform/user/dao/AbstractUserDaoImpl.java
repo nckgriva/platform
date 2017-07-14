@@ -11,11 +11,6 @@ import org.springframework.util.CollectionUtils;
 import javax.persistence.TypedQuery;
 import java.util.*;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 12.07.12
- * Time: 21:44
- */
 public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
     private static Logger logger = Logger.getLogger(AbstractUserDaoImpl.class);
 

@@ -6,11 +6,6 @@ import com.gracelogic.platform.db.dto.IdObjectDTO;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 18.12.2016
- * Time: 23:11
- */
 public class SectionPatternDTO extends IdObjectDTO {
     private String name;
     private String description;

@@ -19,11 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 21.10.2015
- * Time: 17:29
- */
 public abstract class AbstractOauthProvider implements OAuthServiceProvider {
     private static Logger logger = Logger.getLogger(AbstractOauthProvider.class);
 

@@ -2,11 +2,6 @@ package com.gracelogic.platform.task;
 
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 18.07.2016
- * Time: 14:52
- */
 public class DataConstants {
 
     public enum TaskExecutionMethods {

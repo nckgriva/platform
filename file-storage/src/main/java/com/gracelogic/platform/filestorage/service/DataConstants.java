@@ -2,11 +2,6 @@ package com.gracelogic.platform.filestorage.service;
 
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 21.03.2015
- * Time: 16:39
- */
 public class DataConstants {
 
     public enum StoreModes {

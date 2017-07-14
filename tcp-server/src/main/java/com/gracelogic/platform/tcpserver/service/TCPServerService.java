@@ -5,11 +5,6 @@ import com.gracelogic.platform.tcpserver.dto.Message;
 
 import java.util.List;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 23.03.12
- * Time: 13:09
- */
 public interface TCPServerService {
     boolean addMessageToQueue(Client client, Message message);
 

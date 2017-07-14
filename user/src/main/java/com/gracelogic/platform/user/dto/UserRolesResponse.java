@@ -4,11 +4,6 @@ import com.gracelogic.platform.web.dto.PlatformResponse;
 
 import java.util.List;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 10.08.2016
- * Time: 9:41
- */
 public class UserRolesResponse extends PlatformResponse {
     private List<RoleDTO> roles = null;
 

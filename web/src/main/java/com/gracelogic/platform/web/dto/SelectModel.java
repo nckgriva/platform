@@ -1,10 +1,5 @@
 package com.gracelogic.platform.web.dto;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 25.07.13
- * Time: 13:55
- */
 public class SelectModel {
     private String id;
     private String name;

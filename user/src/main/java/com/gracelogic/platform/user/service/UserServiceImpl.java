@@ -30,11 +30,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 23.07.13
- * Time: 13:09
- */
 @Service("userService")
 public class UserServiceImpl implements UserService {
     private static Logger logger = Logger.getLogger(UserServiceImpl.class);

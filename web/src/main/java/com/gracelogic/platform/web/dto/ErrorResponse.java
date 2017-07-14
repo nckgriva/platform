@@ -1,10 +1,5 @@
 package com.gracelogic.platform.web.dto;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 24.12.2014
- * Time: 15:55
- */
 public class ErrorResponse extends PlatformResponse {
     private String code = "";
     private String message = "";

@@ -2,11 +2,6 @@ package com.gracelogic.platform.user.dto;
 
 import com.gracelogic.platform.web.dto.PlatformRequest;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 14.05.14
- * Time: 15:48
- */
 public class AuthRequestDTO extends PlatformRequest {
     private String login;
     private String password;

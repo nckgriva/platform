@@ -2,11 +2,6 @@ package com.gracelogic.platform.db.dto;
 
 import java.util.LinkedList;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 31.01.2015
- * Time: 14:29
- */
 public class EntityListResponse<E extends IdObjectDTO> {
     private Integer pages = 0;
     private Integer page = 1;

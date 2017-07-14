@@ -16,11 +16,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 21.10.2015
- * Time: 13:15
- */
 @Service("vk")
 public class VkOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
     //private static final String CLIENT_ID = "5116200";

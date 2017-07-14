@@ -6,11 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 18.12.14
- * Time: 12:37
- */
 public interface IdObjectService {
 
     <T extends IdObject> T lockObject(Class<T> clazz, Object id);

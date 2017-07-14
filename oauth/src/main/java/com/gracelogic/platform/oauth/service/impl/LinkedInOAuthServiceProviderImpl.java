@@ -16,11 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.URLEncoder;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 21.10.2015
- * Time: 13:15
- */
 @Service("linkedin")
 public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
     private static Logger logger = Logger.getLogger(LinkedInOAuthServiceProviderImpl.class);

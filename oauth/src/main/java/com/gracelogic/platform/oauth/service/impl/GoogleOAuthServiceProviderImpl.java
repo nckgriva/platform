@@ -17,11 +17,6 @@ import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Map;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 21.10.2015
- * Time: 13:15
- */
 @Service("google")
 public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
     private static Logger logger = Logger.getLogger(GoogleOAuthServiceProviderImpl.class);

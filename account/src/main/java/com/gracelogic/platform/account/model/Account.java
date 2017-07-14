@@ -10,11 +10,6 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 11.12.14
- * Time: 12:34
- */
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT")
 public class Account extends IdObject<UUID> {

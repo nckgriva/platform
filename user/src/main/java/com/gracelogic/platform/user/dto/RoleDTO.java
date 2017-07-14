@@ -9,11 +9,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Author: Igor Parkhomenko
- * Date: 10.08.2016
- * Time: 9:28
- */
 public class RoleDTO extends IdObjectDTO {
     private String code;
     private String name;
