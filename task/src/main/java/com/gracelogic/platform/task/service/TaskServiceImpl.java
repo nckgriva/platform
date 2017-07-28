@@ -210,7 +210,7 @@ public class TaskServiceImpl implements TaskService {
         }
 
         if (!StringUtils.isEmpty(serviceName)) {
-            params.put("name", "%%" + StringUtils.lowerCase(serviceName) + "%%");
+            params.put("serviceName", "%%" + StringUtils.lowerCase(serviceName) + "%%");
             cause += " and lower(el.serviceName) like :serviceName";
         }
 
