@@ -296,8 +296,8 @@ public class UserApi extends AbstractAuthorizedController {
                                    @RequestBody
                                    UserRegistrationDTO userRegistrationDTO) {
         try {
-            lifecycleService.register(userRegistrationDTO, false);
-            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+            User user = lifecycleService.register(userRegistrationDTO, false);
+            return new ResponseEntity<>(new IDResponse(user.getId()), HttpStatus.OK);
         } catch (PhoneOrEmailIsNecessaryException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.PHONE_OR_EMAIL_IS_NECESSARY", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidPasswordException e) {
