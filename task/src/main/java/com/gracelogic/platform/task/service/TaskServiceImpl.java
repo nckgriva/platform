@@ -95,7 +95,7 @@ public class TaskServiceImpl implements TaskService {
         Map<String, Object> params = new HashMap<>();
         params.put("state", DataConstants.TaskExecutionStates.CREATED.getValue());
 
-        List<TaskExecutionLog> executions = idObjectService.getList(TaskExecutionLog.class, null, "el.state.id=:state", params, "el.created", "ASC", null, 1);
+        List<TaskExecutionLog> executions = idObjectService.getList(TaskExecutionLog.class, "left join fetch el.task", "el.state.id=:state", params, "el.created", "ASC", null, 1);
         if (executions.isEmpty()) {
             return;
         }
