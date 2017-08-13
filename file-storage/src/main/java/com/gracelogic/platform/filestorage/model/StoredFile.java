@@ -43,6 +43,11 @@ public class StoredFile extends IdObject<UUID> {
     @Column(name = "META", nullable = true, length = 4000)
     private String meta;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "STORED_FILE_DATA", nullable = true)
+    private StoredFileData storedFileData;
+
+
     @Override
     public UUID getId() {
         return id;
@@ -111,5 +116,13 @@ public class StoredFile extends IdObject<UUID> {
 
     public void setMeta(String meta) {
         this.meta = meta;
+    }
+
+    public StoredFileData getStoredFileData() {
+        return storedFileData;
+    }
+
+    public void setStoredFileData(StoredFileData storedFileData) {
+        this.storedFileData = storedFileData;
     }
 }
