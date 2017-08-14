@@ -1,6 +1,8 @@
 package com.gracelogic.platform.user.dto;
 
-public class GrantDTO {
+import com.gracelogic.platform.db.dto.IdObjectDTO;
+
+public class GrantDTO extends IdObjectDTO {
     private String code;
     private String name;
 

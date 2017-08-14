@@ -56,7 +56,8 @@ public interface UserService {
 
     void mergeUserRoles(UUID userId, Collection<UUID> activeRoles);
 
-    EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields,
+                                              boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     UserDTO getUser(UUID userId, boolean fetchRoles) throws ObjectNotFoundException;
 
@@ -67,4 +68,6 @@ public interface UserService {
     RoleDTO getRole(UUID roleId, boolean fetchGrants) throws ObjectNotFoundException;
 
     void deleteRole(UUID roleId);
+
+    EntityListResponse<UserSessionDTO> getSessionsPaged(UUID userId, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
 }

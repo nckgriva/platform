@@ -923,4 +923,39 @@ public class UserServiceImpl implements UserService {
         idObjectService.delete(RoleGrant.class, query, params);
         idObjectService.delete(Role.class, roleId);
     }
+
+    @Override
+    public EntityListResponse<UserSessionDTO> getSessionsPaged(UUID userId, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = "";
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (userId != null) {
+            cause += " and el.user.id=:userId";
+            params.put("userId", userId);
+        }
+
+        int totalCount = idObjectService.getCount(UserSession.class, null, countFetches, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<UserSessionDTO> entityListResponse = new EntityListResponse<UserSessionDTO>();
+        entityListResponse.setEntity("taskExecutionLog");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<UserSession> items = idObjectService.getList(UserSession.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        entityListResponse.setPartCount(items.size());
+        for (UserSession e : items) {
+            UserSessionDTO el = UserSessionDTO.prepare(e);
+            if (enrich) {
+                UserSessionDTO.enrich(el, e);
+            }
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
 }
