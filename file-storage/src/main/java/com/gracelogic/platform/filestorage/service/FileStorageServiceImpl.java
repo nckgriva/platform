@@ -9,17 +9,16 @@ import com.gracelogic.platform.filestorage.exception.StoredFileDataUnavailableEx
 import com.gracelogic.platform.filestorage.exception.UnsupportedStoreModeException;
 import com.gracelogic.platform.filestorage.model.StoreMode;
 import com.gracelogic.platform.filestorage.model.StoredFile;
+import com.gracelogic.platform.filestorage.model.StoredFileData;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -48,19 +47,22 @@ public class FileStorageServiceImpl implements FileStorageService {
             storedFile.setStoreMode(ds.get(StoreMode.class, storeModeId));
             storedFile.setExtension(extension);
             storedFile.setReferenceObjectId(referenceObjectId);
-            storedFile.setDataAvailable(storeModeId.equals(DataConstants.StoreModes.LOCAL.getValue()) && is != null);
+            storedFile.setDataAvailable((storeModeId.equals(DataConstants.StoreModes.LOCAL.getValue()) || storeModeId.equals(DataConstants.StoreModes.DATABASE.getValue())) && is != null);
             storedFile.setMeta(meta);
             storedFile = idObjectService.save(storedFile);
 
             if (storeModeId.equals(DataConstants.StoreModes.LOCAL.getValue())) {
-                if (is != null){
+                if (is != null) {
                     saveDataLocally(is, storedFile.getId(), referenceObjectId, extension);
                 }
-            }
-            else if (storeModeId.equals(DataConstants.StoreModes.EXTERNAL_LINK.getValue())) {
+            } else if (storeModeId.equals(DataConstants.StoreModes.EXTERNAL_LINK.getValue())) {
                 //Nothing to do
-            }
-            else {
+            } else if (storeModeId.equals(DataConstants.StoreModes.DATABASE.getValue())) {
+                StoredFileData storedFileData = new StoredFileData();
+                storedFileData.setData(is != null ? IOUtils.toByteArray(is) : null);
+                storedFileData = idObjectService.save(storedFileData);
+                storedFile.setStoredFileData(storedFileData);
+            } else {
                 throw new UnsupportedStoreModeException("UnsupportedStoreModeException");
             }
 
@@ -83,18 +85,27 @@ public class FileStorageServiceImpl implements FileStorageService {
             }
         }
 
-        storedFile.setDataAvailable(storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue()) && is != null && is.available() > 0);
+        storedFile.setDataAvailable((storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue()) ||
+                storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.DATABASE.getValue())) && is != null);
         storedFile.setMeta(meta);
         storedFile.setExtension(extension);
         idObjectService.save(storedFile);
 
         if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
-            if (is != null){
+            if (is != null) {
                 saveDataLocally(is, storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension());
             }
-        }
-        else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.EXTERNAL_LINK.getValue())) {
+        } else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.EXTERNAL_LINK.getValue())) {
             //Nothing to do
+        } else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.DATABASE.getValue())) {
+            if (is != null) {
+                if (storedFile.getStoredFileData() == null) {
+                    throw new IOException("StoredFileData is null");
+                }
+                StoredFileData storedFileData = idObjectService.getObjectById(StoredFileData.class, storedFile.getStoredFileData().getId());
+                storedFileData.setData(IOUtils.toByteArray(is));
+                idObjectService.save(storedFileData);
+            }
         }
     }
 
@@ -174,12 +185,28 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public byte[] getStoredFileData(StoredFile storedFile) throws UnsupportedStoreModeException, StoredFileDataUnavailableException, IOException {
-        return FileUtils.readFileToByteArray(getFile(storedFile));
+        if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
+            return FileUtils.readFileToByteArray(getFile(storedFile));
+        } else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.DATABASE.getValue())) {
+            StoredFileData storedFileData = idObjectService.getObjectById(StoredFileData.class, storedFile.getStoredFileData().getId());
+            return storedFileData.getData();
+        } else {
+            throw new UnsupportedStoreModeException("UnsupportedStoreModeException");
+        }
+
     }
 
     @Override
     public void writeStoredFileDataToOutputStream(StoredFile storedFile, OutputStream os) throws UnsupportedStoreModeException, StoredFileDataUnavailableException, IOException {
-        Files.copy(getFile(storedFile), os);
+        if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
+            Files.copy(getFile(storedFile), os);
+        } else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.DATABASE.getValue())) {
+            StoredFileData storedFileData = idObjectService.getObjectById(StoredFileData.class, storedFile.getStoredFileData().getId());
+            os.write(storedFileData.getData());
+        } else {
+            throw new UnsupportedStoreModeException("UnsupportedStoreModeException");
+        }
+
     }
 
     @Override
@@ -199,10 +226,14 @@ public class FileStorageServiceImpl implements FileStorageService {
     public void deleteStoredFile(UUID id, boolean withContent) {
         StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, id);
         if (withContent) {
-            if (storedFile.getDataAvailable()) {
-                if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
-                    deleteDataLocally(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension());
-                }
+            if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
+                deleteDataLocally(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension());
+            }
+            else if (storedFile.getStoredFileData() != null) {
+                try {
+                    idObjectService.delete(StoredFileData.class, storedFile.getStoredFileData().getId());
+                } catch (Exception ignored) {
+                } //If many StoredFile link to this StoredFileData
             }
         }
 

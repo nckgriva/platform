@@ -5,6 +5,8 @@ import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.filestorage.Path;
 import com.gracelogic.platform.filestorage.dto.StoreRequestDTO;
 import com.gracelogic.platform.filestorage.dto.StoredFileDTO;
+import com.gracelogic.platform.filestorage.exception.StoredFileDataUnavailableException;
+import com.gracelogic.platform.filestorage.exception.UnsupportedStoreModeException;
 import com.gracelogic.platform.filestorage.model.StoredFile;
 import com.gracelogic.platform.filestorage.service.*;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
@@ -56,9 +58,9 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.POST, value = "{id}/update")
     @ResponseBody
     public ResponseEntity updateStoredFile(@PathVariable(value = "id") UUID id,
-                                 @ModelAttribute StoreRequestDTO dto,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response) {
+                                           @ModelAttribute StoreRequestDTO dto,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response) {
         StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, id);
 
         if (storedFile == null) {
@@ -111,6 +113,12 @@ public class FileStorageApi extends AbstractAuthorizedController {
             try {
                 response.sendRedirect(storedFile.getMeta());
             } catch (IOException e) {
+                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            }
+        } else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.DATABASE.getValue())) {
+            try {
+                fileStorageService.writeStoredFileDataToOutputStream(storedFile, response.getOutputStream());
+            } catch (IOException | UnsupportedStoreModeException | StoredFileDataUnavailableException e) {
                 response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
         }
