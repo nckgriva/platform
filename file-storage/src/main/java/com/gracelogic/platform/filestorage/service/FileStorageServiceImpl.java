@@ -225,19 +225,17 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public void deleteStoredFile(UUID id, boolean withContent) {
         StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, id);
+        idObjectService.delete(StoredFile.class, id);
         if (withContent) {
             if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
                 deleteDataLocally(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension());
-            }
-            else if (storedFile.getStoredFileData() != null) {
+            } else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.DATABASE.getValue())) {
                 try {
                     idObjectService.delete(StoredFileData.class, storedFile.getStoredFileData().getId());
                 } catch (Exception ignored) {
                 } //If many StoredFile link to this StoredFileData
             }
         }
-
-        idObjectService.delete(StoredFile.class, id);
     }
 
     @Override
