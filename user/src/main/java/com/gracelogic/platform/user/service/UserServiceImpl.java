@@ -925,8 +925,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EntityListResponse<UserSessionDTO> getSessionsPaged(UUID userId, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = "";
+    public EntityListResponse<UserSessionDTO> getSessionsPaged(UUID userId, String authIp, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = enrich ? "left join fetch el.user" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -936,12 +936,27 @@ public class UserServiceImpl implements UserService {
             params.put("userId", userId);
         }
 
+        if (authIp != null) {
+            cause += "and lower(el.authIp) like :authIp";
+            params.put("authIp", authIp);
+        }
+
+        if (startDate != null) {
+            cause += "and el.created >= :startDate ";
+            params.put("startDate", startDate);
+        }
+
+        if (endDate != null) {
+            cause += "and el.created <= :endDate ";
+            params.put("endDate", endDate);
+        }
+
         int totalCount = idObjectService.getCount(UserSession.class, null, countFetches, cause, params);
         int totalPages = ((totalCount / count)) + 1;
         int startRecord = page != null ? (page * count) - count : start;
 
         EntityListResponse<UserSessionDTO> entityListResponse = new EntityListResponse<UserSessionDTO>();
-        entityListResponse.setEntity("taskExecutionLog");
+        entityListResponse.setEntity("session");
         entityListResponse.setPage(page);
         entityListResponse.setPages(totalPages);
         entityListResponse.setTotalCount(totalCount);

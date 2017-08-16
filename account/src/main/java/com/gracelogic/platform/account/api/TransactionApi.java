@@ -22,12 +22,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
-
-/**
- * Author: Igor Parkhomenko
- * Date: 10.08.2016
- * Time: 10:15
- */
 @Controller
 @RequestMapping(value = Path.API_TRANSACTION)
 public class TransactionApi extends AbstractAuthorizedController {

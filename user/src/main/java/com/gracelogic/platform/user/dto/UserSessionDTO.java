@@ -130,7 +130,8 @@ public class UserSessionDTO extends IdObjectDTO {
 
     public static void enrich(UserSessionDTO dto, UserSession model) {
         if (model.getUser() != null) {
-            dto.setUserName(model.getUser().getFields());
+            dto.setUserId(model.getUser().getId());
+            dto.setUserName(UserDTO.formatUserName(model.getUser()));
         }
     }
 }
