@@ -68,7 +68,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
         }
 
         if (!filePermissionResolver.canWrite(storedFile, getUser())) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.FORBIDDEN", messageSource.getMessage("fileStorage.FORBIDDEN", null, getUserLocale())), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.FORBIDDEN", messageSource.getMessage("fileStorage.FORBIDDEN", null, getUserLocale())), HttpStatus.FORBIDDEN);
         }
 
         try {
@@ -77,7 +77,38 @@ public class FileStorageApi extends AbstractAuthorizedController {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, getUserLocale())), HttpStatus.NOT_FOUND);
         } catch (IOException e) {
             logger.error("Failed to update file", e);
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, getUserLocale())), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, getUserLocale())), HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "uploadStoredFile", notes = "Загрузить содержимое файла")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 403, message = "Forbidden"), @ApiResponse(code = 404, message = "Not Found"), @ApiResponse(code = 500, message = "Something exceptional happened")})
+    @RequestMapping(method = RequestMethod.POST, value = "{id}/upload")
+    @ResponseBody
+    public ResponseEntity uploadStoredFileData(@PathVariable(value = "id") UUID id,
+                                               @RequestParam(value = "filename", required = false) String filename,
+                                               @RequestParam(value = "meta", required = false) String meta,
+                                               HttpServletRequest request,
+                                               HttpServletResponse response) {
+        StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, id);
+
+        if (storedFile == null) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, getUserLocale())), HttpStatus.NOT_FOUND);
+        }
+
+        if (!filePermissionResolver.canWrite(storedFile, getUser())) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.FORBIDDEN", messageSource.getMessage("fileStorage.FORBIDDEN", null, getUserLocale())), HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            fileStorageService.updateStoredFile(id, request.getInputStream(), filename, meta);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, getUserLocale())), HttpStatus.NOT_FOUND);
+        } catch (IOException e) {
+            logger.error("Failed to update file", e);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
