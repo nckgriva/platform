@@ -1,6 +1,10 @@
 package com.gracelogic.platform.user.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
+import com.gracelogic.platform.db.dto.JsonDateDeserializer;
+import com.gracelogic.platform.db.dto.JsonDateSerializer;
 import com.gracelogic.platform.user.model.UserSession;
 
 import java.util.Date;
@@ -36,6 +40,8 @@ public class UserSessionDTO extends IdObjectDTO {
         this.sessionId = sessionId;
     }
 
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getSessionCreatedDt() {
         return sessionCreatedDt;
     }
@@ -52,6 +58,8 @@ public class UserSessionDTO extends IdObjectDTO {
         this.maxInactiveInterval = maxInactiveInterval;
     }
 
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getLastAccessDt() {
         return lastAccessDt;
     }
@@ -130,7 +138,6 @@ public class UserSessionDTO extends IdObjectDTO {
 
     public static void enrich(UserSessionDTO dto, UserSession model) {
         if (model.getUser() != null) {
-            dto.setUserId(model.getUser().getId());
             dto.setUserName(UserDTO.formatUserName(model.getUser()));
         }
     }
