@@ -680,11 +680,11 @@ public class UserServiceImpl implements UserService {
         }
 
         //Delete non-active roles
-        String query = "el.user.id=:userId";
+        String query = "el.user.id=:userId ";
         HashMap<String, Object> params = new HashMap<>();
         params.put("userId", userId);
         if (!activeRoles.isEmpty()) {
-            query += " and el.role.id not in (:roles)";
+            query += "and el.role.id not in (:roles) ";
             params.put("roles", activeRoles);
         }
         idObjectService.delete(UserRole.class, query, params);
@@ -808,14 +808,14 @@ public class UserServiceImpl implements UserService {
 
         if (!StringUtils.isEmpty(code)) {
             params.put("code", "%%" + StringUtils.lowerCase(name) + "%%");
-            cause += " and lower(el.code) like :code";
+            cause += "and lower(el.code) like :code ";
         }
         if (!StringUtils.isEmpty(name)) {
             params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
-            cause += " and lower(el.name) like :name";
+            cause += "and lower(el.name) like :name ";
         }
         if (grantIds != null && !grantIds.isEmpty()) {
-            cause += " and el.grant.id in (:grants)";
+            cause += "and el.grant.id in (:grants) ";
             params.put("grants", grantIds);
         }
 
@@ -932,12 +932,12 @@ public class UserServiceImpl implements UserService {
         HashMap<String, Object> params = new HashMap<String, Object>();
 
         if (userId != null) {
-            cause += " and el.user.id=:userId";
+            cause += "and el.user.id=:userId ";
             params.put("userId", userId);
         }
 
-        if (authIp != null) {
-            cause += "and lower(el.authIp) like :authIp";
+        if (!StringUtils.isEmpty(authIp)) {
+            cause += "and el.authIp=:authIp ";
             params.put("authIp", authIp);
         }
 
