@@ -385,13 +385,16 @@ public class UserApi extends AbstractAuthorizedController {
                                    @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
                                    @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                    @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
-                                   @ApiParam(name = "feilds", value = "fields") @RequestParam Map<String, String> allRequestParams) {
+                                   @ApiParam(name = "fields", value = "fields") @RequestParam Map<String, String> allRequestParams) {
 
         Map<String, String> fields = new HashMap<String, String>();
         if (allRequestParams != null) {
             for (String paramName : allRequestParams.keySet()) {
                 if (StringUtils.startsWithIgnoreCase(paramName, "fields.")) {
-                    fields.put(paramName.substring("fields.".length()), allRequestParams.get(paramName));
+                    String value = allRequestParams.get(paramName);
+                    if (!StringUtils.isEmpty(value)) {
+                        fields.put(paramName.substring("fields.".length()), allRequestParams.get(paramName));
+                    }
                 }
             }
         }
