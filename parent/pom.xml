@@ -13,6 +13,7 @@
         <uiScope>compile</uiScope>
         <swagger-maven-plugin.version>3.1.4</swagger-maven-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <war.final.name>mcab-core-web-1.0</war.final.name> <!--TODO: вынести это отсюда-->
     </properties>
 
     <dependencyManagement>
@@ -444,12 +445,12 @@
                                 <configuration>
                                     <artifacts>
                                         <artifact>
-                                            <file>${project.build.directory}/mcab-core-web-1.0/static/index.html
+                                            <file>${project.build.directory}/${war.final.name}/static/index.html
                                             </file>
                                             <type>html</type>
                                         </artifact>
                                         <artifact>
-                                            <file>${project.build.directory}/mcab-core-web-1.0/static/swagger.json
+                                            <file>${project.build.directory}/${war.final.name}/static/swagger.json
                                             </file>
                                             <type>json</type>
                                         </artifact>
@@ -478,7 +479,7 @@
                                         <location>com.gracelogic</location>
                                     </locations>
                                     <info>
-                                        <title>MCAB-CORE</title>
+                                        <title>API</title>
                                         <version>v1</version>
                                         <description>
                                             This is a description of API.
@@ -497,10 +498,8 @@
                                         </license>
                                     </info>
                                     <templatePath>classpath:/strapdown.html.hbs</templatePath>
-                                    <outputPath>${project.build.directory}/ccredit-core-web-1.0/static/document.html
-                                    </outputPath>
-                                    <swaggerDirectory>${project.build.directory}/ccredit-core-web-1.0/static
-                                    </swaggerDirectory>
+                                    <outputPath>${project.build.directory}/${war.final.name}/static/document.html</outputPath>
+                                    <swaggerDirectory>${project.build.directory}/${war.final.name}/static</swaggerDirectory>
                                     <securityDefinitions>
                                         <securityDefinition>
                                             <name>MybasicAuth</name>
@@ -537,7 +536,7 @@
                                 <configuration>
                                     <includeArtifactIds>platform-swagger-ui</includeArtifactIds>
                                     <excludes>/META-INF/**</excludes>
-                                    <outputDirectory>${project.build.directory}/mcab-core-web-1.0/static
+                                    <outputDirectory>${project.build.directory}/${war.final.name}/static
                                     </outputDirectory>
                                 </configuration>
                             </execution>
