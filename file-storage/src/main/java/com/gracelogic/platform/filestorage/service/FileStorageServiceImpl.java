@@ -1,5 +1,13 @@
 package com.gracelogic.platform.filestorage.service;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.google.common.io.Files;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
@@ -14,6 +22,7 @@ import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +43,19 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Autowired
     private PropertyService propertyService;
+
+    private static Logger logger = Logger.getLogger(FileStorageServiceImpl.class);
+
+
+    private AmazonS3 s3client = null;
+
+    private AmazonS3 getAmazonS3Client() {
+        if (s3client == null) {
+            AWSCredentials credentials = new BasicAWSCredentials(propertyService.getPropertyValue("file-storage:s3_access_key"), propertyService.getPropertyValue("file-storage:s3_secret_key"));
+            s3client = new AmazonS3Client(credentials);
+        }
+        return s3client;
+    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -62,6 +84,10 @@ public class FileStorageServiceImpl implements FileStorageService {
                 storedFileData.setData(is != null ? IOUtils.toByteArray(is) : null);
                 storedFileData = idObjectService.save(storedFileData);
                 storedFile.setStoredFileData(storedFileData);
+            } else if (storeModeId.equals(DataConstants.StoreModes.S3.getValue())) {
+                if (is != null) {
+                    saveDataViaS3(is, storedFile.getId(), referenceObjectId, extension);
+                }
             } else {
                 throw new UnsupportedStoreModeException("UnsupportedStoreModeException");
             }
@@ -107,9 +133,14 @@ public class FileStorageServiceImpl implements FileStorageService {
                 idObjectService.save(storedFileData);
             }
         }
+        else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.S3.getValue())) {
+            if (is != null) {
+                saveDataViaS3(is, storedFile.getId(), storedFile.getReferenceObjectId(), extension);
+            }
+        }
     }
 
-    protected void deleteDataLocally(UUID storedFileId, UUID referenceObjectId, String extension) {
+    private void deleteDataLocally(UUID storedFileId, UUID referenceObjectId, String extension) {
         String storingPath = buildLocalStoringPath(storedFileId, referenceObjectId, extension);
         File file = new java.io.File(storingPath);
         if (file.exists()) {
@@ -117,7 +148,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    protected void saveDataLocally(InputStream is, UUID storedFileId, UUID referenceObjectId, String extension) throws IOException {
+    private void saveDataLocally(InputStream is, UUID storedFileId, UUID referenceObjectId, String extension) throws IOException {
         //Create dir
         String basePath = propertyService.getPropertyValue("file-storage:local_store_path");
         basePath = String.format("%s/%s", basePath, referenceObjectId.toString());
@@ -133,6 +164,34 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
 
         FileUtils.copyInputStreamToFile(is, file);
+    }
+
+    private PutObjectResult saveDataViaS3(InputStream is, UUID storedFileId, UUID referenceObjectId, String extension) throws IOException {
+        PutObjectResult result = null;
+        try {
+            result = getAmazonS3Client().putObject(new PutObjectRequest(
+                    propertyService.getPropertyValue("file-storage:s3_bucket_prefix") + referenceObjectId,
+                    storedFileId.toString(), is, null));
+        } catch (AmazonServiceException ase) {
+            logger.error("Caught an AmazonServiceException, which " +
+                    "means your request made it " +
+                    "to Amazon S3, but was rejected with an error response" +
+                    " for some reason.");
+            logger.error("Error Message:    " + ase.getMessage() + "\n" +
+                    "HTTP Status Code: " + ase.getStatusCode() + "\n" +
+                    "AWS Error Code:   " + ase.getErrorCode() + "\n" +
+                    "Error Type:       " + ase.getErrorType() + "\n" +
+                    "Request ID:       " + ase.getRequestId() + "\n");
+            throw new IOException(ase);
+        } catch (AmazonClientException ace) {
+            logger.error("Caught an AmazonClientException, which " +
+                    "means the client encountered " +
+                    "an internal error while trying to " +
+                    "communicate with S3, " +
+                    "such as not being able to access the network.");
+            throw new IOException(ace);
+        }
+        return result;
     }
 
     @Override
@@ -193,7 +252,6 @@ public class FileStorageServiceImpl implements FileStorageService {
         } else {
             throw new UnsupportedStoreModeException("UnsupportedStoreModeException");
         }
-
     }
 
     @Override
@@ -243,5 +301,11 @@ public class FileStorageServiceImpl implements FileStorageService {
         String basePath = propertyService.getPropertyValue("file-storage:local_store_path");
         basePath = String.format("%s/%s", basePath, referenceObjectId.toString());
         return String.format("%s/%s.%s", basePath, id.toString(), extension);
+    }
+
+    @Override
+    public String buildS3Url(UUID id, UUID referenceObjectId, String extension) {
+        String bucket = propertyService.getPropertyValue("file-storage:s3_bucket_prefix") + referenceObjectId;
+        return String.format("https://%s.s3.amazonaws.com/%s", bucket, id.toString());
     }
 }

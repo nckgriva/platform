@@ -27,6 +27,8 @@ public interface FileStorageService {
 
     String buildLocalStoringPath(UUID id, UUID referenceObjectId, String extension);
 
+    String buildS3Url(UUID id, UUID referenceObjectId, String extension);
+
     File getFile(StoredFile storedFile) throws UnsupportedStoreModeException, StoredFileDataUnavailableException;
 
     void writeStoredFileDataToOutputStream(StoredFile storedFile, OutputStream os) throws UnsupportedStoreModeException, StoredFileDataUnavailableException, IOException;

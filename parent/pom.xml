@@ -12,6 +12,7 @@
     <properties>
         <uiScope>compile</uiScope>
         <swagger-maven-plugin.version>3.1.4</swagger-maven-plugin.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencyManagement>
@@ -43,9 +44,9 @@
                 </exclusions>
             </dependency>
             <!--<dependency>-->
-                <!--<groupId>org.hibernate.javax.persistence</groupId>-->
-                <!--<artifactId>hibernate-jpa-2.0-api</artifactId>-->
-                <!--<version>1.0.1.Final</version>-->
+            <!--<groupId>org.hibernate.javax.persistence</groupId>-->
+            <!--<artifactId>hibernate-jpa-2.0-api</artifactId>-->
+            <!--<version>1.0.1.Final</version>-->
             <!--</dependency>-->
             <dependency>
                 <groupId>org.hibernate.common</groupId>
@@ -142,6 +143,11 @@
                 <artifactId>servlet-api</artifactId>
                 <version>2.5</version>
                 <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-s3</artifactId>
+                <version>1.11.204</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -427,6 +433,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.0.0</version>
                         <executions>
                             <execution>
                                 <id>attach-swagger-html</id>
@@ -437,12 +444,12 @@
                                 <configuration>
                                     <artifacts>
                                         <artifact>
-                                            <file>${project.build.directory}/ccredit-core-web-1.0/static/index.html
+                                            <file>${project.build.directory}/mcab-core-web-1.0/static/index.html
                                             </file>
                                             <type>html</type>
                                         </artifact>
                                         <artifact>
-                                            <file>${project.build.directory}/ccredit-core-web-1.0/static/swagger.json
+                                            <file>${project.build.directory}/mcab-core-web-1.0/static/swagger.json
                                             </file>
                                             <type>json</type>
                                         </artifact>
@@ -454,6 +461,7 @@
                     <plugin>
                         <groupId>com.github.kongchen</groupId>
                         <artifactId>swagger-maven-plugin</artifactId>
+                        <version>${swagger-maven-plugin.version}</version>
                         <dependencies>
                             <dependency>
                                 <groupId>com.gracelogic.platform</groupId>
@@ -470,7 +478,7 @@
                                         <location>com.gracelogic</location>
                                     </locations>
                                     <info>
-                                        <title>CCREDIT-CORE</title>
+                                        <title>MCAB-CORE</title>
                                         <version>v1</version>
                                         <description>
                                             This is a description of API.
@@ -518,7 +526,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
-                        <version>2.1</version>
+                        <version>3.0.2</version>
                         <executions>
                             <execution>
                                 <id>add-swagger-ui</id>
@@ -529,7 +537,7 @@
                                 <configuration>
                                     <includeArtifactIds>platform-swagger-ui</includeArtifactIds>
                                     <excludes>/META-INF/**</excludes>
-                                    <outputDirectory>${project.build.directory}/ccredit-core-web-1.0/static
+                                    <outputDirectory>${project.build.directory}/mcab-core-web-1.0/static
                                     </outputDirectory>
                                 </configuration>
                             </execution>
@@ -607,6 +615,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -615,6 +624,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>

@@ -144,6 +144,14 @@ public class FileStorageApi extends AbstractAuthorizedController {
             } catch (IOException | UnsupportedStoreModeException | StoredFileDataUnavailableException e) {
                 response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
+        } else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.S3.getValue())) {
+            try {
+                response.sendRedirect(fileStorageService.buildS3Url(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension()));
+            } catch (IOException e) {
+                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            }
+        } else {
+            response.setStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value());
         }
     }
 
