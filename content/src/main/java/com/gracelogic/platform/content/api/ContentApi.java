@@ -31,7 +31,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_CONTENT)
-@Api(value = Path.API_CONTENT, description = "Контроллер управления контентом", authorizations = @Authorization(value = "MybasicAuth"))
+@Api(value = Path.API_CONTENT, description = "Content management controller", authorizations = @Authorization(value = "MybasicAuth"))
 public class ContentApi extends AbstractAuthorizedController {
     @Autowired
     private ContentService contentService;
@@ -40,8 +40,15 @@ public class ContentApi extends AbstractAuthorizedController {
     @Qualifier("contentMessageSource")
     private ResourceBundleMessageSource messageSource;
 
-    @ApiOperation(value = "section", notes = "Получить список секций в иерархическом виде")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
+    @ApiOperation(
+            value = "getSections",
+            notes = "Get list of sections in a hierarchical form",
+            response = List.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(value = "/section", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getSections(@ApiParam(name = "parentId", value = "parentId") @RequestParam(value = "parentId", required = false) UUID parentId,
@@ -51,6 +58,15 @@ public class ContentApi extends AbstractAuthorizedController {
         return new ResponseEntity<List<SectionDTO>>(sectionDTOs, HttpStatus.OK);
     }
 
+    @ApiOperation(
+            value = "getSection",
+            notes = "Get section",
+            response = SectionDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(method = RequestMethod.GET, value = "/section/{id}")
     @ResponseBody
     public ResponseEntity getSection(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
@@ -62,8 +78,15 @@ public class ContentApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(value = "elements", notes = "Получить список элементов")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
+    @ApiOperation(
+            value = "getElements",
+            notes = "Get list of elements",
+            response = EntityListResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(value = "/element", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getElements(@ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
@@ -96,6 +119,15 @@ public class ContentApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<ElementDTO>>(elements, HttpStatus.OK);
     }
 
+    @ApiOperation(
+            value = "getElement",
+            notes = "Get element",
+            response = ElementDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(method = RequestMethod.GET, value = "/element/{id}")
     @ResponseBody
     public ResponseEntity getElement(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id,
@@ -108,6 +140,15 @@ public class ContentApi extends AbstractAuthorizedController {
         }
     }
 
+    @ApiOperation(
+            value = "getSectionPattern",
+            notes = "Get section pattern by pattern id",
+            response = SectionPatternDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(method = RequestMethod.GET, value = "/pattern/{id}")
     @ResponseBody
     public ResponseEntity getSectionPattern(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
@@ -119,6 +160,15 @@ public class ContentApi extends AbstractAuthorizedController {
         }
     }
 
+    @ApiOperation(
+            value = "getSectionPatternBySection",
+            notes = "Get section pattern by section id",
+            response = SectionPatternDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(method = RequestMethod.GET, value = "/section/{id}/pattern")
     @ResponseBody
     public ResponseEntity getSectionPatternBySection(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
@@ -130,6 +180,15 @@ public class ContentApi extends AbstractAuthorizedController {
         }
     }
 
+    @ApiOperation(
+            value = "saveElement",
+            notes = "Save element",
+            response = IDResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @PreAuthorize("hasAuthority('ELEMENT:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/element/save")
     @ResponseBody
@@ -142,6 +201,15 @@ public class ContentApi extends AbstractAuthorizedController {
         }
     }
 
+    @ApiOperation(
+        value = "deleteElement",
+            notes = "Delete element",
+            response = java.lang.Void.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('ELEMENT:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/element/{id}/delete")
     @ResponseBody

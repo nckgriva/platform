@@ -33,7 +33,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_FILE_STORAGE)
-@Api(value = Path.API_FILE_STORAGE, description = "Контроллер по работе с сохраненными файлами", authorizations = @Authorization(value = "MybasicAuth"))
+@Api(value = Path.API_FILE_STORAGE, description = "File storage controller", authorizations = @Authorization(value = "MybasicAuth"))
 public class FileStorageApi extends AbstractAuthorizedController {
     @Autowired
     private DownloadServiceImpl downloadService;
@@ -53,8 +53,15 @@ public class FileStorageApi extends AbstractAuthorizedController {
 
     private static Logger logger = Logger.getLogger(FileStorageApi.class);
 
-    @ApiOperation(value = "updateStoredFile", notes = "Обновить содержимое файла")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 403, message = "Forbidden"), @ApiResponse(code = 404, message = "Not Found"), @ApiResponse(code = 500, message = "Something exceptional happened")})
+    @ApiOperation(
+            value = "updateStoredFile",
+            notes = "Update information about stored file",
+            response = java.lang.Void.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/update")
     @ResponseBody
     public ResponseEntity updateStoredFile(@PathVariable(value = "id") UUID id,
@@ -81,6 +88,15 @@ public class FileStorageApi extends AbstractAuthorizedController {
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 
+    @ApiOperation(
+            value = "uploadStoredFileData",
+            notes = "Update data of stored file",
+            response = java.lang.Void.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/upload", consumes = "application/octet-stream")
     @ResponseBody
     public ResponseEntity uploadStoredFileData(@PathVariable(value = "id") UUID id,
@@ -106,8 +122,15 @@ public class FileStorageApi extends AbstractAuthorizedController {
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "downloadStoredFile", notes = "Скачать содержимое файла")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 403, message = "Forbidden"), @ApiResponse(code = 404, message = "Not Found"), @ApiResponse(code = 500, message = "Something exceptional happened")})
+    @ApiOperation(
+            value = "downloadStoredFile",
+            notes = "Download stored file by id",
+            response = java.lang.Void.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @RequestMapping(value = "/{id}/download", method = RequestMethod.GET)
     public void downloadStoredFile(@PathVariable(value = "id") UUID id,
                                    HttpServletRequest request,
@@ -155,8 +178,15 @@ public class FileStorageApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(value = "getStoredFiles", notes = "Получить список элементов")
-    @ApiResponses({@ApiResponse(code = 200, message = "OK"), @ApiResponse(code = 500, message = "Something exceptional happened")})
+    @ApiOperation(
+            value = "getStoredFiles",
+            notes = "Get list of stored files",
+            response = EntityListResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @PreAuthorize("hasAuthority('FILE_STORAGE:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
