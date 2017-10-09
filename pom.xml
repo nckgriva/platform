@@ -19,6 +19,7 @@
         <module>property</module>
         <module>notification</module>
         <module>user</module>
+        <module>localization</module>
         <module>web</module>
         <module>oauth</module>
         <module>template</module>

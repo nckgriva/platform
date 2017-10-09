@@ -1,6 +1,6 @@
 package com.gracelogic.platform.web.filter;
 
-import com.gracelogic.platform.web.service.LocaleHolder;
+import com.gracelogic.platform.localization.service.LocaleHolder;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

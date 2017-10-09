@@ -3,7 +3,7 @@ package com.gracelogic.platform.user.api;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.model.UserSetting;
 import com.gracelogic.platform.user.service.UserService;
-import com.gracelogic.platform.web.service.LocaleHolder;
+import com.gracelogic.platform.localization.service.LocaleHolder;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

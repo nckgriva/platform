@@ -1,4 +1,4 @@
-package com.gracelogic.platform.web.service;
+package com.gracelogic.platform.localization.service;
 
 import org.apache.commons.lang3.LocaleUtils;
 
