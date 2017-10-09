@@ -30,7 +30,7 @@ public class StringConverter {
         return instance;
     }
 
-    public String process(String source, Locale currentLocale) throws IOException {
+    public String process(String source, Locale currentLocale) {
         if (StringUtils.isEmpty(source) || !StringUtils.containsIgnoreCase(source, I18N_PREFIX)) {
             return source;
         }
