@@ -23,15 +23,16 @@ import java.util.List;
 
 @Controller
 @RequestMapping(value = Path.API_SUGGESTION)
-@Api(value = Path.API_SUGGESTION, description = "Контроллер для поиска нужного элемента")
+@Api(value = Path.API_SUGGESTION, description = "Controller for finding desired element")
 public class SuggestionApi extends AbstractAuthorizedController {
 
     @Autowired
     private SuggestionService suggestionService;
 
     @ApiOperation(
-            value = "process",
-            notes = "Найти элемент"
+            value = "getSuggestedVariants",
+            notes = "Find element",
+            response = List.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),

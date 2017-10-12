@@ -9,6 +9,7 @@ import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -22,6 +23,8 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_PROPERTY)
+@Api(value = Path.API_PROPERTY, description = "Property",
+        authorizations = @Authorization(value = "MybasicAuth"))
 public class PropertyApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
@@ -30,6 +33,15 @@ public class PropertyApi extends AbstractAuthorizedController {
     @Autowired
     private PropertyService propertyService;
 
+    @ApiOperation(
+            value = "getPropeties",
+            notes = "Get list of properties, enrich must be true",
+            response =  EntityListResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PROPERTY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -42,22 +54,40 @@ public class PropertyApi extends AbstractAuthorizedController {
                                         @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
         EntityListResponse<PropertyDTO> properties = propertyService.getPropertiesPaged(name, visible, enrich, count, null, start, sortField, sortDir);
-        return new ResponseEntity<>(properties, HttpStatus.OK);
+        return new ResponseEntity<EntityListResponse<PropertyDTO>>(properties, HttpStatus.OK);
 
     }
 
+    @ApiOperation(
+            value = "getProperty",
+            notes = "Get property",
+            response = PropertyDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @PreAuthorize("hasAuthority('PROPERTY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
     public ResponseEntity getProperty(@PathVariable(value = "id") UUID id) {
         try {
             PropertyDTO propertyDTO = propertyService.getProperty(id);
-            return new ResponseEntity<>(propertyDTO, HttpStatus.OK);
+            return new ResponseEntity<PropertyDTO>(propertyDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
+    @ApiOperation(
+            value = "saveProperty",
+            notes = "Save property",
+            response = IDResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @PreAuthorize("hasAuthority('PROPERTY:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -71,6 +101,15 @@ public class PropertyApi extends AbstractAuthorizedController {
 
     }
 
+    @ApiOperation(
+            value = "deleteProperty",
+            notes = "Delete property",
+            response = java.lang.Void.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PROPERTY:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody

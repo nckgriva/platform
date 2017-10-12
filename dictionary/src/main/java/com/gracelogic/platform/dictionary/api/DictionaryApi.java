@@ -20,7 +20,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping(value = Path.API_DICTIONARY)
-@Api(value = Path.API_DICTIONARY, description = "Контроллер для получения данных системных справочников")
+@Api(value = Path.API_DICTIONARY, description = "Controller for getting dictionary data")
 public class DictionaryApi {
 
     @Autowired
@@ -28,11 +28,13 @@ public class DictionaryApi {
 
     @ApiOperation(
             value = "getDictionary",
-            notes = "Получить содержание справочника"
+            notes = "Get dictionary content",
+            response = List.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Something exceptional happened"),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @RequestMapping(value = "/{className:.+}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getDictionary(@ApiParam(name = "className", value = "className")

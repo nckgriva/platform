@@ -156,7 +156,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "logged",
             notes = "Checking user login status",
-            response = ResponseEntity.class
+            response = AuthorizedUser.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),

@@ -14,6 +14,7 @@ import com.gracelogic.platform.payment.service.PaymentService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,6 +31,8 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_PAYMENT)
+@Api(value = Path.API_PAYMENT, description = "Payment",
+        authorizations = @Authorization(value = "MybasicAuth"))
 public class PaymentApi extends AbstractAuthorizedController {
 
     @Autowired
@@ -39,6 +42,15 @@ public class PaymentApi extends AbstractAuthorizedController {
     @Qualifier("paymentMessageSource")
     private ResourceBundleMessageSource messageSource;
 
+    @ApiOperation(
+            value = "payments",
+            notes = "Get list of payments, enrich must be true",
+            response =  EntityListResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -68,25 +80,43 @@ public class PaymentApi extends AbstractAuthorizedController {
         }
 
         EntityListResponse<PaymentDTO> payments = paymentService.getPaymentsPaged(userId, accountId, paymentSystemId, paymentStateId != null ? Collections.singletonList(paymentStateId) : null, startDate, endDate, enrich, length, null, start, sortField, sortDir);
-        return new ResponseEntity<>(payments, HttpStatus.OK);
+        return new ResponseEntity<EntityListResponse<PaymentDTO> >(payments, HttpStatus.OK);
     }
 
+    @ApiOperation(
+            value = "addPayment",
+            notes = "Add payment",
+            response = EmptyResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:ADD')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
     public ResponseEntity addPayment(@RequestBody ProcessPaymentRequest request) {
         try {
             paymentService.processPayment(DataConstants.PaymentSystems.MANUAL.getValue(), request, getUser());
-            return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (PaymentAlreadyExistException e) {
-            return new ResponseEntity<>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (AccountNotFoundException e) {
-            return new ResponseEntity<>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (InvalidPaymentSystemException e) {
-            return new ResponseEntity<>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
+    @ApiOperation(
+            value = "cancelPayment",
+            notes = "Cancel payment",
+            response = EmptyResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:CANCEL')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/cancel")
     @ResponseBody
@@ -104,6 +134,15 @@ public class PaymentApi extends AbstractAuthorizedController {
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 
+    @ApiOperation(
+            value = "restorePayment",
+            notes = "Restore canceled payment",
+            response = EmptyResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:CANCEL')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/restore")
     @ResponseBody

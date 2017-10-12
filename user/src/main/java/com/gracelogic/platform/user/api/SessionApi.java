@@ -7,6 +7,8 @@ import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.dto.UserSessionDTO;
 import com.gracelogic.platform.user.model.UserSession;
 import com.gracelogic.platform.user.service.UserService;
+import com.gracelogic.platform.web.dto.ErrorResponse;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,6 +27,8 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_SESSION)
+@Api(value = Path.API_SESSION, description = "Session",
+        authorizations = @Authorization(value = "MybasicAuth"))
 public class SessionApi extends AbstractAuthorizedController {
 
     @Autowired
@@ -34,6 +38,15 @@ public class SessionApi extends AbstractAuthorizedController {
     @Autowired
     private UserService userService;
 
+    @ApiOperation(
+            value = "getSession",
+            notes = "Get list of sessions, enrich must be true",
+            response =  EntityListResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('SESSION:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -61,7 +74,7 @@ public class SessionApi extends AbstractAuthorizedController {
         }
 
         EntityListResponse<UserSessionDTO> sessions = userService.getSessionsPaged(userId, authIp, startDate, endDate, enrich, count, null, start, sortField, sortDir);
-        return new ResponseEntity<>(sessions, HttpStatus.OK);
+        return new ResponseEntity<EntityListResponse<UserSessionDTO>>(sessions, HttpStatus.OK);
 
     }
 }

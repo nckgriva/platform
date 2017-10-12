@@ -7,6 +7,8 @@ import com.gracelogic.platform.account.service.AccountService;
 import com.gracelogic.platform.db.dto.DateFormatConstants;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
+import com.gracelogic.platform.web.dto.ErrorResponse;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,10 +26,21 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_TRANSACTION)
+@Api(value = Path.API_TRANSACTION, description = "Transaction",
+        authorizations = @Authorization(value = "MybasicAuth"))
 public class TransactionApi extends AbstractAuthorizedController {
     @Autowired
     private AccountService accountService;
 
+    @ApiOperation(
+            value = "transactions",
+            notes = "Get list of transactions, enrich must be true",
+            response =  EntityListResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TRANSACTION:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -56,6 +69,6 @@ public class TransactionApi extends AbstractAuthorizedController {
         }
 
         EntityListResponse<TransactionDTO> transactions = accountService.getTransactionsPaged(userId, accountId, transactionTypeId != null ? Collections.singletonList(transactionTypeId) : null, startDate, endDate, enrich, length, null, start, sortField, sortDir);
-        return new ResponseEntity<>(transactions, HttpStatus.OK);
+        return new ResponseEntity<EntityListResponse<TransactionDTO>>(transactions, HttpStatus.OK);
     }
 }

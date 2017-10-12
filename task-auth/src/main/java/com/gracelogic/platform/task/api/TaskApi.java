@@ -11,6 +11,7 @@ import com.gracelogic.platform.task.Path;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +29,8 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_TASK)
+@Api(value = Path.API_TASK, description = "Lesson",
+        authorizations = @Authorization(value = "MybasicAuth"))
 public class TaskApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
@@ -36,6 +39,15 @@ public class TaskApi extends AbstractAuthorizedController {
     @Autowired
     private  TaskService taskService;
 
+    @ApiOperation(
+            value = "getTaskExecutionLogs(",
+            notes = "Get list of TaskExecutionLogs, enrich must be true",
+            response =  EntityListResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/taskExecutionLog")
     @ResponseBody
@@ -67,9 +79,18 @@ public class TaskApi extends AbstractAuthorizedController {
         EntityListResponse<TaskExecutionLogDTO> tels =
                 taskService.getTaskExecutionLogsPaged(taskId, methodId != null ? Collections.singletonList(methodId) : null, stateId != null ? Collections.singletonList(stateId) : null, parameter, startDate,
                         endDate, enrich, count, null, start, sortField, sortDir);
-        return new ResponseEntity<>(tels, HttpStatus.OK);
+        return new ResponseEntity<EntityListResponse<TaskExecutionLogDTO>>(tels, HttpStatus.OK);
     }
 
+    @ApiOperation(
+            value = "getTasks",
+            notes = "Get list of tasks, enrich must be true",
+            response =  EntityListResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -83,54 +104,90 @@ public class TaskApi extends AbstractAuthorizedController {
                                    @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
         EntityListResponse<TaskDTO> tasks = taskService.getTasksPaged(name, serviceName, active, enrich, count, null, start, sortField, sortDir);
-        return new ResponseEntity<>(tasks, HttpStatus.OK);
+        return new ResponseEntity<EntityListResponse<TaskDTO>>(tasks, HttpStatus.OK);
     }
 
+    @ApiOperation(
+            value = "getTask",
+            notes = "Get task",
+            response = TaskDTO .class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @PreAuthorize("hasAuthority('TASK:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
     public ResponseEntity getTask(@PathVariable(value = "id") UUID id) {
         try {
             TaskDTO taskDTO = taskService.getTask(id);
-            return new ResponseEntity<>(taskDTO, HttpStatus.OK);
+            return new ResponseEntity<TaskDTO >(taskDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
+    @ApiOperation(
+            value = "saveTask",
+            notes = "Save task",
+            response = IDResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Something exceptional happened")})
     @PreAuthorize("hasAuthority('TASK:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
     public ResponseEntity saveTask(@RequestBody TaskDTO taskDTO) {
         try {
             Task task = taskService.saveTask(taskDTO);
-            return new ResponseEntity<>(new IDResponse(task.getId()), HttpStatus.OK);
+            return new ResponseEntity<IDResponse>(new IDResponse(task.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }
 
+    @ApiOperation(
+            value = "deleteTask",
+            notes = "Delete task",
+            response = java.lang.Void.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
     public ResponseEntity deleteTask(@PathVariable(value = "id") UUID id) {
         try {
             taskService.deleteTask(id);
-            return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }
 
+    @ApiOperation(
+            value = "resetTask",
+            notes = "Reset task",
+            response = java.lang.Void.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:RESET')")
     @RequestMapping(method = RequestMethod.POST, value = "/taskExecutionLog/{id}/reset")
     @ResponseBody
     public ResponseEntity resetTaskExecution(@PathVariable(value = "id") UUID id) {
         try {
             taskService.resetTaskExecution(id);
-            return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
         }

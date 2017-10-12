@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping(value = Path.API_SETTING)
-@Api(value = Path.API_SETTING, description = "Базовый контроллер управления пользовательскими настройками",
+@Api(value = Path.API_SETTING, description = "Base controller for manage user settings",
         authorizations = @Authorization(value = "MybasicAuth"))
 public class SettingApi extends AbstractAuthorizedController {
     @Autowired
@@ -30,7 +30,8 @@ public class SettingApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "getUserSetting",
-            notes = "Получить настройку по коду"
+            notes = "Get user setting by code",
+            response = UserSettingDTO.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -54,8 +55,8 @@ public class SettingApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "saveUserSetting",
-            notes = "Сохранить настройку",
-            response = ResponseEntity.class
+            notes = "Save user setting",
+            response = java.lang.Void.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
