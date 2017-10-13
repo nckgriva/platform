@@ -29,7 +29,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_TASK)
-@Api(value = Path.API_TASK, description = "Lesson",
+@Api(value = Path.API_TASK, tags = {"Task API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class TaskApi extends AbstractAuthorizedController {
     @Autowired

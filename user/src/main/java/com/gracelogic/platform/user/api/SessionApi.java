@@ -27,7 +27,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_SESSION)
-@Api(value = Path.API_SESSION, description = "Session",
+@Api(value = Path.API_SESSION, tags = {"Session API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class SessionApi extends AbstractAuthorizedController {
 

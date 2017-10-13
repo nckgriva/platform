@@ -25,7 +25,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_ROLE)
-@Api(value = Path.API_ROLE, description = "Role",
+@Api(value = Path.API_ROLE, tags = {"Role API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class RoleApi extends AbstractAuthorizedController {
     @Autowired

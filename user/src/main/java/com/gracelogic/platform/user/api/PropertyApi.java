@@ -23,7 +23,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_PROPERTY)
-@Api(value = Path.API_PROPERTY, description = "Property",
+@Api(value = Path.API_PROPERTY, tags = {"Property API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class PropertyApi extends AbstractAuthorizedController {
     @Autowired

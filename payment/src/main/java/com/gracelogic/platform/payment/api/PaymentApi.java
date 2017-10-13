@@ -31,7 +31,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_PAYMENT)
-@Api(value = Path.API_PAYMENT, description = "Payment",
+@Api(value = Path.API_PAYMENT, tags = {"Payment API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class PaymentApi extends AbstractAuthorizedController {
 

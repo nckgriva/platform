@@ -23,7 +23,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping(value = Path.API_SUGGESTION)
-@Api(value = Path.API_SUGGESTION, description = "Controller for finding desired element")
+@Api(value = Path.API_SUGGESTION, tags = {"Suggestion API"})
 public class SuggestionApi extends AbstractAuthorizedController {
 
     @Autowired

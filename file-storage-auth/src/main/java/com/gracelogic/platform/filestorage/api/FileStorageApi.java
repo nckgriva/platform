@@ -33,7 +33,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_FILE_STORAGE)
-@Api(value = Path.API_FILE_STORAGE, description = "File storage controller", authorizations = @Authorization(value = "MybasicAuth"))
+@Api(value = Path.API_FILE_STORAGE, tags = {"File Storage API"}, authorizations = @Authorization(value = "MybasicAuth"))
 public class FileStorageApi extends AbstractAuthorizedController {
     @Autowired
     private DownloadServiceImpl downloadService;

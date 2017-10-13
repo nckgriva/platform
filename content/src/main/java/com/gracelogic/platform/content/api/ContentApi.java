@@ -31,7 +31,8 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_CONTENT)
-@Api(value = Path.API_CONTENT, description = "Content management controller", authorizations = @Authorization(value = "MybasicAuth"))
+@Api(value = Path.API_CONTENT, tags = {"Content API"},
+        authorizations = @Authorization(value = "MybasicAuth"))
 public class ContentApi extends AbstractAuthorizedController {
     @Autowired
     private ContentService contentService;

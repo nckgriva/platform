@@ -26,7 +26,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_TRANSACTION)
-@Api(value = Path.API_TRANSACTION, description = "Transaction",
+@Api(value = Path.API_TRANSACTION, tags = {"Transaction API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class TransactionApi extends AbstractAuthorizedController {
     @Autowired

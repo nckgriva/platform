@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping(value = Path.API_SETTING)
-@Api(value = Path.API_SETTING, description = "Base controller for manage user settings",
+@Api(value = Path.API_SETTING, tags = {"Setting API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class SettingApi extends AbstractAuthorizedController {
     @Autowired

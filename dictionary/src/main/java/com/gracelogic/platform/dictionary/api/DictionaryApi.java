@@ -20,7 +20,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping(value = Path.API_DICTIONARY)
-@Api(value = Path.API_DICTIONARY, description = "Controller for getting dictionary data")
+@Api(value = Path.API_DICTIONARY, tags = {"Dictionary API"})
 public class DictionaryApi {
 
     @Autowired
