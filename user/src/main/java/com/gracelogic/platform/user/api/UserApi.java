@@ -69,7 +69,11 @@ public class UserApi extends AbstractAuthorizedController {
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 401, message = "Invalid credentials"),
+            @ApiResponse(code = 423, message = "User blocked"),
+            @ApiResponse(code = 429, message = "Too many attemps"),
+            @ApiResponse(code = 422, message = "Not activated"),
+            @ApiResponse(code = 510, message = "Not allowed IP"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
@@ -201,6 +205,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 400, message = "Invalid e-mail"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/email-valid", method = RequestMethod.POST)
     @ResponseBody
@@ -222,6 +227,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 400, message = "Invalid phone"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/phone-valid", method = RequestMethod.POST)
     @ResponseBody
@@ -243,6 +249,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 400, message = "Invalid code"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/verify-email", method = RequestMethod.POST)
     @ResponseBody
@@ -457,11 +464,12 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "deleteUser",
             notes = "Delete user",
-            response = EmptyResponse.class
+            response = java.lang.Void.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 400, message = "Failed to delete user", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('USER:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
