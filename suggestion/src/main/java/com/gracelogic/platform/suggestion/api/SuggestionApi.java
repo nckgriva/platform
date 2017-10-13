@@ -36,7 +36,7 @@ public class SuggestionApi extends AbstractAuthorizedController {
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/{processorName}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getSuggestedVariants(@PathVariable(value = "processorName") String processorName,

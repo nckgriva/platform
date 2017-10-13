@@ -33,8 +33,8 @@ public class DictionaryApi {
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 500, message = "Something exceptional happened"),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error"),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @RequestMapping(value = "/{className:.+}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getDictionary(@ApiParam(name = "className", value = "className")

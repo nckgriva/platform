@@ -61,7 +61,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/update")
     @ResponseBody
     public ResponseEntity updateStoredFile(@PathVariable(value = "id") UUID id,
@@ -96,7 +96,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/upload", consumes = "application/octet-stream")
     @ResponseBody
     public ResponseEntity uploadStoredFileData(@PathVariable(value = "id") UUID id,
@@ -130,7 +130,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/{id}/download", method = RequestMethod.GET)
     public void downloadStoredFile(@PathVariable(value = "id") UUID id,
                                    HttpServletRequest request,
@@ -186,7 +186,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('FILE_STORAGE:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody

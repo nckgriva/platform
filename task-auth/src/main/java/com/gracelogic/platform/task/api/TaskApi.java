@@ -47,7 +47,7 @@ public class TaskApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/taskExecutionLog")
     @ResponseBody
@@ -90,7 +90,7 @@ public class TaskApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -115,7 +115,7 @@ public class TaskApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('TASK:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -136,7 +136,7 @@ public class TaskApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('TASK:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -158,7 +158,7 @@ public class TaskApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
@@ -180,7 +180,7 @@ public class TaskApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:RESET')")
     @RequestMapping(method = RequestMethod.POST, value = "/taskExecutionLog/{id}/reset")
     @ResponseBody

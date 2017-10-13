@@ -36,7 +36,7 @@ public class SettingApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/{key}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getUserSetting(@ApiParam(name = "key", value = "key")
@@ -61,7 +61,7 @@ public class SettingApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/{key}/save", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity saveUserSetting(@ApiParam(name = "key", value = "key")

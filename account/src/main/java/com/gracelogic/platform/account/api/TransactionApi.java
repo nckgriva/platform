@@ -40,7 +40,7 @@ public class TransactionApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TRANSACTION:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody

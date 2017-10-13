@@ -50,7 +50,7 @@ public class PaymentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -91,7 +91,7 @@ public class PaymentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:ADD')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -116,7 +116,7 @@ public class PaymentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:CANCEL')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/cancel")
     @ResponseBody
@@ -142,7 +142,7 @@ public class PaymentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:CANCEL')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/restore")
     @ResponseBody

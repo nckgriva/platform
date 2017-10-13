@@ -70,7 +70,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -161,7 +161,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/logged", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity logged() {
@@ -180,7 +180,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity logout(HttpServletRequest request) {
@@ -201,8 +201,8 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = "/emailValid", method = RequestMethod.POST)
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(value = "/email-valid", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity isEMailValid(@ApiParam(name = "valueRequest", value = "valueRequest")
                                        @RequestBody
@@ -222,8 +222,8 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = "/phoneValid", method = RequestMethod.POST)
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(value = "/phone-valid", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity isPhoneValid(@ApiParam(name = "valueRequest", value = "valueRequest")
                                        @RequestBody
@@ -243,8 +243,8 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = "/verifyEmail", method = RequestMethod.POST)
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(value = "/verify-email", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity verifyEmail(@ApiParam(name = "code", value = "code", required = true)
                                       @RequestParam(value = "code", required = true)
@@ -270,8 +270,8 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = "/verifyPhone", method = RequestMethod.POST)
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(value = "/verify-phone", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity verifyPhone(@ApiParam(name = "code", value = "code", required = true)
                                       @RequestParam(value = "code", required = true)
@@ -298,7 +298,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity register(@ApiParam(name = "userRegistrationDTO", value = "userRegistrationDTO")
@@ -329,8 +329,8 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = "/sendRepairCode", method = RequestMethod.POST)
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(value = "/send-repair-code", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity sendRepairCode(@ApiParam(name = "request", value = "request")
                                          @RequestBody
@@ -356,8 +356,8 @@ public class UserApi extends AbstractAuthorizedController {
         @ApiResponses({
                 @ApiResponse(code = 200, message = "OK"),
                 @ApiResponse(code = 401, message = "Unauthorized"),
-                @ApiResponse(code = 500, message = "Something exceptional happened")})
-    @RequestMapping(value = "/changePassword", method = RequestMethod.POST)
+                @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(value = "/change-password", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity changePassword(@ApiParam(name = "request", value = "request")
                                          @RequestBody
@@ -381,7 +381,7 @@ public class UserApi extends AbstractAuthorizedController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 403, message = "Forbidden"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('USER:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -420,7 +420,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('USER:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -441,7 +441,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('USER:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -462,7 +462,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('USER:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody

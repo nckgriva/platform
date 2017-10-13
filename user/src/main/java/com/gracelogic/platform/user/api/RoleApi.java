@@ -43,7 +43,7 @@ public class RoleApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('ROLE:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -68,7 +68,7 @@ public class RoleApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('ROLE:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -90,7 +90,7 @@ public class RoleApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('ROLE:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -112,7 +112,7 @@ public class RoleApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('ROLE:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody

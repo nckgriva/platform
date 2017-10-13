@@ -49,7 +49,7 @@ public class ContentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/section", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getSections(@ApiParam(name = "parentId", value = "parentId") @RequestParam(value = "parentId", required = false) UUID parentId,
@@ -67,7 +67,7 @@ public class ContentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.GET, value = "/section/{id}")
     @ResponseBody
     public ResponseEntity getSection(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
@@ -87,7 +87,7 @@ public class ContentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/element", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getElements(@ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
@@ -128,7 +128,7 @@ public class ContentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.GET, value = "/element/{id}")
     @ResponseBody
     public ResponseEntity getElement(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id,
@@ -149,7 +149,7 @@ public class ContentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.GET, value = "/pattern/{id}")
     @ResponseBody
     public ResponseEntity getSectionPattern(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
@@ -169,7 +169,7 @@ public class ContentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.GET, value = "/section/{id}/pattern")
     @ResponseBody
     public ResponseEntity getSectionPatternBySection(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
@@ -189,7 +189,7 @@ public class ContentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('ELEMENT:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/element/save")
     @ResponseBody
@@ -210,7 +210,7 @@ public class ContentApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('ELEMENT:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/element/{id}/delete")
     @ResponseBody

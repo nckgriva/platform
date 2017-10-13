@@ -41,7 +41,7 @@ public class PropertyApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PROPERTY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -66,7 +66,7 @@ public class PropertyApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('PROPERTY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -87,7 +87,7 @@ public class PropertyApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Something exceptional happened")})
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('PROPERTY:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -109,7 +109,7 @@ public class PropertyApi extends AbstractAuthorizedController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Something exceptional happened", response = ErrorResponse.class)})
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PROPERTY:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
