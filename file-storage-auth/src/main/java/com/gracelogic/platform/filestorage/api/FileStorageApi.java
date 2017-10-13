@@ -56,7 +56,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "updateStoredFile",
             notes = "Update information about stored file",
-            response = java.lang.Void.class
+            response = EmptyResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -91,7 +91,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "uploadStoredFileData",
             notes = "Update data of stored file",
-            response = java.lang.Void.class
+            response = EmptyResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -125,7 +125,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "downloadStoredFile",
             notes = "Download stored file by id",
-            response = java.lang.Void.class
+            response = EmptyResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),

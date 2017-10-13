@@ -35,7 +35,7 @@ public class PropertyApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "getPropeties",
-            notes = "Get list of properties, enrich must be true",
+            notes = "Get list of properties",
             response =  EntityListResponse.class
     )
     @ApiResponses({
@@ -104,7 +104,7 @@ public class PropertyApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "deleteProperty",
             notes = "Delete property",
-            response = java.lang.Void.class
+            response = EmptyResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),

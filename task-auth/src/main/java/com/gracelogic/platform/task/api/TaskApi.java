@@ -41,7 +41,7 @@ public class TaskApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "getTaskExecutionLogs(",
-            notes = "Get list of TaskExecutionLogs, enrich must be true",
+            notes = "Get list of TaskExecutionLogs",
             response =  EntityListResponse.class
     )
     @ApiResponses({
@@ -49,7 +49,7 @@ public class TaskApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:SHOW')")
-    @RequestMapping(method = RequestMethod.GET, value = "/taskExecutionLog")
+    @RequestMapping(method = RequestMethod.GET, value = "/task-execution-log")
     @ResponseBody
     public ResponseEntity getTaskExecutionLogs(@RequestParam(value = "taskId", required = false) UUID taskId,
                                                @RequestParam(value = "methodId", required = false) UUID methodId,
@@ -84,7 +84,7 @@ public class TaskApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "getTasks",
-            notes = "Get list of tasks, enrich must be true",
+            notes = "Get list of tasks",
             response =  EntityListResponse.class
     )
     @ApiResponses({
@@ -153,7 +153,7 @@ public class TaskApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "deleteTask",
             notes = "Delete task",
-            response = java.lang.Void.class
+            response = EmptyResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -174,15 +174,15 @@ public class TaskApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "resetTask",
-            notes = "Reset task",
-            response = java.lang.Void.class
+            notes = "Reset task execution",
+            response = EmptyResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:RESET')")
-    @RequestMapping(method = RequestMethod.POST, value = "/taskExecutionLog/{id}/reset")
+    @RequestMapping(method = RequestMethod.POST, value = "/task-execution-log/{id}/reset")
     @ResponseBody
     public ResponseEntity resetTaskExecution(@PathVariable(value = "id") UUID id) {
         try {

@@ -34,7 +34,7 @@ public class TransactionApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "transactions",
-            notes = "Get list of transactions, enrich must be true",
+            notes = "Get list of transactions",
             response =  EntityListResponse.class
     )
     @ApiResponses({

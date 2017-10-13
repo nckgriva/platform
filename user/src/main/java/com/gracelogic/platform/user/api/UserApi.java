@@ -457,7 +457,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "deleteUser",
             notes = "Delete user",
-            response = java.lang.Void.class
+            response = EmptyResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),

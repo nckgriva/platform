@@ -40,7 +40,7 @@ public class SessionApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "getSession",
-            notes = "Get list of sessions, enrich must be true",
+            notes = "Get list of sessions",
             response =  EntityListResponse.class
     )
     @ApiResponses({

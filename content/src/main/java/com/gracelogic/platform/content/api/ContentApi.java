@@ -205,7 +205,7 @@ public class ContentApi extends AbstractAuthorizedController {
     @ApiOperation(
         value = "deleteElement",
             notes = "Delete element",
-            response = java.lang.Void.class
+            response = EmptyResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),

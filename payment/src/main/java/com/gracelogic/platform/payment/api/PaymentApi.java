@@ -44,7 +44,7 @@ public class PaymentApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "payments",
-            notes = "Get list of payments, enrich must be true",
+            notes = "Get list of payments",
             response =  EntityListResponse.class
     )
     @ApiResponses({

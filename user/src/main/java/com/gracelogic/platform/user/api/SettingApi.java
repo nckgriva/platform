@@ -56,7 +56,7 @@ public class SettingApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "saveUserSetting",
             notes = "Save user setting",
-            response = java.lang.Void.class
+            response = EmptyResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),

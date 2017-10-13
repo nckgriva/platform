@@ -107,7 +107,7 @@ public class RoleApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "deleteRole",
             notes = "Delete role",
-            response = java.lang.Void.class
+            response = EmptyResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
