@@ -479,7 +479,7 @@
                                         <location>com.gracelogic</location>
                                     </locations>
                                     <info>
-                                        <title>API</title>
+                                        <title>GL Platform API</title>
                                         <version>v1</version>
                                         <description>
                                             This is a description of API.
@@ -488,8 +488,8 @@
                                             http://www.gracelogic.com
                                         </termsOfService>
                                         <contact>
-                                            <email>ingvarparko@gmail.com</email>
-                                            <name>Igor Parkhomenko</name>
+                                            <email>office@gracelogic.com</email>
+                                            <name>Grace Logic, LLC</name>
                                             <url>http://gracelogic.com</url>
                                         </contact>
                                         <license>
