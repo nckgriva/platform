@@ -700,46 +700,50 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        if (!StringUtils.isEmpty(sortField)) {
+    public String translateUserSortFieldToNative(String sortFieldInJPAFormat) {
+        if (!StringUtils.isEmpty(sortFieldInJPAFormat)) {
             //Т.к. в данном методе запрос используется нативный и требуется сохранить единообразие - транслируем название jpa полей в нативные sql
-            if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
-                sortField = "id";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.created")) {
-                sortField = "created_dt";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.changed")) {
-                sortField = "changed_dt";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.phone")) {
-                sortField = "phone";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.phoneVerified")) {
-                sortField = "is_phone_verified";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.email")) {
-                sortField = "email";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.emailVerified")) {
-                sortField = "is_email_verified";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.approved")) {
-                sortField = "is_approved";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.blocked")) {
-                sortField = "is_blocked";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.blockedDt")) {
-                sortField = "blocked_dt";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.blockedByUser")) {
-                sortField = "blocked_by_user_id";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.lastVisitDt")) {
-                sortField = "last_visit_dt";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.lastVisitIP")) {
-                sortField = "last_visit_ip";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.allowedAddresses")) {
-                sortField = "allowed_addresses";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.password")) {
-                sortField = "password";
-            } else if (StringUtils.equalsIgnoreCase(sortField, "el.salt")) {
-                sortField = "salt";
-            } else if (StringUtils.startsWithIgnoreCase(sortField, "el.fields")) {
-                sortField = sortField.substring("el.".length());
+            if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.id")) {
+                sortFieldInJPAFormat = "el.id";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.created")) {
+                sortFieldInJPAFormat = "el.created_dt";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.changed")) {
+                sortFieldInJPAFormat = "el.changed_dt";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.phone")) {
+                sortFieldInJPAFormat = "el.phone";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.phoneVerified")) {
+                sortFieldInJPAFormat = "el.is_phone_verified";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.email")) {
+                sortFieldInJPAFormat = "el.email";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.emailVerified")) {
+                sortFieldInJPAFormat = "el.is_email_verified";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.approved")) {
+                sortFieldInJPAFormat = "el.is_approved";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.blocked")) {
+                sortFieldInJPAFormat = "el.is_blocked";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.blockedDt")) {
+                sortFieldInJPAFormat = "el.blocked_dt";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.blockedByUser")) {
+                sortFieldInJPAFormat = "el.blocked_by_user_id";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.lastVisitDt")) {
+                sortFieldInJPAFormat = "el.last_visit_dt";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.lastVisitIP")) {
+                sortFieldInJPAFormat = "el.last_visit_ip";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.allowedAddresses")) {
+                sortFieldInJPAFormat = "el.allowed_addresses";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.password")) {
+                sortFieldInJPAFormat = "el.password";
+            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.salt")) {
+                sortFieldInJPAFormat = "el.salt";
+            } else if (StringUtils.startsWithIgnoreCase(sortFieldInJPAFormat, "el.fields")) {
+                //Nothing to do
             }
         }
+        return sortFieldInJPAFormat;
+    }
+    @Override
+    public EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        sortField = translateUserSortFieldToNative(sortField);
 
         int totalCount = userDao.getUsersCount(phone, email, approved, blocked, fields);
         int totalPages = ((totalCount / count)) + 1;

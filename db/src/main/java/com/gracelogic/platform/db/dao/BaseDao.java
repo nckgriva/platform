@@ -1,5 +1,7 @@
 package com.gracelogic.platform.db.dao;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -72,6 +74,26 @@ public abstract class BaseDao {
 
     public EntityManager getEntityManager() {
         return entityManager;
+    }
+
+    protected void appendSortClause(StringBuilder queryStr, String sortField, String sortDir) {
+        if (!StringUtils.isEmpty(sortField)) {
+            queryStr.append(String.format("order by %s ", sortField));
+            if (!StringUtils.isEmpty(sortDir)) {
+                queryStr.append(String.format("%s ", sortDir));
+            }
+        }
+    }
+
+    protected void appendPaginationClause(StringBuilder queryStr, Map<String, Object> params, Integer recordsOnPage, Integer startRecord) {
+        if (recordsOnPage != null) {
+            queryStr.append("limit :recordsOnPage ");
+            params.put("recordsOnPage", recordsOnPage);
+            if (startRecord != null) {
+                queryStr.append("offset :startRecord ");
+                params.put("startRecord", startRecord);
+            }
+        }
     }
 
 }

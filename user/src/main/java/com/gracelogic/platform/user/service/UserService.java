@@ -70,4 +70,6 @@ public interface UserService {
     void deleteRole(UUID roleId);
 
     EntityListResponse<UserSessionDTO> getSessionsPaged(UUID userId, String authIp, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
+
+    String translateUserSortFieldToNative(String sortFieldInJPAFormat);
 }

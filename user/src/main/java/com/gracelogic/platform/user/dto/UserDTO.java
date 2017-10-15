@@ -26,6 +26,7 @@ public class UserDTO extends IdObjectDTO implements Serializable {
     private Boolean blocked;
     private Map<String, String> fields = new HashMap<>();
     private Set<UUID> roles = new HashSet<>();
+    private String formattedUserName;
 
     public String getEmail() {
         return email;
@@ -91,6 +92,14 @@ public class UserDTO extends IdObjectDTO implements Serializable {
         this.roles = roles;
     }
 
+    public String getFormattedUserName() {
+        return formattedUserName;
+    }
+
+    public void setFormattedUserName(String formattedUserName) {
+        this.formattedUserName = formattedUserName;
+    }
+
     public static UserDTO prepare(User user, UserDTO userDTO) {
         IdObjectDTO.prepare(userDTO, user);
 
@@ -100,6 +109,7 @@ public class UserDTO extends IdObjectDTO implements Serializable {
         userDTO.setBlocked(user.getBlocked());
         userDTO.setEmailVerified(user.getEmailVerified());
         userDTO.setPhoneVerified(user.getPhoneVerified());
+        userDTO.setFormattedUserName(formatUserName(user));
 
         if (!StringUtils.isEmpty(user.getFields())) {
             userDTO.setFields(JsonUtils.jsonToMap(user.getFields()));
@@ -132,4 +142,5 @@ public class UserDTO extends IdObjectDTO implements Serializable {
     public static void setUserNameFormat(String format) {
         USER_NAME_FORMAT = format;
     }
+
 }

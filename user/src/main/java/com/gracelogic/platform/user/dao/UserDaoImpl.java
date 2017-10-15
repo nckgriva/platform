@@ -19,28 +19,28 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
     @Override
     public Integer getUsersCount(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields) {
         BigInteger count = null;
-        StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_user where 1=1 ");
+        StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_user el where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
         if (!StringUtils.isEmpty(phone)) {
-            queryStr.append("and phone = :phone ");
+            queryStr.append("and el.phone = :phone ");
             params.put("phone", phone);
         }
         if (!StringUtils.isEmpty(email)) {
-            queryStr.append("and email = :email ");
+            queryStr.append("and el.email = :email ");
             params.put("email", email);
         }
         if (approved != null) {
-            queryStr.append("and is_approved = :approved ");
+            queryStr.append("and el.is_approved = :approved ");
             params.put("approved", approved);
         }
         if (blocked != null) {
-            queryStr.append("and is_blocked = :blocked ");
+            queryStr.append("and el.is_blocked = :blocked ");
             params.put("blocked", blocked);
         }
         if (fields != null && !fields.isEmpty()) {
             for (String key : fields.keySet()) {
-                queryStr.append(String.format("and fields ->> '%s' = '%s' ", key, fields.get(key)));
+                queryStr.append(String.format("and el.fields ->> '%s' = '%s' ", key, fields.get(key)));
             }
         }
 
@@ -62,46 +62,33 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
     @Override
     public List<User> getUsers(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
         List<User> users = Collections.emptyList();
-        StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_user where 1=1 ");
+        StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_user el where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
         if (!StringUtils.isEmpty(phone)) {
-            queryStr.append("and phone = :phone ");
+            queryStr.append("and el.phone = :phone ");
             params.put("phone", phone);
         }
         if (!StringUtils.isEmpty(email)) {
-            queryStr.append("and email = :email ");
+            queryStr.append("and el.email = :email ");
             params.put("email", email);
         }
         if (approved != null) {
-            queryStr.append("and is_approved = :approved ");
+            queryStr.append("and el.is_approved = :approved ");
             params.put("approved", approved);
         }
         if (blocked != null) {
-            queryStr.append("and is_blocked = :blocked ");
+            queryStr.append("and el.is_blocked = :blocked ");
             params.put("blocked", blocked);
         }
         if (fields != null && !fields.isEmpty()) {
             for (String key : fields.keySet()) {
-                queryStr.append(String.format("and fields ->> '%s' = '%s' ", key, fields.get(key)));
+                queryStr.append(String.format("and el.fields ->> '%s' = '%s' ", key, fields.get(key)));
             }
         }
 
-        if (!StringUtils.isEmpty(sortField)) {
-            queryStr.append(String.format("order by %s ", sortField));
-            if (!StringUtils.isEmpty(sortDir)) {
-                queryStr.append(String.format("%s ", sortDir));
-            }
-        }
-
-        if (recordsOnPage != null) {
-            queryStr.append("limit :recordsOnPage ");
-            params.put("recordsOnPage", recordsOnPage);
-            if (startRecord != null) {
-                queryStr.append("offset :startRecord ");
-                params.put("startRecord", startRecord);
-            }
-        }
+        appendSortClause(queryStr, sortField, sortDir);
+        appendPaginationClause(queryStr, params, recordsOnPage, startRecord);
 
         try {
             Query query = getEntityManager().createNativeQuery(queryStr.toString(), User.class);
