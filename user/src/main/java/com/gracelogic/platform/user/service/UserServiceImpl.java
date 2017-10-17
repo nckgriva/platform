@@ -700,6 +700,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     public String translateUserSortFieldToNative(String sortFieldInJPAFormat) {
         if (!StringUtils.isEmpty(sortFieldInJPAFormat)) {
             //Т.к. в данном методе запрос используется нативный и требуется сохранить единообразие - транслируем название jpa полей в нативные sql

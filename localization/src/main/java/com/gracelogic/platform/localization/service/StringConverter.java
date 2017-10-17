@@ -10,13 +10,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class StringConverter {
     private final ObjectMapper mapper = new ObjectMapper();
     private static final String I18N_PREFIX = "i18n";
-    private static final String I18N_REGEX = I18N_PREFIX + "\\{(.*?)\\}";
+    private static final String I18N_BEGIN_BRACKET = "{";
+    private static final String I18N_END_BRACKET = "}";
 
     private static StringConverter instance = null;
 
@@ -35,15 +34,37 @@ public class StringConverter {
             return source;
         }
 
-        Pattern pattern = Pattern.compile(I18N_REGEX);
-        Matcher matcher = pattern.matcher(source);
-        while (matcher.find()) {
-            String element = matcher.group(0);
-            String processedElement = processElement(element.substring(I18N_PREFIX.length()), currentLocale);
-            source = source.replace(element, processedElement);
+        try {
+            StringBuilder sb = new StringBuilder(source);
+            int index = 0;
+            while (index != -1) {
+                index = processNext(sb, index, currentLocale);
+            }
+            return sb.toString();
         }
+        catch (Exception e) {
+            logger.warn("Exception to localize string", e);
+            return source;
+        }
+    }
 
-        return source;
+    private int processNext(StringBuilder sb, int start, Locale currentLocale) {
+        int index = StringUtils.indexOf(sb, I18N_PREFIX, start);
+        if (index != -1) {
+            int startPos = index + I18N_PREFIX.length();
+            int endPos = StringUtils.indexOf(sb, I18N_END_BRACKET, startPos);
+            if (endPos != -1 && startPos < endPos) {
+                endPos += I18N_END_BRACKET.length();
+
+                String element = sb.substring(startPos, endPos);
+                String processedElement = processElement(encode(element), currentLocale);
+                String decodedElement = decode(processedElement);
+                sb.replace(index, endPos, decodedElement);
+
+                return index + decodedElement.length();
+            }
+        }
+        return index;
     }
 
     private String processElement(String source, Locale currentLocale) {
@@ -77,5 +98,13 @@ public class StringConverter {
             logger.error("Failed to deserialize: " + source, e);
             return source;
         }
+    }
+
+    private static String encode(String str) {
+        return StringUtils.replace(str, "\n", "\\n");
+    }
+
+    private static String decode(String str) {
+        return StringUtils.replace(str, "\\n", "\n");
     }
 }
