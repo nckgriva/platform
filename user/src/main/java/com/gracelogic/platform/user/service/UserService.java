@@ -8,6 +8,7 @@ import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.*;
 
@@ -72,4 +73,6 @@ public interface UserService {
     EntityListResponse<UserSessionDTO> getSessionsPaged(UUID userId, String authIp, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     String translateUserSortFieldToNative(String sortFieldInJPAFormat);
+
+    void changeLocale(HttpServletRequest request, AuthorizedUser authorizedUser, String locale) throws IllegalArgumentException;
 }

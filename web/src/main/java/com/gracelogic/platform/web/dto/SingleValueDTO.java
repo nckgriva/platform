@@ -1,6 +1,6 @@
 package com.gracelogic.platform.web.dto;
 
-public class ValueRequest extends PlatformRequest {
+public class SingleValueDTO extends PlatformRequest {
     private String value;
 
     public String getValue() {
@@ -11,9 +11,16 @@ public class ValueRequest extends PlatformRequest {
         this.value = value;
     }
 
+    public SingleValueDTO(String value) {
+        this.value = value;
+    }
+
+    public SingleValueDTO() {
+    }
+
     @Override
     public String toString() {
-        return "ValueRequest{" +
+        return "SingleValueDTO{" +
                 "value='" + value + '\'' +
                 '}';
     }

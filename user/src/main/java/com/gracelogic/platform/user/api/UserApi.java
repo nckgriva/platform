@@ -19,7 +19,7 @@ import com.gracelogic.platform.web.ServletUtils;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import com.gracelogic.platform.web.dto.ValueRequest;
+import com.gracelogic.platform.web.dto.SingleValueDTO;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,6 +178,44 @@ public class UserApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
+            value = "locale",
+            notes = "Get current locale",
+            response = SingleValueDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(value = "/locale", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity locale() {
+        return new ResponseEntity<SingleValueDTO>(new SingleValueDTO(LocaleHolder.getLocale().toString()), HttpStatus.OK);
+
+    }
+
+    @ApiOperation(
+            value = "changeLocale",
+            notes = "Change current locale",
+            response = EmptyResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 400, message = "Invalid locale"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(value = "/change-locale", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity changeLocale(@RequestBody SingleValueDTO valueDTO, HttpServletRequest request) {
+        try {
+            userService.changeLocale(request, getUser(), valueDTO.getValue());
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        }
+        catch (IllegalArgumentException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.INVALID_LOCALE", messageSource.getMessage("common.INVALID_LOCALE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
             value = "logout",
             notes = "Logout user",
             response = ResponseEntity.class
@@ -210,10 +248,10 @@ public class UserApi extends AbstractAuthorizedController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/email-valid", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity isEMailValid(@ApiParam(name = "valueRequest", value = "valueRequest")
+    public ResponseEntity isEMailValid(@ApiParam(name = "singleValueDTO", value = "singleValueDTO")
                                        @RequestBody
-                                       ValueRequest valueRequest) {
-        if (!userService.checkEmail(valueRequest.getValue(), true)) {
+                                               SingleValueDTO singleValueDTO) {
+        if (!userService.checkEmail(singleValueDTO.getValue(), true)) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.INVALID_EMAIL", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } else {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
@@ -232,10 +270,10 @@ public class UserApi extends AbstractAuthorizedController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/phone-valid", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity isPhoneValid(@ApiParam(name = "valueRequest", value = "valueRequest")
+    public ResponseEntity isPhoneValid(@ApiParam(name = "singleValueDTO", value = "singleValueDTO")
                                        @RequestBody
-                                       ValueRequest valueRequest) {
-        if (!userService.checkPhone(valueRequest.getValue(), true)) {
+                                               SingleValueDTO singleValueDTO) {
+        if (!userService.checkPhone(singleValueDTO.getValue(), true)) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } else {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
@@ -256,10 +294,10 @@ public class UserApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity verifyEmail(@ApiParam(name = "code", value = "code", required = true)
                                       @RequestParam(value = "code", required = true)
-                                      String code,
+                                              String code,
                                       @ApiParam(name = "id", value = "id", required = true)
                                       @RequestParam(value = "id", required = true)
-                                      UUID id) {
+                                              UUID id) {
         if (userService.verifyLogin(id, "email", code)) {
             if (getUser() != null) {
                 getUser().setEmailVerified(true);
@@ -283,10 +321,10 @@ public class UserApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity verifyPhone(@ApiParam(name = "code", value = "code", required = true)
                                       @RequestParam(value = "code", required = true)
-                                      String code,
+                                              String code,
                                       @ApiParam(name = "id", value = "id", required = true)
                                       @RequestParam(value = "id", required = true)
-                                      UUID id) {
+                                              UUID id) {
         if (userService.verifyLogin(id, "phone", code)) {
             if (getUser() != null) {
                 getUser().setPhoneVerified(true);
@@ -311,7 +349,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity register(@ApiParam(name = "userRegistrationDTO", value = "userRegistrationDTO")
                                    @RequestBody
-                                   UserRegistrationDTO userRegistrationDTO) {
+                                           UserRegistrationDTO userRegistrationDTO) {
         try {
             User user = lifecycleService.register(userRegistrationDTO, false);
             return new ResponseEntity<>(new IDResponse(user.getId()), HttpStatus.OK);
@@ -323,8 +361,7 @@ public class UserApi extends AbstractAuthorizedController {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidEmailException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_EMAIL", messageSource.getMessage("register.INVALID_EMAIL", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        }
-        catch (CustomLocalizedException e) {
+        } catch (CustomLocalizedException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
@@ -342,7 +379,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity sendRepairCode(@ApiParam(name = "request", value = "request")
                                          @RequestBody
-                                         RepairCodeRequestDTO request) {
+                                                 RepairCodeRequestDTO request) {
 
         try {
             userService.sendRepairCode(request.getLogin(), request.getLoginType(), null);
@@ -356,20 +393,20 @@ public class UserApi extends AbstractAuthorizedController {
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 
-        @ApiOperation(
-                value = "changePassword",
-                notes = "Change password",
-                response = ResponseEntity.class
-        )
-        @ApiResponses({
-                @ApiResponse(code = 200, message = "OK"),
-                @ApiResponse(code = 401, message = "Unauthorized"),
-                @ApiResponse(code = 500, message = "Internal Server Error")})
+    @ApiOperation(
+            value = "changePassword",
+            notes = "Change password",
+            response = ResponseEntity.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/change-password", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity changePassword(@ApiParam(name = "request", value = "request")
                                          @RequestBody
-                                         ChangePasswordRequestDTO request) {
+                                                 ChangePasswordRequestDTO request) {
         try {
             userService.changePassword(request.getLogin(), request.getLoginType(), request.getCode(), request.getNewPassword());
         } catch (IncorrectAuthCodeException e) {

@@ -7,7 +7,7 @@ import com.gracelogic.platform.user.model.UserSetting;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
-import com.gracelogic.platform.web.dto.ValueRequest;
+import com.gracelogic.platform.web.dto.SingleValueDTO;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -68,7 +68,7 @@ public class SettingApi extends AbstractAuthorizedController {
     public ResponseEntity saveUserSetting(@ApiParam(name = "key", value = "key")
                                           @PathVariable(value = "key") String key,
                                           @ApiParam(name = "request", value = "request")
-                                          @RequestBody ValueRequest request) {
+                                          @RequestBody SingleValueDTO request) {
         if (getUser() == null) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
         }

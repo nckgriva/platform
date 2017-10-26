@@ -14,9 +14,11 @@ import com.gracelogic.platform.template.service.TemplateService;
 import com.gracelogic.platform.user.dao.UserDao;
 import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
+import com.gracelogic.platform.user.filter.LocaleFilter;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.AuthenticationToken;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.*;
@@ -978,5 +981,23 @@ public class UserServiceImpl implements UserService {
         }
 
         return entityListResponse;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void changeLocale(HttpServletRequest request, AuthorizedUser authorizedUser, String locale) throws IllegalArgumentException {
+        Locale l = LocaleUtils.toLocale(locale);
+        if (l != null) {
+            if (authorizedUser != null) {
+                User user = idObjectService.getObjectById(User.class, authorizedUser.getId());
+                user.setLocale(locale);
+                idObjectService.save(user);
+                authorizedUser.setLocale(locale);
+            }
+
+            try {
+                request.getSession(false).setAttribute(LocaleFilter.SESSION_ATTRIBUTE_LOCALE, locale);
+            } catch (Exception ignored) {}
+        }
     }
 }
