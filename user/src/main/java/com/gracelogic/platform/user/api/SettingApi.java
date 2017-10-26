@@ -1,5 +1,6 @@
 package com.gracelogic.platform.user.api;
 
+import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.dto.UserSettingDTO;
 import com.gracelogic.platform.user.model.UserSetting;
@@ -42,14 +43,14 @@ public class SettingApi extends AbstractAuthorizedController {
     public ResponseEntity getUserSetting(@ApiParam(name = "key", value = "key")
                                          @PathVariable(value = "key") String key) {
         if (getUser() == null) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, getUserLocale())), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
         }
 
         UserSetting userSetting = userService.getUserSetting(getUser().getId(), key);
         if (userSetting != null) {
             return new ResponseEntity<UserSettingDTO>(UserSettingDTO.prepare(userSetting), HttpStatus.OK);
         } else {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("setting.NOT_FOUND", messageSource.getMessage("setting.NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("setting.NOT_FOUND", messageSource.getMessage("setting.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -69,7 +70,7 @@ public class SettingApi extends AbstractAuthorizedController {
                                           @ApiParam(name = "request", value = "request")
                                           @RequestBody ValueRequest request) {
         if (getUser() == null) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, getUserLocale())), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
         }
 
         userService.updateUserSetting(getUser().getId(), key, request.getValue());

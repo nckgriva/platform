@@ -80,6 +80,9 @@ public class User extends IdObject<UUID> {
     @Column(columnDefinition = "json", nullable = true)
     private String fields;
 
+    @Column(name = "LOCALE", nullable = true)
+    private String locale;
+
     @Override
     public UUID getId() {
         return id;
@@ -228,5 +231,13 @@ public class User extends IdObject<UUID> {
 
     public void setFields(String fields) {
         this.fields = fields;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 }

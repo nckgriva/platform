@@ -4,6 +4,7 @@ import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.account.exception.IncorrectPaymentStateException;
 import com.gracelogic.platform.db.dto.DateFormatConstants;
 import com.gracelogic.platform.db.dto.EntityListResponse;
+import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.payment.DataConstants;
 import com.gracelogic.platform.payment.Path;
 import com.gracelogic.platform.payment.dto.PaymentDTO;
@@ -127,7 +128,7 @@ public class PaymentApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (IncorrectPaymentStateException e) {
             return new ResponseEntity<>(new ErrorResponse("payment.incorrectStateException",
-                    messageSource.getMessage("payment.incorrectStateException", null, getUserLocale())),
+                    messageSource.getMessage("payment.incorrectStateException", null, LocaleHolder.getLocale())),
                     HttpStatus.BAD_REQUEST);
         }
 
@@ -153,7 +154,7 @@ public class PaymentApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (IncorrectPaymentStateException e) {
             return new ResponseEntity<>(new ErrorResponse("payment.incorrectStateException",
-                    messageSource.getMessage("payment.incorrectStateException", null, getUserLocale())),
+                    messageSource.getMessage("payment.incorrectStateException", null, LocaleHolder.getLocale())),
                     HttpStatus.BAD_REQUEST);
         }
 

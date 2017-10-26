@@ -2,6 +2,7 @@ package com.gracelogic.platform.user.api;
 
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
+import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.property.dto.PropertyDTO;
 import com.gracelogic.platform.property.model.Property;
 import com.gracelogic.platform.property.service.PropertyService;
@@ -75,7 +76,7 @@ public class PropertyApi extends AbstractAuthorizedController {
             PropertyDTO propertyDTO = propertyService.getProperty(id);
             return new ResponseEntity<PropertyDTO>(propertyDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -96,7 +97,7 @@ public class PropertyApi extends AbstractAuthorizedController {
             Property property = propertyService.saveProperty(propertyDTO);
             return new ResponseEntity<>(new IDResponse(property.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, getUserLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -118,7 +119,7 @@ public class PropertyApi extends AbstractAuthorizedController {
             propertyService.deleteProperty(id);
             return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, getUserLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }

@@ -640,6 +640,7 @@ public class UserServiceImpl implements UserService {
 
         u.setFields(JsonUtils.mapToJson(user.getFields()));
         u.setApproved(user.getApproved());
+        u.setLocale(user.getLocale());
 
 
         if (!u.getBlocked() && user.getBlocked()) {

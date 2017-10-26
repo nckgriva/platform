@@ -27,6 +27,7 @@ public class UserDTO extends IdObjectDTO implements Serializable {
     private Map<String, String> fields = new HashMap<>();
     private Set<UUID> roles = new HashSet<>();
     private String formattedUserName;
+    private String locale;
 
     public String getEmail() {
         return email;
@@ -100,6 +101,15 @@ public class UserDTO extends IdObjectDTO implements Serializable {
         this.formattedUserName = formattedUserName;
     }
 
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
     public static UserDTO prepare(User user, UserDTO userDTO) {
         IdObjectDTO.prepare(userDTO, user);
 
@@ -110,6 +120,7 @@ public class UserDTO extends IdObjectDTO implements Serializable {
         userDTO.setEmailVerified(user.getEmailVerified());
         userDTO.setPhoneVerified(user.getPhoneVerified());
         userDTO.setFormattedUserName(formatUserName(user));
+        userDTO.setLocale(user.getLocale());
 
         if (!StringUtils.isEmpty(user.getFields())) {
             userDTO.setFields(JsonUtils.jsonToMap(user.getFields()));
