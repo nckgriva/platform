@@ -39,7 +39,11 @@ public class DataConstants {
     public enum TransactionTypes {
         INCOMING_PAYMENT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
         OUTGOING_PAYMENT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
-        CANCEL_PAYMENT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e99"));
+        CANCEL_PAYMENT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e99")),
+        MARKET_BUY(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e13")),
+        MARKET_SELL(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e14")),
+        MARKET_BUY_CANCEL(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e15")),
+        MARKET_SELL_CANCEL(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e16"));
 
         private UUID value;
 

@@ -60,16 +60,16 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Payment processPayment(UUID paymentSystemId, ProcessPaymentRequest paymentModel, AuthorizedUser executedBy) throws PaymentAlreadyExistException, AccountNotFoundException, InvalidPaymentSystemException {
+    public Payment processPayment(UUID paymentSystemId, ProcessPaymentRequest paymentRequest, AuthorizedUser executedBy) throws PaymentAlreadyExistException, AccountNotFoundException, InvalidPaymentSystemException {
         PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
         if (paymentSystem == null || !paymentSystem.getActive()) {
             throw new InvalidPaymentSystemException("InvalidPaymentSystemException");
         }
 
-        if (!StringUtils.isEmpty(paymentModel.getPaymentUID())) {
+        if (!StringUtils.isEmpty(paymentRequest.getPaymentUID())) {
             Map<String, Object> params = new HashMap<>();
             params.put("paymentSystemId", paymentSystemId);
-            params.put("paymentUID", paymentModel.getPaymentUID());
+            params.put("paymentUID", paymentRequest.getPaymentUID());
 
             Integer count = idObjectService.checkExist(Payment.class, null, "el.paymentSystem.id=:paymentSystemId and el.paymentUID=:paymentUID", params, 1);
             if (count > 0) {
@@ -80,29 +80,29 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = new Payment();
         payment.setPaymentState(ds.get(PaymentState.class, DataConstants.PaymentStates.CREATED.getValue()));
         payment.setPaymentSystem(paymentSystem);
+        payment.setAccountNumber(paymentRequest.getAccountNumber());
 
         Account account = null;
-        if (paymentModel.getAccountId() != null) {
-            account = idObjectService.getObjectById(Account.class, paymentModel.getAccountId());
+        if (paymentRequest.getAccountId() != null) {
+            account = idObjectService.getObjectById(Account.class, paymentRequest.getAccountId());
         }
         else {
-            account = accountResolver.getTargetAccount(null, paymentModel.getAccountNumber(), paymentSystem, paymentModel.getCurrency());
+            account = accountResolver.getTargetAccount(null, paymentRequest.getAccountNumber(), paymentSystem, paymentRequest.getCurrency());
         }
 
         if (account == null) {
             throw new AccountNotFoundException("AccountNotFoundException");
         }
-        User user = account.getUser();
 
         payment.setAccount(account);
-        payment.setPaymentUID(paymentModel.getPaymentUID());
-        payment.setDescription(paymentModel.getDescription());
-        payment.setExternalTypeUID(paymentModel.getExternalTypeUID());
+        payment.setPaymentUID(paymentRequest.getPaymentUID());
+        payment.setDescription(paymentRequest.getDescription());
+        payment.setExternalTypeUID(paymentRequest.getExternalTypeUID());
 
-        if (payment.getRegisteredAmount() == null || !payment.getRegisteredAmount().equals(FinanceUtils.toDecimal(paymentModel.getRegisteredAmount()))) {
-            CalcPaymentFeeResult response = calcPaymentFee(paymentSystem, paymentModel.getRegisteredAmount());
+        if (payment.getRegisteredAmount() == null || !payment.getRegisteredAmount().equals(FinanceUtils.toDecimal(paymentRequest.getRegisteredAmount()))) {
+            CalcPaymentFeeResult response = calcPaymentFee(paymentSystem, paymentRequest.getRegisteredAmount());
 
-            payment.setRegisteredAmount(FinanceUtils.toDecimal(paymentModel.getRegisteredAmount()));
+            payment.setRegisteredAmount(FinanceUtils.toDecimal(paymentRequest.getRegisteredAmount()));
             payment.setAmount(FinanceUtils.toDecimal(response.getAmount()));
             payment.setFee(FinanceUtils.toDecimal(response.getFee()));
             payment.setTotalAmount(FinanceUtils.toDecimal(response.getTotalAmount()));
@@ -144,7 +144,7 @@ public class PaymentServiceImpl implements PaymentService {
         idObjectService.save(payment);
 
         try {
-            accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.CANCEL_PAYMENT.getValue(), -1 * payment.getAmount(), payment.getId(), true);
+            accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.CANCEL_PAYMENT.getValue(), -1 * payment.getAmount(), payment.getId(), false);
         }
         catch (InsufficientFundsException ignored) {}
     }
@@ -161,7 +161,7 @@ public class PaymentServiceImpl implements PaymentService {
         idObjectService.save(payment);
 
         try {
-            accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.INCOMING_PAYMENT.getValue(), payment.getAmount(), payment.getId(), true);
+            accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.INCOMING_PAYMENT.getValue(), payment.getAmount(), payment.getId(), false);
         }
         catch (InsufficientFundsException ignored) {}
     }

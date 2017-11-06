@@ -30,13 +30,18 @@ public class DictionaryServiceImpl implements DictionaryService {
         dictionaryClasses = new Reflections("com.gracelogic").getSubTypesOf(Dictionary.class);
 
         for (Class clazz : dictionaryClasses) {
-            final HashMap<Object, IdObject> map = new HashMap<Object, IdObject>();
-            List list = idObjectService.getList(clazz);
-            for (Object o : list) {
-                IdObject idObject = (IdObject) o;
-                map.put(idObject.getId(), idObject);
+            try {
+                final HashMap<Object, IdObject> map = new HashMap<Object, IdObject>();
+                List list = idObjectService.getList(clazz);
+                for (Object o : list) {
+                    IdObject idObject = (IdObject) o;
+                    map.put(idObject.getId(), idObject);
+                }
+                dictionaries.put(clazz, map);
             }
-            dictionaries.put(clazz, map);
+            catch (Exception e) {
+                logger.warn("Failed to load dictionary: " + clazz.getCanonicalName());
+            }
         }
 
         logger.info(String.format("Loaded %d dictionaries", dictionaries.size()));

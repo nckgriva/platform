@@ -1,0 +1,296 @@
+package com.gracelogic.platform.market.service;
+
+import com.gracelogic.platform.account.exception.AccountNotFoundException;
+import com.gracelogic.platform.account.exception.InsufficientFundsException;
+import com.gracelogic.platform.account.model.Account;
+import com.gracelogic.platform.account.service.AccountService;
+import com.gracelogic.platform.db.exception.ObjectNotFoundException;
+import com.gracelogic.platform.db.service.IdObjectService;
+import com.gracelogic.platform.dictionary.service.DictionaryService;
+import com.gracelogic.platform.market.DataConstants;
+import com.gracelogic.platform.market.dto.OrderDTO;
+import com.gracelogic.platform.market.dto.OrderExecutionParametersDTO;
+import com.gracelogic.platform.market.dto.ProductDTO;
+import com.gracelogic.platform.market.exception.InvalidDiscountException;
+import com.gracelogic.platform.market.exception.InvalidOrderStateException;
+import com.gracelogic.platform.market.exception.OrderNotConsistentException;
+import com.gracelogic.platform.market.model.*;
+import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
+import com.gracelogic.platform.payment.model.Payment;
+import com.gracelogic.platform.payment.model.PaymentSystem;
+import com.gracelogic.platform.payment.service.AccountResolver;
+import com.gracelogic.platform.property.service.PropertyService;
+import com.gracelogic.platform.user.dto.AuthorizedUser;
+import com.gracelogic.platform.user.exception.ForbiddenException;
+import com.gracelogic.platform.user.model.User;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+
+@Service
+public class MarketServiceImpl implements MarketService {
+    @Autowired
+    private IdObjectService idObjectService;
+
+    @Autowired
+    private DictionaryService ds;
+
+    @Autowired
+    private PropertyService propertyService;
+
+    @Autowired
+    private AccountService accountService;
+
+    @Autowired
+    private AccountResolver accountResolver;
+
+    @Autowired
+    private MarketResolver marketResolver;
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException {
+        Order entity;
+        if (dto.getId() != null) {
+            entity = idObjectService.getObjectById(Order.class, dto.getId());
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
+            if (!authorizedUser.getGrants().contains("ORDER:SAVE") && !entity.getUser().getId().equals(authorizedUser.getId())) {
+                throw new ForbiddenException();
+            }
+            if (!entity.getOrderState().getId().equals(DataConstants.OrderStates.DRAFT.getValue())) {
+                throw new InvalidOrderStateException();
+            }
+
+            //Delete order products
+            Map<String, Object> params = new HashMap<>();
+            params.put("orderId", entity.getId());
+            idObjectService.delete(OrderProduct.class, "el.order.id=:orderId", params);
+        } else {
+            entity = new Order();
+            entity.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.DRAFT.getValue()));
+            entity.setUser(idObjectService.getObjectById(User.class, authorizedUser.getId()));
+        }
+
+        Set<UUID> productIds = new HashSet<>();
+
+        //Find discount
+        Discount discount = null;
+        if (!StringUtils.isEmpty(dto.getDiscountSecretCode())) {
+            discount = getActiveDiscountBySecretCode(dto.getDiscountSecretCode());
+            if (discount == null) {
+                throw new InvalidDiscountException();
+            }
+            if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.GIFT_PRODUCT.getValue())) {
+                for (DiscountProduct discountProduct : discount.getDiscountProductSet()) {
+                    productIds.add(discountProduct.getProduct().getId());
+                }
+            }
+        }
+
+        //Get products to purchase
+        if (productIds.isEmpty()) {
+            for (ProductDTO productDTO : dto.getProducts()) {
+                productIds.add(productDTO.getId());
+            }
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put("productIds", productIds);
+        List<Product> products = idObjectService.getList(Product.class, null, "el.id in (:productIds)", params, null, null, null, productIds.size());
+
+        //Calculate total amount
+        Long amount = marketResolver.calculateOrderTotalAmount(entity.getUser().getId(), products);
+        Long discountAmount = 0L;
+
+        //Apply discount
+        if (discount != null) {
+            if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.FIX_AMOUNT_DISCOUNT.getValue())) {
+                if (discount.getAmount() == null) {
+                    throw new InvalidDiscountException();
+                }
+                discountAmount = discount.getAmount();
+                if (discountAmount > amount) {
+                    discountAmount = amount;
+                }
+            } else if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.FIX_PERCENT_DISCOUNT.getValue())) {
+                if (discount.getAmount() == null) {
+                    throw new InvalidDiscountException();
+                }
+                discountAmount -= amount / 100L * discount.getAmount();
+            } else if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.GIFT_PRODUCT.getValue())) {
+                discountAmount = amount;
+            }
+        }
+
+        Long totalAmount = amount - discountAmount;
+        entity.setAmount(amount);
+        entity.setDiscountAmount(discountAmount);
+        entity.setTotalAmount(totalAmount);
+        entity = idObjectService.save(entity);
+
+        //Create order products
+        for (UUID productId : productIds) {
+            Product product = null;
+            for (Product p : products) {
+                if (p.getId().equals(productId)) {
+                    product = p;
+                    break;
+                }
+            }
+            if (product == null || !product.getActive()) {
+                throw new OrderNotConsistentException("Product not found or not active: " + productId);
+            }
+
+            OrderProduct orderProduct = new OrderProduct();
+            orderProduct.setOrder(entity);
+            orderProduct.setProduct(product);
+            idObjectService.save(orderProduct);
+        }
+
+        return entity;
+    }
+
+    private Discount getActiveDiscountBySecretCode(String secretCode) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("secretCode", StringUtils.lowerCase(secretCode));
+        params.put("active", true);
+
+        List<Discount> discounts = idObjectService.getList(Discount.class, "left join fetch el.discountProductSet", "lower(el.secretCode)=:secretCode and el.active=:active and ((el.reusable == false && el.executed == false) || el.reusable == true)", params, null, null, null, 1);
+        return discounts.isEmpty() ? null : discounts.iterator().next();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public OrderExecutionParametersDTO executeOrder(UUID orderId, UUID paymentSystemId, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException {
+        Order order = idObjectService.getObjectById(Order.class, orderId);
+        if (!authorizedUser.getGrants().contains("ORDER:EXECUTE") && !order.getUser().getId().equals(authorizedUser.getId())) {
+            throw new ForbiddenException();
+        }
+
+        if (!order.getOrderState().getId().equals(DataConstants.OrderStates.DRAFT.getValue()) &&
+                !order.getOrderState().getId().equals(DataConstants.OrderStates.PENDING.getValue())) {
+            throw new InvalidOrderStateException();
+        }
+
+        PaymentSystem paymentSystem = null;
+        if (order.getOrderState().getId().equals(DataConstants.OrderStates.DRAFT.getValue())) {
+            paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
+            if (paymentSystem == null || !paymentSystem.getActive()) {
+                throw new InvalidPaymentSystemException();
+            }
+
+            order.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.PENDING.getValue()));
+            order.setPaymentSystem(paymentSystem);
+            order = idObjectService.save(order);
+
+            //Check and process discount
+            if (order.getDiscount() != null) {
+                Discount discount = idObjectService.getObjectById(Discount.class, order.getDiscount().getId());
+                if (!discount.getReusable()) {
+                    if (discount.getUsed()) {
+                        throw new InvalidDiscountException("This discount already used");
+                    }
+                    else {
+                        discount.setUsed(true);
+                        discount.setUsedForOrder(order);
+                        idObjectService.save(discount);
+                    }
+                }
+            }
+        }
+
+        if (paymentSystem == null) {
+            paymentSystem = idObjectService.getObjectById(PaymentSystem.class, order.getPaymentSystem().getId());
+        }
+
+        //Для случая с GIFT_PRODUCT сразу помечаем заказ оплаченным
+        if (order.getTotalAmount().equals(0L)) {
+            Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, null);
+            payOrder(order, order.getTotalAmount(), userAccount.getId());
+        }
+        return new OrderExecutionParametersDTO(paymentSystem.getGatewayUrl(), !StringUtils.isEmpty(paymentSystem.getGatewayUrl()));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void cancelOrder(UUID orderId) throws InvalidOrderStateException, ForbiddenException, ObjectNotFoundException, InsufficientFundsException, AccountNotFoundException {
+        Order order = idObjectService.getObjectById(Order.class, orderId);
+        if (order == null) {
+            throw new ObjectNotFoundException();
+        }
+        if (!order.getOrderState().getId().equals(DataConstants.OrderStates.PAID.getValue())) {
+            throw new InvalidOrderStateException();
+        }
+
+        Long amountToReturn = order.getPaid();
+
+        //Transfer money from organization to user
+        accountService.processTransaction(propertyService.getPropertyValueAsUUID("market:organization_account_id"), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL_CANCEL.getValue(), -1 * amountToReturn, order.getId(), false);
+        Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, null);
+        accountService.processTransaction(userAccount.getId(), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_BUY_CANCEL.getValue(), amountToReturn, order.getId(), false);
+
+        order.setPaid(order.getPaid() - amountToReturn);
+        order.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.CANCELED.getValue()));
+        idObjectService.save(order);
+
+        //Return discount
+        if (order.getDiscount() != null) {
+            Discount discount = idObjectService.getObjectById(Discount.class, order.getDiscount().getId());
+            if (!discount.getReusable() && discount.getUsed() && discount.getUsedForOrder().getId().equals(orderId)) {
+                discount.setUsed(false);
+                discount.setUsedForOrder(null);
+                idObjectService.save(discount);
+            }
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void processPayment(Payment payment) throws InvalidOrderStateException, AccountNotFoundException, InsufficientFundsException {
+        Order order = idObjectService.getObjectById(Order.class, payment.getAccountNumber());
+        if (order == null || !order.getOrderState().getId().equals(DataConstants.OrderStates.PENDING.getValue())) {
+            throw new InvalidOrderStateException();
+        }
+
+        Long amountToPay = order.getTotalAmount() - order.getPaid();
+        if (amountToPay > payment.getAmount()) {
+            amountToPay = payment.getAmount();
+        }
+
+        //Transfer money from user to organization
+        payOrder(order, amountToPay, payment.getAccount().getId());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteOrder(UUID orderId, AuthorizedUser authorizedUser) throws InvalidOrderStateException, ObjectNotFoundException, ForbiddenException {
+        Order order = idObjectService.getObjectById(Order.class, orderId);
+        if (!authorizedUser.getGrants().contains("ORDER:DELETE") && !order.getUser().getId().equals(authorizedUser.getId())) {
+            throw new ForbiddenException();
+        }
+        if (!order.getOrderState().getId().equals(DataConstants.OrderStates.DRAFT.getValue())) {
+            throw new InvalidOrderStateException();
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("orderId", orderId);
+        idObjectService.delete(OrderProduct.class, "el.order.id=:orderId", params);
+        idObjectService.delete(Order.class, orderId);
+    }
+
+    private void payOrder(Order order, Long amountToPay, UUID userAccountId) throws InsufficientFundsException, AccountNotFoundException {
+        //Transfer money from user to organization
+        accountService.processTransaction(userAccountId, com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_BUY.getValue(), -1 * amountToPay, order.getId(), false);
+        accountService.processTransaction(propertyService.getPropertyValueAsUUID("market:organization_account_id"), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL.getValue(), amountToPay, order.getId(), false);
+
+        order.setPaid(order.getPaid() + amountToPay);
+        if (order.getPaid().equals(order.getTotalAmount())) {
+            order.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.PAID.getValue()));
+        }
+        idObjectService.save(order);
+    }
+}

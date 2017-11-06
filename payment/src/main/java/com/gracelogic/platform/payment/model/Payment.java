@@ -33,6 +33,9 @@ public class Payment extends IdObject<UUID> {
     @JoinColumn(name = "ACCOUNT_ID", nullable = false)
     private Account account;
 
+    @Column(name = "ACCOUNT_NUMBER", nullable = true)
+    private String accountNumber;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "PAYMENT_SYSTEM_ID", nullable = false)
     private PaymentSystem paymentSystem;
@@ -182,5 +185,13 @@ public class Payment extends IdObject<UUID> {
 
     public void setExecutedByUser(User executedByUser) {
         this.executedByUser = executedByUser;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
     }
 }

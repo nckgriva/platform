@@ -34,7 +34,7 @@ public class AccountServiceImpl implements AccountService {
         }
 
         if (amount < 0 && !ignoreInsufficientFunds && account.getBalance() < Math.abs(amount)) {
-            throw new InsufficientFundsException("InsufficientFundsException");
+            throw new InsufficientFundsException("Insufficient funds in account: " + accountId);
         }
 
         Transaction transaction = new Transaction();

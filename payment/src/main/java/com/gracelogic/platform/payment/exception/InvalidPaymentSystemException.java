@@ -9,6 +9,10 @@ public class InvalidPaymentSystemException extends Exception {
         this.message = message;
     }
 
+    public InvalidPaymentSystemException() {
+        super("");
+    }
+
     public String getMessage() {
         return message;
     }

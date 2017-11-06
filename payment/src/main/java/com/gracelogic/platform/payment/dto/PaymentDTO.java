@@ -23,6 +23,7 @@ public class PaymentDTO extends IdObjectDTO {
     private Double fee;
     private Double totalAmount;
     private String description;
+    private String accountNumber;
 
     public UUID getUserId() {
         return userId;
@@ -136,6 +137,14 @@ public class PaymentDTO extends IdObjectDTO {
         this.accountExternalIdentifier = accountExternalIdentifier;
     }
 
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+
     public static PaymentDTO prepare(Payment model) {
         PaymentDTO dto = new PaymentDTO();
         IdObjectDTO.prepare(dto, model);
@@ -156,6 +165,7 @@ public class PaymentDTO extends IdObjectDTO {
         dto.setFee(FinanceUtils.toFractional(model.getFee()));
         dto.setDescription(model.getDescription());
         dto.setPaymentUID(model.getPaymentUID());
+        dto.setAccountNumber(model.getAccountNumber());
 
         return dto;
     }
