@@ -2,7 +2,6 @@ package com.gracelogic.platform.market.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import com.gracelogic.platform.user.model.RoleGrant;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -12,7 +11,8 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "DISCOUNT")
+@Table(name = JPAProperties.TABLE_PREFIX + "DISCOUNT", uniqueConstraints =
+        {@UniqueConstraint(columnNames = {"SECRET_CODE"})})
 public class Discount extends IdObject<UUID> {
     @Id
     @Column(name = ID)

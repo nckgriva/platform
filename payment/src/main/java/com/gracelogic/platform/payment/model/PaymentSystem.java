@@ -48,8 +48,8 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
     @Column(name = "IS_FEE_INCLUDED", nullable = false)
     private Boolean feeIncluded;
 
-    @Column(name = "GATEWAY_URL", nullable = true) //Url платёжного шлюза для оплаты
-    private String gatewayUrl;
+    @Column(name = "REDIRECT_URL", nullable = true) //Url платёжного шлюза для оплаты
+    private String redirectUrl;
 
     @Override
     public UUID getId() {
@@ -146,11 +146,11 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
         this.allowedAddresses = allowedAddresses;
     }
 
-    public String getGatewayUrl() {
-        return gatewayUrl;
+    public String getRedirectUrl() {
+        return redirectUrl;
     }
 
-    public void setGatewayUrl(String gatewayUrl) {
-        this.gatewayUrl = gatewayUrl;
+    public void setRedirectUrl(String redirectUrl) {
+        this.redirectUrl = redirectUrl;
     }
 }

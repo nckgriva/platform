@@ -156,17 +156,21 @@ public class MarketServiceImpl implements MarketService {
 
     private Discount getActiveDiscountBySecretCode(String secretCode) {
         Map<String, Object> params = new HashMap<>();
-        params.put("secretCode", StringUtils.lowerCase(secretCode));
+        params.put("secretCode", StringUtils.trim(secretCode));
         params.put("active", true);
 
-        List<Discount> discounts = idObjectService.getList(Discount.class, "left join fetch el.discountProductSet", "lower(el.secretCode)=:secretCode and el.active=:active and ((el.reusable == false && el.executed == false) || el.reusable == true)", params, null, null, null, 1);
+        List<Discount> discounts = idObjectService.getList(Discount.class, "left join fetch el.discountProductSet", "el.secretCode=:secretCode and el.active=:active and ((el.reusable == false && el.executed == false) || el.reusable == true)", params, null, null, null, 1);
         return discounts.isEmpty() ? null : discounts.iterator().next();
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public OrderExecutionParametersDTO executeOrder(UUID orderId, UUID paymentSystemId, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException {
+    public OrderExecutionParametersDTO executeOrder(UUID orderId, UUID paymentSystemId, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException, ObjectNotFoundException {
         Order order = idObjectService.getObjectById(Order.class, orderId);
+        if (order == null) {
+            throw new ObjectNotFoundException();
+        }
+
         if (!authorizedUser.getGrants().contains("ORDER:EXECUTE") && !order.getUser().getId().equals(authorizedUser.getId())) {
             throw new ForbiddenException();
         }
@@ -207,12 +211,13 @@ public class MarketServiceImpl implements MarketService {
             paymentSystem = idObjectService.getObjectById(PaymentSystem.class, order.getPaymentSystem().getId());
         }
 
-        //Для случая с GIFT_PRODUCT сразу помечаем заказ оплаченным
-        if (order.getTotalAmount().equals(0L)) {
-            Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, null);
-            payOrder(order, order.getTotalAmount(), userAccount.getId());
+        //Пытаемся оплатить с помощью внутреннего счёта
+        Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, null);
+        if (order.getTotalAmount().equals(order.getPaid()) || userAccount.getBalance() > (order.getTotalAmount() - order.getPaid())) {
+            order = payOrder(order, order.getTotalAmount(), userAccount.getId());
         }
-        return new OrderExecutionParametersDTO(paymentSystem.getGatewayUrl(), !StringUtils.isEmpty(paymentSystem.getGatewayUrl()));
+
+        return new OrderExecutionParametersDTO(order.getOrderState().getId().equals(DataConstants.OrderStates.PAID.getValue()), paymentSystem.getRedirectUrl());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -282,7 +287,7 @@ public class MarketServiceImpl implements MarketService {
         idObjectService.delete(Order.class, orderId);
     }
 
-    private void payOrder(Order order, Long amountToPay, UUID userAccountId) throws InsufficientFundsException, AccountNotFoundException {
+    private Order payOrder(Order order, Long amountToPay, UUID userAccountId) throws InsufficientFundsException, AccountNotFoundException {
         //Transfer money from user to organization
         accountService.processTransaction(userAccountId, com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_BUY.getValue(), -1 * amountToPay, order.getId(), false);
         accountService.processTransaction(propertyService.getPropertyValueAsUUID("market:organization_account_id"), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL.getValue(), amountToPay, order.getId(), false);
@@ -291,6 +296,6 @@ public class MarketServiceImpl implements MarketService {
         if (order.getPaid().equals(order.getTotalAmount())) {
             order.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.PAID.getValue()));
         }
-        idObjectService.save(order);
+        return idObjectService.save(order);
     }
 }

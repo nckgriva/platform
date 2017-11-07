@@ -2,27 +2,27 @@ package com.gracelogic.platform.market.dto;
 
 
 public class OrderExecutionParametersDTO {
-    private String gatewayUrl;
-    private Boolean needRedirect;
+    private Boolean processed;
+    private String redirectUrl;
 
-    public String getGatewayUrl() {
-        return gatewayUrl;
+    public Boolean getProcessed() {
+        return processed;
     }
 
-    public void setGatewayUrl(String gatewayUrl) {
-        this.gatewayUrl = gatewayUrl;
+    public void setProcessed(Boolean processed) {
+        this.processed = processed;
     }
 
-    public Boolean getNeedRedirect() {
-        return needRedirect;
+    public String getRedirectUrl() {
+        return redirectUrl;
     }
 
-    public void setNeedRedirect(Boolean needRedirect) {
-        this.needRedirect = needRedirect;
+    public void setRedirectUrl(String redirectUrl) {
+        this.redirectUrl = redirectUrl;
     }
 
-    public OrderExecutionParametersDTO(String gatewayUrl, Boolean needRedirect) {
-        this.gatewayUrl = gatewayUrl;
-        this.needRedirect = needRedirect;
+    public OrderExecutionParametersDTO(Boolean processed, String redirectUrl) {
+        this.processed = processed;
+        this.redirectUrl = redirectUrl;
     }
 }

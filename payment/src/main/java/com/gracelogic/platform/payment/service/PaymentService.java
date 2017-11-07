@@ -2,6 +2,7 @@ package com.gracelogic.platform.payment.service;
 
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.account.exception.IncorrectPaymentStateException;
+import com.gracelogic.platform.account.exception.InsufficientFundsException;
 import com.gracelogic.platform.account.model.Account;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.payment.dto.CalcPaymentFeeResult;
@@ -24,9 +25,9 @@ public interface PaymentService {
 
     Payment processPayment(UUID paymentSystemId, ProcessPaymentRequest paymentModel, AuthorizedUser executedBy) throws PaymentAlreadyExistException, AccountNotFoundException, InvalidPaymentSystemException;
 
-    void cancelPayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException;
+    void cancelPayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException;
 
-    void restorePayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException;
+    void restorePayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException;
 
     EntityListResponse<PaymentDTO> getPaymentsPaged(UUID userId, UUID accountId, UUID paymentSystemId, Collection<UUID> paymentStateIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
 }

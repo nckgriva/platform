@@ -43,6 +43,9 @@ public class Product extends IdObject<UUID> {
     @Column(name = "LIFETIME", nullable = true)
     private Long lifetime; //Проставляется если продукт ограничен по времени использования
 
+    @Column(name = "PRICE", nullable = true)
+    private Long price;
+
     @Override
     public UUID getId() {
         return id;
@@ -111,5 +114,13 @@ public class Product extends IdObject<UUID> {
 
     public void setLifetime(Long lifetime) {
         this.lifetime = lifetime;
+    }
+
+    public Long getPrice() {
+        return price;
+    }
+
+    public void setPrice(Long price) {
+        this.price = price;
     }
 }

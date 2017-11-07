@@ -2,6 +2,7 @@ package com.gracelogic.platform.payment.api;
 
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.account.exception.IncorrectPaymentStateException;
+import com.gracelogic.platform.account.exception.InsufficientFundsException;
 import com.gracelogic.platform.db.dto.DateFormatConstants;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.localization.service.LocaleHolder;
@@ -43,10 +44,14 @@ public class PaymentApi extends AbstractAuthorizedController {
     @Qualifier("paymentMessageSource")
     private ResourceBundleMessageSource messageSource;
 
+    @Autowired
+    @Qualifier("accountMessageSource")
+    private ResourceBundleMessageSource accountMessageSource;
+
     @ApiOperation(
             value = "payments",
             notes = "Get list of payments",
-            response =  EntityListResponse.class
+            response = EntityListResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -81,7 +86,7 @@ public class PaymentApi extends AbstractAuthorizedController {
         }
 
         EntityListResponse<PaymentDTO> payments = paymentService.getPaymentsPaged(userId, accountId, paymentSystemId, paymentStateId != null ? Collections.singletonList(paymentStateId) : null, startDate, endDate, enrich, length, null, start, sortField, sortDir);
-        return new ResponseEntity<EntityListResponse<PaymentDTO> >(payments, HttpStatus.OK);
+        return new ResponseEntity<EntityListResponse<PaymentDTO>>(payments, HttpStatus.OK);
     }
 
     @ApiOperation(
@@ -124,15 +129,16 @@ public class PaymentApi extends AbstractAuthorizedController {
     public ResponseEntity cancelPayment(@PathVariable(value = "id") UUID paymentId) {
         try {
             paymentService.cancelPayment(paymentId, getUser());
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (AccountNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (IncorrectPaymentStateException e) {
-            return new ResponseEntity<>(new ErrorResponse("payment.incorrectStateException",
-                    messageSource.getMessage("payment.incorrectStateException", null, LocaleHolder.getLocale())),
+            return new ResponseEntity<>(new ErrorResponse("payment.INCORRECT_STATE",
+                    messageSource.getMessage("payment.INCORRECT_STATE", null, LocaleHolder.getLocale())),
                     HttpStatus.BAD_REQUEST);
+        } catch (InsufficientFundsException e) {
+            return new ResponseEntity<>(new ErrorResponse("account.INSUFFICIENT_FUNDS", accountMessageSource.getMessage("account.INSUFFICIENT_FUNDS", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
-        return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 
     @ApiOperation(
@@ -150,14 +156,17 @@ public class PaymentApi extends AbstractAuthorizedController {
     public ResponseEntity restorePayment(@PathVariable(value = "id") UUID paymentId) {
         try {
             paymentService.restorePayment(paymentId, getUser());
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (AccountNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (IncorrectPaymentStateException e) {
-            return new ResponseEntity<>(new ErrorResponse("payment.incorrectStateException",
-                    messageSource.getMessage("payment.incorrectStateException", null, LocaleHolder.getLocale())),
+            return new ResponseEntity<>(new ErrorResponse("payment.INCORRECT_STATE",
+                    messageSource.getMessage("payment.INCORRECT_STATE", null, LocaleHolder.getLocale())),
                     HttpStatus.BAD_REQUEST);
+        } catch (InsufficientFundsException e) {
+            return new ResponseEntity<>(new ErrorResponse("account.INSUFFICIENT_FUNDS", accountMessageSource.getMessage("account.INSUFFICIENT_FUNDS", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+
     }
 }

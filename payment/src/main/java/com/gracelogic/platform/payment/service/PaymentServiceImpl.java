@@ -85,8 +85,7 @@ public class PaymentServiceImpl implements PaymentService {
         Account account = null;
         if (paymentRequest.getAccountId() != null) {
             account = idObjectService.getObjectById(Account.class, paymentRequest.getAccountId());
-        }
-        else {
+        } else {
             account = accountResolver.getTargetAccount(null, paymentRequest.getAccountNumber(), paymentSystem, paymentRequest.getCurrency());
         }
 
@@ -116,15 +115,14 @@ public class PaymentServiceImpl implements PaymentService {
 
         try {
             accountService.processTransaction(account.getId(), DataConstants.TransactionTypes.INCOMING_PAYMENT.getValue(), payment.getAmount(), payment.getId(), true);
+        } catch (InsufficientFundsException ignored) {
         }
-        catch (InsufficientFundsException ignored) {}
 
         try {
             accountResolver.notifyPaymentReceived(payment);
             payment.setPaymentState(ds.get(PaymentState.class, DataConstants.PaymentStates.ACTIVATED.getValue()));
             idObjectService.save(payment);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Failed to transmit payment event", e);
         }
 
@@ -133,7 +131,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void cancelPayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException {
+    public void cancelPayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException {
         Payment payment = idObjectService.getObjectById(Payment.class, paymentId);
         if (!payment.getPaymentState().getId().equals(DataConstants.PaymentStates.ACTIVATED.getValue())) {
             throw new IncorrectPaymentStateException("Payment must have state 'ACTIVATED'");
@@ -143,15 +141,12 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setPaymentState(ds.get(PaymentState.class, DataConstants.PaymentStates.CANCELLED.getValue()));
         idObjectService.save(payment);
 
-        try {
-            accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.CANCEL_PAYMENT.getValue(), -1 * payment.getAmount(), payment.getId(), false);
-        }
-        catch (InsufficientFundsException ignored) {}
+        accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.CANCEL_PAYMENT.getValue(), -1 * payment.getAmount(), payment.getId(), false);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void restorePayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException {
+    public void restorePayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException {
         Payment payment = idObjectService.getObjectById(Payment.class, paymentId);
         if (!payment.getPaymentState().getId().equals(DataConstants.PaymentStates.CANCELLED.getValue())) {
             throw new IncorrectPaymentStateException("Payment must have state 'CANCELLED'");
@@ -160,10 +155,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setPaymentState(ds.get(PaymentState.class, DataConstants.PaymentStates.ACTIVATED.getValue()));
         idObjectService.save(payment);
 
-        try {
-            accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.INCOMING_PAYMENT.getValue(), payment.getAmount(), payment.getId(), false);
-        }
-        catch (InsufficientFundsException ignored) {}
+        accountService.processTransaction(payment.getAccount().getId(), DataConstants.TransactionTypes.INCOMING_PAYMENT.getValue(), payment.getAmount(), payment.getId(), false);
     }
 
     @Override
@@ -171,7 +163,7 @@ public class PaymentServiceImpl implements PaymentService {
         CalcPaymentFeeResult response = new CalcPaymentFeeResult();
 
         Double amount;
-        Double fee ;
+        Double fee;
         Double totalAmount;
         if (paymentSystem.getFeeIncluded()) {
             amount = FinanceUtils.round(registeredAmount / (1D + FinanceUtils.toFractional(paymentSystem.getFee()) / 100D), 2);
