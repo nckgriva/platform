@@ -1,6 +1,10 @@
 package com.gracelogic.platform.market.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
+import com.gracelogic.platform.db.dto.JsonDateDeserializer;
+import com.gracelogic.platform.db.dto.JsonDateSerializer;
 import com.gracelogic.platform.market.model.Product;
 
 import java.util.Date;
@@ -14,6 +18,8 @@ public class ProductDTO extends IdObjectDTO {
     private Boolean active;
 
     //Transient field for OrderProduct
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
     private Date lifecycleExpiration;
 
     public String getName() {
