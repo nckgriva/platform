@@ -116,5 +116,11 @@ public class Product extends IdObject<UUID> {
         this.lifetime = lifetime;
     }
 
+    public Long getPrice() {
+        return price;
+    }
 
+    public void setPrice(Long price) {
+        this.price = price;
+    }
 }

@@ -9,6 +9,7 @@ import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.market.DataConstants;
 import com.gracelogic.platform.market.dao.MarketDao;
+import com.gracelogic.platform.market.dto.MarketAwareObjectDTO;
 import com.gracelogic.platform.market.dto.OrderDTO;
 import com.gracelogic.platform.market.dto.OrderExecutionParametersDTO;
 import com.gracelogic.platform.market.dto.ProductDTO;
@@ -303,9 +304,11 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public Map<UUID, Boolean> checkAllProductsPurchaseStatus(UUID userId, Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Date checkDate) {
+    public Map<UUID, Boolean> getProductsPurchaseState(UUID userId, Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Date checkDate, Set<UUID> productIds) {
         Map<UUID, Boolean> result = new HashMap<>();
-        Set<UUID> productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(objectReferenceIdsAndProductTypeIds.values());
+        if (productIds == null) {
+            productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(objectReferenceIdsAndProductTypeIds.values());
+        }
         List<OrderProduct> orderProducts = marketDao.getPurchasedProducts(userId, objectReferenceIdsAndProductTypeIds.keySet(), productIds, checkDate);
 
         for (UUID objectReferenceId : objectReferenceIdsAndProductTypeIds.keySet()) {
@@ -322,6 +325,60 @@ public class MarketServiceImpl implements MarketService {
         }
 
         return result;
+    }
+
+    public Map<UUID, Product> findProducts(Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Set<UUID> productIds) {
+        Map<UUID, Product> result = new HashMap<>();
+        if (productIds == null) {
+            productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(objectReferenceIdsAndProductTypeIds.values());
+        }
+        List<Product> products = marketDao.getProductsByReferenceObjectIdsAndIds(objectReferenceIdsAndProductTypeIds.keySet(), productIds);
+
+        for (UUID objectReferenceId : objectReferenceIdsAndProductTypeIds.keySet()) {
+            UUID productTypeId = objectReferenceIdsAndProductTypeIds.get(objectReferenceId);
+            Product p = null;
+            for (Product product : products) {
+                if ((product.getReferenceObjectId() != null && product.getReferenceObjectId().equals(objectReferenceId)) ||
+                        (product.getReferenceObjectId() == null && product.getProductType().getId().equals(productTypeId))) {
+                    p = product;
+                    break;
+                }
+            }
+            result.put(objectReferenceId, p);
+        }
+
+        return result;
+    }
+
+    public void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedUserId, Date checkOnDate) {
+        Map<UUID, UUID> objectReferenceIdsAndProductTypeIds = new HashMap<>();
+        for (MarketAwareObjectDTO dto : objects) {
+            if (dto.getId() == null) {
+                continue;
+            }
+            objectReferenceIdsAndProductTypeIds.put(dto.getId(), productTypeId);
+        }
+
+        Set<UUID> productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(Collections.singletonList(productTypeId));
+
+        Map<UUID, Boolean> purchased = Collections.emptyMap();
+        if (relatedUserId != null) {
+            purchased = getProductsPurchaseState(relatedUserId, objectReferenceIdsAndProductTypeIds, checkOnDate, productIds);
+        }
+
+        Map<UUID, Product> products = findProducts(objectReferenceIdsAndProductTypeIds, productIds);
+
+        for (MarketAwareObjectDTO dto : objects) {
+            if (dto.getId() == null) {
+                continue;
+            }
+            if (purchased.containsKey(dto.getId())) {
+                dto.setProductPurchased(purchased.get(dto.getId()));
+            }
+            if (products.containsKey(dto.getId())) {
+                MarketAwareObjectDTO.enrichMarketInfo(dto, products.get(dto.getId()));
+            }
+        }
     }
 
     private Order payOrder(Order order, Long amountToPay, UUID userAccountId) throws InsufficientFundsException, AccountNotFoundException {
