@@ -205,6 +205,9 @@ public class MarketServiceImpl implements MarketService {
                     }
                 }
             }
+
+            //Update lifetime expiration
+            recalculateOrderProductLifetimeExpiration(order, System.currentTimeMillis());
         }
 
         if (paymentSystem == null) {
@@ -287,6 +290,36 @@ public class MarketServiceImpl implements MarketService {
         idObjectService.delete(Order.class, orderId);
     }
 
+    @Override
+    public boolean checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> referenceObjectIds, Date checkOnDate) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("productTypeIds", referenceObjectIds.keySet());
+        params.put("active", true);
+        List<Product> products = idObjectService.getList(Product.class, null, "el.productType.id in (:productTypeIds) and el.referenceObjectId is null and el.active=:active", params, null, null, null, referenceObjectIds.keySet().size());
+        Set<UUID> productIds = new HashSet<>();
+        for (Product product : products) {
+            productIds.add(product.getId());
+        }
+
+        params.clear();
+        params.put("userId", userId);
+        params.put("referenceObjectIds", referenceObjectIds.values());
+        params.put("checkOnDate", checkOnDate);
+        params.put("orderStateId", DataConstants.OrderStates.PAID.getValue());
+
+        StringBuilder cause = new StringBuilder("ord.user.id=:userId and ord.orderState.id=:orderStateId and (el.lifetimeExpiration is null or el.lifetimeExpiration < :checkOnDate) and (el.product.referenceObjectId in (:referenceObjectIds) ");
+        if (!productIds.isEmpty()) {
+            cause.append("or el.product.id in (:productIds))");
+            params.put("productIds", productIds);
+        }
+        else {
+            cause.append(")");
+        }
+
+        Integer count = idObjectService.checkExist(OrderProduct.class, "left join el.order ord left join el.product prd", cause.toString(), params, 1);
+        return count > 0;
+    }
+
     private Order payOrder(Order order, Long amountToPay, UUID userAccountId) throws InsufficientFundsException, AccountNotFoundException {
         //Transfer money from user to organization
         accountService.processTransaction(userAccountId, com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_BUY.getValue(), -1 * amountToPay, order.getId(), false);
@@ -297,5 +330,21 @@ public class MarketServiceImpl implements MarketService {
             order.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.PAID.getValue()));
         }
         return idObjectService.save(order);
+    }
+
+    private void recalculateOrderProductLifetimeExpiration(Order order, Long currentTimeMillis) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("orderId", order.getId());
+
+        List<OrderProduct> orderProducts = idObjectService.getList(OrderProduct.class, "left join fetch el.product", "el.order.id=:orderId", params, null, null, null, null);
+        for (OrderProduct orderProduct : orderProducts) {
+            if (orderProduct.getProduct().getLifetime() != null) {
+                orderProduct.setLifetimeExpiration(new Date(currentTimeMillis + orderProduct.getProduct().getLifetime()));
+            }
+            else {
+                orderProduct.setLifetimeExpiration(null);
+            }
+            idObjectService.save(orderProduct);
+        }
     }
 }

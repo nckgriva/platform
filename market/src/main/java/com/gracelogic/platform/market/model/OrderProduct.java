@@ -34,6 +34,9 @@ public class OrderProduct extends IdObject<UUID> {
     @JoinColumn(name = "PRODUCT_ID", nullable = false)
     private Product product;
 
+    @Column(name = "LIFETIME_EXPIRATION_DT", nullable = true)
+    private Date lifetimeExpiration;
+
     @Override
     public UUID getId() {
         return id;
@@ -78,5 +81,13 @@ public class OrderProduct extends IdObject<UUID> {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public Date getLifetimeExpiration() {
+        return lifetimeExpiration;
+    }
+
+    public void setLifetimeExpiration(Date lifetimeExpiration) {
+        this.lifetimeExpiration = lifetimeExpiration;
     }
 }

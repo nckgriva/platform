@@ -14,6 +14,9 @@ import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 public interface MarketService {
@@ -26,4 +29,6 @@ public interface MarketService {
     void processPayment(Payment payment) throws InvalidOrderStateException, AccountNotFoundException, InsufficientFundsException;
 
     void deleteOrder(UUID orderId, AuthorizedUser authorizedUser) throws InvalidOrderStateException, ObjectNotFoundException, ForbiddenException;
+
+    boolean checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> referenceObjectIds, Date checkOnDate);
 }
