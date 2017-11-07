@@ -30,11 +30,11 @@ public interface MarketService {
 
     void deleteOrder(UUID orderId, AuthorizedUser authorizedUser) throws InvalidOrderStateException, ObjectNotFoundException, ForbiddenException;
 
-    void checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Date checkOnDate) throws ProductNotPurchasedException;
+    void checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkOnDate) throws ProductNotPurchasedException;
 
-    Map<UUID, Boolean> getProductsPurchaseState(UUID userId, Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Date checkDate, Set<UUID> productIds);
+    Map<UUID, Boolean> getProductsPurchaseState(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate, Set<UUID> productIds);
 
-    Map<UUID, Product> findProducts(Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Set<UUID> productIds);
+    Map<UUID, Product> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Set<UUID> productIds);
 
     void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedUserId, Date checkOnDate);
 }

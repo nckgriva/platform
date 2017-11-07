@@ -70,7 +70,7 @@ public abstract class AbstractMarketDaoImpl extends BaseDao implements MarketDao
         Map<String, Object> params = new HashMap<>();
         params.put("referenceObjectIds", referenceObjectIds);
 
-        StringBuilder cause = new StringBuilder("el.objectReferenceIds in (:objectReferenceIds) ");
+        StringBuilder cause = new StringBuilder("el.referenceObjectId in (:referenceObjectIds) ");
         if (!productIds.isEmpty()) {
             cause.append("and el.id in (:productIds) ");
             params.put("productIds", productIds);

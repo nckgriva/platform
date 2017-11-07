@@ -296,87 +296,90 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public void checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Date checkOnDate) throws ProductNotPurchasedException {
-        Set<UUID> productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(objectReferenceIdsAndProductTypeIds.values());
-        if (!marketDao.existAtLeastOneProductIsPurchased(userId, objectReferenceIdsAndProductTypeIds.keySet(), productIds, checkOnDate)) {
+    public void checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkOnDate) throws ProductNotPurchasedException {
+        Set<UUID> productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(referenceObjectIdsAndProductTypeIds.values());
+        if (!marketDao.existAtLeastOneProductIsPurchased(userId, referenceObjectIdsAndProductTypeIds.keySet(), productIds, checkOnDate)) {
             throw new ProductNotPurchasedException();
         }
     }
 
     @Override
-    public Map<UUID, Boolean> getProductsPurchaseState(UUID userId, Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Date checkDate, Set<UUID> productIds) {
+    public Map<UUID, Boolean> getProductsPurchaseState(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate, Set<UUID> productIds) {
         Map<UUID, Boolean> result = new HashMap<>();
         if (productIds == null) {
-            productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(objectReferenceIdsAndProductTypeIds.values());
+            productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(referenceObjectIdsAndProductTypeIds.values());
         }
-        List<OrderProduct> orderProducts = marketDao.getPurchasedProducts(userId, objectReferenceIdsAndProductTypeIds.keySet(), productIds, checkDate);
+        List<OrderProduct> orderProducts = marketDao.getPurchasedProducts(userId, referenceObjectIdsAndProductTypeIds.keySet(), productIds, checkDate);
 
-        for (UUID objectReferenceId : objectReferenceIdsAndProductTypeIds.keySet()) {
-            UUID productTypeId = objectReferenceIdsAndProductTypeIds.get(objectReferenceId);
+        for (UUID referenceObjectId : referenceObjectIdsAndProductTypeIds.keySet()) {
+            UUID productTypeId = referenceObjectIdsAndProductTypeIds.get(referenceObjectId);
             boolean found = false;
             for (OrderProduct orderProduct : orderProducts) {
-                if ((orderProduct.getProduct().getReferenceObjectId() != null && orderProduct.getProduct().getReferenceObjectId().equals(objectReferenceId)) ||
+                if ((orderProduct.getProduct().getReferenceObjectId() != null && orderProduct.getProduct().getReferenceObjectId().equals(referenceObjectId)) ||
                         (orderProduct.getProduct().getReferenceObjectId() == null && orderProduct.getProduct().getProductType().getId().equals(productTypeId))) {
                     found = true;
                     break;
                 }
             }
-            result.put(objectReferenceId, found);
+            result.put(referenceObjectId, found);
         }
 
         return result;
     }
 
-    public Map<UUID, Product> findProducts(Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Set<UUID> productIds) {
+    public Map<UUID, Product> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Set<UUID> productIds) {
         Map<UUID, Product> result = new HashMap<>();
         if (productIds == null) {
-            productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(objectReferenceIdsAndProductTypeIds.values());
+            productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(referenceObjectIdsAndProductTypeIds.values());
         }
-        List<Product> products = marketDao.getProductsByReferenceObjectIdsAndIds(objectReferenceIdsAndProductTypeIds.keySet(), productIds);
+        List<Product> products = marketDao.getProductsByReferenceObjectIdsAndIds(referenceObjectIdsAndProductTypeIds.keySet(), productIds);
 
-        for (UUID objectReferenceId : objectReferenceIdsAndProductTypeIds.keySet()) {
-            UUID productTypeId = objectReferenceIdsAndProductTypeIds.get(objectReferenceId);
+        for (UUID referenceObjectId : referenceObjectIdsAndProductTypeIds.keySet()) {
+            UUID productTypeId = referenceObjectIdsAndProductTypeIds.get(referenceObjectId);
             Product p = null;
             for (Product product : products) {
-                if ((product.getReferenceObjectId() != null && product.getReferenceObjectId().equals(objectReferenceId)) ||
+                if ((product.getReferenceObjectId() != null && product.getReferenceObjectId().equals(referenceObjectId)) ||
                         (product.getReferenceObjectId() == null && product.getProductType().getId().equals(productTypeId))) {
                     p = product;
                     break;
                 }
             }
-            result.put(objectReferenceId, p);
+            result.put(referenceObjectId, p);
         }
 
         return result;
     }
 
     public void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedUserId, Date checkOnDate) {
-        Map<UUID, UUID> objectReferenceIdsAndProductTypeIds = new HashMap<>();
+        Map<UUID, UUID> referenceObjectIdsAndProductTypeIds = new HashMap<>();
         for (MarketAwareObjectDTO dto : objects) {
             if (dto.getId() == null) {
                 continue;
             }
-            objectReferenceIdsAndProductTypeIds.put(dto.getId(), productTypeId);
+            referenceObjectIdsAndProductTypeIds.put(dto.getId(), productTypeId);
         }
 
         Set<UUID> productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(Collections.singletonList(productTypeId));
 
         Map<UUID, Boolean> purchased = Collections.emptyMap();
         if (relatedUserId != null) {
-            purchased = getProductsPurchaseState(relatedUserId, objectReferenceIdsAndProductTypeIds, checkOnDate, productIds);
+            purchased = getProductsPurchaseState(relatedUserId, referenceObjectIdsAndProductTypeIds, checkOnDate, productIds);
         }
 
-        Map<UUID, Product> products = findProducts(objectReferenceIdsAndProductTypeIds, productIds);
+        Map<UUID, Product> products = findProducts(referenceObjectIdsAndProductTypeIds, productIds);
 
         for (MarketAwareObjectDTO dto : objects) {
             if (dto.getId() == null) {
                 continue;
             }
-            if (purchased.containsKey(dto.getId())) {
-                dto.setProductPurchased(purchased.get(dto.getId()));
-            }
             if (products.containsKey(dto.getId())) {
-                MarketAwareObjectDTO.enrichMarketInfo(dto, products.get(dto.getId()));
+                Product product = products.get(dto.getId());
+                if (product != null) {
+                    MarketAwareObjectDTO.enrichMarketInfo(dto, product);
+                    if (purchased.containsKey(dto.getId())) {
+                        dto.setProductPurchased(purchased.get(dto.getId()));
+                    }
+                }
             }
         }
     }

@@ -4,9 +4,10 @@ import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.market.model.Product;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class MarketAwareObjectDTO extends IdObjectDTO {
+public class MarketAwareObjectDTO extends IdObjectDTO implements Serializable {
     private UUID productId;
     private String productName;
     private Long productPrice;
@@ -38,7 +39,12 @@ public class MarketAwareObjectDTO extends IdObjectDTO {
     }
 
     public Double getProductPriceAsFractional() {
-        return FinanceUtils.toFractional2Rounded(productPrice);
+        if (productPrice != null) {
+            return FinanceUtils.toFractional2Rounded(productPrice);
+        }
+        else {
+            return null;
+        }
     }
 
     public Boolean getProductPurchased() {
