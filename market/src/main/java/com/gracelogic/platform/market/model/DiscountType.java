@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "PRODUCT_TYPE")
+@Table(name = JPAProperties.TABLE_PREFIX + "DISCOUNT_TYPE")
 public class DiscountType extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)
