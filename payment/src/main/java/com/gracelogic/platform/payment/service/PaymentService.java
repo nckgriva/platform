@@ -25,9 +25,9 @@ public interface PaymentService {
 
     Payment processPayment(UUID paymentSystemId, ProcessPaymentRequest paymentModel, AuthorizedUser executedBy) throws PaymentAlreadyExistException, AccountNotFoundException, InvalidPaymentSystemException;
 
-    void cancelPayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException;
+    void cancelPayment(UUID paymentId) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException;
 
-    void restorePayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException;
+    void restorePayment(UUID paymentId) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException;
 
     EntityListResponse<PaymentDTO> getPaymentsPaged(UUID userId, UUID accountId, UUID paymentSystemId, Collection<UUID> paymentStateIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
 }

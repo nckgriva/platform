@@ -131,7 +131,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void cancelPayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException {
+    public void cancelPayment(UUID paymentId) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException {
         Payment payment = idObjectService.getObjectById(Payment.class, paymentId);
         if (!payment.getPaymentState().getId().equals(DataConstants.PaymentStates.ACTIVATED.getValue())) {
             throw new IncorrectPaymentStateException("Payment must have state 'ACTIVATED'");
@@ -146,7 +146,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void restorePayment(UUID paymentId, AuthorizedUser executedBy) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException {
+    public void restorePayment(UUID paymentId) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException {
         Payment payment = idObjectService.getObjectById(Payment.class, paymentId);
         if (!payment.getPaymentState().getId().equals(DataConstants.PaymentStates.CANCELLED.getValue())) {
             throw new IncorrectPaymentStateException("Payment must have state 'CANCELLED'");

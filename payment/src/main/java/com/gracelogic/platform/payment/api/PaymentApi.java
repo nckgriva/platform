@@ -128,7 +128,7 @@ public class PaymentApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity cancelPayment(@PathVariable(value = "id") UUID paymentId) {
         try {
-            paymentService.cancelPayment(paymentId, getUser());
+            paymentService.cancelPayment(paymentId);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (AccountNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -155,7 +155,7 @@ public class PaymentApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity restorePayment(@PathVariable(value = "id") UUID paymentId) {
         try {
-            paymentService.restorePayment(paymentId, getUser());
+            paymentService.restorePayment(paymentId);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (AccountNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -166,7 +166,5 @@ public class PaymentApi extends AbstractAuthorizedController {
         } catch (InsufficientFundsException e) {
             return new ResponseEntity<>(new ErrorResponse("account.INSUFFICIENT_FUNDS", accountMessageSource.getMessage("account.INSUFFICIENT_FUNDS", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
-
     }
 }
