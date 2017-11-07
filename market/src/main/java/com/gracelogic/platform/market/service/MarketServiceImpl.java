@@ -8,12 +8,14 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.market.DataConstants;
+import com.gracelogic.platform.market.dao.MarketDao;
 import com.gracelogic.platform.market.dto.OrderDTO;
 import com.gracelogic.platform.market.dto.OrderExecutionParametersDTO;
 import com.gracelogic.platform.market.dto.ProductDTO;
 import com.gracelogic.platform.market.exception.InvalidDiscountException;
 import com.gracelogic.platform.market.exception.InvalidOrderStateException;
 import com.gracelogic.platform.market.exception.OrderNotConsistentException;
+import com.gracelogic.platform.market.exception.ProductNotPurchasedException;
 import com.gracelogic.platform.market.model.*;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.model.Payment;
@@ -49,6 +51,9 @@ public class MarketServiceImpl implements MarketService {
 
     @Autowired
     private MarketResolver marketResolver;
+
+    @Autowired
+    private MarketDao marketDao;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -197,8 +202,7 @@ public class MarketServiceImpl implements MarketService {
                 if (!discount.getReusable()) {
                     if (discount.getUsed()) {
                         throw new InvalidDiscountException("This discount already used");
-                    }
-                    else {
+                    } else {
                         discount.setUsed(true);
                         discount.setUsedForOrder(order);
                         idObjectService.save(discount);
@@ -291,33 +295,33 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public boolean checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> referenceObjectIds, Date checkOnDate) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("productTypeIds", referenceObjectIds.keySet());
-        params.put("active", true);
-        List<Product> products = idObjectService.getList(Product.class, null, "el.productType.id in (:productTypeIds) and el.referenceObjectId is null and el.active=:active", params, null, null, null, referenceObjectIds.keySet().size());
-        Set<UUID> productIds = new HashSet<>();
-        for (Product product : products) {
-            productIds.add(product.getId());
+    public void checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Date checkOnDate) throws ProductNotPurchasedException {
+        Set<UUID> productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(objectReferenceIdsAndProductTypeIds.values());
+        if (!marketDao.existAtLeastOneProductIsPurchased(userId, objectReferenceIdsAndProductTypeIds.keySet(), productIds, checkOnDate)) {
+            throw new ProductNotPurchasedException();
+        }
+    }
+
+    @Override
+    public Map<UUID, Boolean> checkAllProductsPurchaseStatus(UUID userId, Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Date checkDate) {
+        Map<UUID, Boolean> result = new HashMap<>();
+        Set<UUID> productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(objectReferenceIdsAndProductTypeIds.values());
+        List<OrderProduct> orderProducts = marketDao.getPurchasedProducts(userId, objectReferenceIdsAndProductTypeIds.keySet(), productIds, checkDate);
+
+        for (UUID objectReferenceId : objectReferenceIdsAndProductTypeIds.keySet()) {
+            UUID productTypeId = objectReferenceIdsAndProductTypeIds.get(objectReferenceId);
+            boolean found = false;
+            for (OrderProduct orderProduct : orderProducts) {
+                if ((orderProduct.getProduct().getReferenceObjectId() != null && orderProduct.getProduct().getReferenceObjectId().equals(objectReferenceId)) ||
+                        (orderProduct.getProduct().getReferenceObjectId() == null && orderProduct.getProduct().getProductType().getId().equals(productTypeId))) {
+                    found = true;
+                    break;
+                }
+            }
+            result.put(objectReferenceId, found);
         }
 
-        params.clear();
-        params.put("userId", userId);
-        params.put("referenceObjectIds", referenceObjectIds.values());
-        params.put("checkOnDate", checkOnDate);
-        params.put("orderStateId", DataConstants.OrderStates.PAID.getValue());
-
-        StringBuilder cause = new StringBuilder("ord.user.id=:userId and ord.orderState.id=:orderStateId and (el.lifetimeExpiration is null or el.lifetimeExpiration < :checkOnDate) and (el.product.referenceObjectId in (:referenceObjectIds) ");
-        if (!productIds.isEmpty()) {
-            cause.append("or el.product.id in (:productIds))");
-            params.put("productIds", productIds);
-        }
-        else {
-            cause.append(")");
-        }
-
-        Integer count = idObjectService.checkExist(OrderProduct.class, "left join el.order ord left join el.product prd", cause.toString(), params, 1);
-        return count > 0;
+        return result;
     }
 
     private Order payOrder(Order order, Long amountToPay, UUID userAccountId) throws InsufficientFundsException, AccountNotFoundException {
@@ -340,8 +344,7 @@ public class MarketServiceImpl implements MarketService {
         for (OrderProduct orderProduct : orderProducts) {
             if (orderProduct.getProduct().getLifetime() != null) {
                 orderProduct.setLifetimeExpiration(new Date(currentTimeMillis + orderProduct.getProduct().getLifetime()));
-            }
-            else {
+            } else {
                 orderProduct.setLifetimeExpiration(null);
             }
             idObjectService.save(orderProduct);

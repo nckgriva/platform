@@ -3,6 +3,7 @@ package com.gracelogic.platform.market.dto;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.market.model.Product;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class ProductDTO extends IdObjectDTO {
@@ -11,6 +12,9 @@ public class ProductDTO extends IdObjectDTO {
     private UUID productTypeId;
     private String productTypeName;
     private Boolean active;
+
+    //Transient field for OrderProduct
+    private Date lifecycleExpiration;
 
     public String getName() {
         return name;
@@ -50,6 +54,14 @@ public class ProductDTO extends IdObjectDTO {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public Date getLifecycleExpiration() {
+        return lifecycleExpiration;
+    }
+
+    public void setLifecycleExpiration(Date lifecycleExpiration) {
+        this.lifecycleExpiration = lifecycleExpiration;
     }
 
     public static ProductDTO prepare(Product model) {

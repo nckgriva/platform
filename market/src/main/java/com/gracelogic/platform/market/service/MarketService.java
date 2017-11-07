@@ -8,6 +8,7 @@ import com.gracelogic.platform.market.dto.OrderExecutionParametersDTO;
 import com.gracelogic.platform.market.exception.InvalidDiscountException;
 import com.gracelogic.platform.market.exception.InvalidOrderStateException;
 import com.gracelogic.platform.market.exception.OrderNotConsistentException;
+import com.gracelogic.platform.market.exception.ProductNotPurchasedException;
 import com.gracelogic.platform.market.model.Order;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.model.Payment;
@@ -30,5 +31,7 @@ public interface MarketService {
 
     void deleteOrder(UUID orderId, AuthorizedUser authorizedUser) throws InvalidOrderStateException, ObjectNotFoundException, ForbiddenException;
 
-    boolean checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> referenceObjectIds, Date checkOnDate);
+    void checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> referenceObjectIds, Date checkOnDate) throws ProductNotPurchasedException;
+
+    Map<UUID, Boolean> checkAllProductsPurchaseStatus(UUID userId, Map<UUID, UUID> objectReferenceIdsAndProductTypeIds, Date checkDate);
 }

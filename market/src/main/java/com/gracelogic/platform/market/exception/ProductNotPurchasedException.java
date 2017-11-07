@@ -9,6 +9,10 @@ public class ProductNotPurchasedException extends Exception {
         this.message = message;
     }
 
+    public ProductNotPurchasedException() {
+        super("");
+    }
+
     public String getMessage() {
         return message;
     }
