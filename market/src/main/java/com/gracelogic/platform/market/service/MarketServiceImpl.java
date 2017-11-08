@@ -136,6 +136,7 @@ public class MarketServiceImpl implements MarketService {
         entity.setAmount(amount);
         entity.setDiscountAmount(discountAmount);
         entity.setTotalAmount(totalAmount);
+        entity.setPaid(0L);
         entity = idObjectService.save(entity);
 
         //Create order products
@@ -221,7 +222,7 @@ public class MarketServiceImpl implements MarketService {
 
         //Пытаемся оплатить с помощью внутреннего счёта
         Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, null);
-        if (order.getTotalAmount().equals(order.getPaid()) || userAccount.getBalance() > (order.getTotalAmount() - order.getPaid())) {
+        if (order.getTotalAmount().equals(order.getPaid()) || userAccount.getBalance() >= (order.getTotalAmount() - order.getPaid())) {
             order = payOrder(order, order.getTotalAmount(), userAccount.getId());
         }
 
@@ -265,17 +266,15 @@ public class MarketServiceImpl implements MarketService {
     @Override
     public void processPayment(Payment payment) throws InvalidOrderStateException, AccountNotFoundException, InsufficientFundsException {
         Order order = idObjectService.getObjectById(Order.class, payment.getAccountNumber());
-        if (order == null || !order.getOrderState().getId().equals(DataConstants.OrderStates.PENDING.getValue())) {
-            throw new InvalidOrderStateException();
-        }
+        if (order != null && order.getOrderState().getId().equals(DataConstants.OrderStates.PENDING.getValue())) {
+            Long amountToPay = order.getTotalAmount() - order.getPaid();
+            if (amountToPay > payment.getAmount()) {
+                amountToPay = payment.getAmount();
+            }
 
-        Long amountToPay = order.getTotalAmount() - order.getPaid();
-        if (amountToPay > payment.getAmount()) {
-            amountToPay = payment.getAmount();
+            //Transfer money from user to organization
+            payOrder(order, amountToPay, payment.getAccount().getId());
         }
-
-        //Transfer money from user to organization
-        payOrder(order, amountToPay, payment.getAccount().getId());
     }
 
     @Transactional(rollbackFor = Exception.class)

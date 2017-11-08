@@ -72,7 +72,7 @@ public abstract class AbstractMarketDaoImpl extends BaseDao implements MarketDao
 
         StringBuilder cause = new StringBuilder("el.referenceObjectId in (:referenceObjectIds) ");
         if (!productIds.isEmpty()) {
-            cause.append("and el.id in (:productIds) ");
+            cause.append("or el.id in (:productIds) ");
             params.put("productIds", productIds);
         }
         return idObjectService.getList(Product.class, null, cause.toString(), params, null, null, null, null);

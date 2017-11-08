@@ -36,8 +36,8 @@ public class Order extends IdObject<UUID> {
     @JoinColumn(name = "ORDER_STATE_ID", nullable = false)
     private OrderState orderState;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "DISCOUNT_ID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "DISCOUNT_ID", nullable = true)
     private Discount discount;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
