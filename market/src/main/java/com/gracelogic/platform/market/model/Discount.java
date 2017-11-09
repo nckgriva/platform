@@ -55,9 +55,6 @@ public class Discount extends IdObject<UUID> {
     @Column(name = "AMOUNT", nullable = true)
     private Long amount;
 
-    @OneToMany(mappedBy = "product", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
-    private Set<DiscountProduct> discountProductSet = new HashSet<DiscountProduct>();
-
     @Override
     public UUID getId() {
         return id;
@@ -126,14 +123,6 @@ public class Discount extends IdObject<UUID> {
 
     public void setSecretCode(String secretCode) {
         this.secretCode = secretCode;
-    }
-
-    public Set<DiscountProduct> getDiscountProductSet() {
-        return discountProductSet;
-    }
-
-    public void setDiscountProductSet(Set<DiscountProduct> discountProductSet) {
-        this.discountProductSet = discountProductSet;
     }
 
     public Long getAmount() {

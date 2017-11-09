@@ -92,7 +92,11 @@ public class MarketServiceImpl implements MarketService {
                 throw new InvalidDiscountException();
             }
             if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.GIFT_PRODUCT.getValue())) {
-                for (DiscountProduct discountProduct : discount.getDiscountProductSet()) {
+                Map<String, Object> params = new HashMap<>();
+                params.put("discountId", discount.getId());
+                List<DiscountProduct> discountProducts = idObjectService.getList(DiscountProduct.class, null, "el.discount.id=:discountId", params, null, null, null, null);
+                System.out.println("PRODUCTS IN DISCOUNT: " + discountProducts.size());
+                for (DiscountProduct discountProduct : discountProducts) {
                     productIds.add(discountProduct.getProduct().getId());
                 }
             }
@@ -103,6 +107,9 @@ public class MarketServiceImpl implements MarketService {
             for (ProductDTO productDTO : dto.getProducts()) {
                 productIds.add(productDTO.getId());
             }
+        }
+        if (productIds.isEmpty()) {
+            throw new OrderNotConsistentException("No products found in order");
         }
         Map<String, Object> params = new HashMap<>();
         params.put("productIds", productIds);
@@ -166,7 +173,7 @@ public class MarketServiceImpl implements MarketService {
         params.put("secretCode", StringUtils.trim(secretCode));
         params.put("active", true);
 
-        List<Discount> discounts = idObjectService.getList(Discount.class, "left join fetch el.discountProductSet", "el.secretCode=:secretCode and el.active=:active and ((el.reusable == false && el.executed == false) || el.reusable == true)", params, null, null, null, 1);
+        List<Discount> discounts = idObjectService.getList(Discount.class, null, "el.secretCode=:secretCode and el.active=:active and ((el.reusable=false and el.used=false) or el.reusable=true)", params, null, null, null, 1);
         return discounts.isEmpty() ? null : discounts.iterator().next();
     }
 
