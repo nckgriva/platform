@@ -13,6 +13,7 @@ public class MarketAwareObjectDTO extends IdObjectDTO implements Serializable {
     private Long productPrice;
     private Boolean productPurchased;
     private Boolean productActive;
+    private Boolean productAvailable;
 
     public UUID getProductId() {
         return productId;
@@ -61,6 +62,14 @@ public class MarketAwareObjectDTO extends IdObjectDTO implements Serializable {
 
     public void setProductActive(Boolean productActive) {
         this.productActive = productActive;
+    }
+
+    public Boolean getProductAvailable() {
+        return productAvailable;
+    }
+
+    public void setProductAvailable(Boolean productAvailable) {
+        this.productAvailable = productAvailable;
     }
 
     public static void enrichMarketInfo(MarketAwareObjectDTO dto, Product product) {

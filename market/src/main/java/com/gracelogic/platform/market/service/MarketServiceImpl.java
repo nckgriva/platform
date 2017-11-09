@@ -243,9 +243,11 @@ public class MarketServiceImpl implements MarketService {
         Long amountToReturn = order.getPaid();
 
         //Transfer money from organization to user
-        accountService.processTransaction(propertyService.getPropertyValueAsUUID("market:organization_account_id"), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL_CANCEL.getValue(), -1 * amountToReturn, order.getId(), false);
         Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, null);
-        accountService.processTransaction(userAccount.getId(), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_BUY_CANCEL.getValue(), amountToReturn, order.getId(), false);
+
+        accountService.processTransfer(propertyService.getPropertyValueAsUUID("market:organization_account_id"), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL_CANCEL.getValue(),
+                userAccount.getId(), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_BUY_CANCEL.getValue(),
+                amountToReturn, order.getId(), false);
 
         order.setPaid(order.getPaid() - amountToReturn);
         order.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.CANCELED.getValue()));
@@ -296,26 +298,24 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public void checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkOnDate) throws ProductNotPurchasedException {
-        Set<UUID> productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(referenceObjectIdsAndProductTypeIds.values());
-        if (!marketDao.existAtLeastOneProductIsPurchased(userId, referenceObjectIdsAndProductTypeIds.keySet(), productIds, checkOnDate)) {
+        if (!marketDao.existAtLeastOneProductIsPurchased(userId, referenceObjectIdsAndProductTypeIds.keySet(), checkOnDate)) {
             throw new ProductNotPurchasedException();
         }
     }
 
     @Override
-    public Map<UUID, Boolean> getProductsPurchaseState(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate, Set<UUID> productIds) {
+    public Map<UUID, Boolean> getProductsPurchaseState(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate) {
         Map<UUID, Boolean> result = new HashMap<>();
-        if (productIds == null) {
-            productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(referenceObjectIdsAndProductTypeIds.values());
-        }
-        List<OrderProduct> orderProducts = marketDao.getPurchasedProducts(userId, referenceObjectIdsAndProductTypeIds.keySet(), productIds, checkDate);
+
+        List<OrderProduct> orderProducts = marketDao.getPurchasedProducts(userId, referenceObjectIdsAndProductTypeIds.keySet(), checkDate);
 
         for (UUID referenceObjectId : referenceObjectIdsAndProductTypeIds.keySet()) {
             UUID productTypeId = referenceObjectIdsAndProductTypeIds.get(referenceObjectId);
             boolean found = false;
             for (OrderProduct orderProduct : orderProducts) {
-                if ((orderProduct.getProduct().getReferenceObjectId() != null && orderProduct.getProduct().getReferenceObjectId().equals(referenceObjectId)) ||
-                        (orderProduct.getProduct().getReferenceObjectId() == null && orderProduct.getProduct().getProductType().getId().equals(productTypeId))) {
+                if (orderProduct.getProduct().getReferenceObjectId() != null
+                        && orderProduct.getProduct().getReferenceObjectId().equals(referenceObjectId)
+                        && orderProduct.getProduct().getProductType().getId().equals(productTypeId)) {
                     found = true;
                     break;
                 }
@@ -326,19 +326,17 @@ public class MarketServiceImpl implements MarketService {
         return result;
     }
 
-    public Map<UUID, Product> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Set<UUID> productIds) {
+    public Map<UUID, Product> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds) {
         Map<UUID, Product> result = new HashMap<>();
-        if (productIds == null) {
-            productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(referenceObjectIdsAndProductTypeIds.values());
-        }
-        List<Product> products = marketDao.getProductsByReferenceObjectIdsAndIds(referenceObjectIdsAndProductTypeIds.keySet(), productIds);
+        List<Product> products = marketDao.getProductsByReferenceObjectIds(referenceObjectIdsAndProductTypeIds.keySet());
 
         for (UUID referenceObjectId : referenceObjectIdsAndProductTypeIds.keySet()) {
             UUID productTypeId = referenceObjectIdsAndProductTypeIds.get(referenceObjectId);
             Product p = null;
             for (Product product : products) {
-                if ((product.getReferenceObjectId() != null && product.getReferenceObjectId().equals(referenceObjectId)) ||
-                        (product.getReferenceObjectId() == null && product.getProductType().getId().equals(productTypeId))) {
+                if (product.getReferenceObjectId() != null
+                        && product.getReferenceObjectId().equals(referenceObjectId)
+                        && product.getProductType().getId().equals(productTypeId)) {
                     p = product;
                     break;
                 }
@@ -358,14 +356,12 @@ public class MarketServiceImpl implements MarketService {
             referenceObjectIdsAndProductTypeIds.put(dto.getId(), productTypeId);
         }
 
-        Set<UUID> productIds = marketDao.getProductIdsWithNullObjectReferenceIdByProductTypes(Collections.singletonList(productTypeId));
-
         Map<UUID, Boolean> purchased = Collections.emptyMap();
         if (relatedUserId != null) {
-            purchased = getProductsPurchaseState(relatedUserId, referenceObjectIdsAndProductTypeIds, checkOnDate, productIds);
+            purchased = getProductsPurchaseState(relatedUserId, referenceObjectIdsAndProductTypeIds, checkOnDate);
         }
 
-        Map<UUID, Product> products = findProducts(referenceObjectIdsAndProductTypeIds, productIds);
+        Map<UUID, Product> products = findProducts(referenceObjectIdsAndProductTypeIds);
 
         for (MarketAwareObjectDTO dto : objects) {
             if (dto.getId() == null) {
@@ -385,8 +381,9 @@ public class MarketServiceImpl implements MarketService {
 
     private Order payOrder(Order order, Long amountToPay, UUID userAccountId) throws InsufficientFundsException, AccountNotFoundException {
         //Transfer money from user to organization
-        accountService.processTransaction(userAccountId, com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_BUY.getValue(), -1 * amountToPay, order.getId(), false);
-        accountService.processTransaction(propertyService.getPropertyValueAsUUID("market:organization_account_id"), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL.getValue(), amountToPay, order.getId(), false);
+        accountService.processTransfer(userAccountId, com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_BUY.getValue(),
+                propertyService.getPropertyValueAsUUID("market:organization_account_id"), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL.getValue(),
+                amountToPay, order.getId(), false);
 
         order.setPaid(order.getPaid() + amountToPay);
         if (order.getPaid().equals(order.getTotalAmount())) {
