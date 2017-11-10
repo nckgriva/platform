@@ -36,9 +36,9 @@ public class Product extends IdObject<UUID> {
     @JoinColumn(name = "PRODUCT_TYPE_ID", nullable = false)
     private ProductType productType;
 
-    @Column(name = "REFERENCE_OBJECT_ID", nullable = true)
+    @Column(name = "REFERENCE_OBJECT_ID", nullable = false)
     @org.hibernate.annotations.Type(type = "pg-uuid")
-    private UUID referenceObjectId; //Если null - значит продуктом является любая сущность из таблицы заданного ProductType
+    private UUID referenceObjectId;
 
     @Column(name = "LIFETIME", nullable = true)
     private Long lifetime; //Проставляется если продукт ограничен по времени использования

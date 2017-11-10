@@ -97,12 +97,16 @@ public class OrderApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity saveOrder(@RequestBody OrderDTO orderDTO) {
         try {
+            if (getUser() == null) {
+                return new ResponseEntity<>(new ErrorResponse("auth.FORBIDDEN", userMessageSource.getMessage("auth.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
+            }
+
             Order order = marketService.saveOrder(orderDTO, getUser());
             return new ResponseEntity<IDResponse>(new IDResponse(order.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
         } catch (ForbiddenException e) {
-            return new ResponseEntity<>(new ErrorResponse("auth.FORBIDDEN", userMessageSource.getMessage("auth.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("auth.FORBIDDEN", userMessageSource.getMessage("auth.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
         } catch (InvalidDiscountException e) {
             return new ResponseEntity<>(new ErrorResponse("market.INVALID_DISCOUNT", marketMessageSource.getMessage("market.INVALID_DISCOUNT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (OrderNotConsistentException e) {

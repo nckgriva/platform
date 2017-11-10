@@ -51,6 +51,13 @@ public class AccountServiceImpl implements AccountService {
         idObjectService.save(transaction);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void processTransfer(UUID sourceAccountId, UUID sourceTransactionTypeId, UUID destinationAccountId, UUID destinationTransactionTypeId, Long amount, UUID referenceObjectId, boolean ignoreInsufficientFunds) throws InsufficientFundsException, AccountNotFoundException {
+        processTransaction(sourceAccountId, sourceTransactionTypeId, -1 * amount, referenceObjectId, ignoreInsufficientFunds);
+        processTransaction(destinationAccountId, destinationTransactionTypeId, amount, referenceObjectId, ignoreInsufficientFunds);
+    }
+
     @Override
     public EntityListResponse<TransactionDTO> getTransactionsPaged(UUID userId, UUID accountId, Collection<UUID> transactionTypeIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "left join fetch el.account acc left join fetch acc.user usr left join fetch el.transactionType ttp";
