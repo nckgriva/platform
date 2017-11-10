@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.db.dto.JsonDateDeserializer;
 import com.gracelogic.platform.db.dto.JsonDateSerializer;
+import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.market.model.Product;
 
 import java.util.Date;
@@ -16,11 +17,8 @@ public class ProductDTO extends IdObjectDTO {
     private UUID productTypeId;
     private String productTypeName;
     private Boolean active;
-
-    //Transient field for OrderProduct
-    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
-    @JsonDeserialize(using = JsonDateDeserializer.class)
-    private Date lifecycleExpiration;
+    private Long lifetime;
+    private Long price;
 
     public String getName() {
         return name;
@@ -62,12 +60,22 @@ public class ProductDTO extends IdObjectDTO {
         this.active = active;
     }
 
-    public Date getLifecycleExpiration() {
-        return lifecycleExpiration;
-    }
 
-    public void setLifecycleExpiration(Date lifecycleExpiration) {
-        this.lifecycleExpiration = lifecycleExpiration;
+    public Long getLifetime() { return lifetime; }
+
+    public void setLifetime(Long lifetime) { this.lifetime = lifetime; }
+
+    public Long getPrice() { return price; }
+
+    public void setPrice(Long price) { this.price = price; }
+
+    public Double getPriceAsFractional() {
+        if (this.price != null) {
+            return FinanceUtils.toFractional2Rounded(this.price);
+        }
+        else {
+            return null;
+        }
     }
 
     public static ProductDTO prepare(Product model) {

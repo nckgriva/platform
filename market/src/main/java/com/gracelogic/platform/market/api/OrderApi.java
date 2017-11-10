@@ -2,6 +2,7 @@ package com.gracelogic.platform.market.api;
 
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.account.exception.InsufficientFundsException;
+import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.market.Path;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,6 +60,28 @@ public class OrderApi extends AbstractAuthorizedController {
     @Autowired
     private MarketService marketService;
 
+    @ApiOperation(
+            value = "getOrder",
+            notes = "Get Order",
+            response = OrderDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 400, message = "Object not found", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
+    @PreAuthorize("hasAuthority('ORDER:SHOW')")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    @ResponseBody
+    public ResponseEntity getOrder(@PathVariable(value = "id") UUID id,
+                                      @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich) {
+        try {
+            OrderDTO orderDTO = marketService.getOrder(id, enrich);
+            return new ResponseEntity<OrderDTO>(orderDTO, HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @ApiOperation(
             value = "saveOrder",
@@ -149,5 +173,31 @@ public class OrderApi extends AbstractAuthorizedController {
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @ApiOperation(
+            value = "getOrders",
+            notes = "Get list of orders",
+            response =  EntityListResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
+    @PreAuthorize("hasAuthority('ORDER:SHOW')")
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity getOrders(
+            @RequestParam(value = "userId", required = false) UUID userId,
+            @RequestParam(value = "orderStateId", required = false) UUID orderStateId,
+            @RequestParam(value = "discountId", required = false) UUID discountId,
+            @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+            @RequestParam(value = "withProducts", required = false, defaultValue = "false") Boolean withProducts,
+            @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+            @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
+            @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+            @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+        EntityListResponse<OrderDTO> docs = marketService.getOrdersPaged(userId, orderStateId, discountId, enrich, withProducts, length, null, start, sortField, sortDir);
+        return new ResponseEntity<EntityListResponse<OrderDTO>>(docs, HttpStatus.OK);
     }
 }
