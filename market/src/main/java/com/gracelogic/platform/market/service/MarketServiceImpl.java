@@ -4,15 +4,15 @@ import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.account.exception.InsufficientFundsException;
 import com.gracelogic.platform.account.model.Account;
 import com.gracelogic.platform.account.service.AccountService;
+import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.market.DataConstants;
 import com.gracelogic.platform.market.dao.MarketDao;
-import com.gracelogic.platform.market.dto.MarketAwareObjectDTO;
-import com.gracelogic.platform.market.dto.OrderDTO;
+
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
-import com.gracelogic.platform.market.dto.ProductDTO;
+import com.gracelogic.platform.market.dto.*;
 import com.gracelogic.platform.market.exception.InvalidDiscountException;
 import com.gracelogic.platform.market.exception.InvalidOrderStateException;
 import com.gracelogic.platform.market.exception.OrderNotConsistentException;
@@ -444,5 +444,266 @@ public class MarketServiceImpl implements MarketService {
             }
             idObjectService.save(orderProduct);
         }
+    }
+
+    @Override
+    public OrderDTO getOrder(UUID id, boolean enrich) throws ObjectNotFoundException {
+        Order entity = idObjectService.getObjectById(Order.class, enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount" : "", id);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+        OrderDTO dto = OrderDTO.prepare(entity);
+        if (enrich) {
+            OrderDTO.enrich(dto, entity);
+        }
+        return dto;
+    }
+
+    @Override
+    public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount" : "";
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (userId != null) {
+            cause += "and el.user.id=:userId ";
+            params.put("userId", userId);
+        }
+
+        if (orderStateId != null) {
+            cause += "and el.orderState.id=:orderStateId ";
+            params.put("orderStateId", orderStateId);
+        }
+
+        if (discountId != null) {
+            cause += "and el.discount.id=:discountId ";
+            params.put("discontId", discountId);
+        }
+
+        int totalCount = idObjectService.getCount(Order.class, null, countFetches, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<OrderDTO> entityListResponse = new EntityListResponse<OrderDTO>();
+        entityListResponse.setEntity("order");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<Order> items = idObjectService.getList(Order.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+
+        List<OrderProduct> orderProducts = Collections.emptyList();
+        if (withProducts && !items.isEmpty()) {
+            Set<UUID> orderIds = new HashSet<>();
+            for (Order ord : items) {
+                orderIds.add(ord.getId());
+            }
+            Map<String, Object> productParams = new HashMap<>();
+            productParams.put("orderIds", orderIds);
+            orderProducts = idObjectService.getList(OrderProduct.class, null, "el.order.id in (:orderIds)", productParams, null, null, null, null);
+        }
+
+        entityListResponse.setPartCount(items.size());
+        for (Order e : items) {
+            OrderDTO el = OrderDTO.prepare(e);
+            if (enrich) {
+                OrderDTO.enrich(el, e);
+            }
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
+
+    @Override
+    public ProductDTO getProduct(UUID id, boolean enrich) throws ObjectNotFoundException {
+        Product entity = idObjectService.getObjectById(Product.class, enrich ? "left join fetch el.productType" : "", id);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+        ProductDTO dto = ProductDTO.prepare(entity);
+        if (enrich) {
+            ProductDTO.enrich(dto, entity);
+        }
+        return dto;
+    }
+
+    @Override
+    public EntityListResponse<ProductDTO> getProductsPaged(String name, UUID productTypeId, Boolean active, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = enrich ? "left join fetch el.productType" : "";
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (!StringUtils.isEmpty(name)) {
+            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+            cause += "and lower(el.name) like :name";
+        }
+        if (productTypeId != null) {
+            params.put("productTypeId", productTypeId);
+            cause += "and el.productType.id = :productTypeId ";
+        }
+        if (active != null) {
+            params.put("active", active);
+            cause += "and el.active = :active ";
+        }
+        int totalCount = idObjectService.getCount(Product.class, null, countFetches, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<ProductDTO> entityListResponse = new EntityListResponse<ProductDTO>();
+        entityListResponse.setEntity("product");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<Product> items = idObjectService.getList(Product.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        entityListResponse.setPartCount(items.size());
+        for (Product e : items) {
+            ProductDTO el = ProductDTO.prepare(e);
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
+
+    @Override
+    public Product saveProduct(ProductDTO dto) throws ObjectNotFoundException {
+        Product entity;
+        if (dto.getId() != null) {
+            entity = idObjectService.getObjectById(Product.class, dto.getId());
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
+        } else {
+            entity = new Product();
+        }
+
+        entity.setName(dto.getName());
+        entity.setActive(dto.getActive());
+        entity.setProductType(idObjectService.getObjectById(ProductType.class, dto.getProductTypeId()));
+        entity.setReferenceObjectId(dto.getReferenceObjectId());
+        entity.setLifetime(dto.getLifetime());
+        entity.setPrice(dto.getPrice());
+
+        return idObjectService.save(entity);
+    }
+
+    @Override
+    public void deleteProduct(UUID id) throws ObjectNotFoundException {
+        idObjectService.delete(Product.class, id);
+    }
+
+    @Override
+    public DiscountDTO getDiscount(UUID id, boolean enrich) throws ObjectNotFoundException {
+        Discount entity = idObjectService.getObjectById(Discount.class, enrich ? "left join fetch el.productType left join fetch el.usedForOrder" : "", id);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+        DiscountDTO dto = DiscountDTO.prepare(entity);
+        if (enrich) {
+            DiscountDTO.enrich(dto, entity);
+        }
+        return dto;
+    }
+
+    @Override
+    public EntityListResponse<DiscountDTO> getDiscountsPaged(UUID usedForOrderId, UUID discountTypeId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = enrich ? "left join fetch el.usedForOrder left join fetch el.discountType" : "";
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (usedForOrderId != null) {
+            cause += "and el.usedForOrder.id=:usedForOrderId ";
+            params.put("usedForOrderId", usedForOrderId);
+        }
+
+        if (discountTypeId != null) {
+            cause += "and el.discountType.id=:discountTypeId ";
+            params.put("discountTypeId", discountTypeId);
+        }
+
+        int totalCount = idObjectService.getCount(Discount.class, null, countFetches, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<DiscountDTO> entityListResponse = new EntityListResponse<DiscountDTO>();
+        entityListResponse.setEntity("discount");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<Discount> items = idObjectService.getList(Discount.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+
+        List<DiscountProduct> discountProducts = Collections.emptyList();
+        if (withProducts && !items.isEmpty()) {
+            Set<UUID> discountIds = new HashSet<>();
+            for (Discount dis: items) {
+                discountIds.add(dis.getId());
+            }
+            Map<String, Object> productParams = new HashMap<>();
+            productParams.put("discountIds", discountIds);
+            discountProducts = idObjectService.getList(DiscountProduct.class, null, "el.discount.id in (:discountIds)", productParams, null, null, null, null);
+        }
+
+        entityListResponse.setPartCount(items.size());
+        for (Discount e : items) {
+            DiscountDTO el = DiscountDTO.prepare(e);
+            if (enrich) {
+                DiscountDTO.enrich(el, e);
+            }
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
+
+    @Override
+    public Discount saveDiscount(DiscountDTO dto) throws ObjectNotFoundException {
+        Discount entity;
+        if (dto.getId() != null) {
+            entity = idObjectService.getObjectById(Discount.class, dto.getId());
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
+        } else {
+            entity = new Discount();
+        }
+
+        if (entity.getId() != null) {
+            String query = "el.discount.id=:discountId";
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("discountId", entity.getId());
+            idObjectService.delete(DiscountProduct.class, query, params);
+        }
+
+        entity.setName(dto.getName());
+        entity.setActive(dto.getActive());
+        entity.setReusable(dto.getReusable());
+        entity.setUsed(dto.getUsed());
+        entity.setUsedForOrder(idObjectService.getObjectById(Order.class, dto.getUsedForOrderId()));
+        entity.setDiscountType(idObjectService.getObjectById(DiscountType.class, dto.getDiscountTypeId()));
+        entity.setSecretCode(dto.getSecretCode());
+        entity.setAmount(dto.getAmount());
+        idObjectService.save(entity);
+
+        for (ProductDTO productDTO : dto.getProducts()) {
+            DiscountProduct dp = new DiscountProduct();
+            dp.setDiscount(entity);
+            dp.setProduct(idObjectService.getObjectById(Product.class, productDTO.getId()));
+            idObjectService.save(dp);
+        }
+
+        return entity;
+    }
+
+    @Override
+    public void deleteDiscount(UUID id) throws ObjectNotFoundException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("discountId", id);
+        idObjectService.delete(DiscountProduct.class, "el.discount.id=:discountId", params);
+        idObjectService.delete(Discount.class, id);
     }
 }
