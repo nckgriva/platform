@@ -51,6 +51,9 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
     @Column(name = "REDIRECT_URL", nullable = true) //Url платёжного шлюза для оплаты
     private String redirectUrl;
 
+    @Column(name = "PAYMENT_EXECUTOR_CLASS", nullable = true)
+    private String paymentExecutorClass;
+
     @Override
     public UUID getId() {
         return id;
@@ -152,5 +155,13 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
 
     public void setRedirectUrl(String redirectUrl) {
         this.redirectUrl = redirectUrl;
+    }
+
+    public String getPaymentExecutorClass() {
+        return paymentExecutorClass;
+    }
+
+    public void setPaymentExecutorClass(String paymentExecutorClass) {
+        this.paymentExecutorClass = paymentExecutorClass;
     }
 }

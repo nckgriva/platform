@@ -7,13 +7,14 @@ import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.market.Path;
 import com.gracelogic.platform.market.dto.ExecuteOrderRequestDTO;
 import com.gracelogic.platform.market.dto.OrderDTO;
-import com.gracelogic.platform.market.dto.OrderExecutionParametersDTO;
+import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.market.exception.InvalidDiscountException;
 import com.gracelogic.platform.market.exception.InvalidOrderStateException;
 import com.gracelogic.platform.market.exception.OrderNotConsistentException;
 import com.gracelogic.platform.market.model.Order;
 import com.gracelogic.platform.market.service.MarketService;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
+import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
@@ -95,7 +96,7 @@ public class OrderApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "executeOrder",
             notes = "Execute order",
-            response = OrderExecutionParametersDTO.class
+            response = PaymentExecutionResultDTO.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -106,8 +107,8 @@ public class OrderApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity executeOrder(@RequestBody ExecuteOrderRequestDTO executeOrderRequestDTO) {
         try {
-            OrderExecutionParametersDTO response = marketService.executeOrder(executeOrderRequestDTO.getOrderId(), executeOrderRequestDTO.getPaymentSystemId(), getUser());
-            return new ResponseEntity<OrderExecutionParametersDTO>(response, HttpStatus.OK);
+            PaymentExecutionResultDTO response = marketService.executeOrder(executeOrderRequestDTO.getOrderId(), executeOrderRequestDTO.getPaymentSystemId(), executeOrderRequestDTO.getParams(), getUser());
+            return new ResponseEntity<PaymentExecutionResultDTO>(response, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ForbiddenException e) {
@@ -124,6 +125,8 @@ public class OrderApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("payment.INVALID_PAYMENT_SYSTEM", paymentMessageSource.getMessage("payment.INVALID_PAYMENT_SYSTEM", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (InsufficientFundsException e) {
             return new ResponseEntity<>(new ErrorResponse("account.INSUFFICIENT_FUNDS", accountMessageSource.getMessage("account.INSUFFICIENT_FUNDS", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (PaymentExecutionException e) {
+            return new ResponseEntity<>(new ErrorResponse("payment.FAILED_TO_EXECUTE_PAYMENT", accountMessageSource.getMessage("payment.FAILED_TO_EXECUTE_PAYMENT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 

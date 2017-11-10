@@ -11,7 +11,7 @@ import com.gracelogic.platform.market.DataConstants;
 import com.gracelogic.platform.market.dao.MarketDao;
 import com.gracelogic.platform.market.dto.MarketAwareObjectDTO;
 import com.gracelogic.platform.market.dto.OrderDTO;
-import com.gracelogic.platform.market.dto.OrderExecutionParametersDTO;
+import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.market.dto.ProductDTO;
 import com.gracelogic.platform.market.exception.InvalidDiscountException;
 import com.gracelogic.platform.market.exception.InvalidOrderStateException;
@@ -19,18 +19,22 @@ import com.gracelogic.platform.market.exception.OrderNotConsistentException;
 import com.gracelogic.platform.market.exception.ProductNotPurchasedException;
 import com.gracelogic.platform.market.model.*;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
+import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.payment.service.AccountResolver;
+import com.gracelogic.platform.payment.service.PaymentExecutor;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @Service
@@ -56,6 +60,9 @@ public class MarketServiceImpl implements MarketService {
     @Autowired
     private MarketDao marketDao;
 
+    @Autowired
+    private ApplicationContext applicationContext;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException {
@@ -80,10 +87,11 @@ public class MarketServiceImpl implements MarketService {
             entity = new Order();
             entity.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.DRAFT.getValue()));
             entity.setUser(idObjectService.getObjectById(User.class, authorizedUser.getId()));
+            entity.setPaid(0L);
         }
 
         Set<UUID> productIds = new HashSet<>();
-
+        Set<UUID> discountProductIds = new HashSet<>();
         //Find discount
         Discount discount = null;
         if (!StringUtils.isEmpty(dto.getDiscountSecretCode())) {
@@ -95,25 +103,25 @@ public class MarketServiceImpl implements MarketService {
                 Map<String, Object> params = new HashMap<>();
                 params.put("discountId", discount.getId());
                 List<DiscountProduct> discountProducts = idObjectService.getList(DiscountProduct.class, null, "el.discount.id=:discountId", params, null, null, null, null);
-                System.out.println("PRODUCTS IN DISCOUNT: " + discountProducts.size());
                 for (DiscountProduct discountProduct : discountProducts) {
-                    productIds.add(discountProduct.getProduct().getId());
+                    discountProductIds.add(discountProduct.getProduct().getId());
                 }
             }
         }
 
         //Get products to purchase
-        if (productIds.isEmpty()) {
-            for (ProductDTO productDTO : dto.getProducts()) {
-                productIds.add(productDTO.getId());
-            }
+        productIds.addAll(discountProductIds);
+        for (ProductDTO productDTO : dto.getProducts()) {
+            productIds.add(productDTO.getId());
         }
+
         if (productIds.isEmpty()) {
             throw new OrderNotConsistentException("No products found in order");
         }
         Map<String, Object> params = new HashMap<>();
         params.put("productIds", productIds);
         List<Product> products = idObjectService.getList(Product.class, null, "el.id in (:productIds)", params, null, null, null, productIds.size());
+
 
         //Calculate total amount
         Long amount = marketResolver.calculateOrderTotalAmount(entity.getUser().getId(), products);
@@ -135,7 +143,13 @@ public class MarketServiceImpl implements MarketService {
                 }
                 discountAmount -= amount / 100L * discount.getAmount();
             } else if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.GIFT_PRODUCT.getValue())) {
-                discountAmount = amount;
+                List<Product> onlyDiscountedProducts = new LinkedList<>();
+                for (Product product : products) {
+                    if (discountProductIds.contains(product.getId())) {
+                        onlyDiscountedProducts.add(product);
+                    }
+                }
+                discountAmount = marketResolver.calculateOrderTotalAmount(entity.getUser().getId(), onlyDiscountedProducts);
             }
         }
 
@@ -143,7 +157,6 @@ public class MarketServiceImpl implements MarketService {
         entity.setAmount(amount);
         entity.setDiscountAmount(discountAmount);
         entity.setTotalAmount(totalAmount);
-        entity.setPaid(0L);
         entity = idObjectService.save(entity);
 
         //Create order products
@@ -179,7 +192,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public OrderExecutionParametersDTO executeOrder(UUID orderId, UUID paymentSystemId, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException, ObjectNotFoundException {
+    public PaymentExecutionResultDTO executeOrder(UUID orderId, UUID paymentSystemId, Map<String, String> params, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException, ObjectNotFoundException, PaymentExecutionException {
         Order order = idObjectService.getObjectById(Order.class, orderId);
         if (order == null) {
             throw new ObjectNotFoundException();
@@ -194,15 +207,8 @@ public class MarketServiceImpl implements MarketService {
             throw new InvalidOrderStateException();
         }
 
-        PaymentSystem paymentSystem = null;
         if (order.getOrderState().getId().equals(DataConstants.OrderStates.DRAFT.getValue())) {
-            paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
-            if (paymentSystem == null || !paymentSystem.getActive()) {
-                throw new InvalidPaymentSystemException();
-            }
-
             order.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.PENDING.getValue()));
-            order.setPaymentSystem(paymentSystem);
             order = idObjectService.save(order);
 
             //Check and process discount
@@ -223,17 +229,43 @@ public class MarketServiceImpl implements MarketService {
             recalculateOrderProductLifetimeExpiration(order, System.currentTimeMillis());
         }
 
-        if (paymentSystem == null) {
-            paymentSystem = idObjectService.getObjectById(PaymentSystem.class, order.getPaymentSystem().getId());
-        }
 
         //Пытаемся оплатить с помощью внутреннего счёта
         Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, null);
-        if (order.getTotalAmount().equals(order.getPaid()) || userAccount.getBalance() >= (order.getTotalAmount() - order.getPaid())) {
-            order = payOrder(order, order.getTotalAmount(), userAccount.getId());
+        Long amountToPay = order.getTotalAmount() - order.getPaid();
+        if (userAccount.getBalance() >= amountToPay) {
+            order = payOrder(order, amountToPay, userAccount.getId());
+            amountToPay = order.getTotalAmount() - order.getPaid();
         }
 
-        return new OrderExecutionParametersDTO(order.getOrderState().getId().equals(DataConstants.OrderStates.PAID.getValue()), paymentSystem.getRedirectUrl());
+        //Всё что недоплачено пытаемся получить через платёжную систему
+        if (order.getOrderState().getId().equals(DataConstants.OrderStates.PENDING.getValue())) {
+            PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
+            if (paymentSystem == null || !paymentSystem.getActive() || StringUtils.isEmpty(paymentSystem.getPaymentExecutorClass())) {
+                throw new InvalidPaymentSystemException();
+            }
+
+            if (order.getPaymentSystem() == null || !order.getPaymentSystem().getId().equals(paymentSystemId)) {
+                order.setPaymentSystem(paymentSystem);
+                idObjectService.save(paymentSystem);
+            }
+
+            try {
+                PaymentExecutor paymentExecutor = initializePaymentExecutor(paymentSystem.getPaymentExecutorClass());
+                return paymentExecutor.execute(String.valueOf(order.getId()), amountToPay, applicationContext, params);
+            } catch (PaymentExecutionException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new PaymentExecutionException(e.getMessage());
+            }
+        }
+
+        return new PaymentExecutionResultDTO(order.getOrderState().getId().equals(DataConstants.OrderStates.PAID.getValue()));
+    }
+
+    private PaymentExecutor initializePaymentExecutor(String paymentExecutorClassName) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<?> clazz = Class.forName(paymentExecutorClassName);
+        return (PaymentExecutor) clazz.newInstance();
     }
 
     @Transactional(rollbackFor = Exception.class)
