@@ -478,7 +478,7 @@ public class MarketServiceImpl implements MarketService {
 
         if (discountId != null) {
             cause += "and el.discount.id=:discountId ";
-            params.put("discontId", discountId);
+            params.put("discountId", discountId);
         }
 
         int totalCount = idObjectService.getCount(Order.class, null, countFetches, cause, params);
@@ -501,7 +501,7 @@ public class MarketServiceImpl implements MarketService {
             }
             Map<String, Object> productParams = new HashMap<>();
             productParams.put("orderIds", orderIds);
-            orderProducts = idObjectService.getList(OrderProduct.class, null, "el.order.id in (:orderIds)", productParams, null, null, null, null);
+            orderProducts = idObjectService.getList(OrderProduct.class, "left join fetch el.product", "el.order.id in (:orderIds)", productParams, null, null, null, null);
         }
 
         entityListResponse.setPartCount(items.size());
@@ -568,6 +568,7 @@ public class MarketServiceImpl implements MarketService {
         return entityListResponse;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Product saveProduct(ProductDTO dto) throws ObjectNotFoundException {
         Product entity;
@@ -582,7 +583,7 @@ public class MarketServiceImpl implements MarketService {
 
         entity.setName(dto.getName());
         entity.setActive(dto.getActive());
-        entity.setProductType(idObjectService.getObjectById(ProductType.class, dto.getProductTypeId()));
+        entity.setProductType(ds.get(ProductType.class, dto.getProductTypeId()));
         entity.setReferenceObjectId(dto.getReferenceObjectId());
         entity.setLifetime(dto.getLifetime());
         entity.setPrice(dto.getPrice());
@@ -590,6 +591,7 @@ public class MarketServiceImpl implements MarketService {
         return idObjectService.save(entity);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteProduct(UUID id) throws ObjectNotFoundException {
         idObjectService.delete(Product.class, id);
@@ -597,7 +599,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public DiscountDTO getDiscount(UUID id, boolean enrich) throws ObjectNotFoundException {
-        Discount entity = idObjectService.getObjectById(Discount.class, enrich ? "left join fetch el.productType left join fetch el.usedForOrder" : "", id);
+        Discount entity = idObjectService.getObjectById(Discount.class, enrich ? "left join fetch el.productType" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -610,7 +612,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public EntityListResponse<DiscountDTO> getDiscountsPaged(UUID usedForOrderId, UUID discountTypeId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = enrich ? "left join fetch el.usedForOrder left join fetch el.discountType" : "";
+        String fetches = enrich ? "left join fetch el.discountType" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -645,7 +647,7 @@ public class MarketServiceImpl implements MarketService {
             }
             Map<String, Object> productParams = new HashMap<>();
             productParams.put("discountIds", discountIds);
-            discountProducts = idObjectService.getList(DiscountProduct.class, null, "el.discount.id in (:discountIds)", productParams, null, null, null, null);
+            discountProducts = idObjectService.getList(DiscountProduct.class, "left join fetch el.product", "el.discount.id in (:discountIds)", productParams, null, null, null, null);
         }
 
         entityListResponse.setPartCount(items.size());
@@ -660,6 +662,7 @@ public class MarketServiceImpl implements MarketService {
         return entityListResponse;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Discount saveDiscount(DiscountDTO dto) throws ObjectNotFoundException {
         Discount entity;
@@ -682,9 +685,7 @@ public class MarketServiceImpl implements MarketService {
         entity.setName(dto.getName());
         entity.setActive(dto.getActive());
         entity.setReusable(dto.getReusable());
-        entity.setUsed(dto.getUsed());
-        entity.setUsedForOrder(idObjectService.getObjectById(Order.class, dto.getUsedForOrderId()));
-        entity.setDiscountType(idObjectService.getObjectById(DiscountType.class, dto.getDiscountTypeId()));
+        entity.setDiscountType(ds.get(DiscountType.class, dto.getDiscountTypeId()));
         entity.setSecretCode(dto.getSecretCode());
         entity.setAmount(dto.getAmount());
         idObjectService.save(entity);
@@ -699,6 +700,7 @@ public class MarketServiceImpl implements MarketService {
         return entity;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteDiscount(UUID id) throws ObjectNotFoundException {
         Map<String, Object> params = new HashMap<>();

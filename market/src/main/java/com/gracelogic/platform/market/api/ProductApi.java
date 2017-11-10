@@ -69,6 +69,7 @@ public class ProductApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
+    @PreAuthorize("hasAuthority('PRODUCT:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
     public ResponseEntity saveProduct(@RequestBody ProductDTO productDTO) {

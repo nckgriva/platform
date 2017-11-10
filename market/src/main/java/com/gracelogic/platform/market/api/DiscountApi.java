@@ -5,11 +5,9 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.market.Path;
 import com.gracelogic.platform.market.dto.DiscountDTO;
-import com.gracelogic.platform.market.exception.InvalidDiscountException;
 import com.gracelogic.platform.market.model.Discount;
 import com.gracelogic.platform.market.service.MarketService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
-import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
@@ -71,6 +69,7 @@ public class DiscountApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
+    @PreAuthorize("hasAuthority('DISCOUNT:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
     public ResponseEntity saveDiscount(@RequestBody DiscountDTO discountDTO) {
