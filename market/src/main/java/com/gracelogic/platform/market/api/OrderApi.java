@@ -8,12 +8,12 @@ import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.market.Path;
 import com.gracelogic.platform.market.dto.ExecuteOrderRequestDTO;
 import com.gracelogic.platform.market.dto.OrderDTO;
-import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.market.exception.InvalidDiscountException;
 import com.gracelogic.platform.market.exception.InvalidOrderStateException;
 import com.gracelogic.platform.market.exception.OrderNotConsistentException;
 import com.gracelogic.platform.market.model.Order;
 import com.gracelogic.platform.market.service.MarketService;
+import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
@@ -75,9 +75,10 @@ public class OrderApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
     public ResponseEntity getOrder(@PathVariable(value = "id") UUID id,
-                                      @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich) {
+                                   @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                   @RequestParam(value = "withProducts", required = false, defaultValue = "false") Boolean withProducts) {
         try {
-            OrderDTO orderDTO = marketService.getOrder(id, enrich);
+            OrderDTO orderDTO = marketService.getOrder(id, enrich, withProducts);
             return new ResponseEntity<OrderDTO>(orderDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -185,7 +186,7 @@ public class OrderApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "getOrders",
             notes = "Get list of orders",
-            response =  EntityListResponse.class
+            response = EntityListResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),

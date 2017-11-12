@@ -1,7 +1,6 @@
 package com.gracelogic.platform.user.dto;
 
 import com.gracelogic.platform.db.dto.IdObjectDTO;
-import com.gracelogic.platform.user.model.Grant;
 import com.gracelogic.platform.user.model.Role;
 import com.gracelogic.platform.user.model.UserRole;
 

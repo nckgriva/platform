@@ -1,14 +1,9 @@
 package com.gracelogic.platform.market.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
-import com.gracelogic.platform.db.dto.JsonDateDeserializer;
-import com.gracelogic.platform.db.dto.JsonDateSerializer;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.market.model.Product;
 
-import java.util.Date;
 import java.util.UUID;
 
 public class ProductDTO extends IdObjectDTO {

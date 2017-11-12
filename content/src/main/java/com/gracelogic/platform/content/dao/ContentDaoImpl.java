@@ -2,7 +2,6 @@ package com.gracelogic.platform.content.dao;
 
 import com.gracelogic.platform.content.model.Element;
 import com.gracelogic.platform.db.service.IdObjectServiceImpl;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
 

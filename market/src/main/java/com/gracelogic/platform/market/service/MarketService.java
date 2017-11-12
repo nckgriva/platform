@@ -4,9 +4,10 @@ import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.account.exception.InsufficientFundsException;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
-
-import com.gracelogic.platform.market.dto.*;
-
+import com.gracelogic.platform.market.dto.DiscountDTO;
+import com.gracelogic.platform.market.dto.MarketAwareObjectDTO;
+import com.gracelogic.platform.market.dto.OrderDTO;
+import com.gracelogic.platform.market.dto.ProductDTO;
 import com.gracelogic.platform.market.exception.InvalidDiscountException;
 import com.gracelogic.platform.market.exception.InvalidOrderStateException;
 import com.gracelogic.platform.market.exception.OrderNotConsistentException;
@@ -21,7 +22,10 @@ import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
 
 public interface MarketService {
     Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException;
@@ -34,7 +38,7 @@ public interface MarketService {
 
     void deleteOrder(UUID orderId, AuthorizedUser authorizedUser) throws InvalidOrderStateException, ObjectNotFoundException, ForbiddenException;
 
-    OrderDTO getOrder(UUID id, boolean enrich) throws ObjectNotFoundException;
+    OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts) throws ObjectNotFoundException;
 
     EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
@@ -49,7 +53,7 @@ public interface MarketService {
 
 
     //Discount
-    DiscountDTO getDiscount(UUID id, boolean enrich) throws ObjectNotFoundException;
+    DiscountDTO getDiscount(UUID id, boolean enrich, boolean withProducts) throws ObjectNotFoundException;
 
     EntityListResponse<DiscountDTO> getDiscountsPaged(UUID usedForOrderId, UUID discountTypeId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir);
 

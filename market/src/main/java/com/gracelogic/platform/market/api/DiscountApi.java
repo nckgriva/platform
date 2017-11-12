@@ -50,9 +50,10 @@ public class DiscountApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
     public ResponseEntity getDiscount(@PathVariable(value = "id") UUID id,
-                                   @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich) {
+                                      @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                      @RequestParam(value = "withProducts", required = false, defaultValue = "false") Boolean withProducts) {
         try {
-            DiscountDTO discountDTO = marketService.getDiscount(id, enrich);
+            DiscountDTO discountDTO = marketService.getDiscount(id, enrich, withProducts);
             return new ResponseEntity<DiscountDTO>(discountDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -78,7 +79,7 @@ public class DiscountApi extends AbstractAuthorizedController {
             return new ResponseEntity<IDResponse>(new IDResponse(discount.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        } 
+        }
     }
 
     @ApiOperation(
@@ -106,7 +107,7 @@ public class DiscountApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "getDiscounts",
             notes = "Get list of discounts",
-            response =  EntityListResponse.class
+            response = EntityListResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),

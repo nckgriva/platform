@@ -1,11 +1,11 @@
 package com.gracelogic.platform.filestorage.service;
 
 import com.gracelogic.platform.db.dto.EntityListResponse;
+import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.filestorage.dto.StoredFileDTO;
 import com.gracelogic.platform.filestorage.exception.StoredFileDataUnavailableException;
 import com.gracelogic.platform.filestorage.exception.UnsupportedStoreModeException;
 import com.gracelogic.platform.filestorage.model.StoredFile;
-import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 
 import java.io.File;
 import java.io.IOException;

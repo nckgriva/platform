@@ -3,10 +3,10 @@ package com.gracelogic.platform.user.api;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
+import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.dto.RoleDTO;
 import com.gracelogic.platform.user.model.Role;
 import com.gracelogic.platform.user.service.UserService;
-import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
@@ -21,7 +21,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
-import java.util.Set;
 import java.util.UUID;
 
 @Controller

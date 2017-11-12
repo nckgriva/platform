@@ -5,9 +5,6 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.task.dto.TaskDTO;
 import com.gracelogic.platform.task.dto.TaskExecutionLogDTO;
 import com.gracelogic.platform.task.model.Task;
-import com.gracelogic.platform.task.model.TaskExecuteMethod;
-import com.gracelogic.platform.task.model.TaskExecuteState;
-import com.gracelogic.platform.task.model.TaskExecutionLog;
 
 import java.util.Collection;
 import java.util.Date;

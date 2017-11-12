@@ -2,10 +2,8 @@ package com.gracelogic.platform.user.api;
 
 import com.gracelogic.platform.db.dto.DateFormatConstants;
 import com.gracelogic.platform.db.dto.EntityListResponse;
-import com.gracelogic.platform.property.dto.PropertyDTO;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.dto.UserSessionDTO;
-import com.gracelogic.platform.user.model.UserSession;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import io.swagger.annotations.*;

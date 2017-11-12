@@ -3,7 +3,6 @@ package com.gracelogic.platform.market.dto;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.market.model.Discount;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.util.LinkedList;
 import java.util.List;

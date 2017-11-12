@@ -10,14 +10,16 @@ import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.market.DataConstants;
 import com.gracelogic.platform.market.dao.MarketDao;
-
-import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
-import com.gracelogic.platform.market.dto.*;
+import com.gracelogic.platform.market.dto.DiscountDTO;
+import com.gracelogic.platform.market.dto.MarketAwareObjectDTO;
+import com.gracelogic.platform.market.dto.OrderDTO;
+import com.gracelogic.platform.market.dto.ProductDTO;
 import com.gracelogic.platform.market.exception.InvalidDiscountException;
 import com.gracelogic.platform.market.exception.InvalidOrderStateException;
 import com.gracelogic.platform.market.exception.OrderNotConsistentException;
 import com.gracelogic.platform.market.exception.ProductNotPurchasedException;
 import com.gracelogic.platform.market.model.*;
+import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.payment.model.Payment;
@@ -447,7 +449,7 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public OrderDTO getOrder(UUID id, boolean enrich) throws ObjectNotFoundException {
+    public OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts) throws ObjectNotFoundException {
         Order entity = idObjectService.getObjectById(Order.class, enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
@@ -455,6 +457,16 @@ public class MarketServiceImpl implements MarketService {
         OrderDTO dto = OrderDTO.prepare(entity);
         if (enrich) {
             OrderDTO.enrich(dto, entity);
+        }
+        if (withProducts) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("orderId", id);
+            List<OrderProduct> orderProducts = idObjectService.getList(OrderProduct.class, "left join fetch el.product", "el.order.id=:orderId", params, null, null, null, null);
+            for (OrderProduct orderProduct : orderProducts) {
+                if (orderProduct.getOrder().getId().equals(id)) {
+                    dto.getProducts().add(ProductDTO.prepare(orderProduct.getProduct()));
+                }
+            }
         }
         return dto;
     }
@@ -509,6 +521,13 @@ public class MarketServiceImpl implements MarketService {
             OrderDTO el = OrderDTO.prepare(e);
             if (enrich) {
                 OrderDTO.enrich(el, e);
+            }
+            if (withProducts && !orderProducts.isEmpty()) {
+                for (OrderProduct orderProduct : orderProducts) {
+                    if (orderProduct.getOrder().getId().equals(e.getId())) {
+                        el.getProducts().add(ProductDTO.prepare(orderProduct.getProduct()));
+                    }
+                }
             }
             entityListResponse.addData(el);
         }
@@ -598,7 +617,7 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public DiscountDTO getDiscount(UUID id, boolean enrich) throws ObjectNotFoundException {
+    public DiscountDTO getDiscount(UUID id, boolean enrich, boolean withProducts) throws ObjectNotFoundException {
         Discount entity = idObjectService.getObjectById(Discount.class, enrich ? "left join fetch el.productType" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
@@ -606,6 +625,16 @@ public class MarketServiceImpl implements MarketService {
         DiscountDTO dto = DiscountDTO.prepare(entity);
         if (enrich) {
             DiscountDTO.enrich(dto, entity);
+        }
+        if (withProducts) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("discountId", id);
+            List<DiscountProduct> discountProducts = idObjectService.getList(DiscountProduct.class, "left join fetch el.product", "el.discount.id=:discountId", params, null, null, null, null);
+            for (DiscountProduct discountProduct : discountProducts) {
+                if (discountProduct.getDiscount().getId().equals(id)) {
+                    dto.getProducts().add(ProductDTO.prepare(discountProduct.getProduct()));
+                }
+            }
         }
         return dto;
     }
@@ -655,6 +684,13 @@ public class MarketServiceImpl implements MarketService {
             DiscountDTO el = DiscountDTO.prepare(e);
             if (enrich) {
                 DiscountDTO.enrich(el, e);
+            }
+            if (withProducts && !discountProducts.isEmpty()) {
+                for (DiscountProduct discountProduct : discountProducts) {
+                    if (discountProduct.getDiscount().getId().equals(e.getId())) {
+                        el.getProducts().add(ProductDTO.prepare(discountProduct.getProduct()));
+                    }
+                }
             }
             entityListResponse.addData(el);
         }
