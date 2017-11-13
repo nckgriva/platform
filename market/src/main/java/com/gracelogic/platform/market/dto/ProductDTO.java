@@ -83,6 +83,8 @@ public class ProductDTO extends IdObjectDTO {
         dto.setName(model.getName());
         dto.setActive(model.getActive());
         dto.setReferenceObjectId(model.getReferenceObjectId());
+        dto.setLifetime(model.getLifetime());
+        dto.setPrice(model.getPrice());
         return dto;
     }
 
