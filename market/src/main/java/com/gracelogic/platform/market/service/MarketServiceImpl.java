@@ -272,7 +272,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void cancelOrder(UUID orderId) throws InvalidOrderStateException, ForbiddenException, ObjectNotFoundException, InsufficientFundsException, AccountNotFoundException {
+    public void cancelOrder(UUID orderId) throws InvalidOrderStateException, ObjectNotFoundException, InsufficientFundsException, AccountNotFoundException {
         Order order = idObjectService.getObjectById(Order.class, orderId);
         if (order == null) {
             throw new ObjectNotFoundException();

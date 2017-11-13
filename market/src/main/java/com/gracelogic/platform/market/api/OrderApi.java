@@ -156,6 +156,34 @@ public class OrderApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
+            value = "cancelOrder",
+            notes = "Cancel order",
+            response = PaymentExecutionResultDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not found"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(method = RequestMethod.POST, value = "/{orderId}/cancel")
+    @ResponseBody
+    public ResponseEntity cancelOrder(@PathVariable(value = "orderId") UUID orderId) {
+        try {
+            marketService.cancelOrder(orderId);
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+        }  catch (InvalidOrderStateException e) {
+            return new ResponseEntity<>(new ErrorResponse("market.INVALID_ORDER_STATE", marketMessageSource.getMessage("market.INVALID_ORDER_STATE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (AccountNotFoundException e) {
+            return new ResponseEntity<>(new ErrorResponse("account.ACCOUNT_NOT_FOUND", accountMessageSource.getMessage("account.ACCOUNT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (InsufficientFundsException e) {
+            return new ResponseEntity<>(new ErrorResponse("account.INSUFFICIENT_FUNDS", accountMessageSource.getMessage("account.INSUFFICIENT_FUNDS", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
             value = "deleteOrder",
             notes = "Delete order",
             response = EmptyResponse.class
