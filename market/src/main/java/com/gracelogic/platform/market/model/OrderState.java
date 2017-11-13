@@ -66,7 +66,7 @@ public class OrderState extends IdObject<UUID> implements Dictionary {
 
     @Override
     public Integer getSortOrder() {
-        return null;
+        return 0;
     }
 
     @Override

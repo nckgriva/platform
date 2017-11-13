@@ -618,7 +618,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public DiscountDTO getDiscount(UUID id, boolean enrich, boolean withProducts) throws ObjectNotFoundException {
-        Discount entity = idObjectService.getObjectById(Discount.class, enrich ? "left join fetch el.productType" : "", id);
+        Discount entity = idObjectService.getObjectById(Discount.class, enrich ? "left join fetch el.discountType" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -709,6 +709,7 @@ public class MarketServiceImpl implements MarketService {
             }
         } else {
             entity = new Discount();
+            entity.setUsed(false);
         }
 
         if (entity.getId() != null) {

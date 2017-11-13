@@ -56,7 +56,16 @@ public class DictionaryApi {
                 Collections.sort(dtos, new Comparator<DictionaryDTO>() {
                     @Override
                     public int compare(final DictionaryDTO o1, final DictionaryDTO o2) {
-                        return o1 == null ? 1 : o2 == null ? -1 : o1.getSortOrder().compareTo(o2.getSortOrder());
+                        Integer o1SortOrder = 0;
+                        if (o1 != null && o1.getSortOrder() != null) {
+                            o1SortOrder = o1.getSortOrder();
+                        }
+                        Integer o2SortOrder = 0;
+                        if (o2 != null && o2.getSortOrder() != null) {
+                            o2SortOrder = o2.getSortOrder();
+                        }
+
+                        return o1SortOrder.compareTo(o2SortOrder);
                     }
                 });
 

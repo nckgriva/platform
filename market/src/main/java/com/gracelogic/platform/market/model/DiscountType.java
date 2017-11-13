@@ -64,9 +64,13 @@ public class DiscountType extends IdObject<UUID> implements Dictionary {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public Integer getSortOrder() {
-        return null;
+        return 0;
     }
 
     @Override
@@ -74,8 +78,6 @@ public class DiscountType extends IdObject<UUID> implements Dictionary {
         return null;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+
 
 }

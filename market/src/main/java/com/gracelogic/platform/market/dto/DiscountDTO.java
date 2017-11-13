@@ -77,6 +77,10 @@ public class DiscountDTO extends IdObjectDTO {
         }
     }
 
+    public void setAmountAsFractional(String sAmount) {
+        this.amount = FinanceUtils.stringToLong(sAmount);
+    }
+
     public void setAmount(Long amount) { this.amount = amount; }
 
     public List<ProductDTO> getProducts() {
