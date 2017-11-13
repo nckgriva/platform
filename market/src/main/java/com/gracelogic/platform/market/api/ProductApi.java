@@ -118,7 +118,7 @@ public class ProductApi extends AbstractAuthorizedController {
     public ResponseEntity getProducts(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "productTypeId", required = false) UUID productTypeId,
-            @RequestParam(value = "active", required = false, defaultValue = "false") Boolean active,
+            @RequestParam(value = "active", required = false) Boolean active,
             @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
             @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
             @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
