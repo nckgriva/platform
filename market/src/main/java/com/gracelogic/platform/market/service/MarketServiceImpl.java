@@ -159,6 +159,7 @@ public class MarketServiceImpl implements MarketService {
         entity.setAmount(amount);
         entity.setDiscountAmount(discountAmount);
         entity.setTotalAmount(totalAmount);
+        entity.setDiscount(discount);
         entity = idObjectService.save(entity);
 
         //Create order products
