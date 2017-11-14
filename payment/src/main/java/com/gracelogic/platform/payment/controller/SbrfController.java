@@ -115,7 +115,7 @@ public class SbrfController {
             }
         } else if (StringUtils.equalsIgnoreCase(action, ACTION_PAY)) {
             ProcessPaymentRequest paymentModel = new ProcessPaymentRequest();
-            paymentModel.setAccountNumber(account);
+            paymentModel.setExternalIdentifier(account);
             paymentModel.setPaymentUID(payId);
             paymentModel.setRegisteredAmount(Double.parseDouble(amount));
             paymentModel.setExternalTypeUID(null);

@@ -121,7 +121,7 @@ public class YandexMoneyController {
                     resp = String.format(RESPONSE_TEMPLATE, action, DATE_FORMAT.format(new Date()), "200", payId, shopId);
                 } else {
                     ProcessPaymentRequest paymentModel = new ProcessPaymentRequest();
-                    paymentModel.setAccountNumber(account);
+                    paymentModel.setExternalIdentifier(account);
                     paymentModel.setPaymentUID(payId);
                     paymentModel.setRegisteredAmount(Double.parseDouble(amount));
                     paymentModel.setExternalTypeUID(paymentType);

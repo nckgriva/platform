@@ -76,13 +76,13 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = new Payment();
         payment.setPaymentState(ds.get(PaymentState.class, DataConstants.PaymentStates.CREATED.getValue()));
         payment.setPaymentSystem(paymentSystem);
-        payment.setAccountNumber(paymentRequest.getAccountNumber());
+        payment.setExternalIdentifier(paymentRequest.getExternalIdentifier());
 
         Account account = null;
         if (paymentRequest.getAccountId() != null) {
             account = idObjectService.getObjectById(Account.class, paymentRequest.getAccountId());
         } else {
-            account = accountResolver.getTargetAccount(null, paymentRequest.getAccountNumber(), paymentSystem, paymentRequest.getCurrency());
+            account = accountResolver.getTargetAccount(null, paymentRequest.getExternalIdentifier(), paymentSystem, paymentRequest.getCurrency());
         }
 
         if (account == null) {

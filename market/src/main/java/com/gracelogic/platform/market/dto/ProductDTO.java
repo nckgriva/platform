@@ -73,6 +73,10 @@ public class ProductDTO extends IdObjectDTO {
         }
     }
 
+    public void setPriceAsFractional(String sPrice) {
+        this.price = FinanceUtils.stringToLong(sPrice);
+    }
+
     public static ProductDTO prepare(Product model) {
         ProductDTO dto = new ProductDTO();
         IdObjectDTO.prepare(dto, model);

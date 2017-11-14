@@ -1,6 +1,7 @@
 package com.gracelogic.platform.market.dto;
 
 import com.gracelogic.platform.db.dto.IdObjectDTO;
+import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.market.model.Order;
 import com.gracelogic.platform.user.dto.UserDTO;
 
@@ -13,11 +14,16 @@ public class OrderDTO extends IdObjectDTO {
     private String userName;
     private UUID orderStateId;
     private String orderStateName;
+    private Long amount;
+    private Long discountAmount;
     private Long totalAmount;
     private Long paid;
     private UUID discountId;
     private String discountName;
     private List<ProductDTO> products = new LinkedList<>();
+    private String externalIdentifier;
+    private UUID paymentSystemId;
+    private String paymentSystemName;
 
     //Transient value for user order creation
     private String discountSecretCode;
@@ -102,6 +108,98 @@ public class OrderDTO extends IdObjectDTO {
         this.discountSecretCode = discountSecretCode;
     }
 
+    public String getExternalIdentifier() {
+        return externalIdentifier;
+    }
+
+    public void setExternalIdentifier(String externalIdentifier) {
+        this.externalIdentifier = externalIdentifier;
+    }
+
+    public Long getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Long amount) {
+        this.amount = amount;
+    }
+
+    public Long getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(Long discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public UUID getPaymentSystemId() {
+        return paymentSystemId;
+    }
+
+    public void setPaymentSystemId(UUID paymentSystemId) {
+        this.paymentSystemId = paymentSystemId;
+    }
+
+    public String getPaymentSystemName() {
+        return paymentSystemName;
+    }
+
+    public void setPaymentSystemName(String paymentSystemName) {
+        this.paymentSystemName = paymentSystemName;
+    }
+
+    public Double getAmountAsFractional() {
+        if (this.amount != null) {
+            return FinanceUtils.toFractional2Rounded(this.amount);
+        }
+        else {
+            return null;
+        }
+    }
+
+    public void setAmountAsFractional(String sValue) {
+        this.amount = FinanceUtils.stringToLong(sValue);
+    }
+
+    public Double getDiscountAmountAsFractional() {
+        if (this.discountAmount != null) {
+            return FinanceUtils.toFractional2Rounded(this.discountAmount);
+        }
+        else {
+            return null;
+        }
+    }
+
+    public void setDiscountAmountAsFractional(String sValue) {
+        this.discountAmount = FinanceUtils.stringToLong(sValue);
+    }
+
+    public Double getTotalAmountAsFractional() {
+        if (this.totalAmount != null) {
+            return FinanceUtils.toFractional2Rounded(this.totalAmount);
+        }
+        else {
+            return null;
+        }
+    }
+
+    public void setTotalAmountAsFractional(String sValue) {
+        this.totalAmount = FinanceUtils.stringToLong(sValue);
+    }
+
+    public Double getPaidAsFractional() {
+        if (this.paid != null) {
+            return FinanceUtils.toFractional2Rounded(this.paid);
+        }
+        else {
+            return null;
+        }
+    }
+
+    public void setPaidAsFractional(String sValue) {
+        this.paid = FinanceUtils.stringToLong(sValue);
+    }
+
     public static OrderDTO prepare(Order model) {
         OrderDTO dto = new OrderDTO();
         IdObjectDTO.prepare(dto, model);
@@ -115,8 +213,15 @@ public class OrderDTO extends IdObjectDTO {
         if (model.getDiscount() != null) {
             dto.setDiscountId(model.getDiscount().getId());
         }
+        if (model.getPaymentSystem() != null) {
+            dto.setPaymentSystemId(model.getPaymentSystem().getId());
+        }
         dto.setTotalAmount(model.getTotalAmount());
         dto.setPaid(model.getPaid());
+        dto.setAmount(model.getAmount());
+        dto.setDiscountAmount(model.getDiscountAmount());
+
+        dto.setExternalIdentifier(model.getExternalIdentifier());
 
         return dto;
     }
@@ -130,6 +235,9 @@ public class OrderDTO extends IdObjectDTO {
         }
         if (model.getDiscount() != null) {
             dto.setDiscountName(model.getDiscount().getName());
+        }
+        if (model.getPaymentSystem() != null) {
+            dto.setPaymentSystemName(model.getPaymentSystem().getName());
         }
 
         return dto;

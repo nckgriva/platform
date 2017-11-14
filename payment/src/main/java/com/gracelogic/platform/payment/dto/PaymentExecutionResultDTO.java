@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class PaymentExecutionResultDTO {
     private Boolean processed;
+    private String externalIdentifier;
     private Map<String, String> params;
 
     public Boolean getProcessed() {
@@ -23,12 +24,26 @@ public class PaymentExecutionResultDTO {
         this.params = params;
     }
 
+    public String getExternalIdentifier() {
+        return externalIdentifier;
+    }
+
+    public void setExternalIdentifier(String externalIdentifier) {
+        this.externalIdentifier = externalIdentifier;
+    }
+
     public PaymentExecutionResultDTO(Boolean processed) {
         this.processed = processed;
     }
 
     public PaymentExecutionResultDTO(Boolean processed, Map<String, String> params) {
         this.processed = processed;
+        this.params = params;
+    }
+
+    public PaymentExecutionResultDTO(Boolean processed, String externalIdentifier, Map<String, String> params) {
+        this.processed = processed;
+        this.externalIdentifier = externalIdentifier;
         this.params = params;
     }
 }

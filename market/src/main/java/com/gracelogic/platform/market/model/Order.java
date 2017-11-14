@@ -56,6 +56,9 @@ public class Order extends IdObject<UUID> {
     @Column(name = "PAID", nullable = false)
     private Long paid; //Оплачено пользователем
 
+    @Column(name = "EXTERNAL_IDENTIFIER", nullable = true)
+    private String externalIdentifier;
+
     @Override
     public UUID getId() {
         return id;
@@ -148,5 +151,13 @@ public class Order extends IdObject<UUID> {
 
     public void setDiscountAmount(Long discountAmount) {
         this.discountAmount = discountAmount;
+    }
+
+    public String getExternalIdentifier() {
+        return externalIdentifier;
+    }
+
+    public void setExternalIdentifier(String externalIdentifier) {
+        this.externalIdentifier = externalIdentifier;
     }
 }

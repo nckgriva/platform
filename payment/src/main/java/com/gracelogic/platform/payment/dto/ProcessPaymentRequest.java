@@ -5,7 +5,7 @@ import com.gracelogic.platform.web.dto.PlatformRequest;
 import java.util.UUID;
 
 public class ProcessPaymentRequest extends PlatformRequest {
-    private String accountNumber;
+    private String externalIdentifier;
     private String paymentUID;
     private Double amount;
     private Double registeredAmount;
@@ -48,12 +48,12 @@ public class ProcessPaymentRequest extends PlatformRequest {
         this.externalTypeUID = externalTypeUID;
     }
 
-    public String getAccountNumber() {
-        return accountNumber;
+    public String getExternalIdentifier() {
+        return externalIdentifier;
     }
 
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
+    public void setExternalIdentifier(String externalIdentifier) {
+        this.externalIdentifier = externalIdentifier;
     }
 
     public String getCurrency() {
@@ -99,8 +99,8 @@ public class ProcessPaymentRequest extends PlatformRequest {
     public ProcessPaymentRequest() {
     }
 
-    public ProcessPaymentRequest(String accountNumber, Double registeredAmount) {
-        this.accountNumber = accountNumber;
+    public ProcessPaymentRequest(String externalIdentifier, Double registeredAmount) {
+        this.externalIdentifier = externalIdentifier;
         this.registeredAmount = registeredAmount;
     }
 }

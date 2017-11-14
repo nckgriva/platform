@@ -211,6 +211,9 @@ public class MarketServiceImpl implements MarketService {
 
         if (order.getOrderState().getId().equals(DataConstants.OrderStates.DRAFT.getValue())) {
             order.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.PENDING.getValue()));
+            if (StringUtils.isEmpty(order.getExternalIdentifier())) {
+                order.setExternalIdentifier(order.getId().toString());
+            }
             order = idObjectService.save(order);
 
             //Check and process discount
@@ -247,19 +250,31 @@ public class MarketServiceImpl implements MarketService {
                 throw new InvalidPaymentSystemException();
             }
 
+            boolean orderModified = false;
             if (order.getPaymentSystem() == null || !order.getPaymentSystem().getId().equals(paymentSystemId)) {
                 order.setPaymentSystem(paymentSystem);
-                idObjectService.save(paymentSystem);
+                orderModified = true;
             }
 
+            PaymentExecutionResultDTO result = null;
             try {
                 PaymentExecutor paymentExecutor = initializePaymentExecutor(paymentSystem.getPaymentExecutorClass());
-                return paymentExecutor.execute(String.valueOf(order.getId()), amountToPay, applicationContext, params);
+                result = paymentExecutor.execute(String.valueOf(order.getId()), amountToPay, applicationContext, params);
+                if (!StringUtils.isEmpty(result.getExternalIdentifier()) && !StringUtils.equals(order.getExternalIdentifier(), result.getExternalIdentifier())) {
+                    order.setExternalIdentifier(result.getExternalIdentifier());
+                    orderModified = true;
+                }
             } catch (PaymentExecutionException e) {
                 throw e;
             } catch (Exception e) {
                 throw new PaymentExecutionException(e.getMessage());
             }
+
+            if (orderModified) {
+                order = idObjectService.save(order);
+            }
+
+            return result;
         }
 
         return new PaymentExecutionResultDTO(order.getOrderState().getId().equals(DataConstants.OrderStates.PAID.getValue()));
@@ -308,13 +323,16 @@ public class MarketServiceImpl implements MarketService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void processPayment(Payment payment) throws InvalidOrderStateException, AccountNotFoundException, InsufficientFundsException {
-        Order order = idObjectService.getObjectById(Order.class, payment.getAccountNumber());
-        if (order != null && order.getOrderState().getId().equals(DataConstants.OrderStates.PENDING.getValue())) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("externalIdentifier", payment.getExternalIdentifier());
+        params.put("orderStateId", DataConstants.OrderStates.PENDING.getValue());
+        List<Order> orders = idObjectService.getList(Order.class, null, "(el.externalIdentifier=:externalIdentifier or el.id=:externalIdentifier) and el.orderState.id=:orderStateId", params, null, null, null, 1);
+        if (!orders.isEmpty()) {
+            Order order = orders.iterator().next();
             Long amountToPay = order.getTotalAmount() - order.getPaid();
             if (amountToPay > payment.getAmount()) {
                 amountToPay = payment.getAmount();
             }
-
             //Transfer money from user to organization
             payOrder(order, amountToPay, payment.getAccount().getId());
         }
@@ -450,7 +468,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts) throws ObjectNotFoundException {
-        Order entity = idObjectService.getObjectById(Order.class, enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount" : "", id);
+        Order entity = idObjectService.getObjectById(Order.class, enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -473,7 +491,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount" : "";
+        String fetches = enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
