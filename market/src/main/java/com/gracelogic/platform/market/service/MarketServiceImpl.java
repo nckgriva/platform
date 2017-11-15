@@ -8,6 +8,7 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
+import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.market.DataConstants;
 import com.gracelogic.platform.market.dao.MarketDao;
 import com.gracelogic.platform.market.dto.DiscountDTO;
@@ -140,10 +141,11 @@ public class MarketServiceImpl implements MarketService {
                     discountAmount = amount;
                 }
             } else if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.FIX_PERCENT_DISCOUNT.getValue())) {
-                if (discount.getAmount() == null) {
+                Long hundredPercents = FinanceUtils.toDecimal(100D);
+                if (discount.getAmount() == null || discount.getAmount() > hundredPercents) {
                     throw new InvalidDiscountException();
                 }
-                discountAmount -= amount / 100L * discount.getAmount();
+                discountAmount -= amount / hundredPercents * discount.getAmount();
             } else if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.GIFT_PRODUCT.getValue())) {
                 List<Product> onlyDiscountedProducts = new LinkedList<>();
                 for (Product product : products) {
@@ -600,6 +602,9 @@ public class MarketServiceImpl implements MarketService {
         entityListResponse.setPartCount(items.size());
         for (Product e : items) {
             ProductDTO el = ProductDTO.prepare(e);
+            if (enrich) {
+                ProductDTO.enrich(el, e);
+            }
             entityListResponse.addData(el);
         }
 
