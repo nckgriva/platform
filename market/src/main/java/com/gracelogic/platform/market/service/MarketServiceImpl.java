@@ -102,15 +102,18 @@ public class MarketServiceImpl implements MarketService {
             if (discount == null) {
                 throw new InvalidDiscountException();
             }
-            if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.GIFT_PRODUCT.getValue())) {
-                Map<String, Object> params = new HashMap<>();
-                params.put("discountId", discount.getId());
-                List<DiscountProduct> discountProducts = idObjectService.getList(DiscountProduct.class, null, "el.discount.id=:discountId", params, null, null, null, null);
-                for (DiscountProduct discountProduct : discountProducts) {
-                    discountProductIds.add(discountProduct.getProduct().getId());
-                }
+        } else if (dto.getDiscountId() != null) {
+            discount = idObjectService.getObjectById(Discount.class, dto.getDiscountId());
+        }
+        if (discount != null && discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.GIFT_PRODUCT.getValue())) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("discountId", discount.getId());
+            List<DiscountProduct> discountProducts = idObjectService.getList(DiscountProduct.class, null, "el.discount.id=:discountId", params, null, null, null, null);
+            for (DiscountProduct discountProduct : discountProducts) {
+                discountProductIds.add(discountProduct.getProduct().getId());
             }
         }
+
 
         //Get products to purchase
         productIds.addAll(discountProductIds);
@@ -695,7 +698,7 @@ public class MarketServiceImpl implements MarketService {
         List<DiscountProduct> discountProducts = Collections.emptyList();
         if (withProducts && !items.isEmpty()) {
             Set<UUID> discountIds = new HashSet<>();
-            for (Discount dis: items) {
+            for (Discount dis : items) {
                 discountIds.add(dis.getId());
             }
             Map<String, Object> productParams = new HashMap<>();

@@ -23,8 +23,8 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
     private static final String ACTION_EXECUTE = "execute";
     private static final String ACTION = "action";
 
-    private String SANDBOX_API_URL = "https://api.sandbox.paypal.com";
-    private String PRODUCTION_API_URL = "";
+    private static final String SANDBOX_API_URL = "https://api.sandbox.paypal.com";
+    private static final String PRODUCTION_API_URL = "https://api.paypal.com";
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -36,15 +36,17 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
             throw new PaymentExecutionException("Not specified action");
         }
 
-        String action = params.get(ACTION);
-        PropertyService propertyService = context.getBean("propertyService", PropertyService.class);
-        String apiUrl = null;
-        String accessToken = null;
-        if (propertyService.getPropertyValueAsBoolean("payment:paypal_is_production")) {
-            apiUrl = PRODUCTION_API_URL;
-        } else {
-            apiUrl = SANDBOX_API_URL;
+        PropertyService propertyService = null;
+        try {
+            propertyService = context.getBean("propertyService", PropertyService.class);
         }
+        catch (Exception e) {
+            throw new PaymentExecutionException(e.getMessage());
+        }
+
+        String action = params.get(ACTION);
+        String apiUrl = propertyService.getPropertyValueAsBoolean("payment:paypal_is_production") ? PRODUCTION_API_URL : SANDBOX_API_URL;
+        String accessToken = null;
 
         if (StringUtils.equalsIgnoreCase(action, ACTION_CREATE)) {
             PayPalCreateRequestDTO createRequestDTO = new PayPalCreateRequestDTO();
@@ -83,7 +85,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         }
     }
 
-    private PayPalCreateResponseDTO create(String apiUrl, String accessToken, PayPalCreateRequestDTO requestDTO) throws Exception {
+    private static PayPalCreateResponseDTO create(String apiUrl, String accessToken, PayPalCreateRequestDTO requestDTO) throws Exception {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
 
         String uri = apiUrl + "/v1/payments/payment";
@@ -102,7 +104,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         return mapper.readValue(response, PayPalCreateResponseDTO.class);
     }
 
-    private PayPalExecuteResponseDTO execute(String apiUrl, String accessToken, String id, PayPalExecuteRequestDTO requestDTO) throws Exception {
+    private static PayPalExecuteResponseDTO execute(String apiUrl, String accessToken, String id, PayPalExecuteRequestDTO requestDTO) throws Exception {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
 
         String uri = apiUrl + "/v1/payments/payment/" + id + "/execute/";
