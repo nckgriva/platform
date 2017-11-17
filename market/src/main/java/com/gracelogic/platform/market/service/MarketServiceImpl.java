@@ -581,7 +581,7 @@ public class MarketServiceImpl implements MarketService {
 
         if (!StringUtils.isEmpty(name)) {
             params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
-            cause += "and lower(el.name) like :name";
+            cause += "and lower(el.name) like :name ";
         }
         if (productTypeId != null) {
             params.put("productTypeId", productTypeId);
@@ -667,11 +667,16 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public EntityListResponse<DiscountDTO> getDiscountsPaged(UUID usedForOrderId, UUID discountTypeId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<DiscountDTO> getDiscountsPaged(String name, UUID usedForOrderId, UUID discountTypeId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? "left join fetch el.discountType" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (!StringUtils.isEmpty(name)) {
+            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+            cause += "and lower(el.name) like :name ";
+        }
 
         if (usedForOrderId != null) {
             cause += "and el.usedForOrder.id=:usedForOrderId ";

@@ -117,6 +117,7 @@ public class DiscountApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getDiscounts(
+            @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "usedForOrderId", required = false) UUID usedForOrderId,
             @RequestParam(value = "discountTypeId", required = false) UUID discountTypeId,
             @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
@@ -125,7 +126,7 @@ public class DiscountApi extends AbstractAuthorizedController {
             @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
             @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
             @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
-        EntityListResponse<DiscountDTO> docs = marketService.getDiscountsPaged(usedForOrderId, discountTypeId, enrich, withProducts, length, null, start, sortField, sortDir);
+        EntityListResponse<DiscountDTO> docs = marketService.getDiscountsPaged(name, usedForOrderId, discountTypeId, enrich, withProducts, length, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<DiscountDTO>>(docs, HttpStatus.OK);
     }
 }
