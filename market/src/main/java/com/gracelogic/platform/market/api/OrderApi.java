@@ -151,7 +151,8 @@ public class OrderApi extends AbstractAuthorizedController {
         } catch (InsufficientFundsException e) {
             return new ResponseEntity<>(new ErrorResponse("account.INSUFFICIENT_FUNDS", accountMessageSource.getMessage("account.INSUFFICIENT_FUNDS", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (PaymentExecutionException e) {
-            return new ResponseEntity<>(new ErrorResponse("payment.FAILED_TO_EXECUTE_PAYMENT", accountMessageSource.getMessage("payment.FAILED_TO_EXECUTE_PAYMENT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            e.printStackTrace();
+            return new ResponseEntity<>(new ErrorResponse("payment.FAILED_TO_EXECUTE_PAYMENT", paymentMessageSource.getMessage("payment.FAILED_TO_EXECUTE_PAYMENT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 

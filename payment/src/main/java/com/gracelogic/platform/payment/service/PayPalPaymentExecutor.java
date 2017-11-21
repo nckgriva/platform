@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationContext;
 
 
 import java.util.Map;
+import java.util.UUID;
 
 public class PayPalPaymentExecutor implements PaymentExecutor {
     private static final String ACTION_CREATE = "create";
@@ -31,7 +32,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
     private static Logger logger = Logger.getLogger(PayPalPaymentExecutor.class);
 
     @Override
-    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, Long amount, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
         if (params == null || !params.containsKey(ACTION)) {
             throw new PaymentExecutionException("Not specified action");
         }

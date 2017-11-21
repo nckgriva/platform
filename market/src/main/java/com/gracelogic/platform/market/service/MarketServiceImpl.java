@@ -265,7 +265,7 @@ public class MarketServiceImpl implements MarketService {
             PaymentExecutionResultDTO result = null;
             try {
                 PaymentExecutor paymentExecutor = initializePaymentExecutor(paymentSystem.getPaymentExecutorClass());
-                result = paymentExecutor.execute(String.valueOf(order.getId()), amountToPay, applicationContext, params);
+                result = paymentExecutor.execute(String.valueOf(order.getId()), paymentSystemId, amountToPay, applicationContext, params);
                 if (!StringUtils.isEmpty(result.getExternalIdentifier()) && !StringUtils.equals(order.getExternalIdentifier(), result.getExternalIdentifier())) {
                     order.setExternalIdentifier(result.getExternalIdentifier());
                     orderModified = true;
@@ -273,6 +273,7 @@ public class MarketServiceImpl implements MarketService {
             } catch (PaymentExecutionException e) {
                 throw e;
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new PaymentExecutionException(e.getMessage());
             }
 
@@ -331,8 +332,9 @@ public class MarketServiceImpl implements MarketService {
     public void processPayment(Payment payment) throws InvalidOrderStateException, AccountNotFoundException, InsufficientFundsException {
         Map<String, Object> params = new HashMap<>();
         params.put("externalIdentifier", payment.getExternalIdentifier());
+
         params.put("orderStateId", DataConstants.OrderStates.PENDING.getValue());
-        List<Order> orders = idObjectService.getList(Order.class, null, "(el.externalIdentifier=:externalIdentifier or el.id=:externalIdentifier) and el.orderState.id=:orderStateId", params, null, null, null, 1);
+        List<Order> orders = idObjectService.getList(Order.class, null, "el.externalIdentifier=:externalIdentifier and el.orderState.id=:orderStateId", params, null, null, null, 1);
         if (!orders.isEmpty()) {
             Order order = orders.iterator().next();
             Long amountToPay = order.getTotalAmount() - order.getPaid();
