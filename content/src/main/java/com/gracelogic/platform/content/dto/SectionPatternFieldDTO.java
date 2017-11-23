@@ -10,6 +10,7 @@ public class SectionPatternFieldDTO extends IdObjectDTO {
     private String name;
     private Boolean nullable;
     private UUID sectionPatternId;
+    private UUID elementFieldTypeId;
 
     public String getCode() {
         return code;
@@ -43,6 +44,14 @@ public class SectionPatternFieldDTO extends IdObjectDTO {
         this.sectionPatternId = sectionPatternId;
     }
 
+    public UUID getElementFieldTypeId() {
+        return elementFieldTypeId;
+    }
+
+    public void setElementFieldTypeId(UUID elementFieldTypeId) {
+        this.elementFieldTypeId = elementFieldTypeId;
+    }
+
     public static SectionPatternFieldDTO prepare(SectionPatternField field) {
         SectionPatternFieldDTO dto = new SectionPatternFieldDTO();
         IdObjectDTO.prepare(dto, field);
@@ -52,6 +61,9 @@ public class SectionPatternFieldDTO extends IdObjectDTO {
         dto.setNullable(field.getNullable());
         if (field.getSectionPattern() != null) {
             dto.setSectionPatternId(field.getSectionPattern().getId());
+        }
+        if (field.getElementFieldType() != null) {
+            dto.setElementFieldTypeId(field.getElementFieldType().getId());
         }
 
         return dto;
