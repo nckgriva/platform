@@ -40,6 +40,10 @@ public class SectionPatternField extends IdObject<UUID> {
     @JoinColumn(name = "SECTION_PATTERN_ID", nullable = false)
     private SectionPattern sectionPattern;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ELEMENT_FIELD_TYPE_ID", nullable = false)
+    private ElementFieldType elementFieldType;
+
     @Override
     public UUID getId() {
         return id;
@@ -100,5 +104,13 @@ public class SectionPatternField extends IdObject<UUID> {
 
     public void setSectionPattern(SectionPattern sectionPattern) {
         this.sectionPattern = sectionPattern;
+    }
+
+    public ElementFieldType getElementFieldType() {
+        return elementFieldType;
+    }
+
+    public void setElementFieldType(ElementFieldType elementFieldType) {
+        this.elementFieldType = elementFieldType;
     }
 }

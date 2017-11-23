@@ -1,4 +1,4 @@
-package com.gracelogic.platform.filestorage.model;
+package com.gracelogic.platform.content.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "STORE_MODE")
-public class StoreMode extends IdObject<UUID> implements Dictionary {
+@Table(name = JPAProperties.TABLE_PREFIX + "ELEMENT_FIELD_TYPE")
+public class ElementFieldType extends IdObject<UUID> implements Dictionary {
     @Id
     @Access(AccessType.PROPERTY)
     @Column(name = ID)
