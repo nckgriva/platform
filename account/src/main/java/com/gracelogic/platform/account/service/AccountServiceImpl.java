@@ -1,5 +1,6 @@
 package com.gracelogic.platform.account.service;
 
+import com.gracelogic.platform.account.dto.AccountDTO;
 import com.gracelogic.platform.account.dto.TransactionDTO;
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.account.exception.InsufficientFundsException;
@@ -7,8 +8,11 @@ import com.gracelogic.platform.account.model.Account;
 import com.gracelogic.platform.account.model.Transaction;
 import com.gracelogic.platform.account.model.TransactionType;
 import com.gracelogic.platform.db.dto.EntityListResponse;
+import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
+import com.gracelogic.platform.user.model.User;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,4 +110,74 @@ public class AccountServiceImpl implements AccountService {
 
         return entityListResponse;
     }
+
+    @Override
+    public EntityListResponse<AccountDTO> getAccountsPaged(UUID accountTypeId, UUID accountCurrencyId, UUID userId, String externalIdentifier, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = enrich ? "left join fetch el.user left join fetch el.accountType left join fetch el.accountCurrency" : "";
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (!StringUtils.isEmpty(externalIdentifier)) {
+            params.put("externalIdentifier", "%%" + StringUtils.lowerCase(externalIdentifier) + "%%");
+            cause += "and lower(el.externalIdentifier) like :externalIdentifier ";
+        }
+
+        if (accountTypeId != null) {
+            cause += "and el.accountType.id = :accountTypeId ";
+            params.put("accountTypeId", accountTypeId);
+        }
+
+        if (accountCurrencyId != null) {
+            cause += "and el.accountCurrency.id = :accountCurrencyId ";
+            params.put("accountCurrencyId", accountCurrencyId);
+        }
+
+        if (userId != null) {
+            cause += "and el.user.id = :userId ";
+            params.put("userId", userId);
+        }
+
+        int totalCount = idObjectService.getCount(Account.class, null, countFetches, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<AccountDTO> entityListResponse = new EntityListResponse<AccountDTO>();
+        entityListResponse.setEntity("account");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<Account> items = idObjectService.getList(Account.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        entityListResponse.setPartCount(items.size());
+        for (Account e : items) {
+            AccountDTO el = AccountDTO.prepare(e);
+            if (enrich) {
+                AccountDTO.enrich(el, e);
+            }
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
+    
+    @Override
+    public AccountDTO getAccount(UUID id, boolean enrich) throws ObjectNotFoundException {
+        Account entity = idObjectService.getObjectById(Account.class, enrich ? "left join fetch el.user left join fetch el.accountType left join fetch el.accountCurrency" : "",id);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+        AccountDTO dto = AccountDTO.prepare(entity);
+        if (enrich) {
+            AccountDTO.enrich(dto, entity);
+        }
+        return dto;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteAccount(UUID id) {
+        idObjectService.delete(Account.class, id);
+    }
+
 }
