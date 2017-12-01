@@ -6,6 +6,8 @@ import com.gracelogic.platform.content.model.Element;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.db.dto.JsonDateDeserializer;
 import com.gracelogic.platform.db.dto.JsonDateSerializer;
+import com.gracelogic.platform.localization.service.LocaleHolder;
+import com.gracelogic.platform.localization.service.StringConverter;
 import com.gracelogic.platform.user.service.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,6 +31,8 @@ public class ElementDTO extends IdObjectDTO {
     public String getName() {
         return name;
     }
+
+    public String getNameLocalized() {return StringConverter.getInstance().process(name, LocaleHolder.getLocale());}
 
     public void setName(String name) {
         this.name = name;
@@ -102,6 +106,18 @@ public class ElementDTO extends IdObjectDTO {
 
     public void setSectionPattern(SectionPatternDTO sectionPattern) {
         this.sectionPattern = sectionPattern;
+    }
+
+    public Map<String, String> getFieldsLocalized() {
+        Map<String, String> fieldsLocalized = null;
+        if (fields != null) {
+            fieldsLocalized = new HashMap<>();
+            for (String key : fields.keySet()) {
+                fieldsLocalized.put(key, StringConverter.getInstance().process(fields.get(key), LocaleHolder.getLocale()));
+            }
+        }
+
+        return fieldsLocalized;
     }
 
     public static ElementDTO prepare(Element element) {

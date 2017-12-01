@@ -2,6 +2,8 @@ package com.gracelogic.platform.content.dto;
 
 import com.gracelogic.platform.content.model.Section;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
+import com.gracelogic.platform.localization.service.LocaleHolder;
+import com.gracelogic.platform.localization.service.StringConverter;
 
 import java.util.LinkedList;
 import java.util.UUID;
@@ -21,6 +23,8 @@ public class SectionDTO extends IdObjectDTO {
         return name;
     }
 
+    public String getNameLocalized() {return StringConverter.getInstance().process(name, LocaleHolder.getLocale());}
+
     public void setName(String name) {
         this.name = name;
     }
@@ -32,6 +36,8 @@ public class SectionDTO extends IdObjectDTO {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public String getDescriptionLocalized() {return StringConverter.getInstance().process(description, LocaleHolder.getLocale());}
 
     public Boolean getActive() {
         return active;
