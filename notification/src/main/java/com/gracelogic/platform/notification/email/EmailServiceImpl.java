@@ -23,21 +23,9 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public boolean sendMessage(Message message) {
-        logger.info(String.format("SENDING EMAIL TO: %s", message.getTo()));
+        logger.info(String.format("Sending e-mail to: %s", message.getTo()));
 
         try {
-//            Properties p = new Properties();
-//            p.put("mail.smtp.host", "smtp.yandex.ru");
-//            p.put("mail.smtp.port", "465");
-//            p.put("mail.smtp.auth", "true");
-//            p.put("mail.smtp.socketFactory.port", "465");
-//            p.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-//            p.put("mail.smtp.ssl.enable", "true");
-//            Authenticator auth = new Authenticator() {
-//                protected PasswordAuthentication getPasswordAuthentication() {
-//                    return new PasswordAuthentication("no-reply@leofinance.com", "OR2g7z"); //TODO: Вынести это в проперти
-//                }
-//            };
             Properties p = new Properties();
             p.put("mail.smtp.host", propertyService.getPropertyValue("notification:smtp_host"));
             p.put("mail.smtp.port", propertyService.getPropertyValue("notification:smtp_port"));
@@ -66,10 +54,10 @@ public class EmailServiceImpl implements EmailService {
 
             Transport.send(msg);
         } catch (Exception e) {
-            logger.error(String.format("FAILED TO SEND EMAIL TO: %s.", message.getTo()), e);
+            logger.error(String.format("Failed to send email to: %s.", message.getTo()), e);
             return false;
         }
-        logger.info("EMAIL SENT SUCCESSFULLY");
+        logger.info("Email send successfully");
         return true;
     }
 

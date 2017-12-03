@@ -415,6 +415,10 @@ public class MarketServiceImpl implements MarketService {
     }
 
     public void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedUserId, Date checkOnDate) {
+        if (objects == null || objects.isEmpty()) {
+            return;
+        }
+
         Map<UUID, UUID> referenceObjectIdsAndProductTypeIds = new HashMap<>();
         for (MarketAwareObjectDTO dto : objects) {
             if (dto.getId() == null) {
