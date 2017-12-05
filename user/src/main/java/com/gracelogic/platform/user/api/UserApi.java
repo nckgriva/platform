@@ -260,7 +260,7 @@ public class UserApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "phoneValid",
-            notes = "Validate prhone number",
+            notes = "Validate phone number",
             response = ResponseEntity.class
     )
     @ApiResponses({
@@ -368,7 +368,7 @@ public class UserApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "sendRepairCode",
-            notes = "Send code for repair account",
+            notes = "Send code for repair account password",
             response = ResponseEntity.class
     )
     @ApiResponses({

@@ -44,10 +44,14 @@ public abstract class AbstractMarketDaoImpl extends BaseDao implements MarketDao
                 buildCheckPurchasingQuery(), params, null, null, null, null);
     }
 
-    public List<Product> getProductsByReferenceObjectIds(Collection<UUID> referenceObjectIds) {
+    public List<Product> getProductsByReferenceObjectIds(Collection<UUID> referenceObjectIds, boolean onlyPrimary) {
         Map<String, Object> params = new HashMap<>();
         params.put("referenceObjectIds", referenceObjectIds);
+        String cause = "el.referenceObjectId in (:referenceObjectIds) ";
+        if (onlyPrimary) {
+            cause += "and el.primary=true";
+        }
 
-        return idObjectService.getList(Product.class, null, "el.referenceObjectId in (:referenceObjectIds) ", params, null, null, null, null);
+        return idObjectService.getList(Product.class, null, cause, params, null, null, null, null);
     }
 }

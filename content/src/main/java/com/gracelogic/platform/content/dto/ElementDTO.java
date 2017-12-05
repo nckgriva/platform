@@ -1,5 +1,6 @@
 package com.gracelogic.platform.content.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.gracelogic.platform.content.model.Element;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ElementDTO extends IdObjectDTO {
     private String name;
     private Integer sortOrder;

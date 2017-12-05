@@ -8,10 +8,7 @@ import com.gracelogic.platform.market.dto.DiscountDTO;
 import com.gracelogic.platform.market.dto.MarketAwareObjectDTO;
 import com.gracelogic.platform.market.dto.OrderDTO;
 import com.gracelogic.platform.market.dto.ProductDTO;
-import com.gracelogic.platform.market.exception.InvalidDiscountException;
-import com.gracelogic.platform.market.exception.InvalidOrderStateException;
-import com.gracelogic.platform.market.exception.OrderNotConsistentException;
-import com.gracelogic.platform.market.exception.ProductNotPurchasedException;
+import com.gracelogic.platform.market.exception.*;
 import com.gracelogic.platform.market.model.Discount;
 import com.gracelogic.platform.market.model.Order;
 import com.gracelogic.platform.market.model.Product;
@@ -47,7 +44,7 @@ public interface MarketService {
 
     EntityListResponse<ProductDTO> getProductsPaged(String name, UUID productTypeId, Boolean active, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
-    Product saveProduct(ProductDTO dto) throws ObjectNotFoundException;
+    Product saveProduct(ProductDTO dto) throws ObjectNotFoundException, PrimaryProductException;
 
     void deleteProduct(UUID id) throws ObjectNotFoundException;
 
@@ -66,7 +63,7 @@ public interface MarketService {
 
     Map<UUID, Boolean> getProductsPurchaseState(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate);
 
-    Map<UUID, Product> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds);
+    Map<UUID, Product> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, boolean onlyPrimary);
 
     void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedUserId, Date checkOnDate);
 }

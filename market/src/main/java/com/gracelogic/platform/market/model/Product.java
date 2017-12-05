@@ -46,6 +46,9 @@ public class Product extends IdObject<UUID> {
     @Column(name = "PRICE", nullable = true)
     private Long price;
 
+    @Column(name = "IS_PRIMARY", nullable = false)
+    private Boolean primary; //Используется для приоретености, например, enrichMarket подтягивает только такие продукты
+
     @Override
     public UUID getId() {
         return id;
@@ -122,5 +125,13 @@ public class Product extends IdObject<UUID> {
 
     public void setPrice(Long price) {
         this.price = price;
+    }
+
+    public Boolean getPrimary() {
+        return primary;
+    }
+
+    public void setPrimary(Boolean primary) {
+        this.primary = primary;
     }
 }

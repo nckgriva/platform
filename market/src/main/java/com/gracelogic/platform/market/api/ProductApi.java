@@ -5,6 +5,7 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.market.Path;
 import com.gracelogic.platform.market.dto.ProductDTO;
+import com.gracelogic.platform.market.exception.PrimaryProductException;
 import com.gracelogic.platform.market.model.Product;
 import com.gracelogic.platform.market.service.MarketService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
@@ -32,6 +33,10 @@ public class ProductApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource dbMessageSource;
+
+    @Autowired
+    @Qualifier("marketMessageSource")
+    private ResourceBundleMessageSource marketMessageSource;
 
     @Autowired
     private MarketService marketService;
@@ -78,6 +83,8 @@ public class ProductApi extends AbstractAuthorizedController {
             return new ResponseEntity<IDResponse>(new IDResponse(product.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (PrimaryProductException e) {
+            return new ResponseEntity<>(new ErrorResponse("market.PRIMARY_PRODUCT_CONFLICT", marketMessageSource.getMessage("market.PRIMARY_PRODUCT_CONFLICT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 

@@ -293,7 +293,7 @@ public class UserServiceImpl implements UserService {
             if (templateParams == null) {
                 templateParams = new HashMap<>();
             }
-            //templateParams.put("userId", user.getId().toString());
+            templateParams.put("userId", user.getId().toString());
             templateParams.put("loginType", loginType);
             templateParams.put("login", login);
             templateParams.put("baseUrl", propertyService.getPropertyValue("web:base_url"));

@@ -45,18 +45,10 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
             }
             catch (Exception ignored) {}
         }
-        String accessTokenResponse = OAuthUtils.getQueryReturnText(String.format(ACCESS_TOKEN_ENDPOINT, CLIENT_ID, sRedirectUri, CLIENT_SECRET, code));
+        Map<Object, Object> accessTokenResponse = OAuthUtils.getQueryReturnJson(String.format(ACCESS_TOKEN_ENDPOINT, CLIENT_ID, sRedirectUri, CLIENT_SECRET, code));
         String accessToken = null;
-        if (!StringUtils.isEmpty(accessTokenResponse)) {
-            StringTokenizer st = new StringTokenizer(accessTokenResponse, "&");
-            while (st.hasMoreTokens()) {
-                StringTokenizer stt = new StringTokenizer(st.nextToken(), "=");
-
-                if (StringUtils.equalsIgnoreCase(stt.nextToken(), "access_token")) {
-                    accessToken = stt.nextToken();
-                    break;
-                }
-            }
+        if (accessTokenResponse != null && accessTokenResponse.containsKey("access_token")) {
+            accessToken = (String) accessTokenResponse.get("access_token");
         }
         if (accessToken == null) {
             return null;

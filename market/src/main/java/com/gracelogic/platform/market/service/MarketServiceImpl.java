@@ -15,10 +15,7 @@ import com.gracelogic.platform.market.dto.DiscountDTO;
 import com.gracelogic.platform.market.dto.MarketAwareObjectDTO;
 import com.gracelogic.platform.market.dto.OrderDTO;
 import com.gracelogic.platform.market.dto.ProductDTO;
-import com.gracelogic.platform.market.exception.InvalidDiscountException;
-import com.gracelogic.platform.market.exception.InvalidOrderStateException;
-import com.gracelogic.platform.market.exception.OrderNotConsistentException;
-import com.gracelogic.platform.market.exception.ProductNotPurchasedException;
+import com.gracelogic.platform.market.exception.*;
 import com.gracelogic.platform.market.model.*;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
@@ -393,9 +390,9 @@ public class MarketServiceImpl implements MarketService {
         return result;
     }
 
-    public Map<UUID, Product> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds) {
+    public Map<UUID, Product> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, boolean onlyPrimary) {
         Map<UUID, Product> result = new HashMap<>();
-        List<Product> products = marketDao.getProductsByReferenceObjectIds(referenceObjectIdsAndProductTypeIds.keySet());
+        List<Product> products = marketDao.getProductsByReferenceObjectIds(referenceObjectIdsAndProductTypeIds.keySet(), onlyPrimary);
 
         for (UUID referenceObjectId : referenceObjectIdsAndProductTypeIds.keySet()) {
             UUID productTypeId = referenceObjectIdsAndProductTypeIds.get(referenceObjectId);
@@ -432,7 +429,7 @@ public class MarketServiceImpl implements MarketService {
             purchased = getProductsPurchaseState(relatedUserId, referenceObjectIdsAndProductTypeIds, checkOnDate);
         }
 
-        Map<UUID, Product> products = findProducts(referenceObjectIdsAndProductTypeIds);
+        Map<UUID, Product> products = findProducts(referenceObjectIdsAndProductTypeIds, true);
 
         for (MarketAwareObjectDTO dto : objects) {
             if (dto.getId() == null) {
@@ -622,7 +619,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Product saveProduct(ProductDTO dto) throws ObjectNotFoundException {
+    public Product saveProduct(ProductDTO dto) throws ObjectNotFoundException, PrimaryProductException {
         Product entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Product.class, dto.getId());
@@ -633,12 +630,24 @@ public class MarketServiceImpl implements MarketService {
             entity = new Product();
         }
 
+        if ((entity.getId() != null && !entity.getPrimary() && dto.getPrimary()) || entity.getId() == null && dto.getPrimary()) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("productTypeId", entity.getProductType().getId());
+            params.put("referenceObjectId", entity.getReferenceObjectId());
+
+            if (idObjectService.checkExist(Product.class, null, "el.productType.id=:productTypeId and el.referenceObjectId=:referenceObjectId and el.primary=true", params, 1) > 0) {
+                throw new PrimaryProductException();
+            }
+        }
+
         entity.setName(dto.getName());
         entity.setActive(dto.getActive());
         entity.setProductType(ds.get(ProductType.class, dto.getProductTypeId()));
         entity.setReferenceObjectId(dto.getReferenceObjectId());
         entity.setLifetime(dto.getLifetime());
         entity.setPrice(dto.getPrice());
+        entity.setPrimary(dto.getPrimary());
+
 
         return idObjectService.save(entity);
     }

@@ -1,10 +1,12 @@
 package com.gracelogic.platform.user.dao;
 
 import com.gracelogic.platform.db.dao.BaseDao;
+import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.user.model.AuthCode;
 import com.gracelogic.platform.user.model.IncorrectLoginAttempt;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.service.DataConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 
@@ -17,6 +19,13 @@ public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
 
     @Override
     public User getUserByField(String fieldName, Object fieldValue) {
+        if (StringUtils.equalsIgnoreCase(fieldName, IdObject.ID) && fieldValue != null && fieldValue instanceof String) {
+            try {
+                fieldValue = UUID.fromString((String) fieldValue);
+            }
+            catch (Exception ignored) {}
+        }
+
         User user = null;
         String query = String.format("select user from User user left join fetch user.userRoles where user.%s = :fieldValue", fieldName);
         try {

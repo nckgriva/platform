@@ -14,6 +14,7 @@ public class ProductDTO extends IdObjectDTO {
     private Boolean active;
     private Long lifetime;
     private Long price;
+    private Boolean primary;
 
     public String getName() {
         return name;
@@ -77,6 +78,14 @@ public class ProductDTO extends IdObjectDTO {
         this.price = FinanceUtils.stringToLong(sPrice);
     }
 
+    public Boolean getPrimary() {
+        return primary;
+    }
+
+    public void setPrimary(Boolean primary) {
+        this.primary = primary;
+    }
+
     public static ProductDTO prepare(Product model) {
         ProductDTO dto = new ProductDTO();
         IdObjectDTO.prepare(dto, model);
@@ -89,6 +98,7 @@ public class ProductDTO extends IdObjectDTO {
         dto.setReferenceObjectId(model.getReferenceObjectId());
         dto.setLifetime(model.getLifetime());
         dto.setPrice(model.getPrice());
+        dto.setPrimary(model.getPrimary());
         return dto;
     }
 

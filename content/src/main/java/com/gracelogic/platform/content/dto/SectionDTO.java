@@ -1,5 +1,6 @@
 package com.gracelogic.platform.content.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gracelogic.platform.content.model.Section;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.localization.service.LocaleHolder;
@@ -8,6 +9,7 @@ import com.gracelogic.platform.localization.service.StringConverter;
 import java.util.LinkedList;
 import java.util.UUID;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SectionDTO extends IdObjectDTO {
     private String name;
     private String description;

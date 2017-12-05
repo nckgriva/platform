@@ -13,5 +13,5 @@ public interface MarketDao {
 
     List<OrderProduct> getPurchasedProducts(UUID userId, Collection<UUID> referenceObjectIds, Date checkOnDate);
 
-    List<Product> getProductsByReferenceObjectIds(Collection<UUID> referenceObjectIds);
+    List<Product> getProductsByReferenceObjectIds(Collection<UUID> referenceObjectIds, boolean onlyPrimary);
 }

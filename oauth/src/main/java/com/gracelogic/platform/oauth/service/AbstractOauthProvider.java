@@ -76,6 +76,6 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
     }
 
     public String getRedirectUrl(String providerName) {
-        return String.format("%s%s/%s", propertyService.getPropertyValue("web:base_url"), Path.OAUTH, providerName);
+        return String.format("%s%s/%s", propertyService.getPropertyValue("web:api_url"), Path.OAUTH, providerName);
     }
 }
