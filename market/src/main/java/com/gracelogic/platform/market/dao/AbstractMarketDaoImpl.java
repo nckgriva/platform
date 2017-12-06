@@ -18,7 +18,7 @@ public abstract class AbstractMarketDaoImpl extends BaseDao implements MarketDao
 
     private String buildCheckPurchasingQuery() {
         return "ord.user.id=:userId and ord.orderState.id=:orderStateId " +
-                "and (el.lifetimeExpiration is null or el.lifetimeExpiration < :checkOnDate) " +
+                "and (el.lifetimeExpiration is null or el.lifetimeExpiration >= :checkOnDate) " +
                 "and el.product.referenceObjectId in (:referenceObjectIds) ";
     }
 
