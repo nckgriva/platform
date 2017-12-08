@@ -2,12 +2,16 @@ package com.gracelogic.platform.payment.dto.paypal;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PayPalCreateRequestDTO {
     private String intent;
     private String experience_profile_id;
     private PayPalRedirectUrlsDTO redirect_urls;
     private PayPalPayerDTO payer;
+    private List<PayPalTransactionDTO> transactions = new LinkedList<>();
 
     public String getIntent() {
         return intent;
@@ -39,5 +43,13 @@ public class PayPalCreateRequestDTO {
 
     public void setPayer(PayPalPayerDTO payer) {
         this.payer = payer;
+    }
+
+    public List<PayPalTransactionDTO> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<PayPalTransactionDTO> transactions) {
+        this.transactions = transactions;
     }
 }

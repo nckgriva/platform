@@ -9,7 +9,7 @@ public class LocaleHolder {
 
     public static Locale getLocale() {
         if (locale.get() == null) {
-            return Locale.getDefault();
+            return LocaleUtils.toLocale("en_US");
         }
         else {
             return locale.get();
