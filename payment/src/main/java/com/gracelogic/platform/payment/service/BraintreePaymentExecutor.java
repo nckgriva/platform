@@ -10,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,5 +89,10 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
         } else {
             throw new PaymentExecutionException("Invalid action value");
         }
+    }
+
+    @Override
+    public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) {
+        throw new RuntimeException("Not implemented");
     }
 }

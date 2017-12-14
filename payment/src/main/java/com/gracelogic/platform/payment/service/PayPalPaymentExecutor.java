@@ -19,6 +19,8 @@ import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -118,6 +120,11 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         } else {
             throw new PaymentExecutionException("Invalid action value");
         }
+    }
+
+    @Override
+    public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) {
+        throw new RuntimeException("Not implemented");
     }
 
     private static PayPalOAuthResponseDTO token(String apiUrl, String clientId, String secret) throws Exception {

@@ -26,7 +26,7 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User accessToken(String code, String redirectUri) {
+    public User processAuthorization(String code, String redirectUri) {
         String CLIENT_ID = propertyService.getPropertyValue("oauth:instagram_client_id");
         String CLIENT_SECRET = propertyService.getPropertyValue("oauth:instagram_client_secret");
 
@@ -71,7 +71,7 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
         OAuthDTO.setFirstName(name);
         OAuthDTO.setLastName(surname);
 
-        return processAuth(DataConstants.OAuthProviders.INSTAGRAM.getValue(), code, OAuthDTO);
+        return processAuthorization(DataConstants.OAuthProviders.INSTAGRAM.getValue(), code, OAuthDTO);
     }
 
     @Override

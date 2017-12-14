@@ -30,7 +30,7 @@ public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider impl
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User accessToken(String code, String redirectUri) {
+    public User processAuthorization(String code, String redirectUri) {
         String CLIENT_ID = propertyService.getPropertyValue("oauth:linkedin_client_id");
         String CLIENT_SECRET = propertyService.getPropertyValue("oauth:linkedin_client_secret");
 
@@ -61,7 +61,7 @@ public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider impl
         OAuthDTO.setLastName(response.get("lastName") != null ? (String) response.get("lastName") : null);
         OAuthDTO.setEmail(response.get("emailAddress") != null ? (String) response.get("emailAddress") : null);
 
-        return processAuth(DataConstants.OAuthProviders.LINKEDIN.getValue(), code, OAuthDTO);
+        return processAuthorization(DataConstants.OAuthProviders.LINKEDIN.getValue(), code, OAuthDTO);
     }
 
     @Override

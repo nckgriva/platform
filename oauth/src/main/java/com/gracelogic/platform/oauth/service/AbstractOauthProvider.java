@@ -32,7 +32,7 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
     private PropertyService propertyService;
 
 
-    protected User processAuth(UUID authProviderId, String code, OAuthDTO OAuthDTO) {
+    protected User processAuthorization(UUID authProviderId, String code, OAuthDTO OAuthDTO) {
         Map<String, Object> params = new HashMap<>();
         params.put("externalUserId", OAuthDTO.getUserId());
         params.put("authProviderId", authProviderId);

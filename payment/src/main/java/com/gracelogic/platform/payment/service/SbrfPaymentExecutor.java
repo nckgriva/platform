@@ -1,23 +1,17 @@
-package com.gracelogic.platform.payment.controller;
+package com.gracelogic.platform.payment.service;
 
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.account.model.Account;
-import com.gracelogic.platform.db.service.IdObjectService;
-import com.gracelogic.platform.payment.DataConstants;
-import com.gracelogic.platform.payment.Path;
+import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentAlreadyExistException;
+import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.payment.model.Payment;
-import com.gracelogic.platform.payment.model.PaymentSystem;
-import com.gracelogic.platform.payment.service.PaymentService;
 import com.gracelogic.platform.web.ServletUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,12 +19,11 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
-@Controller
-@RequestMapping(value = Path.PAYMENT_SBRF)
-public class SbrfController {
-
-    private static Logger logger = Logger.getLogger(SbrfController.class);
+//TODO: Проверить безопасность этого способа оплаты
+public class SbrfPaymentExecutor implements PaymentExecutor {
+    private static Logger logger = Logger.getLogger(SbrfPaymentExecutor.class);
 
     private static final String ACTION_CHECK = "check";
     private static final String ACTION_PAY = "payment";
@@ -41,15 +34,20 @@ public class SbrfController {
             "%s" +
             "</response>\n ";
 
-    @Autowired
-    private IdObjectService idObjectService;
+    @Override
+    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
+        throw new RuntimeException("Not implemented");
+    }
 
-    @Autowired
-    private PaymentService paymentService;
-
-    @RequestMapping(method = {RequestMethod.POST, RequestMethod.GET})
-    public void process(HttpServletRequest request,
-                        HttpServletResponse response) {
+    @Override
+    public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) throws PaymentExecutionException {
+        PaymentService paymentService = null;
+        try {
+            paymentService = context.getBean(PaymentService.class);
+        }
+        catch (Exception e) {
+            throw new PaymentExecutionException(e.getMessage());
+        }
 
         String action = null;
         String account = null;
@@ -79,31 +77,11 @@ public class SbrfController {
         logger.info("PAY_ID:" + payId);
         logger.info("PAY_DATE:" + payDate);
 
-        PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, DataConstants.PaymentSystems.YANDEX_MONEY.getValue());
-
-        if (paymentSystem == null || !paymentSystem.getActive()) {
-            response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-            try {
-                response.flushBuffer();
-            } catch (IOException ignored) {
-            }
-            return;
-        }
-
-        if (!StringUtils.isEmpty(paymentSystem.getAllowedAddresses()) && !StringUtils.contains(paymentSystem.getAllowedAddresses(), ServletUtils.getRemoteAddress(request))) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            try {
-                response.flushBuffer();
-            } catch (IOException ignored) {
-            }
-            return;
-        }
-
         String resp;
         if (StringUtils.equalsIgnoreCase(action, ACTION_CHECK)) {
             Account result = null;
             try {
-                result = paymentService.checkPaymentAbility(paymentSystem.getId(), account, "RUR");
+                result = paymentService.checkPaymentAbility(paymentSystemId, account, "RUR");
             } catch (Exception ignored) {
             }
 
@@ -121,7 +99,7 @@ public class SbrfController {
             paymentModel.setExternalTypeUID(null);
 
             try {
-                Payment result = paymentService.processPayment(paymentSystem.getId(), paymentModel, null);
+                Payment result = paymentService.processPayment(paymentSystemId, paymentModel, null);
                 resp = String.format(RESPONSE_TEMPLATE, String.format("<CODE>0</CODE><MESSAGE>OK</MESSAGE><REG_DATE>%s</REG_DATE>", DATE_FORMAT.format(new Date())));
 
             } catch (PaymentAlreadyExistException e) {

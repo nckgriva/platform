@@ -30,7 +30,7 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User accessToken(String code, String redirectUri) {
+    public User processAuthorization(String code, String redirectUri) {
         String CLIENT_ID = propertyService.getPropertyValue("oauth:ok_client_id");
         String CLIENT_SECRET = propertyService.getPropertyValue("oauth:ok_client_secret");
         String PUBLIC_KEY = propertyService.getPropertyValue("oauth:ok_public_key");
@@ -64,7 +64,7 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
         OAuthDTO.setFirstName(response.get("first_name") != null ? (String) response.get("first_name") : null);
         OAuthDTO.setLastName(response.get("last_name") != null ? (String) response.get("last_name") : null);
 
-        return processAuth(DataConstants.OAuthProviders.OK.getValue(), code, OAuthDTO);
+        return processAuthorization(DataConstants.OAuthProviders.OK.getValue(), code, OAuthDTO);
     }
 
     @Override

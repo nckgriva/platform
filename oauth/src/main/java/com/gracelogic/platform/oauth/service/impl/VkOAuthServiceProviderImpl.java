@@ -29,7 +29,7 @@ public class VkOAuthServiceProviderImpl extends AbstractOauthProvider implements
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User accessToken(String code, String redirectUri) {
+    public User processAuthorization(String code, String redirectUri) {
         String CLIENT_ID = propertyService.getPropertyValue("oauth:vk_client_id");
         String CLIENT_SECRET = propertyService.getPropertyValue("oauth:vk_client_secret");
 
@@ -63,7 +63,7 @@ public class VkOAuthServiceProviderImpl extends AbstractOauthProvider implements
         OAuthDTO.setLastName(response.get("last_name") != null ? (String) response.get("last_name") : null);
         OAuthDTO.setPhone(response.get("mobile_phone") != null ? (String) response.get("mobile_phone") : null);
 
-        return processAuth(DataConstants.OAuthProviders.VK.getValue(), code, OAuthDTO);
+        return processAuthorization(DataConstants.OAuthProviders.VK.getValue(), code, OAuthDTO);
     }
 
     @Override

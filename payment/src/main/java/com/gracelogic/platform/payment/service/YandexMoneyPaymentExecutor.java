@@ -1,33 +1,27 @@
-package com.gracelogic.platform.payment.controller;
+package com.gracelogic.platform.payment.service;
 
 import com.gracelogic.platform.account.model.Account;
 import com.gracelogic.platform.db.service.IdObjectService;
-import com.gracelogic.platform.payment.DataConstants;
-import com.gracelogic.platform.payment.Path;
+import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
+import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentSystem;
-import com.gracelogic.platform.payment.service.PaymentService;
-import com.gracelogic.platform.web.ServletUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
 
-@Controller
-@RequestMapping(value = Path.PAYMENT_YANDEX_MONEY)
-public class YandexMoneyController {
-    private static Logger logger = Logger.getLogger(YandexMoneyController.class);
+public class YandexMoneyPaymentExecutor implements PaymentExecutor {
+    private static Logger logger = Logger.getLogger(YandexMoneyPaymentExecutor.class);
 
     private static final String ACTION_CHECK = "checkOrder";
     private static final String ACTION_PAY = "paymentAviso";
@@ -39,25 +33,35 @@ public class YandexMoneyController {
             "code=\"%s\" invoiceId=\"%s\" \n" +
             "shopId=\"%s\"/>";
 
-    @Autowired
-    private PaymentService paymentService;
 
-    @Autowired
-    private IdObjectService idObjectService;
+    @Override
+    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
+        throw new RuntimeException("Not implemented");
+    }
 
-    @RequestMapping(method = RequestMethod.POST, value = {"/", "check", "aviso"})
-    public void getPage(HttpServletRequest request,
-                        HttpServletResponse response,
-                        @RequestParam(value = "action", required = true) String action,
-                        @RequestParam(value = "customerNumber", required = true) String account,
-                        @RequestParam(value = "orderSumAmount", required = false) String amount,
-                        @RequestParam(value = "invoiceId", required = false) String payId,
-                        @RequestParam(value = "orderCreatedDatetime", required = false) String payDate,
-                        @RequestParam(value = "md5", required = false) String hash,
-                        @RequestParam(value = "shopId", required = false) String shopId,
-                        @RequestParam(value = "orderSumCurrencyPaycash", required = false) String orderSumCurrencyPaycash,
-                        @RequestParam(value = "orderSumBankPaycash", required = false) String orderSumBankPaycash,
-                        @RequestParam(value = "paymentType", required = false) String paymentType) {
+    @Override
+    public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) throws PaymentExecutionException {
+        PaymentService paymentService = null;
+        IdObjectService idObjectService = null;
+        try {
+            paymentService = context.getBean(PaymentService.class);
+            idObjectService = context.getBean(IdObjectService.class);
+        }
+        catch (Exception e) {
+            throw new PaymentExecutionException(e.getMessage());
+        }
+
+        String action = request.getParameter("action");
+        String account = request.getParameter("customerNumber");
+        String amount = request.getParameter("orderSumAmount");
+        String payId = request.getParameter("invoiceId");
+        String shopId = request.getParameter("shopId");
+        String hash = request.getParameter("md5");
+        String payDate = request.getParameter("orderCreatedDatetime");
+        String orderSumCurrencyPaycash = request.getParameter("orderSumCurrencyPaycash");
+        String orderSumBankPaycash = request.getParameter("orderSumBankPaycash");
+        String paymentType = request.getParameter("paymentType");
+
 
         logger.info("Yandex request");
         logger.info("action:" + action);
@@ -71,27 +75,7 @@ public class YandexMoneyController {
         logger.info("orderSumBankPaycash:" + orderSumBankPaycash);
         logger.info("orderCreatedDatetime:" + payDate);
 
-        PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, DataConstants.PaymentSystems.YANDEX_MONEY.getValue());
-
-        if (paymentSystem == null || !paymentSystem.getActive()) {
-            response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-            try {
-                response.flushBuffer();
-            } catch (IOException ignored) {
-            }
-            return;
-        }
-
-        if (!StringUtils.isEmpty(paymentSystem.getAllowedAddresses()) && !StringUtils.contains(paymentSystem.getAllowedAddresses(), ServletUtils.getRemoteAddress(request))) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            try {
-                response.flushBuffer();
-            } catch (IOException ignored) {
-            }
-            return;
-        }
-
-        String calcString = String.format("%s;%s;%s;%s;%s;%s;%s;%s", action, amount, orderSumCurrencyPaycash, orderSumBankPaycash, shopId, payId, account, paymentSystem.getSecurityKey());
+        String calcString = String.format("%s;%s;%s;%s;%s;%s;%s;%s", action, amount, orderSumCurrencyPaycash, orderSumBankPaycash, shopId, payId, account, idObjectService.getObjectById(PaymentSystem.class, paymentSystemId).getSecurityKey());
 
         String resp;
         if (action.equalsIgnoreCase(ACTION_CHECK)) {
@@ -101,7 +85,7 @@ public class YandexMoneyController {
             } else {
                 Account result = null;
                 try {
-                    result = paymentService.checkPaymentAbility(paymentSystem.getId(), account, orderSumCurrencyPaycash);
+                    result = paymentService.checkPaymentAbility(paymentSystemId, account, orderSumCurrencyPaycash);
                 }
                 catch (Exception ignored) {}
 
@@ -128,7 +112,7 @@ public class YandexMoneyController {
 
                     Payment result = null;
                     try {
-                        result = paymentService.processPayment(paymentSystem.getId(), paymentModel, null);
+                        result = paymentService.processPayment(paymentSystemId, paymentModel, null);
                     } catch (Exception ignored) {
                     }
 

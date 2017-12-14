@@ -128,10 +128,14 @@ public class TaskServiceImpl implements TaskService {
         for (Task task : tasks) {
             try {
                 if (!StringUtils.isEmpty(task.getCronExpression()) && !checkTaskExist(task.getId(), task.getParameter())) {
-                    Date lastExecutionDate = task.getLastExecutionDate() != null ? task.getLastExecutionDate() : currentDate;
-
-                    CronExpression cronExpression = new CronExpression(task.getCronExpression());
-                    Date nextExecutionDate = cronExpression.getNextValidTimeAfter(lastExecutionDate);
+                    Date nextExecutionDate;
+                    if (task.getLastExecutionDate() != null) {
+                        CronExpression cronExpression = new CronExpression(task.getCronExpression());
+                        nextExecutionDate = cronExpression.getNextValidTimeAfter(task.getLastExecutionDate());
+                    }
+                    else {
+                        nextExecutionDate = currentDate;
+                    }
 
                     if (nextExecutionDate.getTime() <= currentDate.getTime()) {
                         executeTaskInOtherTransaction(task.getId(), task.getParameter(), DataConstants.TaskExecutionMethods.CRON.getValue());

@@ -65,13 +65,12 @@ public class OAuthController extends AbstractAuthorizedController {
 
     private static Logger logger = Logger.getLogger(OAuthController.class);
 
-
     @RequestMapping(value = "/{authProvider}", method = RequestMethod.GET)
-    public void oAuth(HttpServletRequest request,
-                      HttpServletResponse response,
-                      @PathVariable(value = "authProvider") String authProvider,
-                      @RequestParam(value = "code", required = false) String code,
-                      @RequestParam(value = "fwd", required = false) String fwd) throws IOException {
+    public void process(HttpServletRequest request,
+                        HttpServletResponse response,
+                        @PathVariable(value = "authProvider") String authProvider,
+                        @RequestParam(value = "code", required = false) String code,
+                        @RequestParam(value = "fwd", required = false) String fwd) throws IOException {
 
         logger.info("OAUTH request");
         logger.info("provider: " + authProvider);
@@ -93,12 +92,11 @@ public class OAuthController extends AbstractAuthorizedController {
                 String requestUri = vk.buildRedirectUri(additionalParameters);
                 logger.info("REQUEST_URI: " + requestUri);
 
-                user = vk.accessToken(code, requestUri);
+                user = vk.processAuthorization(code, requestUri);
             } catch (Exception e) {
                 logger.error("Failed to process user via vk", e);
             }
-        }
-        else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.OK.name())) {
+        } else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.OK.name())) {
             try {
                 String additionalParameters = null;
                 if (fwd != null) {
@@ -107,12 +105,11 @@ public class OAuthController extends AbstractAuthorizedController {
                 String requestUri = ok.buildRedirectUri(additionalParameters);
                 logger.info("REQUEST_URI: " + requestUri);
 
-                user = ok.accessToken(code, requestUri);
+                user = ok.processAuthorization(code, requestUri);
             } catch (Exception e) {
                 logger.error("Failed to process user via ok", e);
             }
-        }
-        else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.INSTAGRAM.name())) {
+        } else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.INSTAGRAM.name())) {
             try {
                 String additionalParameters = null;
                 if (fwd != null) {
@@ -121,12 +118,11 @@ public class OAuthController extends AbstractAuthorizedController {
                 String requestUri = instagram.buildRedirectUri(additionalParameters);
                 logger.info("REQUEST_URI: " + requestUri);
 
-                user = instagram.accessToken(code, requestUri);
+                user = instagram.processAuthorization(code, requestUri);
             } catch (Exception e) {
                 logger.error("Failed to process user via instagram", e);
             }
-        }
-        else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.FACEBOOK.name())) {
+        } else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.FACEBOOK.name())) {
             try {
                 String additionalParameters = null;
                 if (fwd != null) {
@@ -135,12 +131,11 @@ public class OAuthController extends AbstractAuthorizedController {
                 String requestUri = facebook.buildRedirectUri(additionalParameters);
                 logger.info("REQUEST_URI: " + requestUri);
 
-                user = facebook.accessToken(code, requestUri);
+                user = facebook.processAuthorization(code, requestUri);
             } catch (Exception e) {
                 logger.error("Failed to process user via facebook", e);
             }
-        }
-        else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.GOOGLE.name())) {
+        } else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.GOOGLE.name())) {
             try {
                 String additionalParameters = null;
                 if (fwd != null) {
@@ -149,12 +144,11 @@ public class OAuthController extends AbstractAuthorizedController {
                 String requestUri = google.buildRedirectUri(additionalParameters);
                 logger.info("REQUEST_URI: " + requestUri);
 
-                user = google.accessToken(code, requestUri);
+                user = google.processAuthorization(code, requestUri);
             } catch (Exception e) {
                 logger.error("Failed to process user via google", e);
             }
-        }
-        else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.LINKEDIN.name())) {
+        } else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.LINKEDIN.name())) {
             logger.info("LINKEDIN eq");
             try {
                 String additionalParameters = null;
@@ -164,12 +158,11 @@ public class OAuthController extends AbstractAuthorizedController {
                 String requestUri = linkedin.buildRedirectUri(additionalParameters);
                 logger.info("REQUEST_URI: " + requestUri);
 
-                user = linkedin.accessToken(code, requestUri);
+                user = linkedin.processAuthorization(code, requestUri);
             } catch (Exception e) {
                 logger.error("Failed to process user via linkedin", e);
             }
-        }
-        else {
+        } else {
             try {
                 response.sendRedirect(propertyService.getPropertyValue("oauth:redirect_fail_url"));
                 return;

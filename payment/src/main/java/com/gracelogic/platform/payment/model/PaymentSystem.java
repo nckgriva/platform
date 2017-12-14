@@ -4,6 +4,7 @@ import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.dictionary.model.Dictionary;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -33,7 +34,7 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
     @Column(name = "DESCRIPTION", nullable = true, length = 4000)
     private String description;
 
-    @Column(name = "SECURITY_KEY", nullable = true)
+    @Column(name = "SECURITY_KEY", nullable = true, length = 4000)
     private String securityKey;
 
     @Column(name = "ALLOWED_ADDRESSES", nullable = true)
@@ -48,11 +49,12 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
     @Column(name = "IS_FEE_INCLUDED", nullable = false)
     private Boolean feeIncluded;
 
-    @Column(name = "REDIRECT_URL", nullable = true) //Url платёжного шлюза для оплаты
-    private String redirectUrl;
-
     @Column(name = "PAYMENT_EXECUTOR_CLASS", nullable = true)
     private String paymentExecutorClass;
+
+    @Type(type = "stringJsonObject")
+    @Column(columnDefinition = "json", nullable = true)
+    private String fields;
 
     @Override
     public UUID getId() {
@@ -149,19 +151,19 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
         this.allowedAddresses = allowedAddresses;
     }
 
-    public String getRedirectUrl() {
-        return redirectUrl;
-    }
-
-    public void setRedirectUrl(String redirectUrl) {
-        this.redirectUrl = redirectUrl;
-    }
-
     public String getPaymentExecutorClass() {
         return paymentExecutorClass;
     }
 
     public void setPaymentExecutorClass(String paymentExecutorClass) {
         this.paymentExecutorClass = paymentExecutorClass;
+    }
+
+    public String getFields() {
+        return fields;
+    }
+
+    public void setFields(String fields) {
+        this.fields = fields;
     }
 }

@@ -31,7 +31,7 @@ public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implem
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User accessToken(String code, String redirectUri) {
+    public User processAuthorization(String code, String redirectUri) {
         String CLIENT_ID = propertyService.getPropertyValue("oauth:google_client_id");
         String CLIENT_SECRET = propertyService.getPropertyValue("oauth:google_client_secret");
 
@@ -68,7 +68,7 @@ public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implem
             OAuthDTO.setEmail(email.get("value") != null ? (String) email.get("value") : null);
         }
 
-        return processAuth(DataConstants.OAuthProviders.GOOGLE.getValue(), code, OAuthDTO);
+        return processAuthorization(DataConstants.OAuthProviders.GOOGLE.getValue(), code, OAuthDTO);
     }
 
     @Override
