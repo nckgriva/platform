@@ -11,8 +11,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "ACCOUNT_CURRENCY")
-public class AccountCurrency extends IdObject<UUID> implements Dictionary {
+@Table(name = JPAProperties.TABLE_PREFIX + "CURRENCY")
+public class Currency extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
@@ -30,6 +30,9 @@ public class AccountCurrency extends IdObject<UUID> implements Dictionary {
 
     @Column(name = "NAME", nullable = false)
     private String name;
+
+    @Column(name = "CODE", nullable = false)
+    private String code;
 
     @Override
     public UUID getId() {
@@ -71,7 +74,7 @@ public class AccountCurrency extends IdObject<UUID> implements Dictionary {
 
     @Override
     public String getCode() {
-        return null;
+        return code;
     }
 
     @Override

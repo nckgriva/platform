@@ -36,6 +36,9 @@ public class LocaleFilter extends AbstractAuthorizedController implements Filter
             if (!StringUtils.isEmpty(locale)) {
                 LocaleHolder.setLocale(locale);
             }
+            else {
+                LocaleHolder.setLocale(LocaleHolder.defaultLocale);
+            }
 
             filterChain.doFilter(servletRequest, servletResponse);
         }

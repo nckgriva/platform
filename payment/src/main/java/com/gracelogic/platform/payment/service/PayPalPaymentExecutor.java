@@ -38,7 +38,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
     private static Logger logger = Logger.getLogger(PayPalPaymentExecutor.class);
 
     @Override
-    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
         if (params == null || !params.containsKey(ACTION)) {
             throw new PaymentExecutionException("Not specified action");
         }
@@ -78,7 +78,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
             payPalPayerDTO.setPayment_method("paypal");
             createRequestDTO.setPayer(payPalPayerDTO);
 
-            PayPalAmountDTO amountDTO = new PayPalAmountDTO(FinanceUtils.toFractional(amount), "USD");
+            PayPalAmountDTO amountDTO = new PayPalAmountDTO(FinanceUtils.toFractional(amount), currencyCode);
             PayPalTransactionDTO transactionDTO = new PayPalTransactionDTO();
             transactionDTO.setAmount(amountDTO);
             createRequestDTO.getTransactions().add(transactionDTO);
@@ -104,6 +104,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
                     req.setExternalIdentifier(uniquePaymentIdentifier);
                     req.setRegisteredAmount(FinanceUtils.toFractional(amount));
                     req.setPaymentUID(responseDTO.getId());
+                    req.setCurrency(currencyCode);
                     try {
                         paymentService.processPayment(paymentSystemId, req, null);
                     } catch (Exception e) {

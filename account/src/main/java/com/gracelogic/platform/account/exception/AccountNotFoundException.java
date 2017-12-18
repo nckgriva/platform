@@ -9,6 +9,9 @@ public class AccountNotFoundException extends Exception {
         this.message = message;
     }
 
+    public AccountNotFoundException() {
+    }
+
     public String getMessage() {
         return message;
     }

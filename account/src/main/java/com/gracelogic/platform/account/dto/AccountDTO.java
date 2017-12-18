@@ -11,8 +11,8 @@ public class AccountDTO extends IdObjectDTO {
     private Long balance;
     private UUID accountTypeId;
     private String accountTypeName;
-    private UUID accountCurrencyId;
-    private String accountCurrencyName;
+    private UUID currencyId;
+    private String currencyName;
     private UUID userId;
     private String userName;
     private String externalIdentifier;
@@ -54,20 +54,20 @@ public class AccountDTO extends IdObjectDTO {
         this.accountTypeName = accountTypeName;
     }
 
-    public UUID getAccountCurrencyId() {
-        return accountCurrencyId;
+    public UUID getCurrencyId() {
+        return currencyId;
     }
 
-    public void setAccountCurrencyId(UUID accountCurrencyId) {
-        this.accountCurrencyId = accountCurrencyId;
+    public void setCurrencyId(UUID currencyId) {
+        this.currencyId = currencyId;
     }
 
-    public String getAccountCurrencyName() {
-        return accountCurrencyName;
+    public String getCurrencyName() {
+        return currencyName;
     }
 
-    public void setAccountCurrencyName(String accountCurrencyName) {
-        this.accountCurrencyName = accountCurrencyName;
+    public void setCurrencyName(String currencyName) {
+        this.currencyName = currencyName;
     }
 
     public UUID getUserId() {
@@ -102,8 +102,8 @@ public class AccountDTO extends IdObjectDTO {
         if (model.getAccountType() != null) {
             dto.setAccountTypeId(model.getAccountType().getId());
         }
-        if (model.getAccountCurrency() != null) {
-            dto.setAccountTypeId(model.getAccountType().getId());
+        if (model.getCurrency() != null) {
+            dto.setCurrencyId(model.getCurrency().getId());
         }
         if (model.getUser() != null) {
             dto.setUserId(model.getUser().getId()); 
@@ -120,8 +120,8 @@ public class AccountDTO extends IdObjectDTO {
         if (model.getAccountType() != null) {
             dto.setAccountTypeName(model.getAccountType().getName());
         }
-        if (model.getAccountCurrency() != null) {
-            dto.setAccountCurrencyName(model.getAccountCurrency().getName());
+        if (model.getCurrency() != null) {
+            dto.setCurrencyName(model.getCurrency().getName());
         }
     }
 }

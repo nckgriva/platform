@@ -9,6 +9,9 @@ public class OrderNotConsistentException extends Exception {
         this.message = message;
     }
 
+    public OrderNotConsistentException() {
+    }
+
     public String getMessage() {
         return message;
     }

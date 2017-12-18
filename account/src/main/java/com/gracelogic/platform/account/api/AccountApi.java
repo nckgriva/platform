@@ -2,6 +2,9 @@ package com.gracelogic.platform.account.api;
 
 import com.gracelogic.platform.account.Path;
 import com.gracelogic.platform.account.dto.AccountDTO;
+import com.gracelogic.platform.account.dto.CalculateExchangeRequestDTO;
+import com.gracelogic.platform.account.dto.CalculateExchangeResponseDTO;
+import com.gracelogic.platform.account.exception.NoActualExchangeRateException;
 import com.gracelogic.platform.account.service.AccountService;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
@@ -34,6 +37,10 @@ public class AccountApi extends AbstractAuthorizedController {
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource dbMessageSource;
 
+    @Autowired
+    @Qualifier("accountMessageSource")
+    private ResourceBundleMessageSource accountMessageSource;
+
     @ApiOperation(
             value = "getAccounts",
             notes = "Get list of accounts",
@@ -47,7 +54,7 @@ public class AccountApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getAccounts( @RequestParam(value = "accountTypeId", required = false) UUID accountTypeId,
-                                       @RequestParam(value = "accountCurrencyId", required = false) UUID accountCurrencyId,
+                                       @RequestParam(value = "currencyId", required = false) UUID currencyId,
                                        @RequestParam(value = "userId", required = false) UUID userId,
                                        @RequestParam(value = "externalIdentifier", required = false) String externalIdentifier,
                                        @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
@@ -56,7 +63,7 @@ public class AccountApi extends AbstractAuthorizedController {
                                        @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                        @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<AccountDTO> docs = accountService.getAccountsPaged(accountTypeId, accountCurrencyId, userId, externalIdentifier, enrich, length, null, start, sortField, sortDir);
+        EntityListResponse<AccountDTO> docs = accountService.getAccountsPaged(accountTypeId, currencyId, userId, externalIdentifier, enrich, length, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<AccountDTO>>(docs, HttpStatus.OK);
     }
 
@@ -100,6 +107,28 @@ public class AccountApi extends AbstractAuthorizedController {
         try {
             accountService.deleteAccount(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
+            value = "calculateExchange",
+            notes = "Calculate exchange",
+            response = CalculateExchangeResponseDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
+    @RequestMapping(method = RequestMethod.POST, value = "/calculate-exchange")
+    @ResponseBody
+    public ResponseEntity calculateExchange(@RequestBody CalculateExchangeRequestDTO requestDTO) {
+        try {
+            Long value = accountService.translateAmountInOtherCurrency(requestDTO.getSourceCurrencyId(), requestDTO.getValue(), requestDTO.getDestinationCurrencyId());
+            return new ResponseEntity<CalculateExchangeResponseDTO>(new CalculateExchangeResponseDTO(value), HttpStatus.OK);
+        } catch (NoActualExchangeRateException e) {
+            return new ResponseEntity<>(new ErrorResponse("account.NO_ACTUAL_EXCHANGE_RATE", accountMessageSource.getMessage("account.NO_ACTUAL_EXCHANGE_RATE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }

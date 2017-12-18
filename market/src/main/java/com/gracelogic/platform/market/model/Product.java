@@ -1,5 +1,6 @@
 package com.gracelogic.platform.market.model;
 
+import com.gracelogic.platform.account.model.Currency;
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import org.hibernate.annotations.GenericGenerator;
@@ -45,6 +46,10 @@ public class Product extends IdObject<UUID> {
 
     @Column(name = "PRICE", nullable = true)
     private Long price;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "CURRENCY_ID", nullable = false)
+    private Currency currency;
 
     @Column(name = "IS_PRIMARY", nullable = false)
     private Boolean primary; //Используется для приоретености, например, enrichMarket подтягивает только такие продукты
@@ -133,5 +138,13 @@ public class Product extends IdObject<UUID> {
 
     public void setPrimary(Boolean primary) {
         this.primary = primary;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 }

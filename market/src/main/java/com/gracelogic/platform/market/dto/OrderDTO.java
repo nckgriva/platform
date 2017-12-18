@@ -24,6 +24,8 @@ public class OrderDTO extends IdObjectDTO {
     private String externalIdentifier;
     private UUID paymentSystemId;
     private String paymentSystemName;
+    private UUID targetCurrencyId;
+    private String targetCurrencyName;
 
     //Transient value for user order creation
     private String discountSecretCode;
@@ -200,6 +202,22 @@ public class OrderDTO extends IdObjectDTO {
         this.paid = FinanceUtils.stringToLong(sValue);
     }
 
+    public UUID getTargetCurrencyId() {
+        return targetCurrencyId;
+    }
+
+    public void setTargetCurrencyId(UUID targetCurrencyId) {
+        this.targetCurrencyId = targetCurrencyId;
+    }
+
+    public String getTargetCurrencyName() {
+        return targetCurrencyName;
+    }
+
+    public void setTargetCurrencyName(String targetCurrencyName) {
+        this.targetCurrencyName = targetCurrencyName;
+    }
+
     public static OrderDTO prepare(Order model) {
         OrderDTO dto = new OrderDTO();
         IdObjectDTO.prepare(dto, model);
@@ -215,6 +233,9 @@ public class OrderDTO extends IdObjectDTO {
         }
         if (model.getPaymentSystem() != null) {
             dto.setPaymentSystemId(model.getPaymentSystem().getId());
+        }
+        if (model.getTargetCurrency() != null) {
+            dto.setTargetCurrencyId(model.getTargetCurrency().getId());
         }
         dto.setTotalAmount(model.getTotalAmount());
         dto.setPaid(model.getPaid());
@@ -238,6 +259,9 @@ public class OrderDTO extends IdObjectDTO {
         }
         if (model.getPaymentSystem() != null) {
             dto.setPaymentSystemName(model.getPaymentSystem().getName());
+        }
+        if (model.getTargetCurrency() != null) {
+            dto.setTargetCurrencyName(model.getTargetCurrency().getName());
         }
 
         return dto;

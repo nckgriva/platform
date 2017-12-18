@@ -3,14 +3,18 @@ package com.gracelogic.platform.account.service;
 import com.gracelogic.platform.account.dto.AccountDTO;
 import com.gracelogic.platform.account.dto.TransactionDTO;
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
+import com.gracelogic.platform.account.exception.CurrencyMismatchException;
 import com.gracelogic.platform.account.exception.InsufficientFundsException;
+import com.gracelogic.platform.account.exception.NoActualExchangeRateException;
 import com.gracelogic.platform.account.model.Account;
+import com.gracelogic.platform.account.model.ExchangeRate;
 import com.gracelogic.platform.account.model.Transaction;
 import com.gracelogic.platform.account.model.TransactionType;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
+import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +60,17 @@ public class AccountServiceImpl implements AccountService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void processTransfer(UUID sourceAccountId, UUID sourceTransactionTypeId, UUID destinationAccountId, UUID destinationTransactionTypeId, Long amount, UUID referenceObjectId, boolean ignoreInsufficientFunds) throws InsufficientFundsException, AccountNotFoundException {
+    public void processTransfer(UUID sourceAccountId, UUID sourceTransactionTypeId, UUID destinationAccountId, UUID destinationTransactionTypeId, Long amount, UUID referenceObjectId, boolean ignoreInsufficientFunds) throws InsufficientFundsException, AccountNotFoundException, CurrencyMismatchException {
+        Account sourceAccount = idObjectService.getObjectById(Account.class, sourceAccountId);
+        Account destinationAccount = idObjectService.getObjectById(Account.class, destinationAccountId);
+
+        if (sourceAccount == null || destinationAccount == null) {
+            throw new AccountNotFoundException("AccountNotFoundException");
+        }
+        if (!sourceAccount.getCurrency().getId().equals(destinationAccount.getCurrency().getId())) {
+            throw new CurrencyMismatchException();
+        }
+
         processTransaction(sourceAccountId, sourceTransactionTypeId, -1 * amount, referenceObjectId, ignoreInsufficientFunds);
         processTransaction(destinationAccountId, destinationTransactionTypeId, amount, referenceObjectId, ignoreInsufficientFunds);
     }
@@ -112,8 +126,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public EntityListResponse<AccountDTO> getAccountsPaged(UUID accountTypeId, UUID accountCurrencyId, UUID userId, String externalIdentifier, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = enrich ? "left join fetch el.user left join fetch el.accountType left join fetch el.accountCurrency" : "";
+    public EntityListResponse<AccountDTO> getAccountsPaged(UUID accountTypeId, UUID currencyId, UUID userId, String externalIdentifier, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = enrich ? "left join fetch el.user left join fetch el.accountType left join fetch el.currency" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -128,9 +142,9 @@ public class AccountServiceImpl implements AccountService {
             params.put("accountTypeId", accountTypeId);
         }
 
-        if (accountCurrencyId != null) {
-            cause += "and el.accountCurrency.id = :accountCurrencyId ";
-            params.put("accountCurrencyId", accountCurrencyId);
+        if (currencyId != null) {
+            cause += "and el.currency.id = :currencyId ";
+            params.put("currencyId", currencyId);
         }
 
         if (userId != null) {
@@ -163,7 +177,7 @@ public class AccountServiceImpl implements AccountService {
     
     @Override
     public AccountDTO getAccount(UUID id, boolean enrich) throws ObjectNotFoundException {
-        Account entity = idObjectService.getObjectById(Account.class, enrich ? "left join fetch el.user left join fetch el.accountType left join fetch el.accountCurrency" : "",id);
+        Account entity = idObjectService.getObjectById(Account.class, enrich ? "left join fetch el.user left join fetch el.accountType left join fetch el.currency" : "",id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -180,4 +194,28 @@ public class AccountServiceImpl implements AccountService {
         idObjectService.delete(Account.class, id);
     }
 
+    @Override
+    public ExchangeRate getActualExchangeRate(UUID sourceCurrencyId, UUID destinationCurrencyId, Date validOnDate) throws NoActualExchangeRateException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("sourceCurrencyId", sourceCurrencyId);
+        params.put("destinationCurrencyId", destinationCurrencyId);
+        if (validOnDate == null) {
+            validOnDate = new Date();
+        }
+        params.put("validOnDate", validOnDate);
+
+        List<ExchangeRate> rates = idObjectService.getList(ExchangeRate.class, null, "el.sourceCurrency.id=:sourceCurrencyId and el.destinationCurrency.id=:destinationCurrencyId and (el.lifetimeExpiration is null or el.lifetimeExpiration > :validOnDate)", params, "el.created", "DESC", null, 1);
+        if (rates.isEmpty()) {
+            throw new NoActualExchangeRateException();
+        }
+        else {
+            return rates.iterator().next();
+        }
+    }
+
+    @Override
+    public Long translateAmountInOtherCurrency(UUID sourceCurrencyId, Long amount, UUID destinationCurrencyId) throws NoActualExchangeRateException {
+        ExchangeRate exchangeRate = getActualExchangeRate(sourceCurrencyId, destinationCurrencyId, null);
+        return FinanceUtils.toDecimal(FinanceUtils.toFractional(amount) * FinanceUtils.toFractional(exchangeRate.getValue()));
+    }
 }

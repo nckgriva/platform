@@ -1,8 +1,13 @@
 package com.gracelogic.platform.market.service;
 
+import com.gracelogic.platform.account.dto.CurrencyDTO;
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
+import com.gracelogic.platform.account.exception.CurrencyMismatchException;
 import com.gracelogic.platform.account.exception.InsufficientFundsException;
+import com.gracelogic.platform.account.exception.NoActualExchangeRateException;
 import com.gracelogic.platform.account.model.Account;
+import com.gracelogic.platform.account.model.Currency;
+import com.gracelogic.platform.account.model.ExchangeRate;
 import com.gracelogic.platform.account.service.AccountService;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
@@ -24,7 +29,6 @@ import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.payment.service.AccountResolver;
 import com.gracelogic.platform.payment.service.PaymentExecutor;
-import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.user.model.User;
@@ -46,16 +50,10 @@ public class MarketServiceImpl implements MarketService {
     private DictionaryService ds;
 
     @Autowired
-    private PropertyService propertyService;
-
-    @Autowired
     private AccountService accountService;
 
     @Autowired
     private AccountResolver accountResolver;
-
-    @Autowired
-    private MarketResolver marketResolver;
 
     @Autowired
     private MarketDao marketDao;
@@ -65,7 +63,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException {
+    public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException, NoActualExchangeRateException {
         Order entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Order.class, dto.getId());
@@ -124,10 +122,14 @@ public class MarketServiceImpl implements MarketService {
         Map<String, Object> params = new HashMap<>();
         params.put("productIds", productIds);
         List<Product> products = idObjectService.getList(Product.class, null, "el.id in (:productIds)", params, null, null, null, productIds.size());
-
+        UUID targetCurrencyId = dto.getTargetCurrencyId();
+        if (targetCurrencyId == null) {
+            throw new OrderNotConsistentException("No target currency");
+        }
 
         //Calculate total amount
-        Long amount = marketResolver.calculateOrderTotalAmount(entity.getUser().getId(), products);
+        Long amount = calculateOrderTotalAmount(products, targetCurrencyId);
+
         Long discountAmount = 0L;
 
         //Apply discount
@@ -153,7 +155,7 @@ public class MarketServiceImpl implements MarketService {
                         onlyDiscountedProducts.add(product);
                     }
                 }
-                discountAmount = marketResolver.calculateOrderTotalAmount(entity.getUser().getId(), onlyDiscountedProducts);
+                discountAmount = calculateOrderTotalAmount(onlyDiscountedProducts, targetCurrencyId);
             }
         }
 
@@ -162,6 +164,7 @@ public class MarketServiceImpl implements MarketService {
         entity.setDiscountAmount(discountAmount);
         entity.setTotalAmount(totalAmount);
         entity.setDiscount(discount);
+        entity.setTargetCurrency(ds.get(Currency.class, targetCurrencyId));
         entity = idObjectService.save(entity);
 
         //Create order products
@@ -186,6 +189,34 @@ public class MarketServiceImpl implements MarketService {
         return entity;
     }
 
+    private Long calculateOrderTotalAmount(List<Product> products, UUID targetCurrencyId) throws OrderNotConsistentException, NoActualExchangeRateException {
+        //TODO: Можно оптимизировать этот метод закэшировав ExchangeRates вместо того что бы для каждого продукта их доставать
+
+        Long amount = 0L;
+        for (Product product : products) {
+            Long price = product.getPrice();
+            if (!product.getCurrency().getId().equals(targetCurrencyId)) {
+                ExchangeRate exchangeRate = accountService.getActualExchangeRate(product.getCurrency().getId(), targetCurrencyId, null);
+                price = FinanceUtils.toDecimal(FinanceUtils.toFractional(exchangeRate.getValue()) * FinanceUtils.toFractional(product.getPrice()));
+            }
+            amount += price;
+        }
+
+        return amount;
+    }
+
+    @Override
+    public List<CurrencyDTO> getAvailableCurrencies() {
+        List<CurrencyDTO> currencyDTOs = new LinkedList<>();
+        List<MerchantAccount> merchantAccounts = idObjectService.getList(MerchantAccount.class, "left join fetch el.currency", null, null, null, null, null, null);
+        for (MerchantAccount merchantAccount : merchantAccounts) {
+            CurrencyDTO dto = CurrencyDTO.prepare(merchantAccount.getCurrency());
+            currencyDTOs.add(dto);
+        }
+
+        return currencyDTOs;
+    }
+
     private Discount getActiveDiscountBySecretCode(String secretCode) {
         Map<String, Object> params = new HashMap<>();
         params.put("secretCode", StringUtils.trim(secretCode));
@@ -197,7 +228,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public PaymentExecutionResultDTO executeOrder(UUID orderId, UUID paymentSystemId, Map<String, String> params, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException, ObjectNotFoundException, PaymentExecutionException {
+    public PaymentExecutionResultDTO executeOrder(UUID orderId, UUID paymentSystemId, Map<String, String> params, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException, ObjectNotFoundException, PaymentExecutionException, CurrencyMismatchException {
         Order order = idObjectService.getObjectById(Order.class, orderId);
         if (order == null) {
             throw new ObjectNotFoundException();
@@ -239,7 +270,7 @@ public class MarketServiceImpl implements MarketService {
 
 
         //Пытаемся оплатить с помощью внутреннего счёта
-        Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, null);
+        Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, ds.get(Currency.class, order.getTargetCurrency().getId()).getCode());
         Long amountToPay = order.getTotalAmount() - order.getPaid();
         if (userAccount.getBalance() >= amountToPay) {
             order = payOrder(order, amountToPay, userAccount.getId());
@@ -262,7 +293,7 @@ public class MarketServiceImpl implements MarketService {
             PaymentExecutionResultDTO result = null;
             try {
                 PaymentExecutor paymentExecutor = initializePaymentExecutor(paymentSystem.getPaymentExecutorClass());
-                result = paymentExecutor.execute(String.valueOf(order.getId()), paymentSystemId, amountToPay, applicationContext, params);
+                result = paymentExecutor.execute(String.valueOf(order.getId()), paymentSystemId, amountToPay, ds.get(Currency.class, order.getTargetCurrency().getId()).getCode(), applicationContext, params);
                 if (!StringUtils.isEmpty(result.getExternalIdentifier()) && !StringUtils.equals(order.getExternalIdentifier(), result.getExternalIdentifier())) {
                     order.setExternalIdentifier(result.getExternalIdentifier());
                     orderModified = true;
@@ -291,7 +322,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void cancelOrder(UUID orderId) throws InvalidOrderStateException, ObjectNotFoundException, InsufficientFundsException, AccountNotFoundException {
+    public void cancelOrder(UUID orderId) throws InvalidOrderStateException, ObjectNotFoundException, InsufficientFundsException, AccountNotFoundException, CurrencyMismatchException {
         Order order = idObjectService.getObjectById(Order.class, orderId);
         if (order == null) {
             throw new ObjectNotFoundException();
@@ -303,9 +334,10 @@ public class MarketServiceImpl implements MarketService {
         Long amountToReturn = order.getPaid();
 
         //Transfer money from organization to user
-        Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, null);
+        Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, ds.get(Currency.class, order.getTargetCurrency().getId()).getCode());
+        UUID merchantAccountId = getMerchantAccountId(order.getTargetCurrency().getId());
 
-        accountService.processTransfer(propertyService.getPropertyValueAsUUID("market:organization_account_id"), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL_CANCEL.getValue(),
+        accountService.processTransfer(merchantAccountId, com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL_CANCEL.getValue(),
                 userAccount.getId(), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_BUY_CANCEL.getValue(),
                 amountToReturn, order.getId(), false);
 
@@ -324,9 +356,21 @@ public class MarketServiceImpl implements MarketService {
         }
     }
 
+    private UUID getMerchantAccountId(UUID currencyId) throws AccountNotFoundException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("currencyId", currencyId);
+        List<MerchantAccount> accounts = idObjectService.getList(MerchantAccount.class, null, "el.currency.id=:currencyId", params, null, null, null, 1);
+        if (accounts.isEmpty()) {
+            throw new AccountNotFoundException();
+        }
+        else {
+            return accounts.iterator().next().getAccount().getId();
+        }
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void processPayment(Payment payment) throws InvalidOrderStateException, AccountNotFoundException, InsufficientFundsException {
+    public void processPayment(Payment payment) throws InvalidOrderStateException, AccountNotFoundException, InsufficientFundsException, CurrencyMismatchException {
         Map<String, Object> params = new HashMap<>();
         params.put("externalIdentifier", payment.getExternalIdentifier());
 
@@ -447,10 +491,12 @@ public class MarketServiceImpl implements MarketService {
         }
     }
 
-    private Order payOrder(Order order, Long amountToPay, UUID userAccountId) throws InsufficientFundsException, AccountNotFoundException {
+    private Order payOrder(Order order, Long amountToPay, UUID userAccountId) throws InsufficientFundsException, AccountNotFoundException, CurrencyMismatchException {
+        UUID merchantAccountId = getMerchantAccountId(order.getTargetCurrency().getId());
+
         //Transfer money from user to organization
         accountService.processTransfer(userAccountId, com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_BUY.getValue(),
-                propertyService.getPropertyValueAsUUID("market:organization_account_id"), com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL.getValue(),
+                merchantAccountId, com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL.getValue(),
                 amountToPay, order.getId(), false);
 
         order.setPaid(order.getPaid() + amountToPay);
@@ -477,7 +523,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts) throws ObjectNotFoundException {
-        Order entity = idObjectService.getObjectById(Order.class, enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem" : "", id);
+        Order entity = idObjectService.getObjectById(Order.class, enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -500,7 +546,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem" : "";
+        String fetches = enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -564,7 +610,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public ProductDTO getProduct(UUID id, boolean enrich) throws ObjectNotFoundException {
-        Product entity = idObjectService.getObjectById(Product.class, enrich ? "left join fetch el.productType" : "", id);
+        Product entity = idObjectService.getObjectById(Product.class, enrich ? "left join fetch el.productType left join fetch el.currency" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -577,7 +623,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public EntityListResponse<ProductDTO> getProductsPaged(String name, UUID productTypeId, Boolean active, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = enrich ? "left join fetch el.productType" : "";
+        String fetches = enrich ? "left join fetch el.productType left join fetch el.currency" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();

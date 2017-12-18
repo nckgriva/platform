@@ -15,6 +15,8 @@ public class ProductDTO extends IdObjectDTO {
     private Long lifetime;
     private Long price;
     private Boolean primary;
+    private UUID currencyId;
+    private String currencyName;
 
     public String getName() {
         return name;
@@ -86,12 +88,31 @@ public class ProductDTO extends IdObjectDTO {
         this.primary = primary;
     }
 
+    public UUID getCurrencyId() {
+        return currencyId;
+    }
+
+    public void setCurrencyId(UUID currencyId) {
+        this.currencyId = currencyId;
+    }
+
+    public String getCurrencyName() {
+        return currencyName;
+    }
+
+    public void setCurrencyName(String currencyName) {
+        this.currencyName = currencyName;
+    }
+
     public static ProductDTO prepare(Product model) {
         ProductDTO dto = new ProductDTO();
         IdObjectDTO.prepare(dto, model);
 
         if (model.getProductType() != null) {
             dto.setProductTypeId(model.getProductType().getId());
+        }
+        if (model.getCurrency() != null) {
+            dto.setCurrencyId(model.getCurrency().getId());
         }
         dto.setName(model.getName());
         dto.setActive(model.getActive());
@@ -105,6 +126,9 @@ public class ProductDTO extends IdObjectDTO {
     public static ProductDTO enrich(ProductDTO dto, Product model) {
         if (model.getProductType() != null) {
             dto.setProductTypeName(model.getProductType().getName());
+        }
+        if (model.getCurrency() != null) {
+            dto.setCurrencyName(model.getCurrency().getName());
         }
 
         return dto;

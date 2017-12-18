@@ -35,7 +35,7 @@ public class SbrfPaymentExecutor implements PaymentExecutor {
             "</response>\n ";
 
     @Override
-    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
         throw new RuntimeException("Not implemented");
     }
 

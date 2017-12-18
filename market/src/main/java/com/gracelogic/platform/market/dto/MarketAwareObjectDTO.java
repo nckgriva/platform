@@ -14,6 +14,7 @@ public class MarketAwareObjectDTO extends IdObjectDTO implements Serializable {
     private Boolean productPurchased;
     private Boolean productActive;
     private Boolean productAvailable;
+    private UUID productCurrencyId;
 
     public UUID getProductId() {
         return productId;
@@ -72,10 +73,21 @@ public class MarketAwareObjectDTO extends IdObjectDTO implements Serializable {
         this.productAvailable = productAvailable;
     }
 
+    public UUID getProductCurrencyId() {
+        return productCurrencyId;
+    }
+
+    public void setProductCurrencyId(UUID productCurrencyId) {
+        this.productCurrencyId = productCurrencyId;
+    }
+
     public static void enrichMarketInfo(MarketAwareObjectDTO dto, Product product) {
         dto.setProductId(product.getId());
         dto.setProductName(product.getName());
         dto.setProductPrice(product.getPrice());
         dto.setProductActive(product.getActive());
+        if (product.getCurrency() != null) {
+            dto.setProductCurrencyId(product.getCurrency().getId());
+        }
     }
 }

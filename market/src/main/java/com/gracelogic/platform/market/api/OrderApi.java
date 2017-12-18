@@ -1,7 +1,10 @@
 package com.gracelogic.platform.market.api;
 
+import com.gracelogic.platform.account.dto.CurrencyDTO;
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
+import com.gracelogic.platform.account.exception.CurrencyMismatchException;
 import com.gracelogic.platform.account.exception.InsufficientFundsException;
+import com.gracelogic.platform.account.exception.NoActualExchangeRateException;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
@@ -31,6 +34,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -115,6 +119,8 @@ public class OrderApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("market.ORDER_NOT_CONSISTENT", marketMessageSource.getMessage("market.ORDER_NOT_CONSISTENT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidOrderStateException e) {
             return new ResponseEntity<>(new ErrorResponse("market.INVALID_ORDER_STATE", marketMessageSource.getMessage("market.INVALID_ORDER_STATE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (NoActualExchangeRateException e) {
+            return new ResponseEntity<>(new ErrorResponse("account.NO_ACTUAL_EXCHANGE_RATE", accountMessageSource.getMessage("account.NO_ACTUAL_EXCHANGE_RATE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -153,6 +159,8 @@ public class OrderApi extends AbstractAuthorizedController {
         } catch (PaymentExecutionException e) {
             e.printStackTrace();
             return new ResponseEntity<>(new ErrorResponse("payment.FAILED_TO_EXECUTE_PAYMENT", paymentMessageSource.getMessage("payment.FAILED_TO_EXECUTE_PAYMENT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (CurrencyMismatchException e) {
+            return new ResponseEntity<>(new ErrorResponse("account.CURRENCY_MISMATCH", accountMessageSource.getMessage("account.CURRENCY_MISMATCH", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -181,6 +189,8 @@ public class OrderApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("account.ACCOUNT_NOT_FOUND", accountMessageSource.getMessage("account.ACCOUNT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (InsufficientFundsException e) {
             return new ResponseEntity<>(new ErrorResponse("account.INSUFFICIENT_FUNDS", accountMessageSource.getMessage("account.INSUFFICIENT_FUNDS", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (CurrencyMismatchException e) {
+            return new ResponseEntity<>(new ErrorResponse("account.CURRENCY_MISMATCH", accountMessageSource.getMessage("account.CURRENCY_MISMATCH", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -236,5 +246,21 @@ public class OrderApi extends AbstractAuthorizedController {
             @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
         EntityListResponse<OrderDTO> docs = marketService.getOrdersPaged(userId, orderStateId, discountId, enrich, withProducts, length, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<OrderDTO>>(docs, HttpStatus.OK);
+    }
+
+    @ApiOperation(
+            value = "getAvailableCurrencies",
+            notes = "Get list of available currencies",
+            response = List.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
+    @RequestMapping(method = RequestMethod.GET, value = "/available-currencies")
+    @ResponseBody
+    public ResponseEntity getAvailableCurrencies() {
+        List<CurrencyDTO> currencyDTOs = marketService.getAvailableCurrencies();
+        return new ResponseEntity<List<CurrencyDTO>>(currencyDTOs, HttpStatus.OK);
     }
 }

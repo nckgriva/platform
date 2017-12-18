@@ -1,5 +1,6 @@
 package com.gracelogic.platform.market.model;
 
+import com.gracelogic.platform.account.model.Currency;
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.payment.model.PaymentSystem;
@@ -58,6 +59,10 @@ public class Order extends IdObject<UUID> {
 
     @Column(name = "EXTERNAL_IDENTIFIER", nullable = true)
     private String externalIdentifier;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false) //Валюта, в которой необходимо провести оплату
+    @JoinColumn(name = "TARGET_CURRENCY_ID", nullable = false)
+    private Currency targetCurrency;
 
     @Override
     public UUID getId() {
@@ -159,5 +164,13 @@ public class Order extends IdObject<UUID> {
 
     public void setExternalIdentifier(String externalIdentifier) {
         this.externalIdentifier = externalIdentifier;
+    }
+
+    public Currency getTargetCurrency() {
+        return targetCurrency;
+    }
+
+    public void setTargetCurrency(Currency targetCurrency) {
+        this.targetCurrency = targetCurrency;
     }
 }

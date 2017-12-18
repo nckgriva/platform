@@ -17,7 +17,7 @@ public class Account extends IdObject<UUID> {
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-@org.hibernate.annotations.Type(type = "pg-uuid")
+    @org.hibernate.annotations.Type(type = "pg-uuid")
     @Access(AccessType.PROPERTY)
     private UUID id;
 
@@ -31,15 +31,15 @@ public class Account extends IdObject<UUID> {
     @Column(name = "BALANCE", nullable = false)
     private Long balance;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ACCOUNT_TYPE_ID", nullable = false)
     private AccountType accountType;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "ACCOUNT_CURRENCY_ID", nullable = true)
-    private AccountCurrency accountCurrency;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "CURRENCY_ID", nullable = false)
+    private Currency currency;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
@@ -92,12 +92,12 @@ public class Account extends IdObject<UUID> {
         this.accountType = accountType;
     }
 
-    public AccountCurrency getAccountCurrency() {
-        return accountCurrency;
+    public Currency getCurrency() {
+        return currency;
     }
 
-    public void setAccountCurrency(AccountCurrency accountCurrency) {
-        this.accountCurrency = accountCurrency;
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 
     public User getUser() {

@@ -7,7 +7,7 @@ import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.user.model.User;
 
 public interface AccountResolver {
-    Account getTargetAccount(User user, String accountNumber, PaymentSystem paymentSystem, String currency) throws AccountNotFoundException;
+    Account getTargetAccount(User user, String accountNumber, PaymentSystem paymentSystem, String currencyCode) throws AccountNotFoundException;
 
     void notifyPaymentReceived(Payment payment); //Событие поступления средств на счёт
 
