@@ -693,7 +693,7 @@ public class MarketServiceImpl implements MarketService {
         entity.setLifetime(dto.getLifetime());
         entity.setPrice(dto.getPrice());
         entity.setPrimary(dto.getPrimary());
-
+        entity.setCurrency(ds.get(Currency.class, dto.getCurrencyId()));
 
         return idObjectService.save(entity);
     }

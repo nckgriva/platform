@@ -85,6 +85,9 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
 
             try {
                 PayPalCreateResponseDTO responseDTO = create(apiUrl, accessToken.getAccess_token(), createRequestDTO);
+                if (responseDTO.getId() == null) {
+                    throw new PaymentExecutionException("PaymentId is null!");
+                }
                 Map<String, String> responseParams = new HashMap<>();
                 responseParams.put("paymentId", responseDTO.getId());
                 return new PaymentExecutionResultDTO(false, uniquePaymentIdentifier, responseParams);
@@ -99,7 +102,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
 
             try {
                 PayPalExecuteResponseDTO responseDTO = execute(apiUrl, accessToken.getAccess_token(), params.get("paymentId"), executeRequestDTO);
-                if (StringUtils.equalsIgnoreCase(responseDTO.getState(), "approved")) {
+                if (params.get("paymentId") != null && StringUtils.equalsIgnoreCase(responseDTO.getState(), "approved")) {
                     ProcessPaymentRequest req = new ProcessPaymentRequest();
                     req.setExternalIdentifier(uniquePaymentIdentifier);
                     req.setRegisteredAmount(FinanceUtils.toFractional(amount));
