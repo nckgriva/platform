@@ -175,7 +175,7 @@ public class MarketServiceImpl implements MarketService {
         Long totalAmount = amount - discountAmount;
         entity.setAmount(amount);
         entity.setDiscountAmount(discountAmount);
-        entity.setTotalAmount(totalAmount);
+        entity.setTotalAmount(FinanceUtils.toDecimal(FinanceUtils.toFractional2Rounded(totalAmount))); //Принудительно делаем 2 знака после запятой
         entity.setDiscount(discount);
         entity.setTargetCurrency(ds.get(Currency.class, targetCurrencyId));
         entity = idObjectService.save(entity);
