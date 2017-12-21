@@ -1,6 +1,10 @@
 package com.gracelogic.platform.task.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
+import com.gracelogic.platform.db.dto.JsonDateDeserializer;
+import com.gracelogic.platform.db.dto.JsonDateSerializer;
 import com.gracelogic.platform.task.model.Task;
 
 import java.util.Date;
@@ -96,6 +100,8 @@ public class TaskDTO extends IdObjectDTO {
         this.active = active;
     }
 
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getLastExecutionDate() {
         return lastExecutionDate;
     }

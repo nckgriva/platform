@@ -1,5 +1,6 @@
 package com.gracelogic.platform.market.api;
 
+import com.gracelogic.platform.account.exception.CurrencyMismatchException;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
@@ -32,6 +33,10 @@ public class DiscountApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource dbMessageSource;
+
+    @Autowired
+    @Qualifier("accountMessageSource")
+    private ResourceBundleMessageSource accountMessageSource;
 
     @Autowired
     private MarketService marketService;
@@ -79,6 +84,8 @@ public class DiscountApi extends AbstractAuthorizedController {
             return new ResponseEntity<IDResponse>(new IDResponse(discount.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (CurrencyMismatchException e) {
+            return new ResponseEntity<>(new ErrorResponse("account.CURRENCY_MISMATCH", accountMessageSource.getMessage("account.CURRENCY_MISMATCH", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 

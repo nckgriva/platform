@@ -119,7 +119,7 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setPaymentState(ds.get(PaymentState.class, DataConstants.PaymentStates.ACTIVATED.getValue()));
             idObjectService.save(payment);
         } catch (Exception e) {
-            logger.error("Failed to transmit payment event", e);
+            logger.fatal("Failed to transmit payment event", e);
         }
 
         return payment;

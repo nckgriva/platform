@@ -35,4 +35,21 @@ public class DataConstants {
             return value;
         }
     }
+
+    public enum CashierVoucherTypes {
+        INCOME(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        INCOME_RETURN(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
+        EXPENSE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
+        EXPENSE_RETURN(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74"));
+
+        private UUID value;
+
+        CashierVoucherTypes(UUID value) {
+            this.value = value;
+        }
+
+        public UUID getValue() {
+            return value;
+        }
+    }
 }

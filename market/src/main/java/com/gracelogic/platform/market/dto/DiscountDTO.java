@@ -18,6 +18,8 @@ public class DiscountDTO extends IdObjectDTO {
     private String discountTypeName;
     private String secretCode;
     private Long amount;
+    private UUID currencyId;
+    private String currencyName;
     private List<ProductDTO> products = new LinkedList<>();
 
     public String getName() {
@@ -91,6 +93,22 @@ public class DiscountDTO extends IdObjectDTO {
         this.products = products;
     }
 
+    public UUID getCurrencyId() {
+        return currencyId;
+    }
+
+    public void setCurrencyId(UUID currencyId) {
+        this.currencyId = currencyId;
+    }
+
+    public String getCurrencyName() {
+        return currencyName;
+    }
+
+    public void setCurrencyName(String currencyName) {
+        this.currencyName = currencyName;
+    }
+
     public static DiscountDTO prepare(Discount model) {
         DiscountDTO dto = new DiscountDTO();
         IdObjectDTO.prepare(dto, model);
@@ -105,6 +123,9 @@ public class DiscountDTO extends IdObjectDTO {
         if (model.getDiscountType() != null) {
             dto.setDiscountTypeId(model.getDiscountType().getId());
         }
+        if (model.getCurrency() != null) {
+            dto.setCurrencyId(model.getCurrency().getId());
+        }
         dto.setSecretCode(model.getSecretCode());
         dto.setAmount(model.getAmount());
 
@@ -114,6 +135,9 @@ public class DiscountDTO extends IdObjectDTO {
     public static DiscountDTO enrich(DiscountDTO dto, Discount model) {
         if (model.getDiscountType() != null) {
             dto.setDiscountTypeName(model.getDiscountType().getName());
+        }
+        if (model.getCurrency() != null) {
+            dto.setCurrencyName(model.getCurrency().getName());
         }
         return dto;
     }

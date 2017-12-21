@@ -29,10 +29,12 @@ import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.payment.service.AccountResolver;
 import com.gracelogic.platform.payment.service.PaymentExecutor;
+import com.gracelogic.platform.payment.service.PaymentServiceImpl;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,9 @@ import java.util.*;
 
 @Service
 public class MarketServiceImpl implements MarketService {
+
+    private static Logger logger = Logger.getLogger(MarketServiceImpl.class);
+
     @Autowired
     private IdObjectService idObjectService;
 
@@ -60,6 +65,9 @@ public class MarketServiceImpl implements MarketService {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private MarketResolver marketResolver;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -135,10 +143,15 @@ public class MarketServiceImpl implements MarketService {
         //Apply discount
         if (discount != null) {
             if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.FIX_AMOUNT_DISCOUNT.getValue())) {
-                if (discount.getAmount() == null) {
+                if (discount.getAmount() == null || discount.getCurrency() == null) {
                     throw new InvalidDiscountException();
                 }
                 discountAmount = discount.getAmount();
+                if (!discount.getCurrency().getId().equals(targetCurrencyId)) {
+                    ExchangeRate exchangeRate = accountService.getActualExchangeRate(discount.getCurrency().getId(), targetCurrencyId, null);
+                    discountAmount = FinanceUtils.toDecimal(FinanceUtils.toFractional(exchangeRate.getValue()) * FinanceUtils.toFractional(discount.getAmount()));
+                }
+
                 if (discountAmount > amount) {
                     discountAmount = amount;
                 }
@@ -216,6 +229,17 @@ public class MarketServiceImpl implements MarketService {
 
         return currencyDTOs;
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void queueCashierVoucher(UUID cashierVoucherTypeId, Order order) {
+        CashierVoucher cashierVoucher = new CashierVoucher();
+        cashierVoucher.setCashierVoucherType(ds.get(CashierVoucherType.class, cashierVoucherTypeId));
+        cashierVoucher.setOrder(order);
+        cashierVoucher.setProcessed(false);
+        idObjectService.save(cashierVoucher);
+    }
+
 
     private Discount getActiveDiscountBySecretCode(String secretCode) {
         Map<String, Object> params = new HashMap<>();
@@ -344,6 +368,7 @@ public class MarketServiceImpl implements MarketService {
         order.setPaid(order.getPaid() - amountToReturn);
         order.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.CANCELED.getValue()));
         idObjectService.save(order);
+        queueCashierVoucher(DataConstants.CashierVoucherTypes.INCOME_RETURN.getValue(), order);
 
         //Return discount
         if (order.getDiscount() != null) {
@@ -362,8 +387,7 @@ public class MarketServiceImpl implements MarketService {
         List<MerchantAccount> accounts = idObjectService.getList(MerchantAccount.class, null, "el.currency.id=:currencyId", params, null, null, null, 1);
         if (accounts.isEmpty()) {
             throw new AccountNotFoundException();
-        }
-        else {
+        } else {
             return accounts.iterator().next().getAccount().getId();
         }
     }
@@ -502,8 +526,18 @@ public class MarketServiceImpl implements MarketService {
         order.setPaid(order.getPaid() + amountToPay);
         if (order.getPaid().equals(order.getTotalAmount())) {
             order.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.PAID.getValue()));
+            order = idObjectService.save(order);
+            queueCashierVoucher(DataConstants.CashierVoucherTypes.INCOME.getValue(), order);
+            try {
+                marketResolver.orderPaid(order);
+            } catch (Exception e) {
+                logger.warn("Failed to transmit order paid event", e);
+            }
         }
-        return idObjectService.save(order);
+        else {
+            order = idObjectService.save(order);
+        }
+        return order;
     }
 
     private void recalculateOrderProductLifetimeExpiration(Order order, Long currentTimeMillis) {
@@ -706,7 +740,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public DiscountDTO getDiscount(UUID id, boolean enrich, boolean withProducts) throws ObjectNotFoundException {
-        Discount entity = idObjectService.getObjectById(Discount.class, enrich ? "left join fetch el.discountType" : "", id);
+        Discount entity = idObjectService.getObjectById(Discount.class, enrich ? "left join fetch el.discountType left join fetch el.currency" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -729,7 +763,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public EntityListResponse<DiscountDTO> getDiscountsPaged(String name, UUID usedForOrderId, UUID discountTypeId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = enrich ? "left join fetch el.discountType" : "";
+        String fetches = enrich ? "left join fetch el.discountType left join fetch el.currency" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -793,7 +827,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Discount saveDiscount(DiscountDTO dto) throws ObjectNotFoundException {
+    public Discount saveDiscount(DiscountDTO dto) throws ObjectNotFoundException, CurrencyMismatchException {
         Discount entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Discount.class, dto.getId());
@@ -812,12 +846,18 @@ public class MarketServiceImpl implements MarketService {
             idObjectService.delete(DiscountProduct.class, query, params);
         }
 
+        if (dto.getDiscountTypeId().equals(DataConstants.DiscountTypes.FIX_AMOUNT_DISCOUNT.getValue()) && dto.getCurrencyId() == null) {
+            throw new CurrencyMismatchException("Currency is required for this discount type");
+        }
+
         entity.setName(dto.getName());
         entity.setActive(dto.getActive());
         entity.setReusable(dto.getReusable());
         entity.setDiscountType(ds.get(DiscountType.class, dto.getDiscountTypeId()));
         entity.setSecretCode(dto.getSecretCode());
         entity.setAmount(dto.getAmount());
+        entity.setCurrency(ds.get(Currency.class, dto.getCurrencyId()));
+
         idObjectService.save(entity);
 
         for (ProductDTO productDTO : dto.getProducts()) {

@@ -1,5 +1,6 @@
 package com.gracelogic.platform.market.model;
 
+import com.gracelogic.platform.account.model.Currency;
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import org.hibernate.annotations.GenericGenerator;
@@ -46,6 +47,10 @@ public class Discount extends IdObject<UUID> {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "DISCOUNT_TYPE_ID", nullable = false)
     private DiscountType discountType;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "CURRENCY_ID", nullable = true)
+    private Currency currency;
 
     @Column(name = "SECRET_CODE", nullable = false)
     private String secretCode;
@@ -145,5 +150,13 @@ public class Discount extends IdObject<UUID> {
 
     public void setUsedForOrder(Order usedForOrder) {
         this.usedForOrder = usedForOrder;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
     }
 }

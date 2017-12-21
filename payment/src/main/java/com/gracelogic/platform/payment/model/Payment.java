@@ -65,7 +65,7 @@ public class Payment extends IdObject<UUID> {
     @Column(name = "TOTAL_AMOUNT", nullable = false)
     private Long totalAmount;
 
-    //TODO: Добавить currency
+    //TODO: Добавить currency?
 
     @ManyToOne
     @JoinColumn(name = "EXECUTED_BY_USER_ID", nullable = true)

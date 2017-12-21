@@ -12,6 +12,7 @@ import com.gracelogic.platform.market.dto.MarketAwareObjectDTO;
 import com.gracelogic.platform.market.dto.OrderDTO;
 import com.gracelogic.platform.market.dto.ProductDTO;
 import com.gracelogic.platform.market.exception.*;
+import com.gracelogic.platform.market.model.CashierVoucherType;
 import com.gracelogic.platform.market.model.Discount;
 import com.gracelogic.platform.market.model.Order;
 import com.gracelogic.platform.market.model.Product;
@@ -54,7 +55,7 @@ public interface MarketService {
 
     EntityListResponse<DiscountDTO> getDiscountsPaged(String name, UUID usedForOrderId, UUID discountTypeId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
-    Discount saveDiscount(DiscountDTO dto) throws ObjectNotFoundException;
+    Discount saveDiscount(DiscountDTO dto) throws ObjectNotFoundException, CurrencyMismatchException;
 
     void deleteDiscount(UUID id) throws ObjectNotFoundException;
 
@@ -69,4 +70,7 @@ public interface MarketService {
 
 
     List<CurrencyDTO> getAvailableCurrencies();
+
+
+    void queueCashierVoucher(UUID cashierVoucherTypeId, Order order);
 }
