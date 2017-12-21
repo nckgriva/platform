@@ -3,16 +3,9 @@ package com.gracelogic.platform.task.dto;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.task.model.TaskExecutionLog;
 
-import java.util.Date;
 import java.util.UUID;
 
 public class TaskExecutionLogDTO extends IdObjectDTO {
-    private UUID id;
-
-    private Date created;
-
-    private Date changed;
-
     private UUID taskId;
 
     private String taskName;
@@ -26,36 +19,6 @@ public class TaskExecutionLogDTO extends IdObjectDTO {
     private String stateName;
 
     private String parameter;
-
-    @Override
-    public UUID getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    @Override
-    public Date getCreated() {
-        return created;
-    }
-
-    @Override
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    @Override
-    public Date getChanged() {
-        return changed;
-    }
-
-    @Override
-    public void setChanged(Date changed) {
-        this.changed = changed;
-    }
 
     public String getParameter() {
         return parameter;

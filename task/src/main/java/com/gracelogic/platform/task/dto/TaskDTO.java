@@ -8,16 +8,8 @@ import com.gracelogic.platform.db.dto.JsonDateSerializer;
 import com.gracelogic.platform.task.model.Task;
 
 import java.util.Date;
-import java.util.UUID;
 
 public class TaskDTO extends IdObjectDTO {
-
-    private UUID id;
-
-    private Date created;
-
-    private Date changed;
-
     private String name;
 
     private String serviceName;
@@ -29,36 +21,6 @@ public class TaskDTO extends IdObjectDTO {
     private String parameter;
 
     private Date lastExecutionDate;
-
-    @Override
-    public UUID getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    @Override
-    public Date getChanged() {
-        return changed;
-    }
-
-    @Override
-    public void setChanged(Date changed) {
-        this.changed = changed;
-    }
-
-    @Override
-    public Date getCreated() {
-        return created;
-    }
-
-    @Override
-    public void setCreated(Date created) {
-        this.created = created;
-    }
 
     public String getName() {
         return name;
