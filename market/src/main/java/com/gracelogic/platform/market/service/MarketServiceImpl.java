@@ -160,7 +160,9 @@ public class MarketServiceImpl implements MarketService {
                 if (discount.getAmount() == null || discount.getAmount() > hundredPercents) {
                     throw new InvalidDiscountException();
                 }
-                discountAmount -= amount / hundredPercents * discount.getAmount();
+                double dDiscountAmount = (FinanceUtils.toFractional(amount) / 100D) * FinanceUtils.toFractional(discount.getAmount());
+                discountAmount = FinanceUtils.toDecimal(dDiscountAmount);
+
             } else if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.GIFT_PRODUCT.getValue())) {
                 List<Product> onlyDiscountedProducts = new LinkedList<>();
                 for (Product product : products) {

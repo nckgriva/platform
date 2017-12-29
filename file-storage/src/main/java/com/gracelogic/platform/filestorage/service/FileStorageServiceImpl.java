@@ -72,7 +72,12 @@ public class FileStorageServiceImpl implements FileStorageService {
             storedFile.setStoreMode(ds.get(StoreMode.class, storeModeId));
             storedFile.setExtension(extension);
             storedFile.setReferenceObjectId(referenceObjectId);
-            storedFile.setDataAvailable((storeModeId.equals(DataConstants.StoreModes.LOCAL.getValue()) || storeModeId.equals(DataConstants.StoreModes.DATABASE.getValue())) && is != null);
+            storedFile.setDataAvailable(
+                    (storeModeId.equals(DataConstants.StoreModes.LOCAL.getValue()) && is != null) ||
+                            (storeModeId.equals(DataConstants.StoreModes.DATABASE.getValue()) && is != null) ||
+                            storeModeId.equals(DataConstants.StoreModes.EXTERNAL_LINK.getValue()) ||
+                            storeModeId.equals(DataConstants.StoreModes.S3.getValue())
+            );
             storedFile.setMeta(meta);
             storedFile = idObjectService.save(storedFile);
 
@@ -108,11 +113,10 @@ public class FileStorageServiceImpl implements FileStorageService {
             throw new ObjectNotFoundException();
         }
 
-        if (storedFile.getDataAvailable()) {
-            if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
-                deleteDataLocally(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension());
-            }
+        if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
+            deleteDataLocally(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension());
         }
+
 
         storedFile.setDataAvailable((storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue()) ||
                 storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.DATABASE.getValue())) && is != null);
@@ -135,8 +139,7 @@ public class FileStorageServiceImpl implements FileStorageService {
                 storedFileData.setData(IOUtils.toByteArray(is));
                 idObjectService.save(storedFileData);
             }
-        }
-        else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.S3.getValue())) {
+        } else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.S3.getValue())) {
             if (is != null) {
                 saveDataViaS3(is, storedFile.getId(), storedFile.getReferenceObjectId(), extension);
             }
