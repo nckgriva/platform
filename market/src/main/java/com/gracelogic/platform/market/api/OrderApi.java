@@ -20,6 +20,7 @@ import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
+import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
@@ -75,17 +76,18 @@ public class OrderApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
             @ApiResponse(code = 400, message = "Object not found", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
-    @PreAuthorize("hasAuthority('ORDER:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
     public ResponseEntity getOrder(@PathVariable(value = "id") UUID id,
                                    @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
                                    @RequestParam(value = "withProducts", required = false, defaultValue = "false") Boolean withProducts) {
         try {
-            OrderDTO orderDTO = marketService.getOrder(id, enrich, withProducts);
+            OrderDTO orderDTO = marketService.getOrder(id, enrich, withProducts, getUser());
             return new ResponseEntity<OrderDTO>(orderDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ForbiddenException e) {
+            return new ResponseEntity<>(new ErrorResponse("auth.FORBIDDEN", userMessageSource.getMessage("auth.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
         }
     }
 
@@ -175,6 +177,7 @@ public class OrderApi extends AbstractAuthorizedController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not found"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
+    @PreAuthorize("hasAuthority('ORDER:CANCEL')")
     @RequestMapping(method = RequestMethod.POST, value = "/{orderId}/cancel")
     @ResponseBody
     public ResponseEntity cancelOrder(@PathVariable(value = "orderId") UUID orderId) {
@@ -183,7 +186,7 @@ public class OrderApi extends AbstractAuthorizedController {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
-        }  catch (InvalidOrderStateException e) {
+        } catch (InvalidOrderStateException e) {
             return new ResponseEntity<>(new ErrorResponse("market.INVALID_ORDER_STATE", marketMessageSource.getMessage("market.INVALID_ORDER_STATE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (AccountNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("account.ACCOUNT_NOT_FOUND", accountMessageSource.getMessage("account.ACCOUNT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -231,7 +234,6 @@ public class OrderApi extends AbstractAuthorizedController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
-    @PreAuthorize("hasAuthority('ORDER:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getOrders(
@@ -244,8 +246,18 @@ public class OrderApi extends AbstractAuthorizedController {
             @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
             @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
             @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
-        EntityListResponse<OrderDTO> docs = marketService.getOrdersPaged(userId, orderStateId, discountId, enrich, withProducts, length, null, start, sortField, sortDir);
-        return new ResponseEntity<EntityListResponse<OrderDTO>>(docs, HttpStatus.OK);
+        try {
+            AuthorizedUser authorizedUser = getUser();
+            if (authorizedUser == null || !authorizedUser.getGrants().contains("ORDER:SHOW") && (userId == null || !userId.equals(authorizedUser.getId()))) {
+                throw new ForbiddenException();
+            }
+
+            EntityListResponse<OrderDTO> orders = marketService.getOrdersPaged(userId, orderStateId, discountId, enrich, withProducts, length, null, start, sortField, sortDir);
+            return new ResponseEntity<EntityListResponse<OrderDTO>>(orders, HttpStatus.OK);
+        } catch (ForbiddenException e) {
+            return new ResponseEntity<>(new ErrorResponse("auth.FORBIDDEN", userMessageSource.getMessage("auth.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
+        }
+
     }
 
     @ApiOperation(

@@ -558,10 +558,13 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts) throws ObjectNotFoundException {
+    public OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts, AuthorizedUser authorizedUser) throws ObjectNotFoundException, ForbiddenException {
         Order entity = idObjectService.getObjectById(Order.class, enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
+        }
+        if (!authorizedUser.getGrants().contains("ORDER:SHOW") && !entity.getUser().getId().equals(authorizedUser.getId())) {
+            throw new ForbiddenException();
         }
         OrderDTO dto = OrderDTO.prepare(entity);
         if (enrich) {
