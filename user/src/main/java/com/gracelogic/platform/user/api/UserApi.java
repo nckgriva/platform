@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -445,9 +447,14 @@ public class UserApi extends AbstractAuthorizedController {
         if (allRequestParams != null) {
             for (String paramName : allRequestParams.keySet()) {
                 if (StringUtils.startsWithIgnoreCase(paramName, "fields.")) {
-                    String value = allRequestParams.get(paramName);
+                    String value = null;
+                    try {
+                        value = URLDecoder.decode(allRequestParams.get(paramName), "UTF-8");
+                    } catch (UnsupportedEncodingException ignored) {
+                    }
+
                     if (!StringUtils.isEmpty(value)) {
-                        fields.put(paramName.substring("fields.".length()), allRequestParams.get(paramName));
+                        fields.put(paramName.substring("fields.".length()), value);
                     }
                 }
             }
