@@ -44,7 +44,7 @@ public class StoredFile extends IdObject<UUID> {
     private String meta;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "STORED_FILE_DATA", nullable = true)
+    @JoinColumn(name = "STORED_FILE_DATA_ID", nullable = true)
     private StoredFileData storedFileData;
 
 

@@ -7,10 +7,7 @@ import com.gracelogic.platform.account.exception.InsufficientFundsException;
 import com.gracelogic.platform.account.exception.NoActualExchangeRateException;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
-import com.gracelogic.platform.market.dto.DiscountDTO;
-import com.gracelogic.platform.market.dto.MarketAwareObjectDTO;
-import com.gracelogic.platform.market.dto.OrderDTO;
-import com.gracelogic.platform.market.dto.ProductDTO;
+import com.gracelogic.platform.market.dto.*;
 import com.gracelogic.platform.market.exception.*;
 import com.gracelogic.platform.market.model.CashierVoucherType;
 import com.gracelogic.platform.market.model.Discount;
@@ -62,9 +59,9 @@ public interface MarketService {
 
     void checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkOnDate) throws ProductNotPurchasedException;
 
-    Map<UUID, Boolean> getProductsPurchaseState(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate);
+    Map<UUID, List<PurchasedProductDTO>> getProductsPurchaseState(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate);
 
-    Map<UUID, Product> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, boolean onlyPrimary);
+    Map<UUID, List<Product>> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, boolean onlyPrimary);
 
     void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedUserId, Date checkOnDate);
 

@@ -52,6 +52,6 @@ public abstract class AbstractMarketDaoImpl extends BaseDao implements MarketDao
             cause += "and el.primary=true";
         }
 
-        return idObjectService.getList(Product.class, null, cause, params, null, null, null, null);
+        return idObjectService.getList(Product.class, null, cause, params, "el.primary", "ASC", null, null);
     }
 }

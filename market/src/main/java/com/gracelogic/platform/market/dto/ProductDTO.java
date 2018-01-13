@@ -17,6 +17,8 @@ public class ProductDTO extends IdObjectDTO {
     private Boolean primary;
     private UUID currencyId;
     private String currencyName;
+    private UUID productOwnershipTypeId;
+    private String productOwnershipTypeName;
 
     public String getName() {
         return name;
@@ -104,8 +106,28 @@ public class ProductDTO extends IdObjectDTO {
         this.currencyName = currencyName;
     }
 
+    public UUID getProductOwnershipTypeId() {
+        return productOwnershipTypeId;
+    }
+
+    public void setProductOwnershipTypeId(UUID productOwnershipTypeId) {
+        this.productOwnershipTypeId = productOwnershipTypeId;
+    }
+
+    public String getProductOwnershipTypeName() {
+        return productOwnershipTypeName;
+    }
+
+    public void setProductOwnershipTypeName(String productOwnershipTypeName) {
+        this.productOwnershipTypeName = productOwnershipTypeName;
+    }
+
     public static ProductDTO prepare(Product model) {
         ProductDTO dto = new ProductDTO();
+        return prepare(dto, model);
+    }
+
+    public static ProductDTO prepare(ProductDTO dto, Product model) {
         IdObjectDTO.prepare(dto, model);
 
         if (model.getProductType() != null) {
@@ -113,6 +135,9 @@ public class ProductDTO extends IdObjectDTO {
         }
         if (model.getCurrency() != null) {
             dto.setCurrencyId(model.getCurrency().getId());
+        }
+        if (model.getProductOwnershipType() != null) {
+            dto.setProductOwnershipTypeId(model.getProductOwnershipType().getId());
         }
         dto.setName(model.getName());
         dto.setActive(model.getActive());
@@ -129,6 +154,9 @@ public class ProductDTO extends IdObjectDTO {
         }
         if (model.getCurrency() != null) {
             dto.setCurrencyName(model.getCurrency().getName());
+        }
+        if (model.getProductOwnershipType() != null) {
+            dto.setProductOwnershipTypeName(model.getProductOwnershipType().getName());
         }
 
         return dto;

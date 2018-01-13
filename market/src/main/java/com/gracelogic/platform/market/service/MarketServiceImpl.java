@@ -16,10 +16,7 @@ import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.market.DataConstants;
 import com.gracelogic.platform.market.dao.MarketDao;
-import com.gracelogic.platform.market.dto.DiscountDTO;
-import com.gracelogic.platform.market.dto.MarketAwareObjectDTO;
-import com.gracelogic.platform.market.dto.OrderDTO;
-import com.gracelogic.platform.market.dto.ProductDTO;
+import com.gracelogic.platform.market.dto.*;
 import com.gracelogic.platform.market.exception.*;
 import com.gracelogic.platform.market.model.*;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
@@ -438,44 +435,47 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public Map<UUID, Boolean> getProductsPurchaseState(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate) {
-        Map<UUID, Boolean> result = new HashMap<>();
+    public Map<UUID, List<PurchasedProductDTO>> getProductsPurchaseState(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate) {
+        Map<UUID, List<PurchasedProductDTO>> result = new HashMap<>();
 
         List<OrderProduct> orderProducts = marketDao.getPurchasedProducts(userId, referenceObjectIdsAndProductTypeIds.keySet(), checkDate);
 
         for (UUID referenceObjectId : referenceObjectIdsAndProductTypeIds.keySet()) {
             UUID productTypeId = referenceObjectIdsAndProductTypeIds.get(referenceObjectId);
-            boolean found = false;
+
+            List<PurchasedProductDTO> purchasedProducts = new LinkedList<>();
             for (OrderProduct orderProduct : orderProducts) {
                 if (orderProduct.getProduct().getReferenceObjectId() != null
                         && orderProduct.getProduct().getReferenceObjectId().equals(referenceObjectId)
                         && orderProduct.getProduct().getProductType().getId().equals(productTypeId)) {
-                    found = true;
-                    break;
+                    purchasedProducts.add(PurchasedProductDTO.prepare(orderProduct.getProduct(), true));
                 }
             }
-            result.put(referenceObjectId, found);
+            result.put(referenceObjectId, purchasedProducts);
         }
 
         return result;
     }
 
-    public Map<UUID, Product> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, boolean onlyPrimary) {
-        Map<UUID, Product> result = new HashMap<>();
+    public Map<UUID, List<Product>> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, boolean onlyPrimary) {
+        Map<UUID, List<Product>> result = new HashMap<>();
         List<Product> products = marketDao.getProductsByReferenceObjectIds(referenceObjectIdsAndProductTypeIds.keySet(), onlyPrimary);
 
         for (UUID referenceObjectId : referenceObjectIdsAndProductTypeIds.keySet()) {
             UUID productTypeId = referenceObjectIdsAndProductTypeIds.get(referenceObjectId);
-            Product p = null;
+            List<Product> foundProducts = new LinkedList<>();
             for (Product product : products) {
                 if (product.getReferenceObjectId() != null
                         && product.getReferenceObjectId().equals(referenceObjectId)
                         && product.getProductType().getId().equals(productTypeId)) {
-                    p = product;
-                    break;
+                    foundProducts.add(product);
+
+                    if (onlyPrimary) {
+                        break;
+                    }
                 }
             }
-            result.put(referenceObjectId, p);
+            result.put(referenceObjectId, foundProducts);
         }
 
         return result;
@@ -494,24 +494,32 @@ public class MarketServiceImpl implements MarketService {
             referenceObjectIdsAndProductTypeIds.put(dto.getId(), productTypeId);
         }
 
-        Map<UUID, Boolean> purchased = Collections.emptyMap();
+        Map<UUID, List<PurchasedProductDTO>> purchased = Collections.emptyMap();
         if (relatedUserId != null) {
             purchased = getProductsPurchaseState(relatedUserId, referenceObjectIdsAndProductTypeIds, checkOnDate);
         }
 
-        Map<UUID, Product> products = findProducts(referenceObjectIdsAndProductTypeIds, true);
+        Map<UUID, List<Product>> products = findProducts(referenceObjectIdsAndProductTypeIds, false);
 
         for (MarketAwareObjectDTO dto : objects) {
             if (dto.getId() == null) {
                 continue;
             }
             if (products.containsKey(dto.getId())) {
-                Product product = products.get(dto.getId());
-                if (product != null) {
-                    MarketAwareObjectDTO.enrichMarketInfo(dto, product);
+                List<Product> foundProducts = products.get(dto.getId());
+                for (Product product : foundProducts) {
+                    Boolean isPurchased = null;
                     if (purchased.containsKey(dto.getId())) {
-                        dto.setProductPurchased(purchased.get(dto.getId()));
+                        isPurchased = false;
+                        List<PurchasedProductDTO> purchasedProducts = purchased.get(dto.getId());
+                        for (PurchasedProductDTO purchasedProduct : purchasedProducts) {
+                            if (purchasedProduct.getId().equals(product.getId())) {
+                                isPurchased = true;
+                                break;
+                            }
+                        }
                     }
+                    dto.getProducts().add(PurchasedProductDTO.prepare(product, isPurchased));
                 }
             }
         }
@@ -649,7 +657,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public ProductDTO getProduct(UUID id, boolean enrich) throws ObjectNotFoundException {
-        Product entity = idObjectService.getObjectById(Product.class, enrich ? "left join fetch el.productType left join fetch el.currency" : "", id);
+        Product entity = idObjectService.getObjectById(Product.class, enrich ? "left join fetch el.productType left join fetch el.currency left join fetch el.productOwnershipType" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -662,7 +670,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public EntityListResponse<ProductDTO> getProductsPaged(String name, UUID productTypeId, Boolean active, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = enrich ? "left join fetch el.productType left join fetch el.currency" : "";
+        String fetches = enrich ? "left join fetch el.productType left join fetch el.currency left join fetch el.productOwnershipType" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -733,6 +741,7 @@ public class MarketServiceImpl implements MarketService {
         entity.setPrice(dto.getPrice());
         entity.setPrimary(dto.getPrimary());
         entity.setCurrency(ds.get(Currency.class, dto.getCurrencyId()));
+        entity.setProductOwnershipType(ds.get(ProductOwnershipType.class, dto.getProductTypeId()));
 
         return idObjectService.save(entity);
     }

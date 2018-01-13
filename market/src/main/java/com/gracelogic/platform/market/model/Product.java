@@ -37,6 +37,10 @@ public class Product extends IdObject<UUID> {
     @JoinColumn(name = "PRODUCT_TYPE_ID", nullable = false)
     private ProductType productType;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "PRODUCT_OWNERSHIP_TYPE_ID", nullable = false)
+    private ProductOwnershipType productOwnershipType;
+
     @Column(name = "REFERENCE_OBJECT_ID", nullable = false)
     @org.hibernate.annotations.Type(type = "pg-uuid")
     private UUID referenceObjectId;
@@ -146,5 +150,13 @@ public class Product extends IdObject<UUID> {
 
     public void setCurrency(Currency currency) {
         this.currency = currency;
+    }
+
+    public ProductOwnershipType getProductOwnershipType() {
+        return productOwnershipType;
+    }
+
+    public void setProductOwnershipType(ProductOwnershipType productOwnershipType) {
+        this.productOwnershipType = productOwnershipType;
     }
 }
