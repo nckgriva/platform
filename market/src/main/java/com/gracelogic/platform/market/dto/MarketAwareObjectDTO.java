@@ -18,12 +18,14 @@ public class MarketAwareObjectDTO extends IdObjectDTO implements Serializable {
     }
 
     public Boolean getPurchased() {
-        for (PurchasedProductDTO dto : products) {
-            if (dto.getPurchased() == null) {
-                return null;
-            }
-            if (dto.getPurchased()) {
-                return true;
+        if (products != null) {
+            for (PurchasedProductDTO dto : products) {
+                if (dto.getPurchased() == null) {
+                    return null;
+                }
+                if (dto.getPurchased()) {
+                    return true;
+                }
             }
         }
         return false;
