@@ -9,7 +9,6 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.market.dto.*;
 import com.gracelogic.platform.market.exception.*;
-import com.gracelogic.platform.market.model.CashierVoucherType;
 import com.gracelogic.platform.market.model.Discount;
 import com.gracelogic.platform.market.model.Order;
 import com.gracelogic.platform.market.model.Product;

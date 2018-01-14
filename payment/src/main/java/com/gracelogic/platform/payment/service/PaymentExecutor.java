@@ -2,7 +2,6 @@ package com.gracelogic.platform.payment.service;
 
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
-import com.gracelogic.platform.payment.model.Payment;
 import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;

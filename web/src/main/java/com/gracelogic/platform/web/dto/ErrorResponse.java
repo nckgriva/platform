@@ -26,9 +26,11 @@ public class ErrorResponse extends PlatformResponse {
     }
 
     public ErrorResponse() {
+        setSuccess(false);
     }
 
     public ErrorResponse(String code) {
+        setSuccess(false);
         this.code = code;
     }
 

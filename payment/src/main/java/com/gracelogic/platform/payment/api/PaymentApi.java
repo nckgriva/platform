@@ -12,10 +12,12 @@ import com.gracelogic.platform.payment.dto.PaymentDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentAlreadyExistException;
+import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.service.PaymentService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
+import com.gracelogic.platform.web.dto.IDResponse;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,8 +105,8 @@ public class PaymentApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity addPayment(@RequestBody ProcessPaymentRequest request) {
         try {
-            paymentService.processPayment(DataConstants.PaymentSystems.MANUAL.getValue(), request, getUser());
-            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+            Payment payment = paymentService.processPayment(DataConstants.PaymentSystems.MANUAL.getValue(), request, getUser());
+            return new ResponseEntity<IDResponse>(new IDResponse(payment.getId()), HttpStatus.OK);
         } catch (PaymentAlreadyExistException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (AccountNotFoundException e) {

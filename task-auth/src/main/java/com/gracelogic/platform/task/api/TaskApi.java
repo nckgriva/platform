@@ -41,7 +41,7 @@ public class TaskApi extends AbstractAuthorizedController {
     private  TaskService taskService;
 
     @ApiOperation(
-            value = "getTaskExecutionLogs(",
+            value = "getTaskExecutionLogs",
             notes = "Get list of TaskExecutionLogs",
             response =  EntityListResponse.class
     )

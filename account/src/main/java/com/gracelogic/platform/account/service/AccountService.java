@@ -6,12 +6,10 @@ import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.account.exception.CurrencyMismatchException;
 import com.gracelogic.platform.account.exception.InsufficientFundsException;
 import com.gracelogic.platform.account.exception.NoActualExchangeRateException;
-import com.gracelogic.platform.account.model.Account;
 import com.gracelogic.platform.account.model.ExchangeRate;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
