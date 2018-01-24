@@ -338,7 +338,11 @@
                 <artifactId>reflections</artifactId>
                 <version>0.9.9-RC1</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>16.0.1</version>
+            </dependency>
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
@@ -349,7 +353,11 @@
                 <artifactId>quartz-jobs</artifactId>
                 <version>2.2.1</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>3.18.1-GA</version>
+            </dependency>
 
             <!--Test-->
             <dependency>
