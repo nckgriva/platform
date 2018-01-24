@@ -37,6 +37,9 @@ public class Discount extends IdObject<UUID> {
     @Column(name = "IS_REUSABLE", nullable = false)
     private Boolean reusable;
 
+    @Column(name = "IS_ONCE_FOR_USER", nullable = false)
+    private Boolean onceForUser;
+
     @Column(name = "IS_USED", nullable = false)
     private Boolean used; //Актуально только для случая с reusable = false
 
@@ -158,5 +161,13 @@ public class Discount extends IdObject<UUID> {
 
     public void setCurrency(Currency currency) {
         this.currency = currency;
+    }
+
+    public Boolean getOnceForUser() {
+        return onceForUser;
+    }
+
+    public void setOnceForUser(Boolean onceForUser) {
+        this.onceForUser = onceForUser;
     }
 }

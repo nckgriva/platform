@@ -12,6 +12,7 @@ public class DiscountDTO extends IdObjectDTO {
     private String name;
     private Boolean active;
     private Boolean reusable;
+    private Boolean onceForUser;
     private Boolean used; //Актуально только для случая с reusable = false
     private UUID usedForOrderId; //Актуально только для случая с reusable = false
     private UUID discountTypeId;
@@ -85,6 +86,14 @@ public class DiscountDTO extends IdObjectDTO {
 
     public void setAmount(Long amount) { this.amount = amount; }
 
+    public Boolean getOnceForUser() {
+        return onceForUser;
+    }
+
+    public void setOnceForUser(Boolean onceForUser) {
+        this.onceForUser = onceForUser;
+    }
+
     public List<ProductDTO> getProducts() {
         return products;
     }
@@ -117,6 +126,7 @@ public class DiscountDTO extends IdObjectDTO {
         dto.setActive(model.getActive());
         dto.setReusable(model.getReusable());
         dto.setUsed(model.getUsed());
+        dto.setOnceForUser(model.getOnceForUser());
         if (model.getUsedForOrder() != null) {
             dto.setUsedForOrderId(model.getUsedForOrder().getId());
         }

@@ -284,6 +284,15 @@ public class MarketServiceImpl implements MarketService {
                         idObjectService.save(discount);
                     }
                 }
+                if (discount.getOnceForUser()) {
+                    Map<String, Object> p = new HashMap<>();
+                    p.put("discountId", discount.getId());
+                    p.put("orderStateId", DataConstants.OrderStates.PAID.getValue());
+                    Integer cnt = idObjectService.checkExist(Order.class, null,"el.discount.id=:discountId and el.orderState.id=:orderStateId", p, 1);
+                    if (cnt > 0) {
+                        throw new InvalidDiscountException("This discount may be used only once for user");
+                    }
+                }
             }
 
             //Update lifetime expiration
@@ -866,6 +875,7 @@ public class MarketServiceImpl implements MarketService {
         entity.setName(dto.getName());
         entity.setActive(dto.getActive());
         entity.setReusable(dto.getReusable());
+        entity.setOnceForUser(dto.getOnceForUser());
         entity.setDiscountType(ds.get(DiscountType.class, dto.getDiscountTypeId()));
         entity.setSecretCode(dto.getSecretCode());
         entity.setAmount(dto.getAmount());
