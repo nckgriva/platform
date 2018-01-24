@@ -4,44 +4,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>platform-db</artifactId>
-    <name>db</name>
+    <artifactId>platform-web</artifactId>
+    <name>web</name>
     <version>1.0</version>
     <packaging>jar</packaging>
     <parent>
         <groupId>com.gracelogic.platform</groupId>
         <artifactId>platform-parent</artifactId>
         <version>1.0</version>
-        <relativePath>../parent</relativePath>
+        <relativePath>../../parent</relativePath>
     </parent>
     <dependencies>
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-        </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.hibernate.javax.persistence</groupId>-->
-            <!--<artifactId>hibernate-jpa-2.0-api</artifactId>-->
-        <!--</dependency>-->
-        <dependency>
-            <groupId>org.hibernate.common</groupId>
-            <artifactId>hibernate-commons-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
+            <groupId>com.gracelogic.platform</groupId>
+            <artifactId>platform-localization</artifactId>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -57,15 +34,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-orm</artifactId>
+            <artifactId>spring-webmvc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -80,6 +53,34 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
         </dependency>
     </dependencies>
     <build>

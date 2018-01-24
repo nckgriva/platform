@@ -11,23 +11,23 @@
 
     <modules>
         <module>parent</module>
-        <module>swagger-static</module>
-        <module>swagger-ui</module>
-        <module>db</module>
+        <module>swagger/swagger-static</module>
+        <module>swagger/swagger-ui</module>
+        <module>utils/db</module>
+        <module>utils/finance</module>
+        <module>utils/notification</module>
+        <module>utils/localization</module>
+        <module>utils/template</module>
+        <module>utils/web</module>
+        <module>utils/tcp-server</module>
+        <module>utils/onec</module>
         <module>dictionary</module>
-        <module>finance</module>
         <module>property</module>
-        <module>notification</module>
         <module>user</module>
-        <module>localization</module>
-        <module>web</module>
         <module>oauth</module>
-        <module>template</module>
         <module>account</module>
         <module>payment</module>
-        <module>tcp-server</module>
         <module>task</module>
-        <module>onec</module>
         <module>content</module>
         <module>file-storage</module>
         <module>file-storage-auth</module>

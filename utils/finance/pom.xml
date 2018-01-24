@@ -4,38 +4,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>platform-localization</artifactId>
-    <name>localization</name>
+    <artifactId>platform-finance</artifactId>
+    <name>finance</name>
     <version>1.0</version>
     <packaging>jar</packaging>
     <parent>
         <groupId>com.gracelogic.platform</groupId>
         <artifactId>platform-parent</artifactId>
         <version>1.0</version>
-        <relativePath>../parent</relativePath>
+        <relativePath>../../parent</relativePath>
     </parent>
     <dependencies>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
         </dependency>
     </dependencies>
     <build>

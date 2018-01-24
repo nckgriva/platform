@@ -11,7 +11,7 @@
         <groupId>com.gracelogic.platform</groupId>
         <artifactId>platform-parent</artifactId>
         <version>1.0</version>
-        <relativePath>../parent</relativePath>
+        <relativePath>../../parent</relativePath>
     </parent>
 
     <build>
