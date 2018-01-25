@@ -16,14 +16,8 @@
     </parent>
     <dependencies>
         <dependency>
-            <groupId>com.gracelogic.platform</groupId>
-            <artifactId>platform-db</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.gracelogic.platform</groupId>
-            <artifactId>platform-property</artifactId>
-            <version>1.0</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
