@@ -4,6 +4,7 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
+import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.notification.dto.Message;
 import com.gracelogic.platform.notification.dto.SendingType;
 import com.gracelogic.platform.notification.exception.SendingException;
@@ -998,6 +999,8 @@ public class UserServiceImpl implements UserService {
             try {
                 request.getSession(false).setAttribute(LocaleFilter.SESSION_ATTRIBUTE_LOCALE, locale);
             } catch (Exception ignored) {}
+
+            LocaleHolder.setLocale(l);
         }
     }
 }
