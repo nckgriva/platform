@@ -733,8 +733,8 @@ public class MarketServiceImpl implements MarketService {
 
         if ((entity.getId() != null && !entity.getPrimary() && dto.getPrimary()) || entity.getId() == null && dto.getPrimary()) {
             Map<String, Object> params = new HashMap<>();
-            params.put("productTypeId", entity.getProductType().getId());
-            params.put("referenceObjectId", entity.getReferenceObjectId());
+            params.put("productTypeId", dto.getProductTypeId());
+            params.put("referenceObjectId", dto.getReferenceObjectId());
 
             if (idObjectService.checkExist(Product.class, null, "el.productType.id=:productTypeId and el.referenceObjectId=:referenceObjectId and el.primary=true", params, 1) > 0) {
                 throw new PrimaryProductException();
@@ -749,7 +749,7 @@ public class MarketServiceImpl implements MarketService {
         entity.setPrice(dto.getPrice());
         entity.setPrimary(dto.getPrimary());
         entity.setCurrency(ds.get(Currency.class, dto.getCurrencyId()));
-        entity.setProductOwnershipType(ds.get(ProductOwnershipType.class, dto.getProductTypeId()));
+        entity.setProductOwnershipType(ds.get(ProductOwnershipType.class, dto.getProductOwnershipTypeId()));
 
         return idObjectService.save(entity);
     }
