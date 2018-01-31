@@ -288,7 +288,8 @@ public class MarketServiceImpl implements MarketService {
                     Map<String, Object> p = new HashMap<>();
                     p.put("discountId", discount.getId());
                     p.put("orderStateId", DataConstants.OrderStates.PAID.getValue());
-                    Integer cnt = idObjectService.checkExist(Order.class, null,"el.discount.id=:discountId and el.orderState.id=:orderStateId", p, 1);
+                    p.put("userId", authorizedUser.getId());
+                    Integer cnt = idObjectService.checkExist(Order.class, null,"el.discount.id=:discountId and el.orderState.id=:orderStateId and el.user.id=:userId", p, 1);
                     if (cnt > 0) {
                         throw new InvalidDiscountException("This discount may be used only once for user");
                     }
