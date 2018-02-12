@@ -2,6 +2,7 @@ package com.gracelogic.platform.payment.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gracelogic.platform.finance.FinanceUtils;
+import com.gracelogic.platform.payment.Utils;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.dto.paypal.*;
@@ -136,7 +137,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         String uri = apiUrl + "/v1/oauth2/token";
         logger.debug("request url: " + uri);
         HttpPost sendMethod = new HttpPost(uri);
-        sendMethod.addHeader("Authorization", "Basic " + getBase64Authorization(clientId, secret));
+        sendMethod.addHeader("Authorization", "Basic " + Utils.getBase64Authorization(clientId, secret));
         sendMethod.addHeader("Content-Type", "application/x-www-form-urlencoded");
         sendMethod.addHeader("Accept", "application/json");
         String requestBody = "grant_type=client_credentials";
@@ -186,10 +187,5 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         String response = EntityUtils.toString(entity);
         logger.debug("response body: " + response);
         return mapper.readValue(response, PayPalExecuteResponseDTO.class);
-    }
-
-    private static String getBase64Authorization(String clientId, String password) {
-        String temp = clientId + ":" + password;
-        return Base64.encodeBase64String(temp.getBytes());
     }
 }

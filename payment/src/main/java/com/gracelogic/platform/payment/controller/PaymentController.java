@@ -35,7 +35,7 @@ public class PaymentController {
     @RequestMapping(value = "/{paymentSystemId}")
     public void process(HttpServletRequest request,
                         HttpServletResponse response,
-                        @PathVariable(value = "paymentSystemId") UUID paymentSystemId) {
+                        @PathVariable(value = "paymentSystemId") UUID paymentSystemId) throws IOException {
         PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
         if (paymentSystem == null || !paymentSystem.getActive()) {
             response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
@@ -61,6 +61,7 @@ public class PaymentController {
             paymentExecutor.processCallback(paymentSystemId, applicationContext, request, response);
         } catch (Exception e) {
             logger.error("Failed to process payment", e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
