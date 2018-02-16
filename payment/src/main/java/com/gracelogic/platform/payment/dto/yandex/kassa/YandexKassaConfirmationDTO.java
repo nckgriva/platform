@@ -46,6 +46,9 @@ public class YandexKassaConfirmationDTO {
         this.return_url = return_url;
     }
 
+    public YandexKassaConfirmationDTO() {
+    }
+
     @Override
     public String toString() {
         return "YandexKassaConfirmationDTO{" +

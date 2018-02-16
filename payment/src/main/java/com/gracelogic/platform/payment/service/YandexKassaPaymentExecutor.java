@@ -8,6 +8,7 @@ import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.dto.yandex.kassa.*;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.property.service.PropertyService;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -68,9 +69,11 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
         }
 
         try {
-            YandexKassaNotificationDTO notification = mapper.readValue(request.getInputStream(), YandexKassaNotificationDTO.class);
+            String requestBody = IOUtils.toString(request.getInputStream());
+            logger.info("raw request: " + requestBody);
+            YandexKassaNotificationDTO notification = mapper.readValue(requestBody, YandexKassaNotificationDTO.class);
             logger.info(notification.toString());
-            if (StringUtils.equalsIgnoreCase(notification.getType(), "succeeded") && !StringUtils.isEmpty(notification.getObject().getId())) {
+            if (StringUtils.equalsIgnoreCase(notification.getEvent(), "payment.succeeded") && !StringUtils.isEmpty(notification.getObject().getId())) {
                 YandexKassaPaymentDTO payment = getPayment(notification.getObject().getId(), propertyService.getPropertyValue("payment:yandex_kassa_shop_id"), propertyService.getPropertyValue("payment:yandex_kassa_secret"));
                 if (StringUtils.equalsIgnoreCase(payment.getStatus(), "succeeded")) {
                     ProcessPaymentRequest req = new ProcessPaymentRequest();
@@ -98,6 +101,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
         sendMethod.addHeader("Authorization", "Basic " + Utils.getBase64Authorization(shopId, secret));
         sendMethod.addHeader("Content-Type", "application/json");
         sendMethod.addHeader("Accept", "application/json");
+        sendMethod.addHeader("Idempotence-Key", UUID.randomUUID().toString());
         String requestBody = mapper.writeValueAsString(request);
         logger.debug("request body: " + requestBody);
         sendMethod.setEntity(new StringEntity(requestBody));

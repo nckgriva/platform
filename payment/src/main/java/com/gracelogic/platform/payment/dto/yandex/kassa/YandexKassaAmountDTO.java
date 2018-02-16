@@ -28,6 +28,9 @@ public class YandexKassaAmountDTO {
         this.currency = currency;
     }
 
+    public YandexKassaAmountDTO() {
+    }
+
     @Override
     public String toString() {
         return "YandexKassaAmountDTO{" +

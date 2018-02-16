@@ -36,6 +36,7 @@ public class PaymentController {
     public void process(HttpServletRequest request,
                         HttpServletResponse response,
                         @PathVariable(value = "paymentSystemId") UUID paymentSystemId) throws IOException {
+        logger.info("Payment callback received: " + (paymentSystemId != null ? paymentSystemId.toString() : "null"));
         PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
         if (paymentSystem == null || !paymentSystem.getActive()) {
             response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
