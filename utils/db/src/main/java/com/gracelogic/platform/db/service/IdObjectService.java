@@ -36,7 +36,11 @@ public interface IdObjectService {
 
     void offsetFieldValue(Class clazz, Object id, String fieldName, Integer offsetValuet);
 
+
     <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
+
+    <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortFieldWithDirection, Integer startRecord, Integer maxResult);
+
 
     Integer getMaxInteger(Class clazz, String fieldName, String cause, Map<String, Object> params);
 

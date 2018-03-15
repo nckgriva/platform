@@ -22,8 +22,7 @@ public interface IdObjectDao {
 
     <T> List<T> getList(Class<T> clazz);
 
-    <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
-
+    <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortFieldWithDirection, Integer startRecord, Integer maxResult);
 
     void delete(Class clazz, Object id);
 

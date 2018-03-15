@@ -2,6 +2,7 @@ package com.gracelogic.platform.db.service;
 
 import com.gracelogic.platform.db.dao.IdObjectDao;
 import com.gracelogic.platform.db.model.IdObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -83,8 +84,7 @@ public class IdObjectServiceImpl implements IdObjectService {
     public <T extends IdObject> T setIfModified(Class<T> clazz, T oldObject, Object newId) {
         if (oldObject != null && isEquals(oldObject.getId(), newId)) {
             return oldObject;
-        }
-        else {
+        } else {
             if (newId != null) {
                 return getObjectById(clazz, newId);
             }
@@ -98,9 +98,21 @@ public class IdObjectServiceImpl implements IdObjectService {
         idObjectDao.offsetFieldValue(clazz, id, fieldName, offsetValue);
     }
 
-    @Override
     public <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
-        return idObjectDao.getList(clazz, fetches, cause, params, sortField, sortDirection, startRecord, maxResult);
+        String sortFieldWithDirection = null;
+        if (!StringUtils.isEmpty(sortField)) {
+            if (StringUtils.isEmpty(sortDirection)) {
+                sortDirection = "ASC";
+            }
+            sortFieldWithDirection = sortField + " " + sortDirection;
+        }
+
+        return getList(clazz, fetches, cause, params, sortFieldWithDirection, startRecord, maxResult);
+    }
+
+    @Override
+    public <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortFieldWithDirection, Integer startRecord, Integer maxResult) {
+        return idObjectDao.getList(clazz, fetches, cause, params, sortFieldWithDirection, startRecord, maxResult);
     }
 
     @Override
@@ -136,8 +148,7 @@ public class IdObjectServiceImpl implements IdObjectService {
         for (Object val : values) {
             if (!first) {
                 stringBuilder.append(",");
-            }
-            else {
+            } else {
                 first = false;
             }
             stringBuilder.append("'");

@@ -26,24 +26,22 @@ public abstract class BaseDao {
         return typedQuery.getResultList();
     }
 
-    public <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
+
+
+    public <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortFieldWithDirection, Integer startRecord, Integer maxResult) {
         if (fetches == null) {
             fetches = "";
         }
-        String queryStr = new String("select el from " + clazz.getSimpleName() + " el " + fetches + " ");
-        if (cause != null && !cause.isEmpty()) {
-            queryStr += String.format(" where %s ", cause);
+        String queryStr = "select el from " + clazz.getSimpleName() + " el " + fetches + " ";
+        if (!StringUtils.isEmpty(cause)) {
+            queryStr += " where " + cause + " ";
         }
-        if (sortField == null || sortField.isEmpty()) {
-            sortField = "el.id";
-            sortDirection = "DESC";
-        }
-
-        if (sortDirection == null || sortDirection.isEmpty()) {
-            sortDirection = "ASC";
+        if (StringUtils.isEmpty(sortFieldWithDirection)) {
+            sortFieldWithDirection = "el.id DESC";
         }
 
-        queryStr += String.format(" order by %s %s ", sortField, sortDirection);
+
+        queryStr += " order by " + sortFieldWithDirection + " ";
 
         Query query = entityManager.createQuery(queryStr);
         if (params != null) {
