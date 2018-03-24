@@ -32,7 +32,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
     private static Logger logger = Logger.getLogger(YandexKassaPaymentExecutor.class);
 
     @Override
-    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, Long periodicity, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
         PropertyService propertyService = null;
         try {
             propertyService = context.getBean(PropertyService.class);

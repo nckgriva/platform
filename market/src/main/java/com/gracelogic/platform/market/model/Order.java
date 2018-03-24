@@ -64,6 +64,17 @@ public class Order extends IdObject<UUID> {
     @JoinColumn(name = "TARGET_CURRENCY_ID", nullable = false)
     private Currency targetCurrency;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "OWNERSHIP_TYPE_ID", nullable = false)
+    private OwnershipType ownershipType;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true) //Родительский заказ, используется для подписок
+    @JoinColumn(name = "PARENT_ORDER_ID", nullable = true)
+    private Order parentOrder;
+
+    @Column(name = "PERIODICITY", nullable = true)
+    private Long periodicity; //Периодичность для подписки
+
     @Override
     public UUID getId() {
         return id;
@@ -172,5 +183,29 @@ public class Order extends IdObject<UUID> {
 
     public void setTargetCurrency(Currency targetCurrency) {
         this.targetCurrency = targetCurrency;
+    }
+
+    public Order getParentOrder() {
+        return parentOrder;
+    }
+
+    public void setParentOrder(Order parentOrder) {
+        this.parentOrder = parentOrder;
+    }
+
+    public OwnershipType getOwnershipType() {
+        return ownershipType;
+    }
+
+    public void setOwnershipType(OwnershipType ownershipType) {
+        this.ownershipType = ownershipType;
+    }
+
+    public Long getPeriodicity() {
+        return periodicity;
+    }
+
+    public void setPeriodicity(Long periodicity) {
+        this.periodicity = periodicity;
     }
 }

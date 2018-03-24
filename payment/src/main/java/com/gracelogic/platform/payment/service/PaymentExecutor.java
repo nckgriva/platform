@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface PaymentExecutor {
-    PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException;
+    PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, Long periodicity, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException;
 
     void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) throws PaymentExecutionException;
 }

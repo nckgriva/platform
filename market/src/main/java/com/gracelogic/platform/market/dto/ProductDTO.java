@@ -17,8 +17,8 @@ public class ProductDTO extends IdObjectDTO {
     private Boolean primary;
     private UUID currencyId;
     private String currencyName;
-    private UUID productOwnershipTypeId;
-    private String productOwnershipTypeName;
+    private UUID ownershipTypeId;
+    private String ownershipTypeName;
 
     public String getName() {
         return name;
@@ -106,20 +106,20 @@ public class ProductDTO extends IdObjectDTO {
         this.currencyName = currencyName;
     }
 
-    public UUID getProductOwnershipTypeId() {
-        return productOwnershipTypeId;
+    public UUID getOwnershipTypeId() {
+        return ownershipTypeId;
     }
 
-    public void setProductOwnershipTypeId(UUID productOwnershipTypeId) {
-        this.productOwnershipTypeId = productOwnershipTypeId;
+    public void setOwnershipTypeId(UUID ownershipTypeId) {
+        this.ownershipTypeId = ownershipTypeId;
     }
 
-    public String getProductOwnershipTypeName() {
-        return productOwnershipTypeName;
+    public String getOwnershipTypeName() {
+        return ownershipTypeName;
     }
 
-    public void setProductOwnershipTypeName(String productOwnershipTypeName) {
-        this.productOwnershipTypeName = productOwnershipTypeName;
+    public void setOwnershipTypeName(String ownershipTypeName) {
+        this.ownershipTypeName = ownershipTypeName;
     }
 
     public static ProductDTO prepare(Product model) {
@@ -136,8 +136,8 @@ public class ProductDTO extends IdObjectDTO {
         if (model.getCurrency() != null) {
             dto.setCurrencyId(model.getCurrency().getId());
         }
-        if (model.getProductOwnershipType() != null) {
-            dto.setProductOwnershipTypeId(model.getProductOwnershipType().getId());
+        if (model.getOwnershipType() != null) {
+            dto.setOwnershipTypeId(model.getOwnershipType().getId());
         }
         dto.setName(model.getName());
         dto.setActive(model.getActive());
@@ -155,8 +155,8 @@ public class ProductDTO extends IdObjectDTO {
         if (model.getCurrency() != null) {
             dto.setCurrencyName(model.getCurrency().getName());
         }
-        if (model.getProductOwnershipType() != null) {
-            dto.setProductOwnershipTypeName(model.getProductOwnershipType().getName());
+        if (model.getOwnershipType() != null) {
+            dto.setOwnershipTypeName(model.getOwnershipType().getName());
         }
 
         return dto;

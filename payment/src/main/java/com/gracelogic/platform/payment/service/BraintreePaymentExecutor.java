@@ -25,7 +25,7 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
     private static Logger logger = Logger.getLogger(BraintreePaymentExecutor.class);
 
     @Override
-    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, Long periodicity, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
         if (params == null || !params.containsKey(ACTION)) {
             throw new PaymentExecutionException("Not specified action");
         }

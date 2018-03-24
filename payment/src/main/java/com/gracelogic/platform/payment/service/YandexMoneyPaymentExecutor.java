@@ -35,7 +35,7 @@ public class YandexMoneyPaymentExecutor implements PaymentExecutor {
 
 
     @Override
-    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, Long periodicity, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
         throw new RuntimeException("Not implemented");
     }
 

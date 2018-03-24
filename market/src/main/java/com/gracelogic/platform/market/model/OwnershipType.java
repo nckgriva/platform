@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "PRODUCT_OWNERSHIP_TYPE")
-public class ProductOwnershipType extends IdObject<UUID> implements Dictionary {
+@Table(name = JPAProperties.TABLE_PREFIX + "OWNERSHIP_TYPE")
+public class OwnershipType extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
