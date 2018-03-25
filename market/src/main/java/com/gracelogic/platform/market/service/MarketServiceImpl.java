@@ -19,6 +19,7 @@ import com.gracelogic.platform.market.dao.MarketDao;
 import com.gracelogic.platform.market.dto.*;
 import com.gracelogic.platform.market.exception.*;
 import com.gracelogic.platform.market.model.*;
+import com.gracelogic.platform.payment.dto.PaymentExecutionRequestDTO;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
@@ -362,16 +363,21 @@ public class MarketServiceImpl implements MarketService {
                 order.setPaymentSystem(paymentSystem);
                 orderModified = true;
             }
-
-            String currencyCode = ds.get(Currency.class, order.getTargetCurrency().getId()).getCode();
-            Long periodicity = order.getOwnershipType().getId().equals(DataConstants.OwnershipTypes.SUBSCRIPTION.getValue()) ? order.getPeriodicity() : null;
-
             PaymentExecutionResultDTO result = null;
             try {
                 PaymentExecutor paymentExecutor = initializePaymentExecutor(paymentSystem.getPaymentExecutorClass());
-                result = paymentExecutor.execute(String.valueOf(order.getId()), paymentSystemId,
-                        amountToPay, currencyCode, periodicity,
-                        applicationContext, params);
+                PaymentExecutionRequestDTO request = new PaymentExecutionRequestDTO();
+                request.setPaymentSystemId(paymentSystemId);
+                request.setUniquePaymentIdentifier(String.valueOf(order.getId()));
+                request.setAmount(amountToPay);
+                request.setCurrencyCode(ds.get(Currency.class, order.getTargetCurrency().getId()).getCode());
+                request.setPeriodicity(order.getOwnershipType().getId().equals(DataConstants.OwnershipTypes.SUBSCRIPTION.getValue()) ? order.getPeriodicity() : null);
+                request.setParams(params);
+                request.setName("Content");
+                request.setDescription("Content");
+                request.setRecurringCycles(null);
+
+                result = paymentExecutor.execute(request, applicationContext);
                 if (!StringUtils.isEmpty(result.getExternalIdentifier()) && !StringUtils.equals(order.getExternalIdentifier(), result.getExternalIdentifier())) {
                     order.setExternalIdentifier(result.getExternalIdentifier());
                     orderModified = true;
@@ -473,7 +479,7 @@ public class MarketServiceImpl implements MarketService {
         params.put("pendingOrderStateId", DataConstants.OrderStates.PENDING.getValue());
         params.put("paidOrderStateId", DataConstants.OrderStates.PAID.getValue());
         params.put("subscriptionOwnershipTypeId", DataConstants.OwnershipTypes.SUBSCRIPTION.getValue());
-        List<Order> orders = idObjectService.getList(Order.class, null, "el.externalIdentifier=:externalIdentifier and (el.orderState.id=:pendingOrderStateId or (el.orderState.id=:paidOrderStateId and el.ownershipType.id=:subscriptionOwnershipTypeId and el.parentOrder is null))", params, null, null, null, 1);
+        List<Order> orders = idObjectService.getList(Order.class, null, "el.externalIdentifier=:externalIdentifier and (el.orderState.id=:pendingOrderStateId or (el.orderState.id=:paidOrderStateId and el.ownershipType.id=:subscriptionOwnershipTypeId and el.parentOrder is null))", params, "el.created", "DESC", null, 1);
         if (!orders.isEmpty()) {
             Order order = orders.iterator().next();
             if (order.getOrderState().getId().equals(DataConstants.OrderStates.PAID.getValue())) {

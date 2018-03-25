@@ -2,13 +2,13 @@ package com.gracelogic.platform.payment.dto.paypal;
 
 public class PayPalCurrencyDTO {
     private String currency;
-    private String value;
+    private Double value;
 
-    public String getValue() {
+    public Double getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 
@@ -19,5 +19,10 @@ public class PayPalCurrencyDTO {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public PayPalCurrencyDTO(String currency, Double value) {
+        this.currency = currency;
+        this.value = value;
     }
 }

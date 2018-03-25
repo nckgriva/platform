@@ -2,6 +2,7 @@ package com.gracelogic.platform.payment.service;
 
 import com.gracelogic.platform.account.model.Account;
 import com.gracelogic.platform.db.service.IdObjectService;
+import com.gracelogic.platform.payment.dto.PaymentExecutionRequestDTO;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
@@ -35,7 +36,7 @@ public class YandexMoneyPaymentExecutor implements PaymentExecutor {
 
 
     @Override
-    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, Long periodicity, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
         throw new RuntimeException("Not implemented");
     }
 
@@ -138,5 +139,10 @@ public class YandexMoneyPaymentExecutor implements PaymentExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean isRecurringPaymentsAllowed() {
+        return false;
     }
 }

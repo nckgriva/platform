@@ -1,5 +1,11 @@
 package com.gracelogic.platform.payment.dto.paypal;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.gracelogic.platform.db.dto.JsonDateDeserializer;
+import com.gracelogic.platform.db.dto.JsonDateSerializer;
+
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -8,13 +14,13 @@ public class PayPalBillingAgreementDTO {
     private String state;
     private String name;
     private String description;
-    private String start_date;
+    private Date start_date;
     private PayPalAgreementDetailsDTO agreement_details;
     private PayPalPayerDTO payer;
     private PayPalShippingAddressDTO shipping_address;
     private PayPalMerchantPreferencesDTO override_merchant_preferences;
     private List<PayPalOverrideChargeModelDTO> override_charge_models = new LinkedList<>();
-    private PayPalBAPlanDTO plan;
+    private PayPalPlanDTO plan;
 
     public String getName() {
         return name;
@@ -32,11 +38,13 @@ public class PayPalBillingAgreementDTO {
         this.description = description;
     }
 
-    public String getStart_date() {
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    public Date getStart_date() {
         return start_date;
     }
 
-    public void setStart_date(String start_date) {
+    public void setStart_date(Date start_date) {
         this.start_date = start_date;
     }
 
@@ -80,11 +88,11 @@ public class PayPalBillingAgreementDTO {
         this.override_charge_models = override_charge_models;
     }
 
-    public PayPalBAPlanDTO getPlan() {
+    public PayPalPlanDTO getPlan() {
         return plan;
     }
 
-    public void setPlan(PayPalBAPlanDTO plan) {
+    public void setPlan(PayPalPlanDTO plan) {
         this.plan = plan;
     }
 

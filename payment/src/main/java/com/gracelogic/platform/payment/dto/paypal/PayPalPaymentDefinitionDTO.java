@@ -7,9 +7,9 @@ public class PayPalPaymentDefinitionDTO {
     private String id;
     private String name;
     private String type;
-    private String frequency_interval;
+    private Long frequency_interval;
     private String frequency;
-    private String cycles;
+    private Integer cycles;
     private PayPalCurrencyDTO amount;
     private List<PayPalChargeModelDTO> charge_models = new LinkedList<>();
 
@@ -37,11 +37,11 @@ public class PayPalPaymentDefinitionDTO {
         this.type = type;
     }
 
-    public String getFrequency_interval() {
+    public Long getFrequency_interval() {
         return frequency_interval;
     }
 
-    public void setFrequency_interval(String frequency_interval) {
+    public void setFrequency_interval(Long frequency_interval) {
         this.frequency_interval = frequency_interval;
     }
 
@@ -53,11 +53,11 @@ public class PayPalPaymentDefinitionDTO {
         this.frequency = frequency;
     }
 
-    public String getCycles() {
+    public Integer getCycles() {
         return cycles;
     }
 
-    public void setCycles(String cycles) {
+    public void setCycles(Integer cycles) {
         this.cycles = cycles;
     }
 

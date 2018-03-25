@@ -5,7 +5,7 @@ public class PayPalMerchantPreferencesDTO {
     private PayPalCurrencyDTO setup_fee;
     private String cancel_url;
     private String return_url;
-    private String max_fail_attempts;
+    private Integer max_fail_attempts;
     private String auto_bill_amount;
     private String initial_fail_amount_action;
     private String accepted_payment_type;
@@ -43,11 +43,11 @@ public class PayPalMerchantPreferencesDTO {
         this.return_url = return_url;
     }
 
-    public String getMax_fail_attempts() {
+    public Integer getMax_fail_attempts() {
         return max_fail_attempts;
     }
 
-    public void setMax_fail_attempts(String max_fail_attempts) {
+    public void setMax_fail_attempts(Integer max_fail_attempts) {
         this.max_fail_attempts = max_fail_attempts;
     }
 

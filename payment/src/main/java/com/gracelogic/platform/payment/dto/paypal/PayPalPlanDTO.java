@@ -3,7 +3,7 @@ package com.gracelogic.platform.payment.dto.paypal;
 import java.util.LinkedList;
 import java.util.List;
 
-public class PayPalBAPlanDTO {
+public class PayPalPlanDTO {
     private String id;
     private String name;
     private String description;
@@ -87,5 +87,29 @@ public class PayPalBAPlanDTO {
 
     public void setTerms(List<PayPalTermsDTO> terms) {
         this.terms = terms;
+    }
+
+    public PayPalMerchantPreferencesDTO getMerchant_preferences() {
+        return merchant_preferences;
+    }
+
+    public void setMerchant_preferences(PayPalMerchantPreferencesDTO merchant_preferences) {
+        this.merchant_preferences = merchant_preferences;
+    }
+
+    public PayPalCurrencyCodeDTO getCurrency_code() {
+        return currency_code;
+    }
+
+    public void setCurrency_code(PayPalCurrencyCodeDTO currency_code) {
+        this.currency_code = currency_code;
+    }
+
+    public List<PayPalLinkDescriptionDTO> getLinks() {
+        return links;
+    }
+
+    public void setLinks(List<PayPalLinkDescriptionDTO> links) {
+        this.links = links;
     }
 }

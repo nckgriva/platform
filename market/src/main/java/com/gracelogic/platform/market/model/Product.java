@@ -39,7 +39,7 @@ public class Product extends IdObject<UUID> {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "OWNERSHIP_TYPE_ID", nullable = false)
-    private OwnershipType ownershipType;
+    private OwnershipType ownershipType; //Приобритается по подписке или разовым платежом
 
     @Column(name = "REFERENCE_OBJECT_ID", nullable = false)
     @org.hibernate.annotations.Type(type = "pg-uuid")
