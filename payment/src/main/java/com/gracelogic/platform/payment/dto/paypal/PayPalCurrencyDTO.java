@@ -1,5 +1,10 @@
 package com.gracelogic.platform.payment.dto.paypal;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
 public class PayPalCurrencyDTO {
     private String currency;
     private Double value;
@@ -24,5 +29,8 @@ public class PayPalCurrencyDTO {
     public PayPalCurrencyDTO(String currency, Double value) {
         this.currency = currency;
         this.value = value;
+    }
+
+    public PayPalCurrencyDTO() {
     }
 }

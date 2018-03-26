@@ -1,8 +1,13 @@
 package com.gracelogic.platform.payment.dto.paypal;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.util.LinkedList;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(include= JsonSerialize.Inclusion.NON_EMPTY)
 public class PayPalPlanDTO {
     private String id;
     private String name;
@@ -15,7 +20,6 @@ public class PayPalPlanDTO {
     private List<PayPalTermsDTO> terms = new LinkedList<>();
     private PayPalMerchantPreferencesDTO merchant_preferences;
     private PayPalCurrencyCodeDTO currency_code;
-    private List<PayPalLinkDescriptionDTO> links = new LinkedList<>();
 
     public String getId() {
         return id;
@@ -103,13 +107,5 @@ public class PayPalPlanDTO {
 
     public void setCurrency_code(PayPalCurrencyCodeDTO currency_code) {
         this.currency_code = currency_code;
-    }
-
-    public List<PayPalLinkDescriptionDTO> getLinks() {
-        return links;
-    }
-
-    public void setLinks(List<PayPalLinkDescriptionDTO> links) {
-        this.links = links;
     }
 }

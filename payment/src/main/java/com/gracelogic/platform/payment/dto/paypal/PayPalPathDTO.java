@@ -1,8 +1,11 @@
 package com.gracelogic.platform.payment.dto.paypal;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PayPalPathDTO {
     private String op;
     private String path;

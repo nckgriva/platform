@@ -1,5 +1,6 @@
 package com.gracelogic.platform.payment.dto.paypal;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.gracelogic.platform.db.dto.JsonDateDeserializer;
@@ -9,6 +10,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(include= JsonSerialize.Inclusion.NON_EMPTY)
 public class PayPalBillingAgreementDTO {
     private String id;
     private String state;
@@ -21,6 +24,7 @@ public class PayPalBillingAgreementDTO {
     private PayPalMerchantPreferencesDTO override_merchant_preferences;
     private List<PayPalOverrideChargeModelDTO> override_charge_models = new LinkedList<>();
     private PayPalPlanDTO plan;
+    private List<PayPalLinkDescriptionDTO> links = new LinkedList<>();
 
     public String getName() {
         return name;
@@ -110,5 +114,13 @@ public class PayPalBillingAgreementDTO {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public List<PayPalLinkDescriptionDTO> getLinks() {
+        return links;
+    }
+
+    public void setLinks(List<PayPalLinkDescriptionDTO> links) {
+        this.links = links;
     }
 }

@@ -23,10 +23,10 @@ import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.io.IOException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PayPalPaymentExecutor implements PaymentExecutor {
     private static final String ACTION_CREATE = "create";
@@ -39,6 +39,8 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private static Logger logger = Logger.getLogger(PayPalPaymentExecutor.class);
+
+    private final static String BILLING_AGREEMENT_ID_REGEXP = "billing-agreements\\/(.*?)\\/agreement-execute";
 
 
     @Override
@@ -75,7 +77,8 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
 
     @Override
     public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) {
-        throw new RuntimeException("Not implemented");
+        logger.info("PayPal callback:");
+        logger.info(request.getQueryString());
     }
 
     @Override
@@ -197,14 +200,28 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
             PayPalBillingAgreementDTO billingAgreementDTO = new PayPalBillingAgreementDTO();
             billingAgreementDTO.setName(request.getName());
             billingAgreementDTO.setDescription(request.getDescription());
-            billingAgreementDTO.setStart_date(new Date());
+
+            GregorianCalendar gc = new GregorianCalendar();
+            gc.setTime(new Date());
+            gc.add(Calendar.DATE, 1);
+            gc.add(Calendar.MINUTE, 1);
+            billingAgreementDTO.setStart_date(gc.getTime());
             PayPalPayerDTO payerDTO = new PayPalPayerDTO();
             payerDTO.setPayment_method("paypal");
             billingAgreementDTO.setPayer(payerDTO);
-            billingAgreementDTO.setPlan(planDTO);
+
+            PayPalPlanDTO planDTO1 = new PayPalPlanDTO();
+            planDTO1.setId(planDTO.getId());
+            billingAgreementDTO.setPlan(planDTO1);
 
             try {
                 billingAgreementDTO = createBillingAgreement(apiUrl, accessToken.getAccess_token(), billingAgreementDTO);
+                for (PayPalLinkDescriptionDTO l : billingAgreementDTO.getLinks()) {
+                    if (StringUtils.equalsIgnoreCase(l.getRel(), "execute")) {
+                        billingAgreementDTO.setId(extractAgreementId(l.getHref()));
+                        break;
+                    }
+                }
                 if (billingAgreementDTO.getId() == null) {
                     throw new PaymentExecutionException("BillingAgreement is null!");
                 }
@@ -320,7 +337,9 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         payPalPathDTO.setOp("replace");
         payPalPathDTO.setPath("/");
         payPalPathDTO.getValue().put("state", "ACTIVE");
-        String requestBody = mapper.writeValueAsString(payPalPathDTO);
+        List<PayPalPathDTO> list = new LinkedList<>();
+        list.add(payPalPathDTO);
+        String requestBody = mapper.writeValueAsString(list);
         logger.debug("request body: " + requestBody);
         sendMethod.setEntity(new StringEntity(requestBody));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
@@ -366,5 +385,15 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         String response = EntityUtils.toString(entity);
         logger.debug("response body: " + response);
         return mapper.readValue(response, PayPalBillingAgreementDTO.class);
+    }
+
+    private static String extractAgreementId(String url) {
+        Pattern pattern = Pattern.compile(BILLING_AGREEMENT_ID_REGEXP);
+        Matcher matcher = pattern.matcher(url);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return null;
     }
 }

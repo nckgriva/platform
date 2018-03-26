@@ -1,8 +1,13 @@
 package com.gracelogic.platform.payment.dto.paypal;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.util.LinkedList;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(include= JsonSerialize.Inclusion.NON_EMPTY)
 public class PayPalPaymentDefinitionDTO {
     private String id;
     private String name;
