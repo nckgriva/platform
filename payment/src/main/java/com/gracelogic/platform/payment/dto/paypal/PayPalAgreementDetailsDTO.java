@@ -7,13 +7,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
 public class PayPalAgreementDetailsDTO {
     private PayPalCurrencyDTO outstanding_balance;
-    private String cycles_remaining;
-    private String cycles_completed;
+    private Integer cycles_remaining;
+    private Integer cycles_completed;
     private String next_billing_date;
     private String last_payment_date;
     private String last_payment_amount;
     private String final_payment_date;
-    private String failed_payment_count;
+    private Integer failed_payment_count;
 
     public PayPalCurrencyDTO getOutstanding_balance() {
         return outstanding_balance;
@@ -23,19 +23,19 @@ public class PayPalAgreementDetailsDTO {
         this.outstanding_balance = outstanding_balance;
     }
 
-    public String getCycles_remaining() {
+    public Integer getCycles_remaining() {
         return cycles_remaining;
     }
 
-    public void setCycles_remaining(String cycles_remaining) {
+    public void setCycles_remaining(Integer cycles_remaining) {
         this.cycles_remaining = cycles_remaining;
     }
 
-    public String getCycles_completed() {
+    public Integer getCycles_completed() {
         return cycles_completed;
     }
 
-    public void setCycles_completed(String cycles_completed) {
+    public void setCycles_completed(Integer cycles_completed) {
         this.cycles_completed = cycles_completed;
     }
 
@@ -71,11 +71,11 @@ public class PayPalAgreementDetailsDTO {
         this.final_payment_date = final_payment_date;
     }
 
-    public String getFailed_payment_count() {
+    public Integer getFailed_payment_count() {
         return failed_payment_count;
     }
 
-    public void setFailed_payment_count(String failed_payment_count) {
+    public void setFailed_payment_count(Integer failed_payment_count) {
         this.failed_payment_count = failed_payment_count;
     }
 }

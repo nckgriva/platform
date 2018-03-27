@@ -14,6 +14,7 @@ import com.gracelogic.platform.market.dto.OrderDTO;
 import com.gracelogic.platform.market.exception.InvalidDiscountException;
 import com.gracelogic.platform.market.exception.InvalidOrderStateException;
 import com.gracelogic.platform.market.exception.OrderNotConsistentException;
+import com.gracelogic.platform.market.exception.ProductSubscriptionException;
 import com.gracelogic.platform.market.model.Order;
 import com.gracelogic.platform.market.service.MarketService;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
@@ -123,6 +124,8 @@ public class OrderApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("market.INVALID_ORDER_STATE", marketMessageSource.getMessage("market.INVALID_ORDER_STATE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (NoActualExchangeRateException e) {
             return new ResponseEntity<>(new ErrorResponse("account.NO_ACTUAL_EXCHANGE_RATE", accountMessageSource.getMessage("account.NO_ACTUAL_EXCHANGE_RATE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ProductSubscriptionException e) {
+            return new ResponseEntity<>(new ErrorResponse("market.PRODUCT_SUBSCRIPTION", marketMessageSource.getMessage("market.PRODUCT_SUBSCRIPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 

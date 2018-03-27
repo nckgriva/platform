@@ -19,7 +19,8 @@ public class PayPalPlanDTO {
     private List<PayPalPaymentDefinitionDTO> payment_definitions = new LinkedList<>();
     private List<PayPalTermsDTO> terms = new LinkedList<>();
     private PayPalMerchantPreferencesDTO merchant_preferences;
-    private PayPalCurrencyCodeDTO currency_code;
+    private String currency_code;
+    private List<PayPalLinkDescriptionDTO> links = new LinkedList<>();
 
     public String getId() {
         return id;
@@ -101,11 +102,19 @@ public class PayPalPlanDTO {
         this.merchant_preferences = merchant_preferences;
     }
 
-    public PayPalCurrencyCodeDTO getCurrency_code() {
+    public String getCurrency_code() {
         return currency_code;
     }
 
-    public void setCurrency_code(PayPalCurrencyCodeDTO currency_code) {
+    public void setCurrency_code(String currency_code) {
         this.currency_code = currency_code;
+    }
+
+    public List<PayPalLinkDescriptionDTO> getLinks() {
+        return links;
+    }
+
+    public void setLinks(List<PayPalLinkDescriptionDTO> links) {
+        this.links = links;
     }
 }

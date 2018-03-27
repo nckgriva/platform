@@ -68,7 +68,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException, NoActualExchangeRateException {
+    public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException, NoActualExchangeRateException, ProductSubscriptionException {
         Order entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Order.class, dto.getId());
@@ -221,9 +221,12 @@ public class MarketServiceImpl implements MarketService {
         return commonOwnershipTypeId;
     }
 
-    private static Long calculateMinSubscriptionPeriodicity(List<Product> products) {
+    private static Long calculateMinSubscriptionPeriodicity(List<Product> products) throws ProductSubscriptionException {
         Long commonPeriodicity = Long.MAX_VALUE;
         for (Product product : products) {
+            if (product.getLifetime() == null) {
+                throw new ProductSubscriptionException("Product with ownershipType=SUBSCRIPTION must have lifetime value");
+            }
             if (product.getPrice() > 0 && product.getLifetime() != null) {
                 commonPeriodicity = Math.min(commonPeriodicity, product.getLifetime());
             }
@@ -810,7 +813,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Product saveProduct(ProductDTO dto) throws ObjectNotFoundException, PrimaryProductException {
+    public Product saveProduct(ProductDTO dto) throws ObjectNotFoundException, PrimaryProductException, ProductSubscriptionException {
         Product entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Product.class, dto.getId());
@@ -829,6 +832,10 @@ public class MarketServiceImpl implements MarketService {
             if (idObjectService.checkExist(Product.class, null, "el.productType.id=:productTypeId and el.referenceObjectId=:referenceObjectId and el.primary=true", params, 1) > 0) {
                 throw new PrimaryProductException();
             }
+        }
+
+        if (dto.getOwnershipTypeId() != null && dto.getOwnershipTypeId().equals(DataConstants.OwnershipTypes.SUBSCRIPTION.getValue()) && dto.getLifetime() == null) {
+            throw new ProductSubscriptionException();
         }
 
         entity.setName(dto.getName());

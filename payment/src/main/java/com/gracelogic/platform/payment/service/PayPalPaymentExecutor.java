@@ -10,6 +10,7 @@ import com.gracelogic.platform.payment.dto.paypal.*;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -77,8 +78,38 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
 
     @Override
     public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) {
-        logger.info("PayPal callback:");
-        logger.info(request.getQueryString());
+        try {
+            logger.info("PayPal callback query:" + request.getQueryString());
+//            logger.info(IOUtils.toString(request.getReader()));
+
+            PaymentService paymentService = context.getBean(PaymentService.class);
+
+            String transactionType = request.getParameter("txn_type");
+            logger.info("transactionType: " + transactionType);
+            if (StringUtils.equalsIgnoreCase(transactionType, "recurring_payment")) {
+                Double amount = Double.parseDouble(request.getParameter("amount"));
+                String recurringPaymentId = request.getParameter("recurring_payment_id");
+                String state = request.getParameter("payment_status");
+                String transactionId = request.getParameter("txn_id");
+                String currency = request.getParameter("mc_currency");
+
+                if (StringUtils.equalsIgnoreCase(state, "Completed") && amount > 0) {
+                    ProcessPaymentRequest req = new ProcessPaymentRequest();
+                    req.setExternalIdentifier(recurringPaymentId);
+                    req.setRegisteredAmount(amount);
+                    req.setPaymentUID(transactionId);
+                    req.setCurrency(currency);
+                    try {
+                        paymentService.processPayment(paymentSystemId, req, null);
+                    } catch (Exception e) {
+                        throw new PaymentExecutionException(e.getMessage());
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to process callback", e);
+        }
     }
 
     @Override
@@ -203,8 +234,9 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
 
             GregorianCalendar gc = new GregorianCalendar();
             gc.setTime(new Date());
-            gc.add(Calendar.DATE, 1);
-            gc.add(Calendar.MINUTE, 1);
+//            gc.add(Calendar.DATE, 1);
+//            gc.add(Calendar.MINUTE, 1);
+            gc.add(Calendar.HOUR, 1);
             billingAgreementDTO.setStart_date(gc.getTime());
             PayPalPayerDTO payerDTO = new PayPalPayerDTO();
             payerDTO.setPayment_method("paypal");
@@ -238,7 +270,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
                 if (billingAgreementDTO.getId() == null) {
                     throw new PaymentExecutionException("BillingAgreement is null!");
                 }
-                return new PaymentExecutionResultDTO(true, request.getUniquePaymentIdentifier(), request.getParams());
+                return new PaymentExecutionResultDTO(true, billingAgreementDTO.getId(), request.getParams());
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new PaymentExecutionException(e.getMessage());
@@ -376,9 +408,6 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         HttpPost sendMethod = new HttpPost(uri);
         sendMethod.addHeader("Authorization", "Bearer " + accessToken);
         sendMethod.addHeader("Content-Type", "application/json");
-        String requestBody = mapper.writeValueAsString(EmptyResponse.getInstance());
-        logger.debug("request body: " + requestBody);
-        sendMethod.setEntity(new StringEntity(requestBody));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
         logger.debug("response status: " + result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();

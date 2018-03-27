@@ -10,7 +10,7 @@ public class PayPalPayerInfoDTO {
     private String first_name;
     private String last_name;
     private String payer_id;
-    private PayPalAddressDTO shipping_address;
+    private PayPalShippingAddressDTO shipping_address;
     private PayPalAddressDTO billing_address;
 
     public String getEmail() {
@@ -45,11 +45,11 @@ public class PayPalPayerInfoDTO {
         this.payer_id = payer_id;
     }
 
-    public PayPalAddressDTO getShipping_address() {
+    public PayPalShippingAddressDTO getShipping_address() {
         return shipping_address;
     }
 
-    public void setShipping_address(PayPalAddressDTO shipping_address) {
+    public void setShipping_address(PayPalShippingAddressDTO shipping_address) {
         this.shipping_address = shipping_address;
     }
 
