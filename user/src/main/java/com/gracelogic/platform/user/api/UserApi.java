@@ -149,7 +149,7 @@ public class UserApi extends AbstractAuthorizedController {
         }
 
         try {
-            logger.debug("Response: " + resp);
+//            logger.debug("Response: " + resp);
             response.setCharacterEncoding("UTF-8");
             response.setContentType("application/json");
             response.getWriter().print(resp);

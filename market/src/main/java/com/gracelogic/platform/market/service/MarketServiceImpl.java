@@ -68,7 +68,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException, NoActualExchangeRateException, ProductSubscriptionException {
+    public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException, NoActualExchangeRateException, ProductSubscriptionException, EmptyOrderException, InvalidCurrencyException, InvalidProductException {
         Order entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Order.class, dto.getId());
@@ -122,14 +122,14 @@ public class MarketServiceImpl implements MarketService {
         }
 
         if (productIds.isEmpty()) {
-            throw new OrderNotConsistentException("No products found in order");
+            throw new EmptyOrderException("No products found in order");
         }
         Map<String, Object> params = new HashMap<>();
         params.put("productIds", productIds);
         List<Product> products = idObjectService.getList(Product.class, null, "el.id in (:productIds)", params, null, null, null, productIds.size());
         UUID targetCurrencyId = dto.getTargetCurrencyId();
         if (targetCurrencyId == null) {
-            throw new OrderNotConsistentException("No target currency");
+            throw new InvalidCurrencyException("No target currency");
         }
 
         UUID commonOwnershipTypeId = getCommonOwnershipTypeId(products);
@@ -197,7 +197,7 @@ public class MarketServiceImpl implements MarketService {
                 }
             }
             if (product == null || !product.getActive()) {
-                throw new OrderNotConsistentException("Product not found or not active: " + productId);
+                throw new InvalidProductException("Product not found or not active: " + productId);
             }
 
             OrderProduct orderProduct = new OrderProduct();
