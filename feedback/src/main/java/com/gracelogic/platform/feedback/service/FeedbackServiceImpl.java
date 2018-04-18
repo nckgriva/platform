@@ -9,6 +9,7 @@ import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.notification.dto.Message;
 import com.gracelogic.platform.notification.dto.SendingType;
 import com.gracelogic.platform.notification.service.MessageSenderService;
+import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.service.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -33,6 +34,9 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Autowired
     private MessageSenderService sender;
+
+    @Autowired
+    private PropertyService propertyService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
