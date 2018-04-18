@@ -1,8 +1,6 @@
 package com.gracelogic.platform.feedback.dao;
 
-import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.feedback.model.Feedback;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +15,7 @@ public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
     @Override
     public Integer getFeedbacksCount(UUID feedbackTypeId, Date startDate, Date endDate, Map<String, String> fields) {
         BigInteger count = null;
-        StringBuilder queryStr = new StringBuilder(String.format("select count(ID) from %s.mgt_feedback where 1=1 ", JPAProperties.TABLE_PREFIX + "FEEDBACK"));
+        StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_feedback where 1=1 ");
 
         Map<String, Object> params = new HashMap<String, Object>();
         if (feedbackTypeId != null) {
@@ -56,7 +54,7 @@ public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
     @Override
     public List<Feedback> getFeedbacks(UUID feedbackTypeId, Date startDate, Date endDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
         List<Feedback> feedbacks = Collections.emptyList();
-        StringBuilder queryStr = new StringBuilder(String.format("select * from %s.mgt_feedback where 1=1 ", JPAProperties.TABLE_PREFIX + "FEEDBACK"));
+        StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_feedback where 1=1 ");
 
         Map<String, Object> params = new HashMap<String, Object>();
         if (feedbackTypeId != null) {
@@ -77,21 +75,8 @@ public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
             }
         }
 
-        if (!StringUtils.isEmpty(sortField)) {
-            queryStr.append(String.format("feedback by %s ", sortField));
-            if (!StringUtils.isEmpty(sortDir)) {
-                queryStr.append(String.format("%s ", sortDir));
-            }
-        }
-
-        if (recordsOnPage != null) {
-            queryStr.append("limit :recordsOnPage ");
-            params.put("recordsOnPage", recordsOnPage);
-            if (startRecord != null) {
-                queryStr.append("offset :startRecord ");
-                params.put("startRecord", startRecord);
-            }
-        }
+        appendPaginationClause(queryStr, params, recordsOnPage, startRecord);
+        appendSortClause(queryStr, sortField, sortDir);
 
         try {
             Query query = getEntityManager().createNativeQuery(queryStr.toString(), Feedback.class);

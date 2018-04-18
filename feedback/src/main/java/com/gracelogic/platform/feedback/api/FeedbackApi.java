@@ -1,5 +1,6 @@
 package com.gracelogic.platform.feedback.api;
 
+import com.gracelogic.platform.db.dto.DateFormatConstants;
 import com.gracelogic.platform.feedback.service.FeedbackService;
 import com.gracelogic.platform.feedback.dto.FeedbackDTO;
 import com.gracelogic.platform.db.dto.EntityListResponse;
@@ -38,33 +39,31 @@ public class FeedbackApi extends AbstractAuthorizedController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ORDER:SHOW')")
+    @PreAuthorize("hasAuthority('FEEDBACK:SHOW')")
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity feedbacks(@RequestParam(value = "feedbackTypeId", required = false) UUID feedbackTypeId,
-                                 @RequestParam(value = "startDate", required = false) String sStartDate,
-                                 @RequestParam(value = "endDate", required = false) String sEndDate,
-                                 @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                 @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
-                                 @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                 @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                    @RequestParam(value = "startDate", required = false) String sStartDate,
+                                    @RequestParam(value = "endDate", required = false) String sEndDate,
+                                    @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                    @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
+                                    @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                    @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
         Date startDate = null;
         Date endDate = null;
 
         try {
             if (!StringUtils.isEmpty(sStartDate)) {
-                startDate = TimeUtils.SHORT_DATE_FORMAT.get().parse(sStartDate);
+                startDate = DateFormatConstants.DEFAULT_DATE_FORMAT.get().parse(sStartDate);
             }
             if (!StringUtils.isEmpty(sEndDate)) {
-                endDate = TimeUtils.SHORT_DATE_FORMAT.get().parse(sEndDate);
+                endDate = DateFormatConstants.DEFAULT_DATE_FORMAT.get().parse(sEndDate);
             }
         } catch (Exception ignored) {
         }
 
         EntityListResponse<FeedbackDTO> feedbacks = feedbackService.getFeedbacksPaged(feedbackTypeId, startDate, endDate, null, length, null, start, sortField, sortDir);
-
-
         return new ResponseEntity<EntityListResponse<FeedbackDTO>>(feedbacks, HttpStatus.OK);
     }
 }

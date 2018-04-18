@@ -9,7 +9,6 @@ import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.notification.dto.Message;
 import com.gracelogic.platform.notification.dto.SendingType;
 import com.gracelogic.platform.notification.service.MessageSenderService;
-import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.service.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -35,9 +34,6 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Autowired
     private MessageSenderService sender;
 
-    @Autowired
-    private PropertyService propertyService;
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveFeedback(FeedbackDTO feedbackDTO) {
@@ -54,8 +50,8 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         idObjectService.save(feedback);
 
-        StringBuilder sb = new StringBuilder("??????:\n");
-        sb.append(String.format("???: %s\n", feedbackType.getName()));
+        StringBuilder sb = new StringBuilder("Feedback:\n");
+        sb.append(String.format("Type: %s\n", feedbackType.getName()));
         for (String key : feedbackDTO.getFields().keySet()) {
             sb.append(String.format("%s: %s\n", key, feedbackDTO.getFields().get(key)));
         }
@@ -73,7 +69,6 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public EntityListResponse<FeedbackDTO> getFeedbacksPaged(UUID feedbackTypeId, Date startDate, Date endDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         if (!StringUtils.isEmpty(sortField)) {
-            //?.?. ? ?????? ?????? ?????? ???????????? ???????? ? ????????? ????????? ???????????? - ??????????? ???????? jpa ????? ? ???????? sql
             if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
                 sortField = "id";
             }
