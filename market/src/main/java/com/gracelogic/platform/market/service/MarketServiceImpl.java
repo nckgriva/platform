@@ -19,6 +19,7 @@ import com.gracelogic.platform.market.dao.MarketDao;
 import com.gracelogic.platform.market.dto.*;
 import com.gracelogic.platform.market.exception.*;
 import com.gracelogic.platform.market.model.*;
+import com.gracelogic.platform.payment.dto.PaymentExecutionRequestDTO;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
@@ -67,7 +68,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException, NoActualExchangeRateException {
+    public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException, NoActualExchangeRateException, ProductSubscriptionException, EmptyOrderException, InvalidCurrencyException, InvalidProductException {
         Order entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Order.class, dto.getId());
@@ -121,18 +122,24 @@ public class MarketServiceImpl implements MarketService {
         }
 
         if (productIds.isEmpty()) {
-            throw new OrderNotConsistentException("No products found in order");
+            throw new EmptyOrderException("No products found in order");
         }
         Map<String, Object> params = new HashMap<>();
         params.put("productIds", productIds);
         List<Product> products = idObjectService.getList(Product.class, null, "el.id in (:productIds)", params, null, null, null, productIds.size());
         UUID targetCurrencyId = dto.getTargetCurrencyId();
         if (targetCurrencyId == null) {
-            throw new OrderNotConsistentException("No target currency");
+            throw new InvalidCurrencyException("No target currency");
+        }
+
+        UUID commonOwnershipTypeId = getCommonOwnershipTypeId(products);
+        Long minCommonPeriodicity = null;
+        if (commonOwnershipTypeId.equals(DataConstants.OwnershipTypes.SUBSCRIPTION.getValue())) {
+            minCommonPeriodicity = calculateMinSubscriptionPeriodicity(products);
         }
 
         //Calculate total amount
-        Long amount = calculateOrderTotalAmount(products, targetCurrencyId);
+        Long amount = calculateOrderTotalAmount(products, targetCurrencyId, minCommonPeriodicity);
 
         Long discountAmount = 0L;
 
@@ -166,7 +173,7 @@ public class MarketServiceImpl implements MarketService {
                         onlyDiscountedProducts.add(product);
                     }
                 }
-                discountAmount = calculateOrderTotalAmount(onlyDiscountedProducts, targetCurrencyId);
+                discountAmount = calculateOrderTotalAmount(onlyDiscountedProducts, targetCurrencyId, minCommonPeriodicity);
             }
         }
 
@@ -176,6 +183,8 @@ public class MarketServiceImpl implements MarketService {
         entity.setTotalAmount(FinanceUtils.toDecimal(FinanceUtils.toFractional2Rounded(totalAmount))); //Принудительно делаем 2 знака после запятой
         entity.setDiscount(discount);
         entity.setTargetCurrency(ds.get(Currency.class, targetCurrencyId));
+        entity.setOwnershipType(ds.get(OwnershipType.class, commonOwnershipTypeId));
+        entity.setPeriodicity(minCommonPeriodicity);
         entity = idObjectService.save(entity);
 
         //Create order products
@@ -188,7 +197,7 @@ public class MarketServiceImpl implements MarketService {
                 }
             }
             if (product == null || !product.getActive()) {
-                throw new OrderNotConsistentException("Product not found or not active: " + productId);
+                throw new InvalidProductException("Product not found or not active: " + productId);
             }
 
             OrderProduct orderProduct = new OrderProduct();
@@ -200,15 +209,50 @@ public class MarketServiceImpl implements MarketService {
         return entity;
     }
 
-    private Long calculateOrderTotalAmount(List<Product> products, UUID targetCurrencyId) throws OrderNotConsistentException, NoActualExchangeRateException {
+    private static UUID getCommonOwnershipTypeId(List<Product> products) throws OrderNotConsistentException {
+        UUID commonOwnershipTypeId = null;
+        for (Product product : products) {
+            if (commonOwnershipTypeId == null) {
+                commonOwnershipTypeId = product.getOwnershipType().getId();
+            } else if (!commonOwnershipTypeId.equals(product.getOwnershipType().getId())) {
+                throw new OrderNotConsistentException("Order can't contain products with different ownership type");
+            }
+        }
+        return commonOwnershipTypeId;
+    }
+
+    private static Long calculateMinSubscriptionPeriodicity(List<Product> products) throws ProductSubscriptionException {
+        Long commonPeriodicity = Long.MAX_VALUE;
+        for (Product product : products) {
+            if (product.getLifetime() == null) {
+                throw new ProductSubscriptionException("Product with ownershipType=SUBSCRIPTION must have lifetime value");
+            }
+            if (product.getPrice() > 0 && product.getLifetime() != null) {
+                commonPeriodicity = Math.min(commonPeriodicity, product.getLifetime());
+            }
+        }
+        return commonPeriodicity;
+    }
+
+    private Long calculateOrderTotalAmount(List<Product> products, UUID targetCurrencyId, Long minCommonPeriodicity) throws OrderNotConsistentException, NoActualExchangeRateException {
         //TODO: Можно оптимизировать этот метод закэшировав ExchangeRates вместо того что бы для каждого продукта их доставать
 
         Long amount = 0L;
         for (Product product : products) {
             Long price = product.getPrice();
-            if (!product.getCurrency().getId().equals(targetCurrencyId)) {
-                ExchangeRate exchangeRate = accountService.getActualExchangeRate(product.getCurrency().getId(), targetCurrencyId, null);
-                price = FinanceUtils.toDecimal(FinanceUtils.toFractional(exchangeRate.getValue()) * FinanceUtils.toFractional(product.getPrice()));
+            if (price > 0) {
+                if (minCommonPeriodicity != null && minCommonPeriodicity < product.getLifetime()) {
+                    //Пересчитываем цену на продукт с учётом того, что оплата будет происходить чаще, чем указано в данном продукте
+                    double dLifetimeFactor = ((double) product.getLifetime()) / ((double) minCommonPeriodicity);
+                    double dPrice = FinanceUtils.toFractional(price) / dLifetimeFactor;
+                    price = FinanceUtils.toDecimal(dPrice);
+                }
+
+
+                if (!product.getCurrency().getId().equals(targetCurrencyId)) {
+                    ExchangeRate exchangeRate = accountService.getActualExchangeRate(product.getCurrency().getId(), targetCurrencyId, null);
+                    price = FinanceUtils.toDecimal(FinanceUtils.toFractional(exchangeRate.getValue()) * FinanceUtils.toFractional(product.getPrice()));
+                }
             }
             amount += price;
         }
@@ -289,7 +333,7 @@ public class MarketServiceImpl implements MarketService {
                     p.put("discountId", discount.getId());
                     p.put("orderStateId", DataConstants.OrderStates.PAID.getValue());
                     p.put("userId", authorizedUser.getId());
-                    Integer cnt = idObjectService.checkExist(Order.class, null,"el.discount.id=:discountId and el.orderState.id=:orderStateId and el.user.id=:userId", p, 1);
+                    Integer cnt = idObjectService.checkExist(Order.class, null, "el.discount.id=:discountId and el.orderState.id=:orderStateId and el.user.id=:userId", p, 1);
                     if (cnt > 0) {
                         throw new InvalidDiscountException("This discount may be used only once for user");
                     }
@@ -297,16 +341,17 @@ public class MarketServiceImpl implements MarketService {
             }
 
             //Update lifetime expiration
-            recalculateOrderProductLifetimeExpiration(order, System.currentTimeMillis());
+            recalculateOrderProductLifetimeExpiration(order, System.currentTimeMillis(), null);
         }
 
-
-        //Пытаемся оплатить с помощью внутреннего счёта
-        Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, ds.get(Currency.class, order.getTargetCurrency().getId()).getCode());
         Long amountToPay = order.getTotalAmount() - order.getPaid();
-        if (userAccount.getBalance() >= amountToPay) {
-            order = payOrder(order, amountToPay, userAccount.getId());
-            amountToPay = order.getTotalAmount() - order.getPaid();
+        //Пытаемся оплатить с помощью внутреннего счёта (только для случая единоразовой покупки, подписка так не работает)
+        if (order.getOwnershipType().getId().equals(DataConstants.OwnershipTypes.FULL.getValue())) {
+            Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, ds.get(Currency.class, order.getTargetCurrency().getId()).getCode());
+            if (userAccount.getBalance() >= amountToPay) {
+                order = payOrder(order, amountToPay, userAccount.getId());
+                amountToPay = order.getTotalAmount() - order.getPaid();
+            }
         }
 
         //Всё что недоплачено пытаемся получить через платёжную систему
@@ -321,11 +366,21 @@ public class MarketServiceImpl implements MarketService {
                 order.setPaymentSystem(paymentSystem);
                 orderModified = true;
             }
-
             PaymentExecutionResultDTO result = null;
             try {
                 PaymentExecutor paymentExecutor = initializePaymentExecutor(paymentSystem.getPaymentExecutorClass());
-                result = paymentExecutor.execute(String.valueOf(order.getId()), paymentSystemId, amountToPay, ds.get(Currency.class, order.getTargetCurrency().getId()).getCode(), applicationContext, params);
+                PaymentExecutionRequestDTO request = new PaymentExecutionRequestDTO();
+                request.setPaymentSystemId(paymentSystemId);
+                request.setUniquePaymentIdentifier(String.valueOf(order.getId()));
+                request.setAmount(amountToPay);
+                request.setCurrencyCode(ds.get(Currency.class, order.getTargetCurrency().getId()).getCode());
+                request.setPeriodicity(order.getOwnershipType().getId().equals(DataConstants.OwnershipTypes.SUBSCRIPTION.getValue()) ? order.getPeriodicity() : null);
+                request.setParams(params);
+                request.setName("Content");
+                request.setDescription("Content");
+                request.setRecurringCycles(null);
+
+                result = paymentExecutor.execute(request, applicationContext);
                 if (!StringUtils.isEmpty(result.getExternalIdentifier()) && !StringUtils.equals(order.getExternalIdentifier(), result.getExternalIdentifier())) {
                     order.setExternalIdentifier(result.getExternalIdentifier());
                     orderModified = true;
@@ -400,16 +455,42 @@ public class MarketServiceImpl implements MarketService {
         }
     }
 
+    private Order cloneAndSaveOrder(Order order) {
+        Order newOrder = new Order();
+        newOrder.setParentOrder(order);
+        newOrder.setOwnershipType(order.getOwnershipType());
+        newOrder.setPeriodicity(order.getPeriodicity());
+        newOrder.setTargetCurrency(order.getTargetCurrency());
+        newOrder.setDiscount(order.getDiscount());
+        newOrder.setExternalIdentifier(order.getExternalIdentifier());
+        newOrder.setPaymentSystem(order.getPaymentSystem());
+        newOrder.setDiscountAmount(order.getDiscountAmount());
+        newOrder.setAmount(order.getAmount());
+        newOrder.setTotalAmount(order.getTotalAmount());
+        newOrder.setPaid(0L);
+        newOrder.setUser(order.getUser());
+        newOrder.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.PENDING.getValue()));
+        return idObjectService.save(newOrder);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void processPayment(Payment payment) throws InvalidOrderStateException, AccountNotFoundException, InsufficientFundsException, CurrencyMismatchException {
         Map<String, Object> params = new HashMap<>();
         params.put("externalIdentifier", payment.getExternalIdentifier());
 
-        params.put("orderStateId", DataConstants.OrderStates.PENDING.getValue());
-        List<Order> orders = idObjectService.getList(Order.class, null, "el.externalIdentifier=:externalIdentifier and el.orderState.id=:orderStateId", params, null, null, null, 1);
+        params.put("pendingOrderStateId", DataConstants.OrderStates.PENDING.getValue());
+        params.put("paidOrderStateId", DataConstants.OrderStates.PAID.getValue());
+        params.put("subscriptionOwnershipTypeId", DataConstants.OwnershipTypes.SUBSCRIPTION.getValue());
+        List<Order> orders = idObjectService.getList(Order.class, null, "el.externalIdentifier=:externalIdentifier and (el.orderState.id=:pendingOrderStateId or (el.orderState.id=:paidOrderStateId and el.ownershipType.id=:subscriptionOwnershipTypeId and el.parentOrder is null))", params, "el.created", "DESC", null, 1);
         if (!orders.isEmpty()) {
             Order order = orders.iterator().next();
+            if (order.getOrderState().getId().equals(DataConstants.OrderStates.PAID.getValue())) {
+                //Create new order
+                order = cloneAndSaveOrder(order);
+                recalculateOrderProductLifetimeExpiration(order, System.currentTimeMillis(), order.getParentOrder().getId());
+            }
+
             Long amountToPay = order.getTotalAmount() - order.getPaid();
             if (amountToPay > payment.getAmount()) {
                 amountToPay = payment.getAmount();
@@ -552,21 +633,32 @@ public class MarketServiceImpl implements MarketService {
             } catch (Exception e) {
                 logger.warn("Failed to transmit order paid event", e);
             }
-        }
-        else {
+        } else {
             order = idObjectService.save(order);
         }
         return order;
     }
 
-    private void recalculateOrderProductLifetimeExpiration(Order order, Long currentTimeMillis) {
+    private void recalculateOrderProductLifetimeExpiration(Order order, Long currentTimeMillis, UUID copyProductsFromOrderId) {
         Map<String, Object> params = new HashMap<>();
-        params.put("orderId", order.getId());
+        params.put("orderId", copyProductsFromOrderId == null ? order.getId() : copyProductsFromOrderId);
 
         List<OrderProduct> orderProducts = idObjectService.getList(OrderProduct.class, "left join fetch el.product", "el.order.id=:orderId", params, null, null, null, null);
-        for (OrderProduct orderProduct : orderProducts) {
+        for (OrderProduct op : orderProducts) {
+            OrderProduct orderProduct = op;
+            if (copyProductsFromOrderId != null) {
+                orderProduct = new OrderProduct();
+                orderProduct.setOrder(order);
+                orderProduct.setProduct(op.getProduct());
+            }
+
             if (orderProduct.getProduct().getLifetime() != null) {
-                orderProduct.setLifetimeExpiration(new Date(currentTimeMillis + orderProduct.getProduct().getLifetime()));
+                if (order.getOwnershipType().getId().equals(DataConstants.OwnershipTypes.FULL.getValue())) {
+                    orderProduct.setLifetimeExpiration(new Date(currentTimeMillis + orderProduct.getProduct().getLifetime()));
+                } else if (order.getOwnershipType().getId().equals(DataConstants.OwnershipTypes.SUBSCRIPTION.getValue())) {
+                    orderProduct.setLifetimeExpiration(new Date(currentTimeMillis + order.getPeriodicity()));
+                }
+
             } else {
                 orderProduct.setLifetimeExpiration(null);
             }
@@ -666,7 +758,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public ProductDTO getProduct(UUID id, boolean enrich) throws ObjectNotFoundException {
-        Product entity = idObjectService.getObjectById(Product.class, enrich ? "left join fetch el.productType left join fetch el.currency left join fetch el.productOwnershipType" : "", id);
+        Product entity = idObjectService.getObjectById(Product.class, enrich ? "left join fetch el.productType left join fetch el.currency left join fetch el.ownershipType" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -679,7 +771,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public EntityListResponse<ProductDTO> getProductsPaged(String name, UUID productTypeId, Boolean active, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = enrich ? "left join fetch el.productType left join fetch el.currency left join fetch el.productOwnershipType" : "";
+        String fetches = enrich ? "left join fetch el.productType left join fetch el.currency left join fetch el.ownershipType" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -721,7 +813,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Product saveProduct(ProductDTO dto) throws ObjectNotFoundException, PrimaryProductException {
+    public Product saveProduct(ProductDTO dto) throws ObjectNotFoundException, PrimaryProductException, ProductSubscriptionException {
         Product entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Product.class, dto.getId());
@@ -742,6 +834,10 @@ public class MarketServiceImpl implements MarketService {
             }
         }
 
+        if (dto.getOwnershipTypeId() != null && dto.getOwnershipTypeId().equals(DataConstants.OwnershipTypes.SUBSCRIPTION.getValue()) && dto.getLifetime() == null) {
+            throw new ProductSubscriptionException();
+        }
+
         entity.setName(dto.getName());
         entity.setActive(dto.getActive());
         entity.setProductType(ds.get(ProductType.class, dto.getProductTypeId()));
@@ -750,7 +846,7 @@ public class MarketServiceImpl implements MarketService {
         entity.setPrice(dto.getPrice());
         entity.setPrimary(dto.getPrimary());
         entity.setCurrency(ds.get(Currency.class, dto.getCurrencyId()));
-        entity.setProductOwnershipType(ds.get(ProductOwnershipType.class, dto.getProductOwnershipTypeId()));
+        entity.setOwnershipType(ds.get(OwnershipType.class, dto.getOwnershipTypeId()));
 
         return idObjectService.save(entity);
     }

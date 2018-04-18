@@ -56,6 +56,10 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
     @Column(columnDefinition = "json", nullable = true)
     private String fields;
 
+    @Column(name = "IS_RECURRING_AVAILABLE", nullable = false)
+    private Boolean recurringAvailable;
+
+
     @Override
     public UUID getId() {
         return id;
@@ -165,5 +169,13 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
 
     public void setFields(String fields) {
         this.fields = fields;
+    }
+
+    public Boolean getRecurringAvailable() {
+        return recurringAvailable;
+    }
+
+    public void setRecurringAvailable(Boolean recurringAvailable) {
+        this.recurringAvailable = recurringAvailable;
     }
 }

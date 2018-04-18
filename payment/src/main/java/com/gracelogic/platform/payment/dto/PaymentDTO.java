@@ -24,6 +24,8 @@ public class PaymentDTO extends IdObjectDTO {
     private Double totalAmount;
     private String description;
     private String externalIdentifier;
+    private UUID currencyId;
+    private String currencyName;
 
     public UUID getUserId() {
         return userId;
@@ -145,6 +147,22 @@ public class PaymentDTO extends IdObjectDTO {
         this.externalIdentifier = externalIdentifier;
     }
 
+    public UUID getCurrencyId() {
+        return currencyId;
+    }
+
+    public void setCurrencyId(UUID currencyId) {
+        this.currencyId = currencyId;
+    }
+
+    public String getCurrencyName() {
+        return currencyName;
+    }
+
+    public void setCurrencyName(String currencyName) {
+        this.currencyName = currencyName;
+    }
+
     public static PaymentDTO prepare(Payment model) {
         PaymentDTO dto = new PaymentDTO();
         IdObjectDTO.prepare(dto, model);
@@ -179,6 +197,8 @@ public class PaymentDTO extends IdObjectDTO {
         }
         if (model.getAccount() != null) {
             dto.setAccountExternalIdentifier(model.getAccount().getExternalIdentifier());
+            dto.setCurrencyId(model.getAccount().getCurrency().getId());
+            dto.setCurrencyName(model.getAccount().getCurrency().getName());
             if (model.getAccount().getUser() != null) {
                 dto.setUserId(model.getAccount().getUser().getId());
                 dto.setUserName(UserDTO.formatUserName(model.getAccount().getUser()));

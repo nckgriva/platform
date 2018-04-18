@@ -34,5 +34,6 @@
         <module>suggestion</module>
         <module>task-auth</module>
         <module>market</module>
+        <module>feedback</module>
     </modules>
 </project>

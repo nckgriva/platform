@@ -3,6 +3,7 @@ package com.gracelogic.platform.payment.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.payment.Utils;
+import com.gracelogic.platform.payment.dto.PaymentExecutionRequestDTO;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.dto.yandex.kassa.*;
@@ -32,7 +33,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
     private static Logger logger = Logger.getLogger(YandexKassaPaymentExecutor.class);
 
     @Override
-    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
         PropertyService propertyService = null;
         try {
             propertyService = context.getBean(PropertyService.class);
@@ -41,14 +42,14 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
         }
 
         YandexKassaCreatePaymentDTO paymentDTO = new YandexKassaCreatePaymentDTO();
-        paymentDTO.setAmount(new YandexKassaAmountDTO(FinanceUtils.toFractional2Rounded(amount), currencyCode));
+        paymentDTO.setAmount(new YandexKassaAmountDTO(FinanceUtils.toFractional2Rounded(request.getAmount()), request.getCurrencyCode()));
         paymentDTO.setCapture(true);
         paymentDTO.setConfirmation(new YandexKassaConfirmationDTO("redirect", propertyService.getPropertyValue("payment:yandex_kassa_redirect_url")));
         try {
             YandexKassaPaymentDTO result = createPayment(paymentDTO, propertyService.getPropertyValue("payment:yandex_kassa_shop_id"), propertyService.getPropertyValue("payment:yandex_kassa_secret"));
             Map<String, String> responseParams = new HashMap<>();
-            params.put("confirmation_url", result.getConfirmation().getConfirmation_url());
-            return new PaymentExecutionResultDTO(false, result.getId(), params);
+            request.getParams().put("confirmation_url", result.getConfirmation().getConfirmation_url());
+            return new PaymentExecutionResultDTO(false, result.getId(), request.getParams());
         } catch (Exception e) {
             logger.error("Failed to execute payment with Yandex.Kassa", e);
             throw new PaymentExecutionException(e.getMessage());
@@ -91,6 +92,11 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
             logger.error("Failed to process Yandex.Kassa callback", e);
             throw new PaymentExecutionException(e.getMessage());
         }
+    }
+
+    @Override
+    public boolean isRecurringPaymentsAllowed() {
+        return false;
     }
 
     private static YandexKassaPaymentDTO createPayment(YandexKassaCreatePaymentDTO request, String shopId, String secret) throws Exception {

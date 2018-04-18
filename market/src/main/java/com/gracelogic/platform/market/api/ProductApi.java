@@ -6,6 +6,7 @@ import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.market.Path;
 import com.gracelogic.platform.market.dto.ProductDTO;
 import com.gracelogic.platform.market.exception.PrimaryProductException;
+import com.gracelogic.platform.market.exception.ProductSubscriptionException;
 import com.gracelogic.platform.market.model.Product;
 import com.gracelogic.platform.market.service.MarketService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
@@ -85,6 +86,9 @@ public class ProductApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (PrimaryProductException e) {
             return new ResponseEntity<>(new ErrorResponse("market.PRIMARY_PRODUCT_CONFLICT", marketMessageSource.getMessage("market.PRIMARY_PRODUCT_CONFLICT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ProductSubscriptionException e) {
+            return new ResponseEntity<>(new ErrorResponse("market.PRODUCT_SUBSCRIPTION", marketMessageSource.getMessage("market.PRODUCT_SUBSCRIPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+
         }
     }
 

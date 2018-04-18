@@ -1,8 +1,7 @@
-package com.gracelogic.platform.market.model;
+package com.gracelogic.platform.feedback.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import com.gracelogic.platform.dictionary.model.Dictionary;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -10,14 +9,14 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "PRODUCT_OWNERSHIP_TYPE")
-public class ProductOwnershipType extends IdObject<UUID> implements Dictionary {
+@Table(name = JPAProperties.TABLE_PREFIX + "FEEDBACK_TYPE")
+public class FeedbackType extends IdObject<UUID> {
     @Id
+    @Access(AccessType.PROPERTY)
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @org.hibernate.annotations.Type(type = "pg-uuid")
-    @Access(AccessType.PROPERTY)
     private UUID id;
 
     @Column(name = CREATED, nullable = false)
@@ -27,8 +26,11 @@ public class ProductOwnershipType extends IdObject<UUID> implements Dictionary {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = NAME, nullable = false)
+    @Column(name = "NAME", nullable = false)
     private String name;
+
+    @Column(name = "NOTIFY_EMAIL", nullable = true)
+    private String notifyEmail;
 
     @Override
     public UUID getId() {
@@ -64,18 +66,15 @@ public class ProductOwnershipType extends IdObject<UUID> implements Dictionary {
         return name;
     }
 
-    @Override
-    public Integer getSortOrder() {
-        return 0;
-    }
-
-    @Override
-    public String getCode() {
-        return null;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
 
+    public String getNotifyEmail() {
+        return notifyEmail;
+    }
+
+    public void setNotifyEmail(String notifyEmail) {
+        this.notifyEmail = notifyEmail;
+    }
 }

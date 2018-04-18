@@ -23,10 +23,7 @@ public class SmsServiceImpl implements SmsService {
     @Autowired
     private PropertyService propertyService;
 
-
     private Logger logger = Logger.getLogger(getClass());
-
-    //private final String API_KEY = "1fbfb7aa-ca1e-7204-d1a9-f32a4e4ba131";
 
     private final String sendSms = "http://sms.ru/sms/send?api_id=%s&to=%s&text=%s%s";
 

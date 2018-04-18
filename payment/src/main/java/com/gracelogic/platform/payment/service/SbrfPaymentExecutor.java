@@ -2,6 +2,7 @@ package com.gracelogic.platform.payment.service;
 
 import com.gracelogic.platform.account.exception.AccountNotFoundException;
 import com.gracelogic.platform.account.model.Account;
+import com.gracelogic.platform.payment.dto.PaymentExecutionRequestDTO;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
@@ -35,7 +36,7 @@ public class SbrfPaymentExecutor implements PaymentExecutor {
             "</response>\n ";
 
     @Override
-    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
         throw new RuntimeException("Not implemented");
     }
 
@@ -120,5 +121,10 @@ public class SbrfPaymentExecutor implements PaymentExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean isRecurringPaymentsAllowed() {
+        return false;
     }
 }

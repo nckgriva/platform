@@ -2,6 +2,7 @@ package com.gracelogic.platform.payment.service;
 
 import com.braintreegateway.*;
 import com.gracelogic.platform.finance.FinanceUtils;
+import com.gracelogic.platform.payment.dto.PaymentExecutionRequestDTO;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
@@ -25,8 +26,8 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
     private static Logger logger = Logger.getLogger(BraintreePaymentExecutor.class);
 
     @Override
-    public PaymentExecutionResultDTO execute(String uniquePaymentIdentifier, UUID paymentSystemId, Long amount, String currencyCode, ApplicationContext context, Map<String, String> params) throws PaymentExecutionException {
-        if (params == null || !params.containsKey(ACTION)) {
+    public PaymentExecutionResultDTO execute(PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
+        if (request.getParams() == null || !request.getParams().containsKey(ACTION)) {
             throw new PaymentExecutionException("Not specified action");
         }
 
@@ -40,7 +41,7 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
             throw new PaymentExecutionException(e.getMessage());
         }
 
-        String action = params.get(ACTION);
+        String action = request.getParams().get(ACTION);
         logger.info("action: " + action);
         BraintreeGateway gateway = new BraintreeGateway(
                 propertyService.getPropertyValueAsBoolean("payment:braintree_is_production") ? Environment.PRODUCTION : Environment.SANDBOX,
@@ -54,34 +55,34 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
             logger.info("token: " + token);
             Map<String, String> responseParams = new HashMap<>();
             responseParams.put("token", token);
-            return new PaymentExecutionResultDTO(false, uniquePaymentIdentifier, responseParams);
+            return new PaymentExecutionResultDTO(false, request.getUniquePaymentIdentifier(), responseParams);
         } else if (StringUtils.equalsIgnoreCase(action, ACTION_CHECKOUT)) {
-            String nonce = params.get("nonce");
+            String nonce = request.getParams().get("nonce");
             logger.info("nonce: " + nonce);
             if (StringUtils.isEmpty(nonce)) {
                 throw new PaymentExecutionException("Invalid nonce");
             }
-            double dAmount = FinanceUtils.toFractional(amount);
-            TransactionRequest request = new TransactionRequest()
+            double dAmount = FinanceUtils.toFractional(request.getAmount());
+            TransactionRequest transactionRequest = new TransactionRequest()
                     .amount(new BigDecimal(dAmount))
                     .paymentMethodNonce(nonce)
                     .options()
                     .submitForSettlement(true)
                     .done();
 
-            Result<Transaction> result = gateway.transaction().sale(request);
+            Result<Transaction> result = gateway.transaction().sale(transactionRequest);
             logger.info("Transaction result: " + result.isSuccess() + "; message: " + result.getMessage());
             if (result.isSuccess()) {
                 ProcessPaymentRequest req = new ProcessPaymentRequest();
-                req.setExternalIdentifier(uniquePaymentIdentifier);
+                req.setExternalIdentifier(request.getUniquePaymentIdentifier());
                 req.setRegisteredAmount(dAmount);
                 req.setPaymentUID(nonce);
                 try {
-                    paymentService.processPayment(paymentSystemId, req, null);
+                    paymentService.processPayment(request.getPaymentSystemId(), req, null);
                 } catch (Exception e) {
                     throw new PaymentExecutionException(e.getMessage());
                 }
-                return new PaymentExecutionResultDTO(true, uniquePaymentIdentifier, null);
+                return new PaymentExecutionResultDTO(true, request.getUniquePaymentIdentifier(), null);
             }
             else {
                 throw new PaymentExecutionException("Payment failed");
@@ -94,5 +95,10 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
     @Override
     public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) {
         throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public boolean isRecurringPaymentsAllowed() {
+        return false;
     }
 }

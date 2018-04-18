@@ -26,6 +26,10 @@ public class OrderDTO extends IdObjectDTO {
     private String paymentSystemName;
     private UUID targetCurrencyId;
     private String targetCurrencyName;
+    private Long periodicity;
+    private UUID ownershipTypeId;
+    private String ownershipName;
+    private UUID parentOrderId;
 
     //Transient value for user order creation
     private String discountSecretCode;
@@ -218,6 +222,38 @@ public class OrderDTO extends IdObjectDTO {
         this.targetCurrencyName = targetCurrencyName;
     }
 
+    public Long getPeriodicity() {
+        return periodicity;
+    }
+
+    public void setPeriodicity(Long periodicity) {
+        this.periodicity = periodicity;
+    }
+
+    public UUID getOwnershipTypeId() {
+        return ownershipTypeId;
+    }
+
+    public void setOwnershipTypeId(UUID ownershipTypeId) {
+        this.ownershipTypeId = ownershipTypeId;
+    }
+
+    public String getOwnershipName() {
+        return ownershipName;
+    }
+
+    public void setOwnershipName(String ownershipName) {
+        this.ownershipName = ownershipName;
+    }
+
+    public UUID getParentOrderId() {
+        return parentOrderId;
+    }
+
+    public void setParentOrderId(UUID parentOrderId) {
+        this.parentOrderId = parentOrderId;
+    }
+
     public static OrderDTO prepare(Order model) {
         OrderDTO dto = new OrderDTO();
         IdObjectDTO.prepare(dto, model);
@@ -237,11 +273,17 @@ public class OrderDTO extends IdObjectDTO {
         if (model.getTargetCurrency() != null) {
             dto.setTargetCurrencyId(model.getTargetCurrency().getId());
         }
+        if (model.getOwnershipType() != null) {
+            dto.setOwnershipTypeId(model.getOwnershipType().getId());
+        }
+        if (model.getParentOrder() != null) {
+            dto.setParentOrderId(model.getParentOrder().getId());
+        }
         dto.setTotalAmount(model.getTotalAmount());
         dto.setPaid(model.getPaid());
         dto.setAmount(model.getAmount());
         dto.setDiscountAmount(model.getDiscountAmount());
-
+        dto.setPeriodicity(model.getPeriodicity());
         dto.setExternalIdentifier(model.getExternalIdentifier());
 
         return dto;
