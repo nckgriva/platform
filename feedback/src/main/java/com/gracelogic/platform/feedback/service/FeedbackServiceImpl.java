@@ -40,31 +40,31 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void saveFeedback(FeedbackDTO orderDTO) {
-        Feedback order;
-        if (orderDTO.getId() != null) {
-            order = idObjectService.getObjectById(Feedback.class, orderDTO.getId());
+    public void saveFeedback(FeedbackDTO feedbackDTO) {
+        Feedback feedback;
+        if (feedbackDTO.getId() != null) {
+            feedback = idObjectService.getObjectById(Feedback.class, feedbackDTO.getId());
         }
         else {
-            order = new Feedback();
+            feedback = new Feedback();
         }
-        FeedbackType orderType = idObjectService.getObjectById(FeedbackType.class, orderDTO.getFeedbackTypeId());
-        order.setFeedbackType(orderType);
-        order.setFields(JsonUtils.mapToJson(orderDTO.getFields()));
+        FeedbackType feedbackType = idObjectService.getObjectById(FeedbackType.class, feedbackDTO.getFeedbackTypeId());
+        feedback.setFeedbackType(feedbackType);
+        feedback.setFields(JsonUtils.mapToJson(feedbackDTO.getFields()));
 
-        idObjectService.save(order);
+        idObjectService.save(feedback);
 
-        StringBuilder sb = new StringBuilder("������:\n");
-        sb.append(String.format("���: %s\n", orderType.getName()));
-        for (String key : orderDTO.getFields().keySet()) {
-            sb.append(String.format("%s: %s\n", key, orderDTO.getFields().get(key)));
+        StringBuilder sb = new StringBuilder("??????:\n");
+        sb.append(String.format("???: %s\n", feedbackType.getName()));
+        for (String key : feedbackDTO.getFields().keySet()) {
+            sb.append(String.format("%s: %s\n", key, feedbackDTO.getFields().get(key)));
         }
 
-        if (!StringUtils.isEmpty(orderType.getNotifyEmail())) {
+        if (!StringUtils.isEmpty(feedbackType.getNotifyEmail())) {
             try {
-                sender.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"), orderType.getNotifyEmail(), orderType.getName(), sb.toString()), SendingType.EMAIL);
+                sender.sendMessage(new Message(feedbackType.getNotifyEmail(), sb.toString()), SendingType.EMAIL);
             } catch (Exception e) {
-                logger.error("Failed to send order", e);
+                logger.error("Failed to send feedback", e);
             }
 
         }
@@ -73,7 +73,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public EntityListResponse<FeedbackDTO> getFeedbacksPaged(UUID feedbackTypeId, Date startDate, Date endDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         if (!StringUtils.isEmpty(sortField)) {
-            //�.�. � ������ ������ ������ ������������ �������� � ��������� ��������� ������������ - ����������� �������� jpa ����� � �������� sql
+            //?.?. ? ?????? ?????? ?????? ???????????? ???????? ? ????????? ????????? ???????????? - ??????????? ???????? jpa ????? ? ???????? sql
             if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
                 sortField = "id";
             }
