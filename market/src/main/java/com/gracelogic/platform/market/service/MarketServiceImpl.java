@@ -559,10 +559,6 @@ public class MarketServiceImpl implements MarketService {
                         && product.getReferenceObjectId().equals(referenceObjectId)
                         && product.getProductType().getId().equals(productTypeId)) {
                     foundProducts.add(product);
-
-                    if (onlyPrimary) {
-                        break;
-                    }
                 }
             }
             result.put(referenceObjectId, foundProducts);
@@ -571,7 +567,7 @@ public class MarketServiceImpl implements MarketService {
         return result;
     }
 
-    public void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedUserId, Date checkOnDate) {
+    public void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedUserId, Date checkOnDate, boolean onlyPrimary) {
         if (objects == null || objects.isEmpty()) {
             return;
         }
@@ -589,7 +585,7 @@ public class MarketServiceImpl implements MarketService {
             purchased = getProductsPurchaseState(relatedUserId, referenceObjectIdsAndProductTypeIds, checkOnDate);
         }
 
-        Map<UUID, List<Product>> products = findProducts(referenceObjectIdsAndProductTypeIds, false);
+        Map<UUID, List<Product>> products = findProducts(referenceObjectIdsAndProductTypeIds, onlyPrimary);
 
         for (MarketAwareObjectDTO dto : objects) {
             if (dto.getId() == null) {
@@ -822,16 +818,6 @@ public class MarketServiceImpl implements MarketService {
             }
         } else {
             entity = new Product();
-        }
-
-        if ((entity.getId() != null && !entity.getPrimary() && dto.getPrimary()) || entity.getId() == null && dto.getPrimary()) {
-            Map<String, Object> params = new HashMap<>();
-            params.put("productTypeId", dto.getProductTypeId());
-            params.put("referenceObjectId", dto.getReferenceObjectId());
-
-            if (idObjectService.checkExist(Product.class, null, "el.productType.id=:productTypeId and el.referenceObjectId=:referenceObjectId and el.primary=true", params, 1) > 0) {
-                throw new PrimaryProductException();
-            }
         }
 
         if (dto.getOwnershipTypeId() != null && dto.getOwnershipTypeId().equals(DataConstants.OwnershipTypes.SUBSCRIPTION.getValue()) && dto.getLifetime() == null) {
