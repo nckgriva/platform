@@ -67,7 +67,7 @@ public class Payment extends IdObject<UUID> {
 
     //TODO: Добавить currency?
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "EXECUTED_BY_USER_ID", nullable = true)
     private User executedByUser;
 

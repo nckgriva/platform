@@ -10,10 +10,6 @@ import java.util.*;
 public interface UserDao {
     User getUserByField(String fieldName, Object fieldValue);
 
-    Long getIncorrectLoginAttemptCount(UUID userId, Date startDate, Date endDate);
-
-    IncorrectLoginAttempt saveIncorrectLoginAttempt(IncorrectLoginAttempt incorrectLoginAttempt);
-
     void invalidateActualAuthCodes(UUID userId, UUID codeTypeId);
 
     List<AuthCode> findAuthCodes(UUID userId, Collection<UUID> codeTypeIds, Collection<UUID> codeStateIds);

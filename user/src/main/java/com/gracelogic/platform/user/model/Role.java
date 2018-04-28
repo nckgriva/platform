@@ -38,8 +38,8 @@ public class Role extends IdObject<UUID> implements Dictionary {
     @Column(name = CODE, nullable = false)
     private String code;
 
-    @OneToMany(mappedBy = "role", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.EAGER)
-    private Set<RoleGrant> roleGrantSet = new HashSet<RoleGrant>();
+    @OneToMany(mappedBy = "role", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
+    private Set<RoleGrant> roleGrants = new HashSet<RoleGrant>();
 
     @Override
     public UUID getId() {
@@ -70,12 +70,12 @@ public class Role extends IdObject<UUID> implements Dictionary {
         this.changed = changed;
     }
 
-    public Set<RoleGrant> getRoleGrantSet() {
-        return roleGrantSet;
+    public Set<RoleGrant> getRoleGrants() {
+        return roleGrants;
     }
 
-    public void setRoleGrantSet(Set<RoleGrant> roleGrantSet) {
-        this.roleGrantSet = roleGrantSet;
+    public void setRoleGrants(Set<RoleGrant> roleGrants) {
+        this.roleGrants = roleGrants;
     }
 
     public String getName() {

@@ -103,12 +103,17 @@ public class UserServiceImpl implements UserService {
 
             if (user.getApproved() && loginTypeVerified &&
                     (user.getAllowedAddresses() == null || user.getAllowedAddresses().contains(remoteAddress))) {
+
                 Long currentTimeMillis = System.currentTimeMillis();
                 Date endDate = new Date(currentTimeMillis);
                 Date startDate = new Date(currentTimeMillis - propertyService.getPropertyValueAsInteger("user:block_period"));
+                Map<String, Object> params = new HashMap<>();
+                params.put("userId", user.getId());
+                params.put("startDate", startDate);
+                params.put("endDate", endDate);
+                Integer checkIncorrectLoginAttempts = idObjectService.checkExist(IncorrectLoginAttempt.class, null, "el.user.id=:userId and el.created >= :startDate and el.created <= :endDate", params, propertyService.getPropertyValueAsInteger("user:attempts_to_block"));
 
-                Long incorrectLoginAttemptCount = userDao.getIncorrectLoginAttemptCount(user.getId(), startDate, endDate);
-                if (incorrectLoginAttemptCount < propertyService.getPropertyValueAsInteger("user:attempts_to_block")) {
+                if (checkIncorrectLoginAttempts < propertyService.getPropertyValueAsInteger("user:attempts_to_block")) {
                     if (trust || user.getPassword() != null && user.getPassword().equals(DigestUtils.shaHex(password.concat(user.getSalt())))) {
                         user.setLastVisitDt(new Date());
                         user.setLastVisitIP(remoteAddress);
@@ -117,7 +122,7 @@ public class UserServiceImpl implements UserService {
                     } else {
                         IncorrectLoginAttempt incorrectLoginAttempt = new IncorrectLoginAttempt();
                         incorrectLoginAttempt.setUser(user);
-                        userDao.saveIncorrectLoginAttempt(incorrectLoginAttempt);
+                        idObjectService.save(incorrectLoginAttempt);
                     }
                 } else {
                     throw new TooManyAttemptsException("TooManyAttemptsException");
@@ -810,7 +815,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EntityListResponse<RoleDTO> getRolesPaged(String code, String name, Collection<UUID> grantIds, boolean fetchGrants, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<RoleDTO> getRolesPaged(String code, String name, boolean fetchGrants, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -823,10 +828,6 @@ public class UserServiceImpl implements UserService {
         if (!StringUtils.isEmpty(name)) {
             params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
             cause += "and lower(el.name) like :name ";
-        }
-        if (grantIds != null && !grantIds.isEmpty()) {
-            cause += "and el.grant.id in (:grants) ";
-            params.put("grants", grantIds);
         }
 
         int totalCount = idObjectService.getCount(Role.class, null, countFetches, cause, params);

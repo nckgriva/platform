@@ -26,11 +26,11 @@ public class RoleGrant extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROLE_ID", nullable = false)
     private Role role;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "GRANT_ID", nullable = false)
     private Grant grant;
 

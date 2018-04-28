@@ -66,7 +66,7 @@ public class User extends IdObject<UUID> {
     @Column(name = "BLOCKED_DT", nullable = true)
     private Date blockedDt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "BLOCKED_BY_USER_ID", nullable = true)
     private User blockedByUser;
 

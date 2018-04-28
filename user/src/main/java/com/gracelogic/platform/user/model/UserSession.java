@@ -38,7 +38,7 @@ public class UserSession extends IdObject<UUID> {
     @Column(name = "LAST_ACCESS_DT", nullable = true)
     private Date lastAccessDt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
 

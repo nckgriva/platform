@@ -1,6 +1,7 @@
 package com.gracelogic.platform.oauth.service;
 
 import com.gracelogic.platform.db.service.IdObjectService;
+import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.oauth.Path;
 import com.gracelogic.platform.oauth.dto.OAuthDTO;
 import com.gracelogic.platform.oauth.model.AuthProvider;
@@ -31,12 +32,15 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
     @Autowired
     private PropertyService propertyService;
 
+    @Autowired
+    private DictionaryService ds;
+
 
     protected User processAuthorization(UUID authProviderId, String code, OAuthDTO OAuthDTO) {
         Map<String, Object> params = new HashMap<>();
         params.put("externalUserId", OAuthDTO.getUserId());
         params.put("authProviderId", authProviderId);
-        List<AuthProviderLinkage> linkages = idObjectService.getList(AuthProviderLinkage.class, null, "el.externalUserId=:externalUserId and el.authProvider.id=:authProviderId", params, null, null, null, 1);
+        List<AuthProviderLinkage> linkages = idObjectService.getList(AuthProviderLinkage.class, "left join fetch el.user", "el.externalUserId=:externalUserId and el.authProvider.id=:authProviderId", params, null, null, null, 1);
         if (!linkages.isEmpty() && linkages.size() == 1) {
             AuthProviderLinkage authProviderLinkage = linkages.iterator().next();
             //Existing user
@@ -64,7 +68,7 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
 
             if (user != null) {
                 AuthProviderLinkage authProviderLinkage = new AuthProviderLinkage();
-                authProviderLinkage.setAuthProvider(idObjectService.getObjectById(AuthProvider.class, authProviderId));
+                authProviderLinkage.setAuthProvider(ds.get(AuthProvider.class, authProviderId));
                 authProviderLinkage.setUser(user);
                 authProviderLinkage.setExternalUserId(OAuthDTO.getUserId());
                 authProviderLinkage.setCode(code);
