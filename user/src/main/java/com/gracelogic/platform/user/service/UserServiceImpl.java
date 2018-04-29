@@ -822,7 +822,7 @@ public class UserServiceImpl implements UserService {
         HashMap<String, Object> params = new HashMap<String, Object>();
 
         if (!StringUtils.isEmpty(code)) {
-            params.put("code", "%%" + StringUtils.lowerCase(name) + "%%");
+            params.put("code", "%%" + StringUtils.lowerCase(code) + "%%");
             cause += "and lower(el.code) like :code ";
         }
         if (!StringUtils.isEmpty(name)) {
