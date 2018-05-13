@@ -24,6 +24,7 @@
         <module>dictionary</module>
         <module>property</module>
         <module>user</module>
+        <module>survey</module>
         <module>oauth</module>
         <module>account</module>
         <module>payment</module>
