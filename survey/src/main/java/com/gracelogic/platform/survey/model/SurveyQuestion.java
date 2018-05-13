@@ -34,17 +34,17 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder;
 
-    @Column(name = "description", nullable = false)
-    private String description;
+    @Column(name = "text", nullable = false)
+    private String text;
 
     @Column(name = "type", nullable = false)
-    private Integer type;
+    private Integer type; //TODO: Вынести в отдельную таблицу-справочник (для примера - AccountType)
 
-    @Column(name = "required", nullable = false)
-    private boolean required;
+    @Column(name = "is_required", nullable = false)
+    private Boolean required;
 
-    @Column(name = "hidden", nullable = false)
-    private boolean hidden;
+    @Column(name = "is_hidden", nullable = false)
+    private Boolean hidden;
 
     @Override
     public UUID getId() {
@@ -92,12 +92,32 @@ public class SurveyQuestion extends IdObject<UUID> {
         this.sortOrder = sortOrder;
     }
 
-    public String getDescription() {
-        return description;
+    public String getText() {
+        return text;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public Boolean getRequired() {
+        return required;
+    }
+
+    public void setRequired(Boolean required) {
+        this.required = required;
+    }
+
+    public Boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(Boolean hidden) {
+        this.hidden = hidden;
     }
 
     public QuestionType getType() {

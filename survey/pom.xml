@@ -47,6 +47,11 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.gracelogic.platform</groupId>
+            <artifactId>platform-file-storage</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <exclusions>

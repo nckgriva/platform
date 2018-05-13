@@ -29,11 +29,11 @@ public class SurveyPassing extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "SURVEY_ID", nullable = false)
     private Survey survey;
 
@@ -79,5 +79,29 @@ public class SurveyPassing extends IdObject<UUID> {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Survey getSurvey() {
+        return survey;
+    }
+
+    public void setSurvey(Survey survey) {
+        this.survey = survey;
+    }
+
+    public Date getStarted() {
+        return started;
+    }
+
+    public void setStarted(Date started) {
+        this.started = started;
+    }
+
+    public Date getEnded() {
+        return ended;
+    }
+
+    public void setEnded(Date ended) {
+        this.ended = ended;
     }
 }

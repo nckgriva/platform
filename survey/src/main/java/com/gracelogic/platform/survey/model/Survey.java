@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
+import com.gracelogic.platform.user.model.User;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -34,14 +35,14 @@ public class Survey extends IdObject<UUID> {
     @Column(name = "expires_dt", nullable = true)
     private Date expires;
 
-    @Column(name = "show_progress", nullable = false)
-    private boolean showProgress;
+    @Column(name = "is_show_progress", nullable = false)
+    private Boolean showProgress;
 
-    @Column(name = "show_question_number", nullable = false)
-    private boolean showQuestionNumber;
+    @Column(name = "is_show_question_number", nullable = false)
+    private Boolean showQuestionNumber;
 
-    @Column(name = "allow_return", nullable = false)
-    private boolean allowReturn;
+    @Column(name = "is_allow_return", nullable = false)
+    private Boolean allowReturn;
 
     @Column(name = "introduction", nullable = true)
     private String introduction;
@@ -53,10 +54,14 @@ public class Survey extends IdObject<UUID> {
     private Integer maximumRespondents;
 
     @Column(name = "time_limit", nullable = true)
-    private Integer timeLimit;
+    private Long timeLimit;
 
-    @Column(name = "authorization_required", nullable = true)
-    private boolean isAuthorizationRequired;
+    @Column(name = "is_authorization_required", nullable = false)
+    private Boolean authorizationRequired;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "OWNER_USER_ID", nullable = false)
+    private User owner;
 
     @Override
     public UUID getId() {
@@ -104,27 +109,27 @@ public class Survey extends IdObject<UUID> {
         this.expires = expires;
     }
 
-    public boolean isShowProgress() {
+    public Boolean getShowProgress() {
         return showProgress;
     }
 
-    public void setShowProgress(boolean showProgress) {
+    public void setShowProgress(Boolean showProgress) {
         this.showProgress = showProgress;
     }
 
-    public boolean isShowQuestionNumber() {
+    public Boolean getShowQuestionNumber() {
         return showQuestionNumber;
     }
 
-    public void setShowQuestionNumber(boolean showQuestionNumber) {
+    public void setShowQuestionNumber(Boolean showQuestionNumber) {
         this.showQuestionNumber = showQuestionNumber;
     }
 
-    public boolean isAllowReturn() {
+    public Boolean getAllowReturn() {
         return allowReturn;
     }
 
-    public void setAllowReturn(boolean allowReturn) {
+    public void setAllowReturn(Boolean allowReturn) {
         this.allowReturn = allowReturn;
     }
 
@@ -152,19 +157,37 @@ public class Survey extends IdObject<UUID> {
         this.maximumRespondents = maximumRespondents;
     }
 
-    public Integer getTimeLimit() {
+    public Long getTimeLimit() {
         return timeLimit;
     }
 
-    public void setTimeLimit(Integer timeLimit) {
+    public void setTimeLimit(Long timeLimit) {
         this.timeLimit = timeLimit;
     }
 
     public boolean isAuthorizationRequired() {
-        return isAuthorizationRequired;
+        return authorizationRequired;
+    }
+
+    public Boolean getAuthorizationRequired() {
+        return authorizationRequired;
+    }
+
+    public void setAuthorizationRequired(Boolean authorizationRequired) {
+        this.authorizationRequired = authorizationRequired;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 
     public void setAuthorizationRequired(boolean authorizationRequired) {
-        isAuthorizationRequired = authorizationRequired;
+        this.authorizationRequired = authorizationRequired;
+
+
     }
 }

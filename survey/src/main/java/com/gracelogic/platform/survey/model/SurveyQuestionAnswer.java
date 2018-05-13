@@ -2,6 +2,7 @@ package com.gracelogic.platform.survey.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
+import com.gracelogic.platform.filestorage.model.StoredFile;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -9,8 +10,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "USER_ANSWER")
-public class UserAnswer extends IdObject<UUID> {
+@Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_QUESTION_ANSWER")
+public class SurveyQuestionAnswer extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @Access(AccessType.PROPERTY)
@@ -30,12 +31,16 @@ public class UserAnswer extends IdObject<UUID> {
     @Column(name = "survey_passing_id", nullable = false)
     private SurveyPassing surveyPassing;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @Column(name = "answer_variant", nullable = true)
     private SurveyAnswerVariant answerVariant;
 
     @Column(name = "text_answer", nullable = true)
     private String textAnswer;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @Column(name = "answer_stored_file", nullable = true)
+    private StoredFile storedFile; //Для хранения прикрепленного пользователем файла
 
     @Override
     public UUID getId() {
@@ -89,5 +94,13 @@ public class UserAnswer extends IdObject<UUID> {
 
     public void setTextAnswer(String textAnswer) {
         this.textAnswer = textAnswer;
+    }
+
+    public StoredFile getStoredFile() {
+        return storedFile;
+    }
+
+    public void setStoredFile(StoredFile storedFile) {
+        this.storedFile = storedFile;
     }
 }

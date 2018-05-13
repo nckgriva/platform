@@ -36,7 +36,7 @@ public class SurveyPage extends IdObject<UUID> {
     @Column(name = "description", nullable = true)
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "NEXT_PAGE_ID", nullable = true)
     private SurveyPage nextPage;
 
@@ -68,5 +68,37 @@ public class SurveyPage extends IdObject<UUID> {
     @Override
     public void setChanged(Date changed) {
         this.changed = changed;
+    }
+
+    public Survey getSurvey() {
+        return survey;
+    }
+
+    public void setSurvey(Survey survey) {
+        this.survey = survey;
+    }
+
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public SurveyPage getNextPage() {
+        return nextPage;
+    }
+
+    public void setNextPage(SurveyPage nextPage) {
+        this.nextPage = nextPage;
     }
 }

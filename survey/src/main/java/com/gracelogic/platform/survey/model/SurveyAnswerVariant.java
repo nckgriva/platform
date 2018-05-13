@@ -36,6 +36,14 @@ public class SurveyAnswerVariant extends IdObject<UUID> {
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder;
 
+    @Column(name = "is_default_variant", nullable = false)
+    private Boolean defaultVariant; //Вариант выбран по умолчанию
+
+    @Column(name = "weight", nullable = true)
+    private Integer weight; //Вес ответа для автоматической обработки
+
+
+
     @Override
     public UUID getId() {
         return id;
@@ -88,5 +96,21 @@ public class SurveyAnswerVariant extends IdObject<UUID> {
 
     public void setSortOrder(Integer sortOrder) {
         this.sortOrder = sortOrder;
+    }
+
+    public Boolean getDefaultVariant() {
+        return defaultVariant;
+    }
+
+    public void setDefaultVariant(Boolean defaultVariant) {
+        this.defaultVariant = defaultVariant;
+    }
+
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Integer weight) {
+        this.weight = weight;
     }
 }

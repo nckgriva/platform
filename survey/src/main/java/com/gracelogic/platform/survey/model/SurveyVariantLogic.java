@@ -32,16 +32,16 @@ public class SurveyVariantLogic extends IdObject<UUID> {
     @JoinColumn(name = "SURVEY_PAGE_ID", nullable = false)
     private SurveyPage surveyPage;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "SELECTED_VARIANT_ID", nullable = false)
     private SurveyAnswerVariant selectedVariant;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "SURVEY_TARGET_QUESTION_ID", nullable = false)
     private SurveyQuestion targetQuestion;
 
     @Column(name = "relation_type", nullable = false)
-    private Integer relationType;
+    private Integer relationType; //TODO: Вынести в отдельную таблицу-справочник (для примера AccountType)
 
     @Override
     public UUID getId() {
