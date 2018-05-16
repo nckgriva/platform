@@ -2,10 +2,8 @@ package com.gracelogic.platform.survey.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import com.gracelogic.platform.survey.RelationType;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.management.relation.Relation;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
@@ -41,7 +39,8 @@ public class SurveyVariantLogic extends IdObject<UUID> {
     private SurveyQuestion targetQuestion;
 
     @Column(name = "relation_type", nullable = false)
-    private Integer relationType; //TODO: Вынести в отдельную таблицу-справочник (для примера AccountType)
+    @org.hibernate.annotations.Type(type = "pg-uuid")
+    private UUID relationType;
 
     @Override
     public UUID getId() {
@@ -97,15 +96,11 @@ public class SurveyVariantLogic extends IdObject<UUID> {
         this.targetQuestion = targetQuestion;
     }
 
-    public RelationType getRelationType() {
-        switch (relationType) {
-            case 0: return RelationType.HIDES_QUESTION;
-            case 1: return RelationType.SHOWS_QUESTION;
-            default: return RelationType.HIDES_QUESTION;
-        }
+    public UUID getRelationType() {
+        return relationType;
     }
 
-    public void setRelationType(RelationType relationType) {
-        this.relationType = relationType.ordinal();
+    public void setRelationType(UUID relationType) {
+        this.relationType = relationType;
     }
 }

@@ -37,12 +37,10 @@ public class SurveyAnswerVariant extends IdObject<UUID> {
     private Integer sortOrder;
 
     @Column(name = "is_default_variant", nullable = false)
-    private Boolean defaultVariant; //Вариант выбран по умолчанию
+    private Boolean defaultVariant; // Вариант выбран по умолчанию
 
     @Column(name = "weight", nullable = true)
-    private Integer weight; //Вес ответа для автоматической обработки
-
-
+    private Integer weight; // Вес ответа для автоматической обработки
 
     @Override
     public UUID getId() {

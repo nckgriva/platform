@@ -30,15 +30,11 @@ public class SurveyPage extends IdObject<UUID> {
     @JoinColumn(name = "SURVEY_ID", nullable = false)
     private Survey survey;
 
-    @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder;
+    @Column(name = "page_index", nullable = false)
+    private Integer pageIndex;
 
     @Column(name = "description", nullable = true)
     private String description;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "NEXT_PAGE_ID", nullable = true)
-    private SurveyPage nextPage;
 
     @Override
     public UUID getId() {
@@ -78,12 +74,12 @@ public class SurveyPage extends IdObject<UUID> {
         this.survey = survey;
     }
 
-    public Integer getSortOrder() {
-        return sortOrder;
+    public Integer getPageIndex() {
+        return pageIndex;
     }
 
-    public void setSortOrder(Integer sortOrder) {
-        this.sortOrder = sortOrder;
+    public void setPageIndex(Integer pageIndex) {
+        this.pageIndex = pageIndex;
     }
 
     public String getDescription() {
@@ -92,13 +88,5 @@ public class SurveyPage extends IdObject<UUID> {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public SurveyPage getNextPage() {
-        return nextPage;
-    }
-
-    public void setNextPage(SurveyPage nextPage) {
-        this.nextPage = nextPage;
     }
 }

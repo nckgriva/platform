@@ -2,7 +2,6 @@ package com.gracelogic.platform.survey.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import com.gracelogic.platform.survey.QuestionType;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -38,7 +37,8 @@ public class SurveyQuestion extends IdObject<UUID> {
     private String text;
 
     @Column(name = "type", nullable = false)
-    private Integer type; //TODO: Вынести в отдельную таблицу-справочник (для примера - AccountType)
+    @org.hibernate.annotations.Type(type = "pg-uuid")
+    private UUID type;
 
     @Column(name = "is_required", nullable = false)
     private Boolean required;
@@ -100,10 +100,6 @@ public class SurveyQuestion extends IdObject<UUID> {
         this.text = text;
     }
 
-    public void setType(Integer type) {
-        this.type = type;
-    }
-
     public Boolean getRequired() {
         return required;
     }
@@ -120,23 +116,6 @@ public class SurveyQuestion extends IdObject<UUID> {
         this.hidden = hidden;
     }
 
-    public QuestionType getType() {
-        switch (type) {
-            case 0: return QuestionType.RADIOBUTTON;
-            case 1: return QuestionType.CHECKBOX;
-            case 2: return QuestionType.TEXT;
-            case 3: return QuestionType.COMBOBOX;
-            case 4: return QuestionType.LISTBOX;
-            case 5: return QuestionType.RATING_SCALE;
-            case 6: return QuestionType.ATTACHMENT;
-            default: return QuestionType.RADIOBUTTON;
-        }
-    }
-
-    public void setType(QuestionType type) {
-        this.type = type.ordinal();
-    }
-
     public boolean isRequired() {
         return required;
     }
@@ -151,5 +130,13 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
+    }
+
+    public UUID getType() {
+        return type;
+    }
+
+    public void setType(UUID type) {
+        this.type = type;
     }
 }

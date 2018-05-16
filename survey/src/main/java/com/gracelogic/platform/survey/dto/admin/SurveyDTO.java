@@ -1,96 +1,40 @@
-package com.gracelogic.platform.survey.model;
+package com.gracelogic.platform.survey.dto.admin;
 
-import javax.persistence.Entity;
+import com.gracelogic.platform.db.dto.IdObjectDTO;
+import com.gracelogic.platform.survey.model.Survey;
 
-import com.gracelogic.platform.db.JPAProperties;
-import com.gracelogic.platform.db.model.IdObject;
-import com.gracelogic.platform.user.model.User;
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
-@Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "SURVEY")
-public class Survey extends IdObject<UUID> {
-    @Id
-    @Column(name = ID)
-    @Access(AccessType.PROPERTY)
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "pg-uuid")
-    private UUID id;
+public class SurveyDTO extends IdObjectDTO {
 
-    @Column(name = CREATED, nullable = false)
-    private Date created;
-
-    @Version
-    @Column(name = CHANGED, nullable = false)
-    private Date changed;
-
-    @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "expires_dt", nullable = true)
     private Date expires;
-
-    @Column(name = "is_show_progress", nullable = false)
     private Boolean showProgress;
-
-    @Column(name = "is_show_question_number", nullable = false)
     private Boolean showQuestionNumber;
-
-    @Column(name = "is_allow_return", nullable = false)
     private Boolean allowReturn;
-
-    @Column(name = "introduction", nullable = true)
     private String introduction;
-
-    @Column(name = "conclusion", nullable = true)
     private String conclusion;
-
-    @Column(name = "maximum_respondents", nullable = true)
     private Integer maximumRespondents;
-
-    @Column(name = "time_limit", nullable = true)
     private Long timeLimit;
-
-    @Column(name = "participation_type", nullable = false)
     private UUID participationType;
+    private UUID owner;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "OWNER_USER_ID", nullable = false)
-    private User owner;
-
-    @Override
-    public UUID getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    @Override
-    public Date getCreated() {
-        return created;
-    }
-
-    @Override
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    @Override
-    public Date getChanged() {
-        return changed;
-    }
-
-    @Override
-    public void setChanged(Date changed) {
-        this.changed = changed;
+    public static SurveyDTO prepare(Survey survey) {
+        SurveyDTO model = new SurveyDTO();
+        IdObjectDTO.prepare(model, survey);
+        model.setName(survey.getName());
+        model.setExpires(survey.getExpires());
+        model.setShowProgress(survey.getShowProgress());
+        model.setShowQuestionNumber(survey.getShowQuestionNumber());
+        model.setAllowReturn(survey.getAllowReturn());
+        model.setIntroduction(survey.getIntroduction());
+        model.setConclusion(survey.getConclusion());
+        model.setMaximumRespondents(survey.getMaximumRespondents());
+        model.setTimeLimit(survey.getTimeLimit());
+        model.setParticipationType(survey.getParticipationType());
+        model.setOwner(survey.getOwner().getId());
+        return model;
     }
 
     public String getName() {
@@ -165,11 +109,11 @@ public class Survey extends IdObject<UUID> {
         this.timeLimit = timeLimit;
     }
 
-    public User getOwner() {
+    public UUID getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public void setOwner(UUID owner) {
         this.owner = owner;
     }
 
@@ -180,6 +124,4 @@ public class Survey extends IdObject<UUID> {
     public void setParticipationType(UUID participationType) {
         this.participationType = participationType;
     }
-
-
 }

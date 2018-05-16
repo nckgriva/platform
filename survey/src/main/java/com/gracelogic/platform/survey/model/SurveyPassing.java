@@ -33,6 +33,9 @@ public class SurveyPassing extends IdObject<UUID> {
     @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
 
+    @Column(name = "LAST_VISIT_IP", nullable = true)
+    private String lastVisitIP;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "SURVEY_ID", nullable = false)
     private Survey survey;

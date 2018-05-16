@@ -5,13 +5,10 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.Path;
-import com.gracelogic.platform.survey.dto.admin.SurveyDTO;
-import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
-import com.gracelogic.platform.survey.exception.HitRespondentsLimitException;
-import com.gracelogic.platform.survey.model.Survey;
+import com.gracelogic.platform.survey.dto.admin.SurveyQuestionDTO;
+import com.gracelogic.platform.survey.model.SurveyQuestion;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
-import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
@@ -25,13 +22,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Controller
-@RequestMapping(value = Path.API_SURVEY)
-@Api(value = Path.API_SURVEY, tags = {"Survey API"})
-public class SurveyApi extends AbstractAuthorizedController {
+@RequestMapping(value = Path.API_SURVEY_QUESTION)
+@Api(value = Path.API_SURVEY_QUESTION, tags = {"Survey question API"})
+public class SurveyQuestionApi extends AbstractAuthorizedController {
     @Autowired
     private SurveyService surveyService;
 
@@ -40,8 +36,8 @@ public class SurveyApi extends AbstractAuthorizedController {
     private ResourceBundleMessageSource messageSource;
 
     @ApiOperation(
-            value = "getSurveys",
-            notes = "Get list of surveys",
+            value = "getSurveyQuestions",
+            notes = "Get list of survey questions",
             response =  EntityListResponse.class
     )
     @ApiResponses({
@@ -51,21 +47,21 @@ public class SurveyApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getSurveys(@RequestParam(value = "name", required = false) String name,
-                                        @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                        @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                        @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                        @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+    public ResponseEntity getSurveyQuestions(@RequestParam(value = "text", required = false) String text,
+                                     @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                     @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                     @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                     @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
 
-        EntityListResponse<SurveyDTO> properties = surveyService.getSurveysPaged(name, count, null, start, sortField, sortDir);
-        return new ResponseEntity<EntityListResponse<SurveyDTO>>(properties, HttpStatus.OK);
+        EntityListResponse<SurveyQuestionDTO> properties = surveyService.getSurveyQuestionsPaged(text, count, null, start, sortField, sortDir);
+        return new ResponseEntity<EntityListResponse<SurveyQuestionDTO>>(properties, HttpStatus.OK);
     }
 
     @ApiOperation(
-            value = "getSurvey",
-            notes = "Get survey",
-            response = SurveyDTO.class
+            value = "getSurveyQuestion",
+            notes = "Get survey question",
+            response = SurveyQuestionDTO.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -74,10 +70,10 @@ public class SurveyApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
-    public ResponseEntity getSurvey(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity getSurveyQuestion(@PathVariable(value = "id") UUID id) {
         try {
-            SurveyDTO dto = surveyService.getSurvey(id);
-            return new ResponseEntity<SurveyDTO>(dto, HttpStatus.OK);
+            SurveyQuestionDTO dto = surveyService.getSurveyQuestion(id);
+            return new ResponseEntity<SurveyQuestionDTO>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null,
                     LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -85,8 +81,8 @@ public class SurveyApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
-            value = "saveSurvey",
-            notes = "Save survey",
+            value = "saveSurveyQuestion",
+            notes = "Save survey question",
             response = IDResponse.class
     )
     @ApiResponses({
@@ -96,10 +92,10 @@ public class SurveyApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
-    public ResponseEntity saveSurvey(@RequestBody SurveyDTO surveyDTO) {
+    public ResponseEntity saveSurvey(@RequestBody SurveyQuestionDTO surveyQuestionDTO) {
         try {
-            Survey survey = surveyService.saveSurvey(surveyDTO, getUser());
-            return new ResponseEntity<IDResponse>(new IDResponse(survey.getId()), HttpStatus.OK);
+            SurveyQuestion surveyQuestion = surveyService.saveSurveyQuestion(surveyQuestionDTO);
+            return new ResponseEntity<IDResponse>(new IDResponse(surveyQuestion.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
@@ -107,8 +103,8 @@ public class SurveyApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
-            value = "deleteSurvey",
-            notes = "Delete survey",
+            value = "deleteSurveyQuestion",
+            notes = "Delete survey question",
             response = EmptyResponse.class
     )
     @ApiResponses({
@@ -118,37 +114,12 @@ public class SurveyApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
-    public ResponseEntity deleteSurvey(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity deleteSurveyQuestion(@PathVariable(value = "id") UUID id) {
         try {
-            surveyService.deleteSurvey(id);
+            surveyService.deleteSurveyQuestion(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
-
-    @ApiOperation(
-            value = "getInitialSurveyInfo",
-            notes = "Sends initial survey information to user",
-            response = SurveyIntroductionDTO.class
-    )
-    @RequestMapping(method = RequestMethod.GET, value = "/{id}/init")
-    public ResponseEntity getInitialSurveyInfo(HttpServletRequest request, @PathVariable(value = "id") UUID surveyId) {
-        try {
-
-            SurveyIntroductionDTO dto = surveyService.getSurveyIntroduction(surveyId, request.getRemoteAddr(), getUser());
-            return new ResponseEntity<SurveyIntroductionDTO>(dto, HttpStatus.OK);
-
-        } catch (ObjectNotFoundException notFoundException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
-                    messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        } catch (ForbiddenException forbiddenException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
-                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
-        } catch (HitRespondentsLimitException respondentsException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.HIT_RESPONDENTS_LIMIT",
-                    messageSource.getMessage("surveys.HIT_RESPONDENTS_LIMIT", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
-        }
-    }
-
 }
