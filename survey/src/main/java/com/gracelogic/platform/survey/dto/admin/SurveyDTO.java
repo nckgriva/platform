@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.UUID;
 
 public class SurveyDTO extends IdObjectDTO {
-
     private String name;
     private Date expires;
     private Boolean showProgress;
@@ -18,6 +17,7 @@ public class SurveyDTO extends IdObjectDTO {
     private Integer maximumRespondents;
     private Long timeLimit;
     private UUID participationType;
+    private UUID answerSavingType;
     private UUID owner;
 
     public static SurveyDTO prepare(Survey survey) {
@@ -33,6 +33,7 @@ public class SurveyDTO extends IdObjectDTO {
         model.setMaximumRespondents(survey.getMaximumRespondents());
         model.setTimeLimit(survey.getTimeLimit());
         model.setParticipationType(survey.getParticipationType());
+        model.setAnswerSavingType(survey.getAnswerSavingType());
         model.setOwner(survey.getOwner().getId());
         return model;
     }
@@ -123,5 +124,13 @@ public class SurveyDTO extends IdObjectDTO {
 
     public void setParticipationType(UUID participationType) {
         this.participationType = participationType;
+    }
+
+    public UUID getAnswerSavingType() {
+        return answerSavingType;
+    }
+
+    public void setAnswerSavingType(UUID answerSavingType) {
+        this.answerSavingType = answerSavingType;
     }
 }

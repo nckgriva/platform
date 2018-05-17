@@ -59,6 +59,9 @@ public class Survey extends IdObject<UUID> {
     @Column(name = "participation_type", nullable = false)
     private UUID participationType;
 
+    @Column(name = "answer_saving_type", nullable = false)
+    private UUID answerSavingType;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "OWNER_USER_ID", nullable = false)
     private User owner;
@@ -181,5 +184,11 @@ public class Survey extends IdObject<UUID> {
         this.participationType = participationType;
     }
 
+    public UUID getAnswerSavingType() {
+        return answerSavingType;
+    }
 
+    public void setAnswerSavingType(UUID answerSavingType) {
+        this.answerSavingType = answerSavingType;
+    }
 }

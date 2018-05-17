@@ -107,4 +107,12 @@ public class SurveyPassing extends IdObject<UUID> {
     public void setEnded(Date ended) {
         this.ended = ended;
     }
+
+    public String getLastVisitIP() {
+        return lastVisitIP;
+    }
+
+    public void setLastVisitIP(String lastVisitIP) {
+        this.lastVisitIP = lastVisitIP;
+    }
 }

@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service("surveyService")
 public class SurveyServiceImpl implements SurveyService {
@@ -33,6 +30,41 @@ public class SurveyServiceImpl implements SurveyService {
     @Autowired
     private IdObjectService idObjectService;
 
+    private boolean isHitRespondentsLimit(Survey survey) {
+        if (survey.getMaximumRespondents() != null && survey.getMaximumRespondents() > 0) {
+            Integer totalPasses = idObjectService.getCount(SurveyPassing.class, null, null,
+                    String.format("el.survey = '%s' AND el.ended IS NOT NULL", survey.getId()), null);
+            if (totalPasses >= survey.getMaximumRespondents()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void checkSurveyExecutionAvailability(AuthorizedUser user, String remoteAddress, Survey survey)
+            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException {
+        if (user == null && survey.getParticipationType() == DataConstants.ParticipationType.AUTHORIZATION_REQUIRED.getValue()) {
+            throw new ForbiddenException();
+        }
+
+        if (survey.getParticipationType() == DataConstants.ParticipationType.IP_LIMITED.getValue() ||
+                survey.getParticipationType() == DataConstants.ParticipationType.COOKIE_IP_LIMITED.getValue()) {
+
+            Integer passesFromIP = idObjectService.getCount(SurveyPassing.class, null, null,
+                    String.format("el.survey = '%s' AND (el.lastVisitIP = '%s' OR el.user = '%s')",
+                            survey.getId(), remoteAddress, user != null ? user.getId() : null),null);
+
+            if (passesFromIP > 0) {
+                throw new ForbiddenException();
+            }
+        }
+
+        // TODO: что если лимит респондентов - 100, и в один момент стартовало 200 человек?
+        if (isHitRespondentsLimit(survey)) {
+            throw new HitRespondentsLimitException();
+        }
+    }
+
     @Override
     public SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId, String remoteAddress, AuthorizedUser user)
             throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException {
@@ -41,31 +73,7 @@ public class SurveyServiceImpl implements SurveyService {
             throw new ObjectNotFoundException();
         }
 
-        // authorization limit
-        if (user == null && survey.getParticipationType() == DataConstants.ParticipationType.AUTHORIZATION_REQUIRED.getValue()) {
-            throw new ForbiddenException();
-        }
-
-        // ip-limit
-        if (survey.getParticipationType() == DataConstants.ParticipationType.IP_LIMITED.getValue() ||
-                survey.getParticipationType() == DataConstants.ParticipationType.COOKIE_IP_LIMITED.getValue()) {
-
-            Integer passesFromIP = idObjectService.getCount(SurveyPassing.class, null, null,
-                    String.format("el.lastVisitIP = '%s'", remoteAddress),null);
-
-            if (passesFromIP > 0) {
-                throw new ForbiddenException();
-            }
-        }
-
-        // TODO: что если лимит респондентов - 100, и в один момент стартовало 200 человек?
-        if (survey.getMaximumRespondents() > 0) {
-            Integer totalPasses = idObjectService.getCount(SurveyPassing.class, null, null,
-                    String.format("el.SURVEY = '%s' AND el.ENDED IS NOT NULL", survey.getId()), null);
-            if (totalPasses >= survey.getMaximumRespondents()) {
-                throw new HitRespondentsLimitException();
-            }
-        }
+        checkSurveyExecutionAvailability(user, remoteAddress, survey);
 
         Integer totalQuestions = idObjectService.getCount(SurveyQuestion.class, null, null,
                 String.format("el.SURVEY_PAGE_ID = '%s'", surveyId), null);
@@ -73,16 +81,72 @@ public class SurveyServiceImpl implements SurveyService {
         return new SurveyIntroductionDTO(survey.getIntroduction(), survey.getTimeLimit(), totalQuestions);
     }
 
-    public SurveyPageDTO getSurveyPage(int pageIndex, String remoteAddress, AuthorizedUser user) throws ObjectNotFoundException, ForbiddenException {
+    public SurveyPassing startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress)
+            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException {
 
-        Integer surveyPassings = idObjectService.getCount(SurveyPassing.class, null, null,
-                String.format("(el.USER = '%s' OR el.lastVisitIP = '%s') AND el.ENDED IS NULL", user != null ? user.getId() : null, remoteAddress),
-                null);
+        List<Survey> surveys = idObjectService.getList(Survey.class, null, String.format("el.id = '%s'", surveyId),
+                null, null, null, 1);
+
+        if (surveys.size() <= 0) {
+             throw new ObjectNotFoundException();
+        }
+
+        Survey survey = surveys.get(0);
+
+        checkSurveyExecutionAvailability(user, remoteAddress, survey);
+
+        SurveyPassing surveyPassing = new SurveyPassing();
+        surveyPassing.setStarted(new Date());
+        surveyPassing.setLastVisitIP(remoteAddress);
+        if (user != null) {
+            surveyPassing.setUser(idObjectService.getObjectById(User.class, user.getId()));
+        }
+        surveyPassing.setSurvey(survey);
+
+        idObjectService.save(surveyPassing);
+        return surveyPassing;
+    }
+
+    @Override
+    public SurveyPageDTO getSurveyPage(UUID surveyPassingId, int pageIndex, String remoteAddress, AuthorizedUser user)
+            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException {
+
+        List<SurveyPassing> surveyPassings = idObjectService.getList(SurveyPassing.class, null,
+                String.format("el.id = '%s' AND el.ENDED IS NULL", surveyPassingId),
+                null, null, null, null);
 
         // похоже, страница была запрошена без старта опроса
-        if (surveyPassings <= 0) {
+        if (surveyPassings.size() <= 0) {
             throw new ForbiddenException();
         }
+
+        SurveyPassing surveyPassing = surveyPassings.get(0);
+
+        // есть вариант, что пользователь мог вернуться к опросу, но не залогиненным или под другим IP.
+        // Или в момент, когда прохождение опроса уже неактуально (был достигнут предел респондентов)
+        // в целях безопасности запретим так сделать
+        // -->
+        List<Survey> surveys = idObjectService.getList(Survey.class, null, String.format("el.id = '%s'", surveyPassing.getSurvey().getId()),
+                null, null, null, null, 1);
+        if (surveys.size() <= 0) throw new ObjectNotFoundException();
+
+        Survey survey = surveys.get(0);
+
+        if (survey.getParticipationType() == DataConstants.ParticipationType.AUTHORIZATION_REQUIRED.getValue()
+                && user == null) {
+            throw new ForbiddenException();
+        }
+
+        if (survey.getParticipationType() == DataConstants.ParticipationType.COOKIE_IP_LIMITED.getValue() ||
+                survey.getParticipationType() == DataConstants.ParticipationType.IP_LIMITED.getValue()) {
+            if (!StringUtils.equals(remoteAddress, surveyPassing.getLastVisitIP()))
+                throw new ForbiddenException();
+        }
+
+        if (isHitRespondentsLimit(survey)) {
+            throw new HitRespondentsLimitException();
+        }
+        // <--
 
         List<SurveyPage> surveyPages = idObjectService.getList(SurveyPage.class, null,
                 String.format("el.pageIndex = '%s'", pageIndex), null, null, null, null, 1);
@@ -92,6 +156,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         SurveyPage surveyPage = surveyPages.get(0);
 
+        // get questions
         List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, null,
                 String.format("el.surveyPage = '%s'", surveyPage.getId()), null, "el.sortOrder", null, null, null);
 
@@ -114,10 +179,10 @@ public class SurveyServiceImpl implements SurveyService {
 
         dto.setQuestions(surveyQuestionDTOS);
 
+        // get answer variants
         List<SurveyAnswerVariant> variants = idObjectService.getList(SurveyAnswerVariant.class, null,
                 String.format("el.surveyQuestion IN ('%s')", questionIds), null, "el.sortOrder",
                 null, null, null);
-
 
         for (SurveyAnswerVariant variant : variants) {
             answersCache.get(variant.getSurveyQuestion().getId()).add(SurveyAnswerVariantDTO.prepare(variant));
@@ -186,6 +251,7 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setMaximumRespondents(dto.getMaximumRespondents());
         entity.setTimeLimit(dto.getTimeLimit());
         entity.setParticipationType(dto.getParticipationType());
+        entity.setAnswerSavingType(dto.getAnswerSavingType());
         entity.setOwner(idObjectService.getObjectById(User.class, user.getId()));
         idObjectService.save(entity);
         return entity;

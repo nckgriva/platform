@@ -8,10 +8,7 @@ import com.gracelogic.platform.survey.dto.admin.SurveyPageDTO;
 import com.gracelogic.platform.survey.dto.admin.SurveyQuestionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
 import com.gracelogic.platform.survey.exception.HitRespondentsLimitException;
-import com.gracelogic.platform.survey.model.Survey;
-import com.gracelogic.platform.survey.model.SurveyAnswerVariant;
-import com.gracelogic.platform.survey.model.SurveyPage;
-import com.gracelogic.platform.survey.model.SurveyQuestion;
+import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 
@@ -21,6 +18,10 @@ import java.util.UUID;
 public interface SurveyService {
 
     SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId, String remoteAddress, AuthorizedUser user)
+            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException;
+    SurveyPageDTO getSurveyPage(UUID surveyPassingId, int pageIndex, String remoteAddress, AuthorizedUser user)
+            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException;
+    SurveyPassing startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress)
             throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException;
 
     EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir);
