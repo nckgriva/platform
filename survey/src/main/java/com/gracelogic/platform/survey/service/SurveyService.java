@@ -8,21 +8,20 @@ import com.gracelogic.platform.survey.dto.admin.SurveyPageDTO;
 import com.gracelogic.platform.survey.dto.admin.SurveyQuestionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
 import com.gracelogic.platform.survey.exception.HitRespondentsLimitException;
+import com.gracelogic.platform.survey.exception.SurveyExpiredException;
 import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.UUID;
 
 public interface SurveyService {
 
     SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId, String remoteAddress, AuthorizedUser user)
-            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException;
+            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException, SurveyExpiredException;
     SurveyPageDTO getSurveyPage(UUID surveyPassingId, int pageIndex, String remoteAddress, AuthorizedUser user)
             throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException;
     SurveyPassing startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress)
-            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException;
+            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException, SurveyExpiredException;
 
     EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir);
     Survey saveSurvey(SurveyDTO dto, AuthorizedUser user) throws ObjectNotFoundException;

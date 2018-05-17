@@ -9,6 +9,7 @@ import com.gracelogic.platform.survey.dto.admin.SurveyDTO;
 import com.gracelogic.platform.survey.dto.admin.SurveyPageDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
 import com.gracelogic.platform.survey.exception.HitRespondentsLimitException;
+import com.gracelogic.platform.survey.exception.SurveyExpiredException;
 import com.gracelogic.platform.survey.model.Survey;
 import com.gracelogic.platform.survey.model.SurveyPassing;
 import com.gracelogic.platform.survey.service.SurveyService;
@@ -150,6 +151,9 @@ public class SurveyApi extends AbstractAuthorizedController {
         } catch (HitRespondentsLimitException respondentsException) {
             return new ResponseEntity<>(new ErrorResponse("surveys.HIT_RESPONDENTS_LIMIT",
                     messageSource.getMessage("surveys.HIT_RESPONDENTS_LIMIT", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
+        } catch (SurveyExpiredException expiredException) {
+            return new ResponseEntity<>(new ErrorResponse("surveys.EXPIRED",
+                    messageSource.getMessage("surveys.EXPIRED", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
         }
     }
 
@@ -158,7 +162,7 @@ public class SurveyApi extends AbstractAuthorizedController {
             notes = "Starts survey and sends SurveyPassing session id back to user",
             response = IDResponse.class
     )
-    @RequestMapping(method = RequestMethod.GET, value = "/{id}/start")
+    @RequestMapping(method = RequestMethod.GET, value = "{id}/start")
     @ResponseBody
     public ResponseEntity startSurvey(HttpServletRequest request, @PathVariable(value = "id") UUID surveyId) {
         try {
@@ -173,6 +177,9 @@ public class SurveyApi extends AbstractAuthorizedController {
         } catch (HitRespondentsLimitException respondentsException) {
             return new ResponseEntity<>(new ErrorResponse("surveys.HIT_RESPONDENTS_LIMIT",
                     messageSource.getMessage("surveys.HIT_RESPONDENTS_LIMIT", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
+        } catch (SurveyExpiredException expiredException) {
+            return new ResponseEntity<>(new ErrorResponse("surveys.EXPIRED",
+                    messageSource.getMessage("surveys.EXPIRED", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
         }
     }
 

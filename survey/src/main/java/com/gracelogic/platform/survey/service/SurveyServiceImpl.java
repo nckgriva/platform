@@ -9,6 +9,7 @@ import com.gracelogic.platform.survey.dto.admin.SurveyPageDTO;
 import com.gracelogic.platform.survey.dto.admin.SurveyQuestionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
 import com.gracelogic.platform.survey.exception.HitRespondentsLimitException;
+import com.gracelogic.platform.survey.exception.SurveyExpiredException;
 import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
@@ -42,7 +43,12 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     private void checkSurveyExecutionAvailability(AuthorizedUser user, String remoteAddress, Survey survey)
-            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException {
+            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException, SurveyExpiredException {
+
+        if (survey.getExpires() != null && new Date().after(survey.getExpires())) {
+            throw new SurveyExpiredException();
+        }
+
         if (user == null && survey.getParticipationType() == DataConstants.ParticipationType.AUTHORIZATION_REQUIRED.getValue()) {
             throw new ForbiddenException();
         }
@@ -67,7 +73,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Override
     public SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId, String remoteAddress, AuthorizedUser user)
-            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException {
+            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException, SurveyExpiredException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
         if (survey == null) {
             throw new ObjectNotFoundException();
@@ -78,11 +84,11 @@ public class SurveyServiceImpl implements SurveyService {
         Integer totalQuestions = idObjectService.getCount(SurveyQuestion.class, null, null,
                 String.format("el.SURVEY_PAGE_ID = '%s'", surveyId), null);
 
-        return new SurveyIntroductionDTO(survey.getIntroduction(), survey.getTimeLimit(), totalQuestions);
+        return new SurveyIntroductionDTO(survey, totalQuestions);
     }
 
     public SurveyPassing startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress)
-            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException {
+            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException, SurveyExpiredException {
 
         List<Survey> surveys = idObjectService.getList(Survey.class, null, String.format("el.id = '%s'", surveyId),
                 null, null, null, 1);
