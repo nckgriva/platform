@@ -282,6 +282,11 @@ public class UserServiceImpl implements UserService {
                 //userSession.setThisAccessedTime(session.getLastAccessedTime());
                 userSession.setMaxInactiveInterval((long) session.getMaxInactiveInterval());
                 userSession.setValid(!isDestroying);
+
+                if (!isDestroying) {
+                    LastSessionHolder.updateLastSessionSessionId(authorizedUser.getId(), session.getId());
+                }
+
                 return idObjectService.save(userSession);
 
             }
