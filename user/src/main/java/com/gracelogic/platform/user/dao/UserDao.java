@@ -17,4 +17,6 @@ public interface UserDao {
     Integer getUsersCount(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields);
 
     List<User> getUsers(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage);
+
+    List<Object[]> getLastActiveUsersSessions();
 }

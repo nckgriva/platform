@@ -689,7 +689,7 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, Double totalAmountGreatThan, boolean onlyEmptyParentOrder, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -708,6 +708,16 @@ public class MarketServiceImpl implements MarketService {
         if (discountId != null) {
             cause += "and el.discount.id=:discountId ";
             params.put("discountId", discountId);
+        }
+
+        if (totalAmountGreatThan != null) {
+            Long totalAmountGreatThanAsLong = FinanceUtils.toDecimal(totalAmountGreatThan);
+            cause += "and el.totalAmount >= :totalAmountGreatThan ";
+            params.put("totalAmountGreatThan", totalAmountGreatThanAsLong);
+        }
+
+        if (onlyEmptyParentOrder) {
+            cause += "and el.parentOrder is null ";
         }
 
         int totalCount = idObjectService.getCount(Order.class, null, countFetches, cause, params);

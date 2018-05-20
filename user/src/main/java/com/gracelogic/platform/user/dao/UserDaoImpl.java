@@ -105,4 +105,31 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
 
         return users;
     }
+
+    @Override
+    public List<Object[]> getLastActiveUsersSessions() {
+        List<Object[]> result = Collections.emptyList();
+
+        String queryStr =
+                "SELECT " +
+                "  CAST(x.user_id AS text) as user_id, x.session_id " +
+                "FROM ( " +
+                "  SELECT " +
+                "    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_dt desc) AS r, " +
+                "    t.* " +
+                "  FROM " +
+                "    {h-schema}cmn_user_session t where t.is_valid = true) x " +
+                "WHERE " +
+                "  x.r <= 1";
+
+        try {
+            Query query = getEntityManager().createNativeQuery(queryStr);
+            result = query.getResultList();
+
+        } catch (Exception e) {
+            logger.error("Failed to get last active users sessions", e);
+        }
+
+        return result;
+    }
 }
