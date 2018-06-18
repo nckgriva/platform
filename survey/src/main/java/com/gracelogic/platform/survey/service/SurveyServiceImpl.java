@@ -2,14 +2,13 @@ package com.gracelogic.platform.survey.service;
 
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
+import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.db.service.IdObjectService;
-import com.gracelogic.platform.survey.dto.admin.SurveyAnswerVariantDTO;
-import com.gracelogic.platform.survey.dto.admin.SurveyDTO;
-import com.gracelogic.platform.survey.dto.admin.SurveyPageDTO;
-import com.gracelogic.platform.survey.dto.admin.SurveyQuestionDTO;
+import com.gracelogic.platform.survey.dto.admin.*;
+import com.gracelogic.platform.survey.dto.user.PageAnswersDTO;
+import com.gracelogic.platform.survey.dto.user.SurveyConclusionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
-import com.gracelogic.platform.survey.exception.HitRespondentsLimitException;
-import com.gracelogic.platform.survey.exception.SurveyExpiredException;
+import com.gracelogic.platform.survey.dto.user.SurveyPassingDTO;
 import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
@@ -20,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Service("surveyService")
@@ -31,75 +29,63 @@ public class SurveyServiceImpl implements SurveyService {
     @Autowired
     private IdObjectService idObjectService;
 
-    private boolean isHitRespondentsLimit(Survey survey) {
-        if (survey.getMaximumRespondents() != null && survey.getMaximumRespondents() > 0) {
-            Integer totalPasses = idObjectService.getCount(SurveyPassing.class, null, null,
-                    String.format("el.survey = '%s' AND el.ended IS NOT NULL", survey.getId()), null);
-            if (totalPasses >= survey.getMaximumRespondents()) {
-                return true;
-            }
+    private static <T extends IdObject<UUID>> HashMap<UUID, T> asUUIDHashMap(List<T> list) {
+        HashMap<UUID, T> hashMap = new HashMap<>();
+        for (T t : list) {
+            hashMap.put(t.getId(), t);
         }
-        return false;
+        return hashMap;
     }
+    private static HashMap<SurveyQuestion, List<SurveyAnswerVariant>> asListAnswerVariantHashMap(List<SurveyAnswerVariant> list) {
+        HashMap<SurveyQuestion, List<SurveyAnswerVariant>> hashMap = new HashMap<>();
 
-    private void checkSurveyExecutionAvailability(AuthorizedUser user, String remoteAddress, Survey survey)
-            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException, SurveyExpiredException {
-
-        if (survey.getExpires() != null && new Date().after(survey.getExpires())) {
-            throw new SurveyExpiredException();
-        }
-
-        if (user == null && survey.getParticipationType() == DataConstants.ParticipationType.AUTHORIZATION_REQUIRED.getValue()) {
-            throw new ForbiddenException();
-        }
-
-        if (survey.getParticipationType() == DataConstants.ParticipationType.IP_LIMITED.getValue() ||
-                survey.getParticipationType() == DataConstants.ParticipationType.COOKIE_IP_LIMITED.getValue()) {
-
-            Integer passesFromIP = idObjectService.getCount(SurveyPassing.class, null, null,
-                    String.format("el.survey = '%s' AND (el.lastVisitIP = '%s' OR el.user = '%s')",
-                            survey.getId(), remoteAddress, user != null ? user.getId() : null),null);
-
-            if (passesFromIP > 0) {
-                throw new ForbiddenException();
+        for (SurveyAnswerVariant variant : list) {
+            List<SurveyAnswerVariant> variantList = hashMap.get(variant.getSurveyQuestion());
+            if (variantList != null) {
+                variantList.add(variant); continue;
             }
+            variantList = new ArrayList<>();
+            variantList.add(variant);
+            hashMap.put(variant.getSurveyQuestion(), variantList);
         }
 
-        // TODO: что если лимит респондентов - 100, и в один момент стартовало 200 человек?
-        if (isHitRespondentsLimit(survey)) {
-            throw new HitRespondentsLimitException();
+        return hashMap;
+    }
+    private static HashMap<SurveyQuestion, SurveyAnswerVariant> asAnswerVariantHashMap(List<SurveyAnswerVariant> list) {
+        HashMap<SurveyQuestion, SurveyAnswerVariant> hashMap = new HashMap<>();
+        for (SurveyAnswerVariant answerVariant : list) {
+            hashMap.put(answerVariant.getSurveyQuestion(), answerVariant);
         }
+        return hashMap;
+    }
+    private static HashMap<SurveyQuestion, SurveyVariantLogic> asVariantLogicHashMap(List<SurveyVariantLogic> list) {
+        HashMap<SurveyQuestion, SurveyVariantLogic> hashMap = new HashMap<>();
+        for (SurveyVariantLogic variantLogic : list) {
+            hashMap.put(variantLogic.getSurveyQuestion(), variantLogic);
+        }
+        return hashMap;
     }
 
     @Override
-    public SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId, String remoteAddress, AuthorizedUser user)
-            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException, SurveyExpiredException {
+    public SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId)
+            throws ObjectNotFoundException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
         if (survey == null) {
             throw new ObjectNotFoundException();
         }
 
-        checkSurveyExecutionAvailability(user, remoteAddress, survey);
-
-        Integer totalQuestions = idObjectService.getCount(SurveyQuestion.class, null, null,
-                String.format("el.SURVEY_PAGE_ID = '%s'", surveyId), null);
-
-        return new SurveyIntroductionDTO(survey, totalQuestions);
+        return new SurveyIntroductionDTO(survey);
     }
 
-    public SurveyPassing startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress)
-            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException, SurveyExpiredException {
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public SurveyPassingDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress)
+            throws ObjectNotFoundException {
+        Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
 
-        List<Survey> surveys = idObjectService.getList(Survey.class, null, String.format("el.id = '%s'", surveyId),
-                null, null, null, 1);
-
-        if (surveys.size() <= 0) {
+        if (survey == null) {
              throw new ObjectNotFoundException();
         }
-
-        Survey survey = surveys.get(0);
-
-        checkSurveyExecutionAvailability(user, remoteAddress, survey);
 
         SurveyPassing surveyPassing = new SurveyPassing();
         surveyPassing.setStarted(new Date());
@@ -107,52 +93,27 @@ public class SurveyServiceImpl implements SurveyService {
         if (user != null) {
             surveyPassing.setUser(idObjectService.getObjectById(User.class, user.getId()));
         }
+
+        // TODO: если опрос имеет лимит времени, запустить поток (хотя и без потока можно)
+        surveyPassing.setLastVisitedPageIndex(0);
+        // указываем максимальное количество страниц в опросе один раз
+        surveyPassing.setFinishPageIndex(idObjectService.getCount(SurveyPage.class, null, null,
+                String.format("el.survey = '%s'", survey.getId()), null));
+        surveyPassing.setLink(survey.getLink());
+        surveyPassing.setConclusion(survey.getConclusion());
         surveyPassing.setSurvey(survey);
 
         idObjectService.save(surveyPassing);
-        return surveyPassing;
+
+        SurveyPassingDTO surveyPassingDTO = new SurveyPassingDTO();
+        surveyPassingDTO.setSurveyPassingId(surveyPassing.getId());
+        surveyPassingDTO.setSurveyPage(getSurveyPage(surveyPassing, 0));
+        return surveyPassingDTO;
     }
 
-    @Override
-    public SurveyPageDTO getSurveyPage(UUID surveyPassingId, int pageIndex, String remoteAddress, AuthorizedUser user)
-            throws ObjectNotFoundException, ForbiddenException, HitRespondentsLimitException {
-
-        List<SurveyPassing> surveyPassings = idObjectService.getList(SurveyPassing.class, null,
-                String.format("el.id = '%s' AND el.ENDED IS NULL", surveyPassingId),
-                null, null, null, null);
-
-        // похоже, страница была запрошена без старта опроса
-        if (surveyPassings.size() <= 0) {
-            throw new ForbiddenException();
-        }
-
-        SurveyPassing surveyPassing = surveyPassings.get(0);
-
-        // есть вариант, что пользователь мог вернуться к опросу, но не залогиненным или под другим IP.
-        // Или в момент, когда прохождение опроса уже неактуально (был достигнут предел респондентов)
-        // в целях безопасности запретим так сделать
-        // -->
-        List<Survey> surveys = idObjectService.getList(Survey.class, null, String.format("el.id = '%s'", surveyPassing.getSurvey().getId()),
-                null, null, null, null, 1);
-        if (surveys.size() <= 0) throw new ObjectNotFoundException();
-
-        Survey survey = surveys.get(0);
-
-        if (survey.getParticipationType() == DataConstants.ParticipationType.AUTHORIZATION_REQUIRED.getValue()
-                && user == null) {
-            throw new ForbiddenException();
-        }
-
-        if (survey.getParticipationType() == DataConstants.ParticipationType.COOKIE_IP_LIMITED.getValue() ||
-                survey.getParticipationType() == DataConstants.ParticipationType.IP_LIMITED.getValue()) {
-            if (!StringUtils.equals(remoteAddress, surveyPassing.getLastVisitIP()))
-                throw new ForbiddenException();
-        }
-
-        if (isHitRespondentsLimit(survey)) {
-            throw new HitRespondentsLimitException();
-        }
-        // <--
+    private SurveyPageDTO getSurveyPage(SurveyPassing surveyPassing, int pageIndex) throws ObjectNotFoundException {
+        Survey survey = idObjectService.getObjectById(Survey.class, surveyPassing.getSurvey().getId());
+        if (survey == null) throw new ObjectNotFoundException();
 
         List<SurveyPage> surveyPages = idObjectService.getList(SurveyPage.class, null,
                 String.format("el.pageIndex = '%s'", pageIndex), null, null, null, null, 1);
@@ -161,45 +122,160 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         SurveyPage surveyPage = surveyPages.get(0);
-
-        // get questions
-        List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, null,
-                String.format("el.surveyPage = '%s'", surveyPage.getId()), null, "el.sortOrder", null, null, null);
-
         SurveyPageDTO dto = SurveyPageDTO.prepare(surveyPage);
 
-        SurveyQuestionDTO[] surveyQuestionDTOS = new SurveyQuestionDTO[questions.size()];
-        HashMap<UUID, List<SurveyAnswerVariantDTO>> answersCache = new HashMap<>();
+        // 1. Получение списка вопросов текущей страницы
+        List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, null,
+                String.format("el.surveyPage = '%s'", surveyPage.getId()), null, "el.sortOrder", null, null, null);
 
         String questionIds = "";
 
         int i = 0;
         for (SurveyQuestion question : questions) {
-            surveyQuestionDTOS[i] = SurveyQuestionDTO.prepare(question);
-            answersCache.put(question.getId(), new ArrayList<SurveyAnswerVariantDTO>());
-
-            questionIds += question.getId();
-            if (i + 1 != questions.size()) questionIds += ", ";
-            i++;
+            questionIds += "'" + question.getId() + "'"; if (i + 1 != questions.size()) questionIds += ", "; i++;
         }
 
-        dto.setQuestions(surveyQuestionDTOS);
+        // 2. Получение логики вариантов ответа. Для веба выбор только HIDE_QUESTION/SHOW_QUESTION
+        HashMap<SurveyQuestion, SurveyVariantLogic> logicHashMap = asVariantLogicHashMap(idObjectService.getList(SurveyVariantLogic.class, null,
+                String.format("el.surveyQuestion IN (%s) AND (el.logicType = '%s' OR el.logicType = '%s')", questionIds,
+                        DataConstants.LogicType.HIDE_QUESTION.getValue(), DataConstants.LogicType.SHOW_QUESTION.getValue()), null, null, null, null));
 
-        // get answer variants
-        List<SurveyAnswerVariant> variants = idObjectService.getList(SurveyAnswerVariant.class, null,
-                String.format("el.surveyQuestion IN ('%s')", questionIds), null, "el.sortOrder",
-                null, null, null);
+        // 3. Получение вариантов ответа
+        HashMap<SurveyQuestion, List<SurveyAnswerVariant>> answerVariants = asListAnswerVariantHashMap(idObjectService.getList(SurveyAnswerVariant.class, null,
+                String.format("el.surveyQuestion IN (%s)", questionIds), null, "el.sortOrder",
+                null, null, null));
 
-        for (SurveyAnswerVariant variant : variants) {
-            answersCache.get(variant.getSurveyQuestion().getId()).add(SurveyAnswerVariantDTO.prepare(variant));
+        List<SurveyQuestionDTO> surveyQuestionDTOs = new ArrayList<>();
+        for (SurveyQuestion question : questions) {
+             SurveyQuestionDTO surveyQuestionDTO = SurveyQuestionDTO.prepare(question);
+
+             List<SurveyAnswerVariantDTO> answerVariantsDTO = new ArrayList<>();
+             for (SurveyAnswerVariant answerVariant : answerVariants.get(question)) {
+                 answerVariantsDTO.add(SurveyAnswerVariantDTO.prepare(answerVariant));
+             }
+
+             SurveyVariantLogic variantLogic = logicHashMap.get(question);
+             surveyQuestionDTO.setVariantLogic(SurveyVariantLogicDTO.prepare(variantLogic));
+             surveyQuestionDTO.setAnswers(answerVariantsDTO);
+             surveyQuestionDTOs.add(surveyQuestionDTO);
         }
 
-        for (SurveyQuestionDTO questionDTO : dto.getQuestions()) {
-            List<SurveyAnswerVariantDTO> answersList = answersCache.get(questionDTO.getId());
-            questionDTO.setAnswers(answersList.toArray(new SurveyAnswerVariantDTO[answersList.size()]));
-        }
+        dto.setQuestions(surveyQuestionDTOs);
 
         return dto;
+    }
+
+    @Override
+    public SurveyPageDTO getSurveyPage(UUID surveyPassingId, int pageIndex)
+            throws ObjectNotFoundException, ForbiddenException {
+        SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
+
+        if (surveyPassing == null) throw new ObjectNotFoundException();
+        if (surveyPassing.getEnded() != null) {
+            throw new ForbiddenException(); // TODO: time limit
+        }
+
+        return getSurveyPage(surveyPassing, pageIndex);
+    }
+
+    @Override
+    public SurveyPageDTO continueSurvey(UUID surveyPassingId) throws ObjectNotFoundException {
+        SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
+        if (surveyPassing == null) throw new ObjectNotFoundException();
+
+        return getSurveyPage(surveyPassing, surveyPassing.getLastVisitedPageIndex());
+    }
+
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public SurveyPassingDTO saveAnswersAndContinue(UUID surveyPassingId, PageAnswersDTO dto) throws ObjectNotFoundException, ForbiddenException {
+        final SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
+
+        if (surveyPassing == null) throw new ObjectNotFoundException();
+        if (surveyPassing.getEnded() != null) throw new ForbiddenException(); // TODO: time limit
+
+        boolean finishSurvey = false;
+
+        int nextPage = surveyPassing.getLastVisitedPageIndex()+1;
+        if (nextPage >= surveyPassing.getFinishPageIndex()) { // если на данный момент пользователь проходит опрос на последней странице, это финиш
+            finishSurvey = true;
+        }
+
+        // список вопросов от полученных ответов
+        HashMap<UUID, SurveyQuestion> surveyQuestionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, null,
+                String.format("el.id IN (%s)", dto.getQuestionIdsSeparatedByCommas()),
+                null, null, null, null, null));
+
+        // список вариантов ответов
+        HashMap<SurveyQuestion, SurveyAnswerVariant> surveyAnswersHashMap = asAnswerVariantHashMap(
+                idObjectService.getList(SurveyAnswerVariant.class, null,
+                String.format("el.id IN (%s)", dto.getAnswerIdsSeparatedByCommas()),
+                null, null, null, null));
+
+        HashMap<SurveyQuestion, SurveyVariantLogic> logicHashMap = asVariantLogicHashMap(
+                idObjectService.getList(SurveyVariantLogic.class, null,
+                String.format("el.surveyQuestion IN (%s)", dto.getQuestionIdsSeparatedByCommas()),
+                        null, null, null, null));
+
+        for (Map.Entry<UUID, SurveyQuestion> entry : surveyQuestionsHashMap.entrySet()) {
+            SurveyQuestion question = entry.getValue();
+            SurveyAnswerVariant answerVariant = surveyAnswersHashMap.get(entry.getValue());
+            String textAnswer = dto.getAnswers().get(entry.getValue().getId()).getTextAnswer();
+
+            boolean hasAnswer = answerVariant != null || textAnswer != null;
+            if (question.isRequired() && !hasAnswer) {
+                throw new ForbiddenException();
+            }
+
+            SurveyVariantLogic variantLogic = logicHashMap.get(question);
+            if (variantLogic != null) {
+                boolean triggersWhenSelected = variantLogic.isSelectionRequired() && variantLogic.getAnswerVariant() == answerVariant;
+                boolean triggersWhenUnselected = !variantLogic.isSelectionRequired() && answerVariant != null && variantLogic.getAnswerVariant() != answerVariant;
+
+                if (triggersWhenSelected || triggersWhenUnselected) {
+
+                    if (variantLogic.getLogicType() == DataConstants.LogicType.CHANGE_CONCLUSION.getValue()) {
+                        surveyPassing.setConclusion(variantLogic.getNewConclusion());
+                    }
+
+                    if (variantLogic.getLogicType() == DataConstants.LogicType.CHANGE_LINK.getValue()) {
+                        surveyPassing.setLink(variantLogic.getNewLink());
+                    }
+
+                    if (variantLogic.getLogicType() == DataConstants.LogicType.GO_TO_PAGE.getValue()) {
+                        nextPage = variantLogic.getPageIndex();
+                    }
+
+                    if (!finishSurvey)
+                        finishSurvey = variantLogic.getLogicType() == DataConstants.LogicType.END_SURVEY.getValue();
+                }
+            }
+
+            SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveyPassing,
+                    question, answerVariant, textAnswer,
+                    null); // TODO stored file
+
+            idObjectService.save(surveyQuestionAnswer);
+        }
+
+        SurveyPassingDTO surveyPassingDTO = new SurveyPassingDTO();
+
+        if (finishSurvey) {
+            SurveyConclusionDTO surveyConclusionDTO = new SurveyConclusionDTO();
+            surveyConclusionDTO.setConclusion(surveyPassing.getConclusion());
+            surveyConclusionDTO.setLink(surveyPassing.getLink());
+            surveyPassingDTO.setSurveyConclusion(surveyConclusionDTO);
+
+            surveyPassing.setEnded(new Date());
+        } else {
+            surveyPassingDTO.setSurveyPage(getSurveyPage(surveyPassing, nextPage));
+            surveyPassing.setLastVisitedPageIndex(nextPage);
+        }
+
+        idObjectService.save(surveyPassing);
+
+        return surveyPassingDTO;
     }
 
     @Override
@@ -484,5 +560,76 @@ public class SurveyServiceImpl implements SurveyService {
     @Override
     public void deleteSurveyQuestion(UUID id) {
         idObjectService.delete(SurveyQuestion.class, id);
+    }
+
+    @Override
+    public EntityListResponse<SurveyVariantLogicDTO> getSurveyVariantLogicsPaged(Integer count, Integer page,
+                                                                         Integer start, String sortField, String sortDir) {
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        int totalCount = idObjectService.getCount(Survey.class, null, countFetches, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<SurveyVariantLogicDTO> entityListResponse = new EntityListResponse<SurveyVariantLogicDTO>();
+        entityListResponse.setEntity("surveyVariantLogic");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<SurveyVariantLogic> items = idObjectService.getList(SurveyVariantLogic.class, null, cause, params, sortField, sortDir, startRecord, count);
+
+        entityListResponse.setPartCount(items.size());
+        for (SurveyVariantLogic e : items) {
+            SurveyVariantLogicDTO el = SurveyVariantLogicDTO.prepare(e);
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public SurveyVariantLogic saveSurveyVariantLogic(SurveyVariantLogicDTO dto) throws ObjectNotFoundException {
+        SurveyVariantLogic entity;
+        if (dto.getId() != null) {
+            entity = idObjectService.getObjectById(SurveyVariantLogic.class, dto.getId());
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
+        } else {
+            entity = new SurveyVariantLogic();
+        }
+
+        entity.setAnswerVariant(idObjectService.getObjectById(SurveyAnswerVariant.class, dto.getAnswerVariant()));
+        entity.setLogicType(dto.getLogicType());
+        entity.setNewConclusion(dto.getNewConclusion());
+        entity.setNewLink(dto.getNewLink());
+        entity.setPageIndex(dto.getPageIndex());
+        entity.setSelectionRequired(dto.isSelectionRequired());
+        entity.setSurveyQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getSurveyQuestion()));
+        if (dto.getTargetQuestion() != null) {
+            entity.setTargetQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getTargetQuestion()));
+        }
+        idObjectService.save(entity);
+        return entity;
+    }
+
+
+    @Override
+    public SurveyVariantLogicDTO getSurveyVariantLogic(UUID id) throws ObjectNotFoundException {
+        SurveyVariantLogic entity = idObjectService.getObjectById(SurveyVariantLogic.class, id);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+        return SurveyVariantLogicDTO.prepare(entity);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteSurveyVariantLogic(UUID id) {
+        idObjectService.delete(SurveyVariantLogic.class, id);
     }
 }

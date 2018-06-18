@@ -25,22 +25,42 @@ public class SurveyVariantLogic extends IdObject<UUID> {
     @Version
     @Column(name = CHANGED, nullable = false)
     private Date changed;
+    /**
+     * Вопрос, относящийся к данному answerVariant
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "SURVEY_QUESTION_ID", nullable = false)
+    private SurveyQuestion surveyQuestion;
+
+    /**
+     * Отслеживаемый вариант ответа
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ANSWER_VARIANT_ID", nullable = false)
+    private SurveyAnswerVariant answerVariant;
+
+    /**
+     * Необходимо ли выбрать вариант, чтобы действие сработало
+     */
+    @Column(name = "IS_SELECTION_REQUIRED", nullable = false)
+    private boolean isSelectionRequired;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "SURVEY_PAGE_ID", nullable = false)
-    private SurveyPage surveyPage;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "SELECTED_VARIANT_ID", nullable = false)
-    private SurveyAnswerVariant selectedVariant;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "SURVEY_TARGET_QUESTION_ID", nullable = false)
+    @JoinColumn(name = "TARGET_QUESTION_ID", nullable = false)
     private SurveyQuestion targetQuestion;
 
-    @Column(name = "relation_type", nullable = false)
+    @Column(name = "new_conclusion", nullable = true)
+    private String newConclusion;
+
+    @Column(name = "page_index", nullable = true)
+    private Integer pageIndex;
+
+    @Column(name = "new_link", nullable = true)
+    private String newLink;
+
+    @Column(name = "logic_type", nullable = false)
     @org.hibernate.annotations.Type(type = "pg-uuid")
-    private UUID relationType;
+    private UUID logicType;
 
     @Override
     public UUID getId() {
@@ -72,20 +92,20 @@ public class SurveyVariantLogic extends IdObject<UUID> {
         this.changed = changed;
     }
 
-    public SurveyPage getSurveyPage() {
-        return surveyPage;
+    public SurveyAnswerVariant getAnswerVariant() {
+        return answerVariant;
     }
 
-    public void setSurveyPage(SurveyPage surveyPage) {
-        this.surveyPage = surveyPage;
+    public void setAnswerVariant(SurveyAnswerVariant answerVariant) {
+        this.answerVariant = answerVariant;
     }
 
-    public SurveyAnswerVariant getSelectedVariant() {
-        return selectedVariant;
+    public boolean isSelectionRequired() {
+        return isSelectionRequired;
     }
 
-    public void setSelectedVariant(SurveyAnswerVariant selectedVariant) {
-        this.selectedVariant = selectedVariant;
+    public void setSelectionRequired(boolean selectionRequired) {
+        isSelectionRequired = selectionRequired;
     }
 
     public SurveyQuestion getTargetQuestion() {
@@ -96,11 +116,43 @@ public class SurveyVariantLogic extends IdObject<UUID> {
         this.targetQuestion = targetQuestion;
     }
 
-    public UUID getRelationType() {
-        return relationType;
+    public String getNewConclusion() {
+        return newConclusion;
     }
 
-    public void setRelationType(UUID relationType) {
-        this.relationType = relationType;
+    public void setNewConclusion(String newConclusion) {
+        this.newConclusion = newConclusion;
+    }
+
+    public Integer getPageIndex() {
+        return pageIndex;
+    }
+
+    public void setPageIndex(Integer pageIndex) {
+        this.pageIndex = pageIndex;
+    }
+
+    public String getNewLink() {
+        return newLink;
+    }
+
+    public void setNewLink(String newLink) {
+        this.newLink = newLink;
+    }
+
+    public UUID getLogicType() {
+        return logicType;
+    }
+
+    public void setLogicType(UUID logicType) {
+        this.logicType = logicType;
+    }
+
+    public SurveyQuestion getSurveyQuestion() {
+        return surveyQuestion;
+    }
+
+    public void setSurveyQuestion(SurveyQuestion surveyQuestion) {
+        this.surveyQuestion = surveyQuestion;
     }
 }

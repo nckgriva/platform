@@ -10,4 +10,6 @@ public class Path extends PlatformPath {
     public static final String API_SURVEY_QUESTION_ANSWER_VARIANT_LOGIC = PLATFORM_API + "/survey/question/variant/logic";
 
     public static final String API_SURVEY_PAGE = PLATFORM_API + "/survey/page";
+
+    public static final String API_USER_PASSING = PLATFORM_API + "/survey/user/passing";
 }

@@ -4,19 +4,41 @@ import java.util.UUID;
 
 public class DataConstants {
 
-    public enum LogicRelationType {
+    public enum LogicType {
         /**
-         * Hides a question when specified answer is selected
+         * Hides a question on client machine
          */
-        HIDES_QUESTION(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        HIDE_QUESTION(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
         /**
-         * Shows a question when specified answer is selected
+         * Shows a question on client machine
          */
-        SHOWS_QUESTION(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72"));
+        SHOW_QUESTION(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
+
+        /**
+         * Ends survey
+         */
+        END_SURVEY(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
+
+        /**
+         * Changes conclusion of passing survey
+         */
+        CHANGE_CONCLUSION(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74")),
+        /**
+         * Skips specified page
+         */
+        SKIP_PAGE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e75")),
+        /**
+         * Change url when survey ends
+         */
+        CHANGE_LINK(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e76")),
+        /**
+         * Go to specified page
+         */
+        GO_TO_PAGE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e77"));
 
         private UUID value;
 
-        LogicRelationType(UUID value) {
+        LogicType(UUID value) {
             this.value = value;
         }
 

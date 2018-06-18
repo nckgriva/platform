@@ -83,8 +83,8 @@ public class SurveyAnswerVariantApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
-            value = "saveSurvey",
-            notes = "Save survey",
+            value = "saveSurveyAnswerVariant",
+            notes = "Save survey answer variant",
             response = IDResponse.class
     )
     @ApiResponses({

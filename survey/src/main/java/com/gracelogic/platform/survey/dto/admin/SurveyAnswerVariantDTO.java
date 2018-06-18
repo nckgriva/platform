@@ -12,8 +12,6 @@ public class SurveyAnswerVariantDTO extends IdObjectDTO {
     private Boolean defaultVariant; // Вариант выбран по умолчанию
     private Integer weight; // Вес ответа для автоматической обработки
 
-    // TODO: add logic
-
     public static SurveyAnswerVariantDTO prepare(SurveyAnswerVariant surveyAnswerVariant) {
         SurveyAnswerVariantDTO model = new SurveyAnswerVariantDTO();
         IdObjectDTO.prepare(model, surveyAnswerVariant);

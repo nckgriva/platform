@@ -6,19 +6,16 @@ public class SurveyIntroductionDTO {
     private String name;
     private String introduction;
     private Long timeLimit;
-    private Integer totalQuestions;
     private boolean showQuestionNumber;
     private boolean allowReturn;
     private boolean showProgress;
-
-    public SurveyIntroductionDTO(Survey survey, Integer totalQuestions) {
+    public SurveyIntroductionDTO(Survey survey) {
         this.name = survey.getName();
         this.introduction = survey.getIntroduction();
         this.allowReturn = survey.getAllowReturn();
         this.showQuestionNumber = survey.getShowQuestionNumber();
         this.allowReturn = survey.getAllowReturn();
         this.showProgress = survey.getShowProgress();
-        this.totalQuestions = totalQuestions;
     }
 
     public String getIntroduction() {
@@ -35,14 +32,6 @@ public class SurveyIntroductionDTO {
 
     public void setTimeLimit(Long timeLimit) {
         this.timeLimit = timeLimit;
-    }
-
-    public Integer getTotalQuestions() {
-        return totalQuestions;
-    }
-
-    public void setTotalQuestions(Integer totalQuestions) {
-        this.totalQuestions = totalQuestions;
     }
 
     public boolean isShowQuestionNumber() {

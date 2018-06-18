@@ -3,6 +3,7 @@ package com.gracelogic.platform.survey.dto.admin;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.survey.model.SurveyQuestion;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,7 +14,8 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private UUID type;
     private Boolean required;
     private Boolean hidden;
-    private SurveyAnswerVariantDTO[] answers;
+    private List<SurveyAnswerVariantDTO> answers;
+    private SurveyVariantLogicDTO variantLogic;
 
     public static SurveyQuestionDTO prepare(SurveyQuestion surveyQuestion) {
         SurveyQuestionDTO model = new SurveyQuestionDTO();
@@ -75,11 +77,19 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         this.hidden = hidden;
     }
 
-    public SurveyAnswerVariantDTO[] getAnswers() {
+    public List<SurveyAnswerVariantDTO> getAnswers() {
         return answers;
     }
 
-    public void setAnswers(SurveyAnswerVariantDTO[] answers) {
+    public void setAnswers(List<SurveyAnswerVariantDTO> answers) {
         this.answers = answers;
+    }
+
+    public SurveyVariantLogicDTO getVariantLogic() {
+        return variantLogic;
+    }
+
+    public void setVariantLogic(SurveyVariantLogicDTO variantLogic) {
+        this.variantLogic = variantLogic;
     }
 }

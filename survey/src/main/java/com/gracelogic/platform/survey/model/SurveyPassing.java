@@ -46,6 +46,18 @@ public class SurveyPassing extends IdObject<UUID> {
     @Column(name = "ended_dt", nullable = true)
     private Date ended;
 
+    @Column(name = "conclusion", nullable = true)
+    private String conclusion;
+
+    @Column(name = "link", nullable = true)
+    private String link;
+
+    @Column(name = "last_visited_page_index", nullable = true)
+    private Integer lastVisitedPageIndex;
+
+    @Column(name = "finish_page_index", nullable = false)
+    private Integer finishPageIndex;
+
     @Override
     public UUID getId() {
         return id;
@@ -84,6 +96,14 @@ public class SurveyPassing extends IdObject<UUID> {
         this.user = user;
     }
 
+    public String getLastVisitIP() {
+        return lastVisitIP;
+    }
+
+    public void setLastVisitIP(String lastVisitIP) {
+        this.lastVisitIP = lastVisitIP;
+    }
+
     public Survey getSurvey() {
         return survey;
     }
@@ -108,11 +128,35 @@ public class SurveyPassing extends IdObject<UUID> {
         this.ended = ended;
     }
 
-    public String getLastVisitIP() {
-        return lastVisitIP;
+    public String getConclusion() {
+        return conclusion;
     }
 
-    public void setLastVisitIP(String lastVisitIP) {
-        this.lastVisitIP = lastVisitIP;
+    public void setConclusion(String conclusion) {
+        this.conclusion = conclusion;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    public Integer getLastVisitedPageIndex() {
+        return lastVisitedPageIndex;
+    }
+
+    public void setLastVisitedPageIndex(Integer lastVisitedPageIndex) {
+        this.lastVisitedPageIndex = lastVisitedPageIndex;
+    }
+
+    public Integer getFinishPageIndex() {
+        return finishPageIndex;
+    }
+
+    public void setFinishPageIndex(Integer finishPageIndex) {
+        this.finishPageIndex = finishPageIndex;
     }
 }

@@ -3,13 +3,14 @@ package com.gracelogic.platform.survey.dto.admin;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.survey.model.SurveyPage;
 
+import java.util.List;
 import java.util.UUID;
 
 public class SurveyPageDTO extends IdObjectDTO {
     private UUID survey;
     private Integer pageIndex;
     private String description;
-    private SurveyQuestionDTO[] questions;
+    private List<SurveyQuestionDTO> questions;
 
     public static SurveyPageDTO prepare(SurveyPage surveyPage) {
         SurveyPageDTO model = new SurveyPageDTO();
@@ -44,12 +45,11 @@ public class SurveyPageDTO extends IdObjectDTO {
         this.pageIndex = pageIndex;
     }
 
-
-    public SurveyQuestionDTO[] getQuestions() {
+    public List<SurveyQuestionDTO> getQuestions() {
         return questions;
     }
 
-    public void setQuestions(SurveyQuestionDTO[] questions) {
+    public void setQuestions(List<SurveyQuestionDTO> questions) {
         this.questions = questions;
     }
 }

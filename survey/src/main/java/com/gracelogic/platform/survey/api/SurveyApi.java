@@ -8,6 +8,7 @@ import com.gracelogic.platform.survey.Path;
 import com.gracelogic.platform.survey.dto.admin.SurveyDTO;
 import com.gracelogic.platform.survey.dto.admin.SurveyPageDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
+import com.gracelogic.platform.survey.dto.user.SurveyPassingDTO;
 import com.gracelogic.platform.survey.exception.HitRespondentsLimitException;
 import com.gracelogic.platform.survey.exception.SurveyExpiredException;
 import com.gracelogic.platform.survey.model.Survey;
@@ -41,6 +42,41 @@ public class SurveyApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource messageSource;
+
+    @ApiOperation(
+            value = "getInitialSurveyInfo",
+            notes = "Sends initial survey information to user",
+            response = SurveyIntroductionDTO.class
+    )
+    @RequestMapping(method = RequestMethod.POST, value = "/{id}/info/")
+    @ResponseBody
+    public ResponseEntity getInitialSurveyInfo(@PathVariable(value = "id") UUID surveyId) {
+        try {
+            SurveyIntroductionDTO dto = surveyService.getSurveyIntroduction(surveyId);
+            return new ResponseEntity<SurveyIntroductionDTO>(dto, HttpStatus.OK);
+        } catch (ObjectNotFoundException notFoundException) {
+            return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
+                    messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
+            value = "startSurvey",
+            notes = "Starts survey and sends SurveyPassingDTO with first page back to user",
+            response = SurveyPassingDTO.class
+    )
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/start/")
+    @ResponseBody
+    public ResponseEntity startSurvey(HttpServletRequest request,
+                                      @PathVariable(value = "id") UUID surveyId) {
+        try {
+            SurveyPassingDTO dto = surveyService.startSurvey(surveyId, getUser(), request.getRemoteAddr());
+            return new ResponseEntity<SurveyPassingDTO>(dto, HttpStatus.OK);
+        } catch (ObjectNotFoundException notFoundException) {
+            return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
+                    messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @ApiOperation(
             value = "getSurveys",
@@ -127,84 +163,6 @@ public class SurveyApi extends AbstractAuthorizedController {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @ApiOperation(
-            value = "getInitialSurveyInfo",
-            notes = "Sends initial survey information to user",
-            response = SurveyIntroductionDTO.class
-    )
-    @RequestMapping(method = RequestMethod.GET, value = "/{id}/init")
-    @ResponseBody
-    public ResponseEntity getInitialSurveyInfo(HttpServletRequest request, @PathVariable(value = "id") UUID surveyId) {
-        try {
-            SurveyIntroductionDTO dto = surveyService.getSurveyIntroduction(surveyId, request.getRemoteAddr(), getUser());
-            return new ResponseEntity<SurveyIntroductionDTO>(dto, HttpStatus.OK);
-
-        } catch (ObjectNotFoundException notFoundException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
-                    messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        } catch (ForbiddenException forbiddenException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
-                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
-        } catch (HitRespondentsLimitException respondentsException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.HIT_RESPONDENTS_LIMIT",
-                    messageSource.getMessage("surveys.HIT_RESPONDENTS_LIMIT", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
-        } catch (SurveyExpiredException expiredException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.EXPIRED",
-                    messageSource.getMessage("surveys.EXPIRED", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
-        }
-    }
-
-    @ApiOperation(
-            value = "startSurvey",
-            notes = "Starts survey and sends SurveyPassing session id back to user",
-            response = IDResponse.class
-    )
-    @RequestMapping(method = RequestMethod.GET, value = "{id}/start")
-    @ResponseBody
-    public ResponseEntity startSurvey(HttpServletRequest request, @PathVariable(value = "id") UUID surveyId) {
-        try {
-            SurveyPassing surveyPassing = surveyService.startSurvey(surveyId, getUser(), request.getRemoteAddr());
-            return new ResponseEntity<>(new IDResponse(surveyPassing.getId()), HttpStatus.OK);
-        } catch (ObjectNotFoundException notFoundException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
-                    messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        } catch (ForbiddenException forbiddenException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
-                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
-        } catch (HitRespondentsLimitException respondentsException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.HIT_RESPONDENTS_LIMIT",
-                    messageSource.getMessage("surveys.HIT_RESPONDENTS_LIMIT", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
-        } catch (SurveyExpiredException expiredException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.EXPIRED",
-                    messageSource.getMessage("surveys.EXPIRED", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
-        }
-    }
-
-    @ApiOperation(
-            value = "getSurveyPage",
-            notes = "Get specified survey page",
-            response = SurveyPageDTO.class
-    )
-    @RequestMapping(method = RequestMethod.GET, value = "/{passing_id}/{page}")
-    @ResponseBody
-    public ResponseEntity getSurveyPage(HttpServletRequest request, @PathVariable(value = "passing_id") UUID surveyPassingId,
-                                        @PathVariable(value = "page") Integer pageIndex) {
-        try {
-
-            SurveyPageDTO dto = surveyService.getSurveyPage(surveyPassingId, pageIndex, request.getRemoteAddr(), getUser());
-            return new ResponseEntity<>(dto, HttpStatus.OK);
-        } catch (ObjectNotFoundException notFoundException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
-                    messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        } catch (ForbiddenException forbiddenException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
-                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
-        } catch (HitRespondentsLimitException respondentsException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.HIT_RESPONDENTS_LIMIT",
-                    messageSource.getMessage("surveys.HIT_RESPONDENTS_LIMIT", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
         }
     }
 }

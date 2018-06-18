@@ -31,6 +31,10 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     @Column(name = "survey_passing_id", nullable = false)
     private SurveyPassing surveyPassing;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @Column(name = "question_id", nullable = false)
+    private SurveyQuestion question;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @Column(name = "answer_variant", nullable = true)
     private SurveyAnswerVariant answerVariant;
@@ -40,7 +44,16 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @Column(name = "answer_stored_file", nullable = true)
-    private StoredFile storedFile; //Для хранения прикрепленного пользователем файла
+    private StoredFile storedFile; // Для хранения прикрепленного пользователем файла
+
+    public SurveyQuestionAnswer(SurveyPassing surveyPassing, SurveyQuestion question, SurveyAnswerVariant answerVariant,
+                                String textAnswer, StoredFile storedFile) {
+        this.surveyPassing = surveyPassing;
+        this.question = question;
+        this.answerVariant = answerVariant;
+        this.textAnswer = textAnswer;
+        this.storedFile = storedFile;
+    }
 
     @Override
     public UUID getId() {
@@ -102,5 +115,13 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
 
     public void setStoredFile(StoredFile storedFile) {
         this.storedFile = storedFile;
+    }
+
+    public SurveyQuestion getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(SurveyQuestion question) {
+        this.question = question;
     }
 }

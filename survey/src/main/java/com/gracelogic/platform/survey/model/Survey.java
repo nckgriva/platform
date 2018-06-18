@@ -50,6 +50,9 @@ public class Survey extends IdObject<UUID> {
     @Column(name = "conclusion", nullable = true)
     private String conclusion;
 
+    @Column(name = "link", nullable = true)
+    private String link;
+
     @Column(name = "maximum_respondents", nullable = true)
     private Integer maximumRespondents;
 
@@ -190,5 +193,13 @@ public class Survey extends IdObject<UUID> {
 
     public void setAnswerSavingType(UUID answerSavingType) {
         this.answerSavingType = answerSavingType;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
     }
 }

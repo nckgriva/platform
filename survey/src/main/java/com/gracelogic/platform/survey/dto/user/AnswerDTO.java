@@ -3,15 +3,16 @@ package com.gracelogic.platform.survey.dto.user;
 import java.util.UUID;
 
 public class AnswerDTO {
-    private UUID questionId;
     private UUID answerId;
+    private UUID storedFileId;
+    private String textAnswer;
 
-    public UUID getQuestionId() {
-        return questionId;
+    public UUID getStoredFileId() {
+        return storedFileId;
     }
 
-    public void setQuestionId(UUID questionId) {
-        this.questionId = questionId;
+    public void setStoredFileId(UUID storedFileId) {
+        this.storedFileId = storedFileId;
     }
 
     public UUID getAnswerId() {
@@ -20,5 +21,13 @@ public class AnswerDTO {
 
     public void setAnswerId(UUID answerId) {
         this.answerId = answerId;
+    }
+
+    public String getTextAnswer() {
+        return textAnswer;
+    }
+
+    public void setTextAnswer(String textAnswer) {
+        this.textAnswer = textAnswer;
     }
 }
