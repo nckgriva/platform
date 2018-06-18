@@ -7,10 +7,14 @@ import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.User;
 
+import javax.servlet.http.HttpSession;
+
 public interface UserLifecycleService {
     User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException, CustomLocalizedException;
 
     void delete(User user);
 
     User save(UserDTO userDTO, boolean mergeRoles, AuthorizedUser executor) throws ObjectNotFoundException;
+
+    void login(AuthorizedUser authorizedUser, HttpSession httpSession);
 }

@@ -246,6 +246,8 @@ public class OrderApi extends AbstractAuthorizedController {
             @RequestParam(value = "userId", required = false) UUID userId,
             @RequestParam(value = "orderStateId", required = false) UUID orderStateId,
             @RequestParam(value = "discountId", required = false) UUID discountId,
+            @RequestParam(value = "totalAmountGreatThan", required = false) Double totalAmountGreatThan,
+            @RequestParam(value = "onlyEmptyParentOrder", required = false, defaultValue = "false") Boolean onlyEmptyParentOrder,
             @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
             @RequestParam(value = "withProducts", required = false, defaultValue = "false") Boolean withProducts,
             @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
@@ -258,7 +260,7 @@ public class OrderApi extends AbstractAuthorizedController {
                 throw new ForbiddenException();
             }
 
-            EntityListResponse<OrderDTO> orders = marketService.getOrdersPaged(userId, orderStateId, discountId, enrich, withProducts, length, null, start, sortField, sortDir);
+            EntityListResponse<OrderDTO> orders = marketService.getOrdersPaged(userId, orderStateId, discountId, totalAmountGreatThan, onlyEmptyParentOrder, enrich, withProducts, length, null, start, sortField, sortDir);
             return new ResponseEntity<EntityListResponse<OrderDTO>>(orders, HttpStatus.OK);
         } catch (ForbiddenException e) {
             return new ResponseEntity<>(new ErrorResponse("auth.FORBIDDEN", userMessageSource.getMessage("auth.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);

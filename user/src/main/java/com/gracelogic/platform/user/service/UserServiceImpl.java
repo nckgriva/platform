@@ -67,6 +67,16 @@ public class UserServiceImpl implements UserService {
             UserDTO.setUserNameFormat(userNameFormat);
         }
 
+        if (propertyService.getPropertyValueAsBoolean("user:one_session_per_user")) {
+            List<Object[]> lastActiveUsersSession = userDao.getLastActiveUsersSessions();
+            logger.info("Loaded last users sessions: " + lastActiveUsersSession.size());
+            for (Object[] obj : lastActiveUsersSession) {
+                UUID userId = UUID.fromString((String) obj[0]);
+                String sessionId = (String) obj[1];
+
+                LastSessionHolder.updateLastSessionSessionId(userId, sessionId);
+            }
+        }
     }
 
     @Override
@@ -282,6 +292,11 @@ public class UserServiceImpl implements UserService {
                 //userSession.setThisAccessedTime(session.getLastAccessedTime());
                 userSession.setMaxInactiveInterval((long) session.getMaxInactiveInterval());
                 userSession.setValid(!isDestroying);
+
+                if (!isDestroying) {
+                    LastSessionHolder.updateLastSessionSessionId(authorizedUser.getId(), session.getId());
+                }
+
                 return idObjectService.save(userSession);
 
             }

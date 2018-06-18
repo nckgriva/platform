@@ -34,7 +34,7 @@ public interface MarketService {
 
     OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts, AuthorizedUser authorizedUser) throws ObjectNotFoundException, ForbiddenException;
 
-    EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, Double totalAmountGreatThan, boolean onlyEmptyParentOrder, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     //Product
     ProductDTO getProduct(UUID id, boolean enrich) throws ObjectNotFoundException;

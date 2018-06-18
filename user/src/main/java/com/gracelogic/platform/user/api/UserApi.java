@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -99,12 +100,14 @@ public class UserApi extends AbstractAuthorizedController {
                 if (authentication.isAuthenticated()) {
                     if (authentication.getDetails() instanceof AuthorizedUser) {
                         AuthorizedUser authorizedUser = ((AuthorizedUser) authentication.getDetails());
-
                         try {
-                            UserSession userSession = userService.updateSessionInfo(request.getSession(), authentication, request.getHeader("User-Agent"), false);
+                            HttpSession session = request.getSession(false);
+                            UserSession userSession = userService.updateSessionInfo(session, authentication, request.getHeader("User-Agent"), false);
                             if (userSession != null) {
                                 authorizedUser.setUserSessionId(userSession.getId());
                             }
+
+                            lifecycleService.login(authorizedUser, session);
                         } catch (Exception ignored) {
                         }
                     }
