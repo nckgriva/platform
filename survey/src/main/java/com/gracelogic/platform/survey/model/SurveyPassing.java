@@ -46,6 +46,9 @@ public class SurveyPassing extends IdObject<UUID> {
     @Column(name = "ended_dt", nullable = true)
     private Date ended;
 
+    @Column(name = "expiration_dt", nullable = true)
+    private Date expirationDate;
+
     @Column(name = "conclusion", nullable = true)
     private String conclusion;
 
@@ -54,8 +57,6 @@ public class SurveyPassing extends IdObject<UUID> {
 
     @Column(name = "last_visited_page_index", nullable = true)
     private Integer lastVisitedPageIndex;
-
-
 
     @Override
     public UUID getId() {
@@ -125,6 +126,14 @@ public class SurveyPassing extends IdObject<UUID> {
 
     public void setEnded(Date ended) {
         this.ended = ended;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     public String getConclusion() {

@@ -2,7 +2,6 @@ package com.gracelogic.platform.survey.service;
 
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
-import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.filestorage.model.StoredFile;
 import com.gracelogic.platform.survey.dto.admin.*;
@@ -14,6 +13,7 @@ import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
 import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
+import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.crypto.Data;
 import java.util.*;
 
 @Service("surveyService")
@@ -86,11 +85,17 @@ public class SurveyServiceImpl implements SurveyService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress)
-            throws ObjectNotFoundException {
+            throws ObjectNotFoundException, ForbiddenException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
 
         if (survey == null) {
              throw new ObjectNotFoundException();
+        }
+
+        if (survey.getExpirationDate() != null && survey.getExpirationDate().before(new Date())) throw new ForbiddenException();
+
+        if (user == null && survey.getParticipationType() == DataConstants.ParticipationType.AUTHORIZATION_REQUIRED.getValue()) {
+            throw new ForbiddenException();
         }
 
         SurveyPassing surveyPassing = new SurveyPassing();
@@ -100,7 +105,11 @@ public class SurveyServiceImpl implements SurveyService {
             surveyPassing.setUser(idObjectService.getObjectById(User.class, user.getId()));
         }
 
-        // TODO: time-limit
+        if (survey.getTimeLimit() != null && survey.getTimeLimit() > 0) {
+            Calendar c = Calendar.getInstance();
+            c.add(Calendar.MILLISECOND, survey.getTimeLimit().intValue());
+            surveyPassing.setExpirationDate(c.getTime());
+        }
 
         surveyPassing.setLastVisitedPageIndex(0);
         surveyPassing.setLink(survey.getLink());
@@ -116,11 +125,8 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     private SurveyPageDTO getSurveyPage(SurveyPassing surveyPassing, int pageIndex) throws ObjectNotFoundException {
-        Survey survey = idObjectService.getObjectById(Survey.class, surveyPassing.getSurvey().getId());
-        if (survey == null) throw new ObjectNotFoundException();
-
         List<SurveyPage> surveyPages = idObjectService.getList(SurveyPage.class, null,
-                String.format("el.pageIndex = '%s'", pageIndex), null, null, null, null, 1);
+                String.format("el.survey = '%s' AND el.pageIndex = '%s'", surveyPassing.getSurvey().getId(), pageIndex), null, null, null, null, 1);
         if (surveyPages.size() <= 0) {
             throw new ObjectNotFoundException();
         }
@@ -175,10 +181,12 @@ public class SurveyServiceImpl implements SurveyService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public SurveyInteractionDTO getSurveyPage(UUID surveyPassingId, int pageIndex)
-            throws ObjectNotFoundException {
+            throws ObjectNotFoundException, ForbiddenException {
         SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
 
         if (surveyPassing == null) throw new ObjectNotFoundException();
+        if (surveyPassing.getEnded() != null) throw new ForbiddenException();
+        if (surveyPassing.getExpirationDate() != null && surveyPassing.getExpirationDate().before(new Date())) throw new ForbiddenException();
 
         surveyPassing.setLastVisitedPageIndex(pageIndex);
         idObjectService.save(surveyPassing);
@@ -191,9 +199,11 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public SurveyInteractionDTO continueSurvey(UUID surveyPassingId) throws ObjectNotFoundException {
+    public SurveyInteractionDTO continueSurvey(UUID surveyPassingId) throws ObjectNotFoundException, ForbiddenException {
         SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
         if (surveyPassing == null) throw new ObjectNotFoundException();
+        if (surveyPassing.getEnded() != null) throw new ForbiddenException();
+        if (surveyPassing.getExpirationDate() != null && surveyPassing.getExpirationDate().before(new Date())) throw new ForbiddenException();
 
         SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
         surveyInteractionDTO.setSurveyPassingId(surveyPassing.getId());
@@ -204,10 +214,12 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyInteractionDTO saveAnswersAndContinue(UUID surveyPassingId, PageAnswersDTO dto) throws ObjectNotFoundException {
+    public SurveyInteractionDTO saveAnswersAndContinue(UUID surveyPassingId, PageAnswersDTO dto) throws ObjectNotFoundException, ForbiddenException {
         final SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
 
         if (surveyPassing == null) throw new ObjectNotFoundException();
+        if (surveyPassing.getEnded() != null) throw new ForbiddenException();
+        if (surveyPassing.getExpirationDate() != null && surveyPassing.getExpirationDate().before(new Date())) throw new ForbiddenException();
 
         boolean finishSurvey = false;
 
@@ -260,7 +272,6 @@ public class SurveyServiceImpl implements SurveyService {
                         boolean unselectedTrigger = !trigger.isInteractionRequired() && answerVariant != null && trigger.getAnswerVariant() != answerVariant;
 
                         triggered = selectedTrigger || unselectedTrigger;
-
                         break;
                     case QUESTION:
                         boolean answeredTrigger = trigger.isInteractionRequired() && (answerVariant != null || StringUtils.isNotBlank(textAnswer));
@@ -364,7 +375,7 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         entity.setName(dto.getName());
-        entity.setExpires(dto.getExpires());
+        entity.setExpirationDate(dto.getExpirationDate());
         entity.setShowProgress(dto.getShowProgress());
         entity.setShowQuestionNumber(dto.getShowQuestionNumber());
         entity.setAllowReturn(dto.getAllowReturn());
@@ -709,6 +720,7 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setSurvey(idObjectService.getObjectById(Survey.class, dto.getSurvey()));
         entity.setStarted(dto.getStarted());
         entity.setEnded(dto.getEnded());
+        entity.setExpirationDate(dto.getExpirationDate());
         entity.setLastVisitedPageIndex(dto.getLastVisitedPageIndex());
 
         idObjectService.save(entity);

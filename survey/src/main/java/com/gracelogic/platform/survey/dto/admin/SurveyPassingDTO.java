@@ -12,6 +12,7 @@ public class SurveyPassingDTO extends IdObjectDTO {
     private UUID survey;
     private Date started;
     private Date ended;
+    private Date expirationDate;
     private Integer lastVisitedPageIndex;
 
     public static SurveyPassingDTO prepare(SurveyPassing surveyPassing) {
@@ -23,6 +24,7 @@ public class SurveyPassingDTO extends IdObjectDTO {
         model.setStarted(surveyPassing.getStarted());
         model.setEnded(surveyPassing.getEnded());
         model.setLastVisitedPageIndex(surveyPassing.getLastVisitedPageIndex());
+        model.setExpirationDate(surveyPassing.getExpirationDate());
         return model;
     }
 
@@ -72,5 +74,13 @@ public class SurveyPassingDTO extends IdObjectDTO {
 
     public void setLastVisitedPageIndex(Integer lastVisitedPageIndex) {
         this.lastVisitedPageIndex = lastVisitedPageIndex;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
     }
 }

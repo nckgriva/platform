@@ -33,7 +33,7 @@ public class Survey extends IdObject<UUID> {
     private String name;
 
     @Column(name = "expires_dt", nullable = true)
-    private Date expires;
+    private Date expirationDate;
 
     @Column(name = "is_show_progress", nullable = false)
     private Boolean showProgress;
@@ -107,12 +107,12 @@ public class Survey extends IdObject<UUID> {
         this.name = name;
     }
 
-    public Date getExpires() {
-        return expires;
+    public Date getExpirationDate() {
+        return expirationDate;
     }
 
-    public void setExpires(Date expires) {
-        this.expires = expires;
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     public Boolean getShowProgress() {

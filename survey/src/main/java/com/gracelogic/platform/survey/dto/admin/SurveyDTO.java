@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class SurveyDTO extends IdObjectDTO {
     private String name;
-    private Date expires;
+    private Date expirationDate;
     private Boolean showProgress;
     private Boolean showQuestionNumber;
     private Boolean allowReturn;
@@ -24,7 +24,7 @@ public class SurveyDTO extends IdObjectDTO {
         SurveyDTO model = new SurveyDTO();
         IdObjectDTO.prepare(model, survey);
         model.setName(survey.getName());
-        model.setExpires(survey.getExpires());
+        model.setExpirationDate(survey.getExpirationDate());
         model.setShowProgress(survey.getShowProgress());
         model.setShowQuestionNumber(survey.getShowQuestionNumber());
         model.setAllowReturn(survey.getAllowReturn());
@@ -46,12 +46,12 @@ public class SurveyDTO extends IdObjectDTO {
         this.name = name;
     }
 
-    public Date getExpires() {
-        return expires;
+    public Date getExpirationDate() {
+        return expirationDate;
     }
 
-    public void setExpires(Date expires) {
-        this.expires = expires;
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     public Boolean getShowProgress() {

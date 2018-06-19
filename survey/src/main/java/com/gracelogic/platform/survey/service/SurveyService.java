@@ -10,6 +10,7 @@ import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
 import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
+import com.gracelogic.platform.user.exception.ForbiddenException;
 
 import java.util.UUID;
 
@@ -17,11 +18,11 @@ public interface SurveyService {
 
     SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId) throws ObjectNotFoundException;
 
-    SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress) throws ObjectNotFoundException;
-    SurveyInteractionDTO saveAnswersAndContinue(UUID surveyPassingId, PageAnswersDTO dto) throws ObjectNotFoundException;
+    SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress) throws ObjectNotFoundException, ForbiddenException;
+    SurveyInteractionDTO saveAnswersAndContinue(UUID surveyPassingId, PageAnswersDTO dto) throws ObjectNotFoundException, ForbiddenException;
 
-    SurveyInteractionDTO getSurveyPage(UUID surveyPassingId, int pageIndex) throws ObjectNotFoundException;
-    SurveyInteractionDTO continueSurvey(UUID surveyPassingId) throws ObjectNotFoundException;
+    SurveyInteractionDTO getSurveyPage(UUID surveyPassingId, int pageIndex) throws ObjectNotFoundException, ForbiddenException;
+    SurveyInteractionDTO continueSurvey(UUID surveyPassingId) throws ObjectNotFoundException, ForbiddenException;
 
     EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir);
     Survey saveSurvey(SurveyDTO dto, AuthorizedUser user) throws ObjectNotFoundException;
