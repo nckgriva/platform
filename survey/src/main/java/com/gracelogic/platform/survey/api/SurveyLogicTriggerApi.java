@@ -4,8 +4,8 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.Path;
-import com.gracelogic.platform.survey.dto.admin.SurveyVariantLogicDTO;
-import com.gracelogic.platform.survey.model.SurveyVariantLogic;
+import com.gracelogic.platform.survey.dto.admin.SurveyLogicTriggerDTO;
+import com.gracelogic.platform.survey.model.SurveyLogicTrigger;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
@@ -29,7 +29,7 @@ import java.util.UUID;
 @Controller
 @RequestMapping(value = Path.API_SURVEY_QUESTION_ANSWER_VARIANT)
 @Api(value = Path.API_SURVEY_QUESTION_ANSWER_VARIANT, tags = {"Survey variant logic API"})
-public class SurveyVariantLogicApi extends AbstractAuthorizedController {
+public class SurveyLogicTriggerApi extends AbstractAuthorizedController {
     @Autowired
     private SurveyService surveyService;
 
@@ -38,8 +38,8 @@ public class SurveyVariantLogicApi extends AbstractAuthorizedController {
     private ResourceBundleMessageSource messageSource;
 
     @ApiOperation(
-            value = "getSurveyVariantLogics",
-            notes = "Get list of survey variant logics",
+            value = "getSurveyLogicTriggers",
+            notes = "Get list of survey logic triggers",
             response =  EntityListResponse.class
     )
     @ApiResponses({
@@ -49,20 +49,20 @@ public class SurveyVariantLogicApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getSurveyVariantLogics(@RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+    public ResponseEntity getSurveyLogicTriggers(@RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                                   @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                                   @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                                   @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
 
-        EntityListResponse<SurveyVariantLogicDTO> properties = surveyService.getSurveyVariantLogicsPaged(count, null, start, sortField, sortDir);
-        return new ResponseEntity<EntityListResponse<SurveyVariantLogicDTO>>(properties, HttpStatus.OK);
+        EntityListResponse<SurveyLogicTriggerDTO> properties = surveyService.getSurveyLogicTriggersPaged(count, null, start, sortField, sortDir);
+        return new ResponseEntity<EntityListResponse<SurveyLogicTriggerDTO>>(properties, HttpStatus.OK);
     }
 
     @ApiOperation(
-            value = "getSurveyVariantLogic",
-            notes = "Get survey variant logic",
-            response = SurveyVariantLogicDTO.class
+            value = "getSurveyLogicTrigger",
+            notes = "Get survey logic trigger",
+            response = SurveyLogicTriggerDTO.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -71,10 +71,10 @@ public class SurveyVariantLogicApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
-    public ResponseEntity getSurveyVariantLogic(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity getSurveyLogicTrigger(@PathVariable(value = "id") UUID id) {
         try {
-            SurveyVariantLogicDTO dto = surveyService.getSurveyVariantLogic(id);
-            return new ResponseEntity<SurveyVariantLogicDTO>(dto, HttpStatus.OK);
+            SurveyLogicTriggerDTO dto = surveyService.getSurveyLogicTrigger(id);
+            return new ResponseEntity<SurveyLogicTriggerDTO>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null,
                     LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -82,8 +82,8 @@ public class SurveyVariantLogicApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
-            value = "saveSurveyVariantLogic",
-            notes = "Save survey variant logic",
+            value = "saveSurveyLogicTrigger",
+            notes = "Save survey logic trigger",
             response = IDResponse.class
     )
     @ApiResponses({
@@ -93,10 +93,10 @@ public class SurveyVariantLogicApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
-    public ResponseEntity saveSurveyVariantLogic(@RequestBody SurveyVariantLogicDTO dto) {
+    public ResponseEntity saveSurveyLogicTrigger(@RequestBody SurveyLogicTriggerDTO dto) {
         try {
-            SurveyVariantLogic surveyVariantLogic = surveyService.saveSurveyVariantLogic(dto);
-            return new ResponseEntity<IDResponse>(new IDResponse(surveyVariantLogic.getId()), HttpStatus.OK);
+            SurveyLogicTrigger surveyLogicTrigger = surveyService.saveSurveyLogicTrigger(dto);
+            return new ResponseEntity<IDResponse>(new IDResponse(surveyLogicTrigger.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
@@ -104,8 +104,8 @@ public class SurveyVariantLogicApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
-            value = "deleteSurveyVariantLogic",
-            notes = "Delete survey variant logic",
+            value = "deleteSurveyLogicTrigger",
+            notes = "Delete survey logic trigger",
             response = EmptyResponse.class
     )
     @ApiResponses({
@@ -115,9 +115,9 @@ public class SurveyVariantLogicApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
-    public ResponseEntity deleteSurveyVariantLogic(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity deleteSurveyLogicTrigger(@PathVariable(value = "id") UUID id) {
         try {
-            surveyService.deleteSurveyVariantLogic(id);
+            surveyService.deleteSurveyLogicTrigger(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);

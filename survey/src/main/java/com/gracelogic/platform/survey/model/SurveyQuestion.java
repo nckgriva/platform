@@ -30,8 +30,8 @@ public class SurveyQuestion extends IdObject<UUID> {
     @JoinColumn(name = "SURVEY_PAGE_ID", nullable = false)
     private SurveyPage surveyPage;
 
-    @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder;
+    @Column(name = "question_index", nullable = false)
+    private Integer questionIndex;
 
     @Column(name = "text", nullable = false)
     private String text;
@@ -84,12 +84,12 @@ public class SurveyQuestion extends IdObject<UUID> {
         this.surveyPage = surveyPage;
     }
 
-    public Integer getSortOrder() {
-        return sortOrder;
+    public Integer getQuestionIndex() {
+        return questionIndex;
     }
 
-    public void setSortOrder(Integer sortOrder) {
-        this.sortOrder = sortOrder;
+    public void setQuestionIndex(Integer questionIndex) {
+        this.questionIndex = questionIndex;
     }
 
     public String getText() {

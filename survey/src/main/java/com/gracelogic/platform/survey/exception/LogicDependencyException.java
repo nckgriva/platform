@@ -1,15 +1,15 @@
 package com.gracelogic.platform.survey.exception;
 
-public class HitRespondentsLimitException extends Exception {
+public class LogicDependencyException extends Exception {
 
     private String message;
 
-    public HitRespondentsLimitException(String message) {
+    public LogicDependencyException(String message) {
         super(message);
         this.message = message;
     }
 
-    public HitRespondentsLimitException() {
+    public LogicDependencyException() {
         super("");
         message = null;
     }

@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_VARIANT_LOGIC")
-public class SurveyVariantLogic extends IdObject<UUID> {
+public class SurveyLogicTrigger extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @Access(AccessType.PROPERTY)
@@ -25,8 +25,16 @@ public class SurveyVariantLogic extends IdObject<UUID> {
     @Version
     @Column(name = CHANGED, nullable = false)
     private Date changed;
+
     /**
-     * Вопрос, относящийся к данному answerVariant
+     * Страница, к которой относится данная логика
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "SURVEY_PAGE_ID", nullable = false)
+    private SurveyPage surveyPage;
+
+    /**
+     * Отслеживаемый вопрос / вопрос, относящийся к данному answerVariant
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "SURVEY_QUESTION_ID", nullable = false)
@@ -40,10 +48,10 @@ public class SurveyVariantLogic extends IdObject<UUID> {
     private SurveyAnswerVariant answerVariant;
 
     /**
-     * Необходимо ли выбрать вариант, чтобы действие сработало
+     * Если TRUE, логика срабатывает при отвеченном вопросе/выбранном варианте
      */
-    @Column(name = "IS_SELECTION_REQUIRED", nullable = false)
-    private boolean isSelectionRequired;
+    @Column(name = "IS_INTERACTION_REQUIRED", nullable = false)
+    private boolean isInteractionRequired;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "TARGET_QUESTION_ID", nullable = false)
@@ -92,6 +100,22 @@ public class SurveyVariantLogic extends IdObject<UUID> {
         this.changed = changed;
     }
 
+    public SurveyPage getSurveyPage() {
+        return surveyPage;
+    }
+
+    public void setSurveyPage(SurveyPage surveyPage) {
+        this.surveyPage = surveyPage;
+    }
+
+    public SurveyQuestion getSurveyQuestion() {
+        return surveyQuestion;
+    }
+
+    public void setSurveyQuestion(SurveyQuestion surveyQuestion) {
+        this.surveyQuestion = surveyQuestion;
+    }
+
     public SurveyAnswerVariant getAnswerVariant() {
         return answerVariant;
     }
@@ -100,12 +124,12 @@ public class SurveyVariantLogic extends IdObject<UUID> {
         this.answerVariant = answerVariant;
     }
 
-    public boolean isSelectionRequired() {
-        return isSelectionRequired;
+    public boolean isInteractionRequired() {
+        return isInteractionRequired;
     }
 
-    public void setSelectionRequired(boolean selectionRequired) {
-        isSelectionRequired = selectionRequired;
+    public void setInteractionRequired(boolean interactionRequired) {
+        isInteractionRequired = interactionRequired;
     }
 
     public SurveyQuestion getTargetQuestion() {
@@ -146,13 +170,5 @@ public class SurveyVariantLogic extends IdObject<UUID> {
 
     public void setLogicType(UUID logicType) {
         this.logicType = logicType;
-    }
-
-    public SurveyQuestion getSurveyQuestion() {
-        return surveyQuestion;
-    }
-
-    public void setSurveyQuestion(SurveyQuestion surveyQuestion) {
-        this.surveyQuestion = surveyQuestion;
     }
 }

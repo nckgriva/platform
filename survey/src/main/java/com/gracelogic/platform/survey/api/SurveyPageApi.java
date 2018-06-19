@@ -5,6 +5,8 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.Path;
 import com.gracelogic.platform.survey.dto.admin.SurveyPageDTO;
+import com.gracelogic.platform.survey.exception.LogicDependencyException;
+import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.model.SurveyPage;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
@@ -46,13 +48,13 @@ public class SurveyPageApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getSurveyPages(@RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+    public ResponseEntity getSurveyPages(@RequestParam(value = "description", required = false) String description,
+                                     @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                      @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                      @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                      @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-
-        EntityListResponse<SurveyPageDTO> properties = surveyService.getSurveyPagesPaged(count, null, start, sortField, sortDir);
+        EntityListResponse<SurveyPageDTO> properties = surveyService.getSurveyPagesPaged(description, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<SurveyPageDTO>>(properties, HttpStatus.OK);
     }
 
@@ -97,7 +99,6 @@ public class SurveyPageApi extends AbstractAuthorizedController {
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @ApiOperation(
@@ -116,6 +117,12 @@ public class SurveyPageApi extends AbstractAuthorizedController {
         try {
             surveyService.deleteSurveyPage(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (ResultDependencyException resultDependency) {
+            return new ResponseEntity<>(new ErrorResponse("db.RESULT_DEPENDENCY",
+                    messageSource.getMessage("db.RESULT_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (LogicDependencyException logicDependency) {
+            return new ResponseEntity<>(new ErrorResponse("db.LOGIC_DEPENDENCY",
+                    messageSource.getMessage("db.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }

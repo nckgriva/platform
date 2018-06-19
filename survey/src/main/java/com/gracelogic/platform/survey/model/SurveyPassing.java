@@ -55,8 +55,7 @@ public class SurveyPassing extends IdObject<UUID> {
     @Column(name = "last_visited_page_index", nullable = true)
     private Integer lastVisitedPageIndex;
 
-    @Column(name = "finish_page_index", nullable = false)
-    private Integer finishPageIndex;
+
 
     @Override
     public UUID getId() {
@@ -150,13 +149,5 @@ public class SurveyPassing extends IdObject<UUID> {
 
     public void setLastVisitedPageIndex(Integer lastVisitedPageIndex) {
         this.lastVisitedPageIndex = lastVisitedPageIndex;
-    }
-
-    public Integer getFinishPageIndex() {
-        return finishPageIndex;
-    }
-
-    public void setFinishPageIndex(Integer finishPageIndex) {
-        this.finishPageIndex = finishPageIndex;
     }
 }

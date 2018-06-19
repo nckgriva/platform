@@ -6,16 +6,13 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.Path;
 import com.gracelogic.platform.survey.dto.admin.SurveyDTO;
-import com.gracelogic.platform.survey.dto.admin.SurveyPageDTO;
+import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
-import com.gracelogic.platform.survey.dto.user.SurveyPassingDTO;
-import com.gracelogic.platform.survey.exception.HitRespondentsLimitException;
-import com.gracelogic.platform.survey.exception.SurveyExpiredException;
+import com.gracelogic.platform.survey.exception.LogicDependencyException;
+import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.model.Survey;
-import com.gracelogic.platform.survey.model.SurveyPassing;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
-import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
@@ -45,10 +42,10 @@ public class SurveyApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "getInitialSurveyInfo",
-            notes = "Sends initial survey information to user",
+            notes = "Sends initial survey information to user. This method does not begin the survey.",
             response = SurveyIntroductionDTO.class
     )
-    @RequestMapping(method = RequestMethod.POST, value = "/{id}/info/")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/info/")
     @ResponseBody
     public ResponseEntity getInitialSurveyInfo(@PathVariable(value = "id") UUID surveyId) {
         try {
@@ -62,16 +59,16 @@ public class SurveyApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "startSurvey",
-            notes = "Starts survey and sends SurveyPassingDTO with first page back to user",
-            response = SurveyPassingDTO.class
+            notes = "Starts survey and sends SurveyInteractionDTO with first page back to user",
+            response = SurveyInteractionDTO.class
     )
     @RequestMapping(method = RequestMethod.GET, value = "/{id}/start/")
     @ResponseBody
     public ResponseEntity startSurvey(HttpServletRequest request,
                                       @PathVariable(value = "id") UUID surveyId) {
         try {
-            SurveyPassingDTO dto = surveyService.startSurvey(surveyId, getUser(), request.getRemoteAddr());
-            return new ResponseEntity<SurveyPassingDTO>(dto, HttpStatus.OK);
+            SurveyInteractionDTO dto = surveyService.startSurvey(surveyId, getUser(), request.getRemoteAddr());
+            return new ResponseEntity<SurveyInteractionDTO>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException notFoundException) {
             return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
                     messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -161,6 +158,12 @@ public class SurveyApi extends AbstractAuthorizedController {
         try {
             surveyService.deleteSurvey(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (ResultDependencyException resultDependency) {
+            return new ResponseEntity<>(new ErrorResponse("db.RESULT_DEPENDENCY",
+                    messageSource.getMessage("db.RESULT_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (LogicDependencyException logicDependency) {
+            return new ResponseEntity<>(new ErrorResponse("db.LOGIC_DEPENDENCY",
+                    messageSource.getMessage("db.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }

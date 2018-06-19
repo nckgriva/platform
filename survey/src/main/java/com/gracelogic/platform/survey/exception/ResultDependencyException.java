@@ -1,15 +1,14 @@
 package com.gracelogic.platform.survey.exception;
 
-public class HitTimeLimitException extends Exception {
-
+public class ResultDependencyException extends Exception {
     private String message;
 
-    public HitTimeLimitException(String message) {
+    public ResultDependencyException(String message) {
         super(message);
         this.message = message;
     }
 
-    public HitTimeLimitException() {
+    public ResultDependencyException() {
         super("");
         message = null;
     }

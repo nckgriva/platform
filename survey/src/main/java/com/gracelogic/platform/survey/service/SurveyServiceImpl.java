@@ -7,11 +7,12 @@ import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.survey.dto.admin.*;
 import com.gracelogic.platform.survey.dto.user.PageAnswersDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyConclusionDTO;
+import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
-import com.gracelogic.platform.survey.dto.user.SurveyPassingDTO;
+import com.gracelogic.platform.survey.exception.ResultDependencyException;
+import com.gracelogic.platform.survey.exception.LogicDependencyException;
 import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
-import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -29,6 +30,10 @@ public class SurveyServiceImpl implements SurveyService {
     @Autowired
     private IdObjectService idObjectService;
 
+    private enum LogicTriggerCheckItem {
+        QUESTION,
+        ANSWER,
+    }
     private static <T extends IdObject<UUID>> HashMap<UUID, T> asUUIDHashMap(List<T> list) {
         HashMap<UUID, T> hashMap = new HashMap<>();
         for (T t : list) {
@@ -58,10 +63,17 @@ public class SurveyServiceImpl implements SurveyService {
         }
         return hashMap;
     }
-    private static HashMap<SurveyQuestion, SurveyVariantLogic> asVariantLogicHashMap(List<SurveyVariantLogic> list) {
-        HashMap<SurveyQuestion, SurveyVariantLogic> hashMap = new HashMap<>();
-        for (SurveyVariantLogic variantLogic : list) {
-            hashMap.put(variantLogic.getSurveyQuestion(), variantLogic);
+    private static HashMap<SurveyQuestion, List<SurveyLogicTrigger>> asLogicTriggerListHashMap(List<SurveyLogicTrigger> list) {
+        HashMap<SurveyQuestion, List<SurveyLogicTrigger>> hashMap = new HashMap<>();
+
+        for (SurveyLogicTrigger variant : list) {
+            List<SurveyLogicTrigger> triggerList = hashMap.get(variant.getSurveyQuestion());
+            if (triggerList != null) {
+                triggerList.add(variant); continue;
+            }
+            triggerList = new ArrayList<>();
+            triggerList.add(variant);
+            hashMap.put(variant.getSurveyQuestion(), triggerList);
         }
         return hashMap;
     }
@@ -79,7 +91,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyPassingDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress)
+    public SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress)
             throws ObjectNotFoundException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
 
@@ -94,21 +106,19 @@ public class SurveyServiceImpl implements SurveyService {
             surveyPassing.setUser(idObjectService.getObjectById(User.class, user.getId()));
         }
 
-        // TODO: если опрос имеет лимит времени, запустить поток (хотя и без потока можно)
+        // TODO: time-limit
+
         surveyPassing.setLastVisitedPageIndex(0);
-        // указываем максимальное количество страниц в опросе один раз
-        surveyPassing.setFinishPageIndex(idObjectService.getCount(SurveyPage.class, null, null,
-                String.format("el.survey = '%s'", survey.getId()), null));
         surveyPassing.setLink(survey.getLink());
         surveyPassing.setConclusion(survey.getConclusion());
         surveyPassing.setSurvey(survey);
 
         idObjectService.save(surveyPassing);
 
-        SurveyPassingDTO surveyPassingDTO = new SurveyPassingDTO();
-        surveyPassingDTO.setSurveyPassingId(surveyPassing.getId());
-        surveyPassingDTO.setSurveyPage(getSurveyPage(surveyPassing, 0));
-        return surveyPassingDTO;
+        SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
+        surveyInteractionDTO.setSurveyPassingId(surveyPassing.getId());
+        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveyPassing, 0));
+        return surveyInteractionDTO;
     }
 
     private SurveyPageDTO getSurveyPage(SurveyPassing surveyPassing, int pageIndex) throws ObjectNotFoundException {
@@ -126,7 +136,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         // 1. Получение списка вопросов текущей страницы
         List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, null,
-                String.format("el.surveyPage = '%s'", surveyPage.getId()), null, "el.sortOrder", null, null, null);
+                String.format("el.surveyPage = '%s'", surveyPage.getId()), null, "el.questionIndex", null, null, null);
 
         String questionIds = "";
 
@@ -135,8 +145,8 @@ public class SurveyServiceImpl implements SurveyService {
             questionIds += "'" + question.getId() + "'"; if (i + 1 != questions.size()) questionIds += ", "; i++;
         }
 
-        // 2. Получение логики вариантов ответа. Для веба выбор только HIDE_QUESTION/SHOW_QUESTION
-        HashMap<SurveyQuestion, SurveyVariantLogic> logicHashMap = asVariantLogicHashMap(idObjectService.getList(SurveyVariantLogic.class, null,
+        // 2. Получение логики. Для веба выбор только HIDE_QUESTION/SHOW_QUESTION
+        HashMap<SurveyQuestion, List<SurveyLogicTrigger>> logicHashMap = asLogicTriggerListHashMap(idObjectService.getList(SurveyLogicTrigger.class, null,
                 String.format("el.surveyQuestion IN (%s) AND (el.logicType = '%s' OR el.logicType = '%s')", questionIds,
                         DataConstants.LogicType.HIDE_QUESTION.getValue(), DataConstants.LogicType.SHOW_QUESTION.getValue()), null, null, null, null));
 
@@ -154,8 +164,11 @@ public class SurveyServiceImpl implements SurveyService {
                  answerVariantsDTO.add(SurveyAnswerVariantDTO.prepare(answerVariant));
              }
 
-             SurveyVariantLogic variantLogic = logicHashMap.get(question);
-             surveyQuestionDTO.setVariantLogic(SurveyVariantLogicDTO.prepare(variantLogic));
+             surveyQuestionDTO.setLogicTriggers(new ArrayList<SurveyLogicTriggerDTO>());
+
+             for (SurveyLogicTrigger trigger : logicHashMap.get(question)) {
+                 surveyQuestionDTO.getLogicTriggers().add(SurveyLogicTriggerDTO.prepare(trigger));
+             }
              surveyQuestionDTO.setAnswers(answerVariantsDTO);
              surveyQuestionDTOs.add(surveyQuestionDTO);
         }
@@ -166,89 +179,106 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public SurveyPageDTO getSurveyPage(UUID surveyPassingId, int pageIndex)
-            throws ObjectNotFoundException, ForbiddenException {
+    public SurveyInteractionDTO getSurveyPage(UUID surveyPassingId, int pageIndex)
+            throws ObjectNotFoundException {
         SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
 
         if (surveyPassing == null) throw new ObjectNotFoundException();
-        if (surveyPassing.getEnded() != null) {
-            throw new ForbiddenException(); // TODO: time limit
-        }
 
-        return getSurveyPage(surveyPassing, pageIndex);
+        surveyPassing.setLastVisitedPageIndex(pageIndex);
+        idObjectService.save(surveyPassing);
+
+        SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
+        surveyInteractionDTO.setSurveyPassingId(surveyPassing.getId());
+        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveyPassing, pageIndex));
+
+        return surveyInteractionDTO;
     }
 
     @Override
-    public SurveyPageDTO continueSurvey(UUID surveyPassingId) throws ObjectNotFoundException {
+    public SurveyInteractionDTO continueSurvey(UUID surveyPassingId) throws ObjectNotFoundException {
         SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
         if (surveyPassing == null) throw new ObjectNotFoundException();
 
-        return getSurveyPage(surveyPassing, surveyPassing.getLastVisitedPageIndex());
-    }
+        SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
+        surveyInteractionDTO.setSurveyPassingId(surveyPassing.getId());
+        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveyPassing, surveyPassing.getLastVisitedPageIndex()));
 
+        return surveyInteractionDTO;
+    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyPassingDTO saveAnswersAndContinue(UUID surveyPassingId, PageAnswersDTO dto) throws ObjectNotFoundException, ForbiddenException {
+    public SurveyInteractionDTO saveAnswersAndContinue(UUID surveyPassingId, PageAnswersDTO dto) throws ObjectNotFoundException {
         final SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
 
         if (surveyPassing == null) throw new ObjectNotFoundException();
-        if (surveyPassing.getEnded() != null) throw new ForbiddenException(); // TODO: time limit
 
         boolean finishSurvey = false;
 
         int nextPage = surveyPassing.getLastVisitedPageIndex()+1;
-        if (nextPage >= surveyPassing.getFinishPageIndex()) { // если на данный момент пользователь проходит опрос на последней странице, это финиш
-            finishSurvey = true;
-        }
 
         // список вопросов от полученных ответов
-        HashMap<UUID, SurveyQuestion> surveyQuestionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, null,
-                String.format("el.id IN (%s)", dto.getQuestionIdsSeparatedByCommas()),
-                null, null, null, null, null));
+        List<SurveyQuestion> surveyQuestions = idObjectService.getList(SurveyQuestion.class, null,
+                String.format("el.surveyPage = '%s'", surveyPassing.getLastVisitedPageIndex()),
+                null, "el.questionIndex", null, null, null);
 
         // список вариантов ответов
-        HashMap<SurveyQuestion, SurveyAnswerVariant> surveyAnswersHashMap = asAnswerVariantHashMap(
-                idObjectService.getList(SurveyAnswerVariant.class, null,
-                String.format("el.id IN (%s)", dto.getAnswerIdsSeparatedByCommas()),
-                null, null, null, null));
+        HashMap<SurveyQuestion, SurveyAnswerVariant> surveyAnswersHashMap = new HashMap<>();
 
-        HashMap<SurveyQuestion, SurveyVariantLogic> logicHashMap = asVariantLogicHashMap(
-                idObjectService.getList(SurveyVariantLogic.class, null,
-                String.format("el.surveyQuestion IN (%s)", dto.getQuestionIdsSeparatedByCommas()),
+        if (dto.containsNonTextAnswers()) {
+            surveyAnswersHashMap = asAnswerVariantHashMap(
+                    idObjectService.getList(SurveyAnswerVariant.class, null,
+                            String.format("el.id IN (%s)", dto.getAnswerIdsSeparatedByCommas()),
+                            null, null, null, null));
+        }
+
+        HashMap<SurveyQuestion, List<SurveyLogicTrigger>> triggersHashMap = asLogicTriggerListHashMap(
+                idObjectService.getList(SurveyLogicTrigger.class, null,
+                String.format("el.surveyPage = '%s'", surveyPassing.getLastVisitedPageIndex()),
                         null, null, null, null));
 
-        for (Map.Entry<UUID, SurveyQuestion> entry : surveyQuestionsHashMap.entrySet()) {
-            SurveyQuestion question = entry.getValue();
-            SurveyAnswerVariant answerVariant = surveyAnswersHashMap.get(entry.getValue());
-            String textAnswer = dto.getAnswers().get(entry.getValue().getId()).getTextAnswer();
+        for (SurveyQuestion question : surveyQuestions) {
+            SurveyAnswerVariant answerVariant = surveyAnswersHashMap.get(question);
+            String textAnswer = dto.getAnswers().get(question.getId()).getTextAnswer();
 
-            boolean hasAnswer = answerVariant != null || textAnswer != null;
-            if (question.isRequired() && !hasAnswer) {
-                throw new ForbiddenException();
-            }
+            for (SurveyLogicTrigger trigger : triggersHashMap.get(question)) {
+                LogicTriggerCheckItem logicTriggerCheckItem = LogicTriggerCheckItem.ANSWER;
+                if (trigger.getAnswerVariant() == null) logicTriggerCheckItem = LogicTriggerCheckItem.QUESTION;
 
-            SurveyVariantLogic variantLogic = logicHashMap.get(question);
-            if (variantLogic != null) {
-                boolean triggersWhenSelected = variantLogic.isSelectionRequired() && variantLogic.getAnswerVariant() == answerVariant;
-                boolean triggersWhenUnselected = !variantLogic.isSelectionRequired() && answerVariant != null && variantLogic.getAnswerVariant() != answerVariant;
+                boolean triggered = false;
 
-                if (triggersWhenSelected || triggersWhenUnselected) {
+                switch (logicTriggerCheckItem) {
+                    case ANSWER:
+                        boolean selectedTrigger = trigger.isInteractionRequired() && trigger.getAnswerVariant() == answerVariant;
+                        boolean unselectedTrigger = !trigger.isInteractionRequired() && answerVariant != null && trigger.getAnswerVariant() != answerVariant;
 
-                    if (variantLogic.getLogicType() == DataConstants.LogicType.CHANGE_CONCLUSION.getValue()) {
-                        surveyPassing.setConclusion(variantLogic.getNewConclusion());
+                        triggered = selectedTrigger || unselectedTrigger;
+
+                        break;
+                    case QUESTION:
+                        boolean answeredTrigger = trigger.isInteractionRequired() && (answerVariant != null || StringUtils.isNotBlank(textAnswer));
+                        boolean unansweredTrigger = !trigger.isInteractionRequired() && answerVariant == null && StringUtils.isBlank(textAnswer);
+
+                        triggered = answeredTrigger || unansweredTrigger;
+                        break;
+                }
+
+                if (triggered) {
+                    if (trigger.getLogicType() == DataConstants.LogicType.CHANGE_CONCLUSION.getValue()) {
+                        surveyPassing.setConclusion(trigger.getNewConclusion());
                     }
 
-                    if (variantLogic.getLogicType() == DataConstants.LogicType.CHANGE_LINK.getValue()) {
-                        surveyPassing.setLink(variantLogic.getNewLink());
+                    if (trigger.getLogicType() == DataConstants.LogicType.CHANGE_LINK.getValue()) {
+                        surveyPassing.setLink(trigger.getNewLink());
                     }
 
-                    if (variantLogic.getLogicType() == DataConstants.LogicType.GO_TO_PAGE.getValue()) {
-                        nextPage = variantLogic.getPageIndex();
+                    if (trigger.getLogicType() == DataConstants.LogicType.GO_TO_PAGE.getValue()) {
+                        nextPage = trigger.getPageIndex();
                     }
 
                     if (!finishSurvey)
-                        finishSurvey = variantLogic.getLogicType() == DataConstants.LogicType.END_SURVEY.getValue();
+                        finishSurvey = trigger.getLogicType() == DataConstants.LogicType.END_SURVEY.getValue();
                 }
             }
 
@@ -259,23 +289,27 @@ public class SurveyServiceImpl implements SurveyService {
             idObjectService.save(surveyQuestionAnswer);
         }
 
-        SurveyPassingDTO surveyPassingDTO = new SurveyPassingDTO();
+        // если следующей страницы не существует, это финиш
+        if (!finishSurvey && idObjectService.getCount(SurveyPage.class, null, null,
+                String.format("el.page_index = '%s'", nextPage), null) == 0) {
+            finishSurvey = true;
+        }
 
+        SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
         if (finishSurvey) {
             SurveyConclusionDTO surveyConclusionDTO = new SurveyConclusionDTO();
             surveyConclusionDTO.setConclusion(surveyPassing.getConclusion());
             surveyConclusionDTO.setLink(surveyPassing.getLink());
-            surveyPassingDTO.setSurveyConclusion(surveyConclusionDTO);
+            surveyInteractionDTO.setSurveyConclusion(surveyConclusionDTO);
 
             surveyPassing.setEnded(new Date());
         } else {
-            surveyPassingDTO.setSurveyPage(getSurveyPage(surveyPassing, nextPage));
+            surveyInteractionDTO.setSurveyPage(getSurveyPage(surveyPassing, nextPage));
             surveyPassing.setLastVisitedPageIndex(nextPage);
         }
 
         idObjectService.save(surveyPassing);
-
-        return surveyPassingDTO;
+        return surveyInteractionDTO;
     }
 
     @Override
@@ -349,12 +383,6 @@ public class SurveyServiceImpl implements SurveyService {
         return SurveyDTO.prepare(entity);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public void deleteSurvey(UUID id) {
-        idObjectService.delete(Survey.class, id);
-    }
-
     @Override
     public EntityListResponse<SurveyAnswerVariantDTO> getSurveyAnswerVariantsPaged(String description, Integer count, Integer page,
                                                                                    Integer start, String sortField, String sortDir) {
@@ -421,17 +449,17 @@ public class SurveyServiceImpl implements SurveyService {
         return SurveyAnswerVariantDTO.prepare(entity);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteSurveyAnswerVariant(UUID id) {
-        idObjectService.delete(SurveyAnswerVariant.class, id);
-    }
-
-    @Override
-    public EntityListResponse<SurveyPageDTO> getSurveyPagesPaged(Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<SurveyPageDTO> getSurveyPagesPaged(String description, Integer count, Integer page,
+                                                                 Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (!StringUtils.isEmpty(description)) {
+            params.put("description", "%%" + StringUtils.lowerCase(description) + "%%");
+            cause += "and lower(el.description) like :description ";
+        }
 
         int totalCount = idObjectService.getCount(Survey.class, null, countFetches, cause, params);
         int totalPages = ((totalCount / count)) + 1;
@@ -484,12 +512,6 @@ public class SurveyServiceImpl implements SurveyService {
         return SurveyPageDTO.prepare(entity);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public void deleteSurveyPage(UUID id) {
-        idObjectService.delete(SurveyPage.class, id);
-    }
-
     @Override
     public EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(String text, Integer count, Integer page,
                                                                          Integer start, String sortField, String sortDir) {
@@ -536,7 +558,7 @@ public class SurveyServiceImpl implements SurveyService {
             entity = new SurveyQuestion();
         }
 
-        entity.setSortOrder(dto.getSortOrder());
+        entity.setQuestionIndex(dto.getQuestionIndex());
         entity.setHidden(dto.getHidden());
         entity.setRequired(dto.getRequired());
         entity.setSurveyPage(idObjectService.getObjectById(SurveyPage.class, dto.getSurveyPage()));
@@ -556,15 +578,9 @@ public class SurveyServiceImpl implements SurveyService {
         return SurveyQuestionDTO.prepare(entity);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteSurveyQuestion(UUID id) {
-        idObjectService.delete(SurveyQuestion.class, id);
-    }
-
-    @Override
-    public EntityListResponse<SurveyVariantLogicDTO> getSurveyVariantLogicsPaged(Integer count, Integer page,
-                                                                         Integer start, String sortField, String sortDir) {
+    public EntityListResponse<SurveyLogicTriggerDTO> getSurveyLogicTriggersPaged(Integer count, Integer page,
+                                                                                 Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -573,17 +589,17 @@ public class SurveyServiceImpl implements SurveyService {
         int totalPages = ((totalCount / count)) + 1;
         int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<SurveyVariantLogicDTO> entityListResponse = new EntityListResponse<SurveyVariantLogicDTO>();
+        EntityListResponse<SurveyLogicTriggerDTO> entityListResponse = new EntityListResponse<SurveyLogicTriggerDTO>();
         entityListResponse.setEntity("surveyVariantLogic");
         entityListResponse.setPage(page);
         entityListResponse.setPages(totalPages);
         entityListResponse.setTotalCount(totalCount);
 
-        List<SurveyVariantLogic> items = idObjectService.getList(SurveyVariantLogic.class, null, cause, params, sortField, sortDir, startRecord, count);
+        List<SurveyLogicTrigger> items = idObjectService.getList(SurveyLogicTrigger.class, null, cause, params, sortField, sortDir, startRecord, count);
 
         entityListResponse.setPartCount(items.size());
-        for (SurveyVariantLogic e : items) {
-            SurveyVariantLogicDTO el = SurveyVariantLogicDTO.prepare(e);
+        for (SurveyLogicTrigger e : items) {
+            SurveyLogicTriggerDTO el = SurveyLogicTriggerDTO.prepare(e);
             entityListResponse.addData(el);
         }
 
@@ -592,24 +608,28 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyVariantLogic saveSurveyVariantLogic(SurveyVariantLogicDTO dto) throws ObjectNotFoundException {
-        SurveyVariantLogic entity;
+    public SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException {
+        SurveyLogicTrigger entity;
         if (dto.getId() != null) {
-            entity = idObjectService.getObjectById(SurveyVariantLogic.class, dto.getId());
+            entity = idObjectService.getObjectById(SurveyLogicTrigger.class, dto.getId());
             if (entity == null) {
                 throw new ObjectNotFoundException();
             }
         } else {
-            entity = new SurveyVariantLogic();
+            entity = new SurveyLogicTrigger();
         }
 
-        entity.setAnswerVariant(idObjectService.getObjectById(SurveyAnswerVariant.class, dto.getAnswerVariant()));
+        entity.setSurveyPage(idObjectService.getObjectById(SurveyPage.class, dto.getPageIndex()));
+        entity.setSurveyQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getSurveyQuestion()));
+        if (dto.getAnswerVariant() != null) {
+            entity.setAnswerVariant(idObjectService.getObjectById(SurveyAnswerVariant.class, dto.getAnswerVariant()));
+        }
+
         entity.setLogicType(dto.getLogicType());
         entity.setNewConclusion(dto.getNewConclusion());
         entity.setNewLink(dto.getNewLink());
         entity.setPageIndex(dto.getPageIndex());
-        entity.setSelectionRequired(dto.isSelectionRequired());
-        entity.setSurveyQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getSurveyQuestion()));
+        entity.setInteractionRequired(dto.isInteractionRequired());
         if (dto.getTargetQuestion() != null) {
             entity.setTargetQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getTargetQuestion()));
         }
@@ -617,19 +637,187 @@ public class SurveyServiceImpl implements SurveyService {
         return entity;
     }
 
-
     @Override
-    public SurveyVariantLogicDTO getSurveyVariantLogic(UUID id) throws ObjectNotFoundException {
-        SurveyVariantLogic entity = idObjectService.getObjectById(SurveyVariantLogic.class, id);
+    public SurveyLogicTriggerDTO getSurveyLogicTrigger(UUID id) throws ObjectNotFoundException {
+        SurveyLogicTrigger entity = idObjectService.getObjectById(SurveyLogicTrigger.class, id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
-        return SurveyVariantLogicDTO.prepare(entity);
+        return SurveyLogicTriggerDTO.prepare(entity);
+    }
+
+    @Override
+    public EntityListResponse<SurveyPassingDTO> getSurveyPassingsPaged(UUID surveyId, UUID userId, String lastVisitIP,
+                                                                       Integer count, Integer page, Integer start,
+                                                                       String sortField, String sortDir) {
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (!StringUtils.isEmpty(lastVisitIP)) {
+            params.put("ip", "%%" + lastVisitIP + "%%");
+            cause += "and el.lastVisitIP like :ip ";
+        }
+
+        if (userId != null) {
+            cause += String.format("and el.user = '%s' ", userId);
+        }
+
+        if (surveyId != null) {
+            cause += String.format("and el.survey = '%s' ", surveyId);
+        }
+
+        int totalCount = idObjectService.getCount(SurveyPassing.class, null, countFetches, cause, params);
+        int totalPages = ((totalCount / count)) + 1;
+        int startRecord = page != null ? (page * count) - count : start;
+
+        EntityListResponse<SurveyPassingDTO> entityListResponse = new EntityListResponse<SurveyPassingDTO>();
+        entityListResponse.setEntity("surveyPassing");
+        entityListResponse.setPage(page);
+        entityListResponse.setPages(totalPages);
+        entityListResponse.setTotalCount(totalCount);
+
+        List<SurveyPassing> items = idObjectService.getList(SurveyPassing.class, null, cause, params, sortField, sortDir, startRecord, count);
+
+        entityListResponse.setPartCount(items.size());
+        for (SurveyPassing e : items) {
+            SurveyPassingDTO el = SurveyPassingDTO.prepare(e);
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteSurveyVariantLogic(UUID id) {
-        idObjectService.delete(SurveyVariantLogic.class, id);
+    public SurveyPassing saveSurveyPassing(SurveyPassingDTO dto) throws ObjectNotFoundException {
+        SurveyPassing entity;
+        if (dto.getId() != null) {
+            entity = idObjectService.getObjectById(SurveyPassing.class, dto.getId());
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
+        } else {
+            entity = new SurveyPassing();
+        }
+
+        if (dto.getUser() != null) {
+            entity.setUser(idObjectService.getObjectById(User.class, dto.getUser()));
+        }
+        entity.setLastVisitIP(dto.getLastVisitIP());
+        entity.setSurvey(idObjectService.getObjectById(Survey.class, dto.getSurvey()));
+        entity.setStarted(dto.getStarted());
+        entity.setEnded(dto.getEnded());
+        entity.setLastVisitedPageIndex(dto.getLastVisitedPageIndex());
+
+        idObjectService.save(entity);
+        return entity;
+    }
+
+    @Override
+    public SurveyPassingDTO getSurveyPassing(UUID id) throws ObjectNotFoundException {
+        SurveyPassing entity = idObjectService.getObjectById(SurveyPassing.class, id);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+        return SurveyPassingDTO.prepare(entity);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteSurvey(UUID id) throws LogicDependencyException, ResultDependencyException {
+        List<SurveyPage> pages = idObjectService.getList(SurveyPage.class, null,
+                String.format("el.surveyPage = '%s'", id), null, null, null, null);
+
+        for (SurveyPage page : pages) {
+            deleteSurveyPage(page.getId());
+        }
+
+        idObjectService.delete(Survey.class, id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteSurveyPage(UUID id) throws LogicDependencyException, ResultDependencyException {
+        List<SurveyQuestion> surveyQuestions = idObjectService.getList(SurveyQuestion.class, null,
+                String.format("el.surveyPage = '%s'", id), null, null, null, null);
+
+        for (SurveyQuestion question : surveyQuestions) {
+            deleteSurveyQuestion(question.getId(), true); // если удаляется целая страница - подразумевается, что удаляется вся логика вместе с ней
+        }
+
+        idObjectService.delete(SurveyPage.class, id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteSurveyQuestion(UUID id, boolean deleteLogic) throws LogicDependencyException, ResultDependencyException {
+        boolean isQuestionAnswered = idObjectService.getCount(SurveyQuestionAnswer.class, null, null,
+                String.format("el.question = '%s'", id), null) > 0;
+
+        if (isQuestionAnswered) throw new ResultDependencyException("question is answered");
+
+        if (!deleteLogic) {
+            boolean hasLogic = idObjectService.getCount(SurveyLogicTrigger.class, null, null,
+                    String.format("el.surveyQuestion = '%s' OR el.targetQuestion = '%s'", id, id), null) > 0;
+
+            if (hasLogic) throw new LogicDependencyException("question has corresponding logic");
+        } else {
+            List<SurveyLogicTrigger> logicTriggers = idObjectService.getList(SurveyLogicTrigger.class, null,
+                    String.format("el.surveyQuestion = '%s' OR el.targetQuestion = '%s'", id, id),
+                    null, null, null, null);
+
+            for (SurveyLogicTrigger trigger : logicTriggers) {
+                deleteSurveyLogicTrigger(trigger.getId());
+            }
+        }
+
+        List<SurveyAnswerVariant> answerVariants = idObjectService.getList(SurveyAnswerVariant.class, null,
+                String.format("el.surveyQuestion = '%s'", id), null, null, null, null);
+
+        for (SurveyAnswerVariant var : answerVariants) {
+            deleteSurveyAnswerVariant(var.getId(), deleteLogic);
+        }
+
+        idObjectService.delete(SurveyQuestion.class, id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteSurveyAnswerVariant(UUID id, boolean deleteLogic) throws LogicDependencyException, ResultDependencyException {
+        boolean isAnswered = idObjectService.getCount(SurveyQuestionAnswer.class, null, null,
+                String.format("el.answerVariant = '%s'", id), null) > 0;
+        if (isAnswered) throw new ResultDependencyException("selected as answer");
+
+        if (!deleteLogic) {
+            boolean hasLogic = idObjectService.getCount(SurveyLogicTrigger.class, null, null,
+                    String.format("el.answerVariant = '%s'", id), null) > 0;
+
+            if (hasLogic) throw new LogicDependencyException("answer has corresponding logic");
+        } else {
+            List<SurveyLogicTrigger> logicTriggers = idObjectService.getList(SurveyLogicTrigger.class, null,
+                    String.format("el.answerVariant = '%s'", id),
+                    null, null, null, null);
+
+            for (SurveyLogicTrigger trigger : logicTriggers) {
+                deleteSurveyLogicTrigger(trigger.getId());
+            }
+        }
+
+        idObjectService.delete(SurveyAnswerVariant.class, id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteSurveyLogicTrigger(UUID id) {
+        idObjectService.delete(SurveyLogicTrigger.class, id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteSurveyPassing(UUID id)
+    {
+        idObjectService.delete(SurveyQuestionAnswer.class, String.format("el.surveyPassing = '%s'", id), null);
+        idObjectService.delete(SurveyLogicTrigger.class, id);
     }
 }

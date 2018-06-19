@@ -4,7 +4,7 @@ import com.gracelogic.platform.survey.dto.admin.SurveyPageDTO;
 
 import java.util.UUID;
 
-public class SurveyPassingDTO {
+public class SurveyInteractionDTO {
     private UUID surveyPassingId;
     private SurveyPageDTO surveyPage;
     private SurveyConclusionDTO surveyConclusion;

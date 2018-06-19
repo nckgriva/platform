@@ -4,52 +4,57 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.survey.dto.admin.*;
 import com.gracelogic.platform.survey.dto.user.PageAnswersDTO;
-import com.gracelogic.platform.survey.dto.user.SurveyConclusionDTO;
+import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
-import com.gracelogic.platform.survey.dto.user.SurveyPassingDTO;
-import com.gracelogic.platform.survey.exception.HitRespondentsLimitException;
-import com.gracelogic.platform.survey.exception.SurveyExpiredException;
+import com.gracelogic.platform.survey.exception.ResultDependencyException;
+import com.gracelogic.platform.survey.exception.LogicDependencyException;
 import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
-import com.gracelogic.platform.user.exception.ForbiddenException;
+
 import java.util.UUID;
 
 public interface SurveyService {
 
     SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId) throws ObjectNotFoundException;
 
-    SurveyPassingDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress) throws ObjectNotFoundException;
-    SurveyPassingDTO saveAnswersAndContinue(UUID surveyPassingId, PageAnswersDTO dto) throws ObjectNotFoundException, ForbiddenException;
+    SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress) throws ObjectNotFoundException;
+    SurveyInteractionDTO saveAnswersAndContinue(UUID surveyPassingId, PageAnswersDTO dto) throws ObjectNotFoundException;
 
-    SurveyPageDTO getSurveyPage(UUID surveyPassingId, int pageIndex) throws ObjectNotFoundException, ForbiddenException;
-    SurveyPageDTO continueSurvey(UUID surveyPassingId) throws ObjectNotFoundException;
+    SurveyInteractionDTO getSurveyPage(UUID surveyPassingId, int pageIndex) throws ObjectNotFoundException;
+    SurveyInteractionDTO continueSurvey(UUID surveyPassingId) throws ObjectNotFoundException;
 
     EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir);
     Survey saveSurvey(SurveyDTO dto, AuthorizedUser user) throws ObjectNotFoundException;
     SurveyDTO getSurvey(UUID surveyId) throws ObjectNotFoundException;
-    void deleteSurvey(UUID id);
+    void deleteSurvey(UUID id) throws LogicDependencyException, ResultDependencyException;
 
     EntityListResponse<SurveyAnswerVariantDTO> getSurveyAnswerVariantsPaged(String description, Integer count, Integer page,
                                                                             Integer start, String sortField, String sortDir);
     SurveyAnswerVariant saveSurveyAnswerVariant(SurveyAnswerVariantDTO dto) throws ObjectNotFoundException;
     SurveyAnswerVariantDTO getSurveyAnswerVariant(UUID id) throws ObjectNotFoundException;
-    void deleteSurveyAnswerVariant(UUID id);
+    void deleteSurveyAnswerVariant(UUID id, boolean deleteLogic) throws LogicDependencyException, ResultDependencyException;
 
-    EntityListResponse<SurveyPageDTO> getSurveyPagesPaged(Integer count, Integer page,
+    EntityListResponse<SurveyPageDTO> getSurveyPagesPaged(String description, Integer count, Integer page,
                                                           Integer start, String sortField, String sortDir);
     SurveyPage saveSurveyPage(SurveyPageDTO dto) throws ObjectNotFoundException;
     SurveyPageDTO getSurveyPage(UUID id) throws ObjectNotFoundException;
-    void deleteSurveyPage(UUID id);
+    void deleteSurveyPage(UUID id) throws LogicDependencyException, ResultDependencyException;
 
     EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(String text, Integer count, Integer page,
                                                                   Integer start, String sortField, String sortDir);
     SurveyQuestion saveSurveyQuestion(SurveyQuestionDTO dto) throws ObjectNotFoundException;
     SurveyQuestionDTO getSurveyQuestion(UUID surveyQuestionId) throws ObjectNotFoundException;
-    void deleteSurveyQuestion(UUID id);
+    void deleteSurveyQuestion(UUID id, boolean deleteLogic) throws LogicDependencyException, ResultDependencyException;
 
-    EntityListResponse<SurveyVariantLogicDTO> getSurveyVariantLogicsPaged(Integer count, Integer page,
+    EntityListResponse<SurveyLogicTriggerDTO> getSurveyLogicTriggersPaged(Integer count, Integer page,
                                                                           Integer start, String sortField, String sortDir);
-    SurveyVariantLogic saveSurveyVariantLogic(SurveyVariantLogicDTO dto) throws ObjectNotFoundException;
-    SurveyVariantLogicDTO getSurveyVariantLogic(UUID id) throws ObjectNotFoundException;
-    void deleteSurveyVariantLogic(UUID id);
+    SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException;
+    SurveyLogicTriggerDTO getSurveyLogicTrigger(UUID id) throws ObjectNotFoundException;
+    void deleteSurveyLogicTrigger(UUID id);
+
+    EntityListResponse<SurveyPassingDTO> getSurveyPassingsPaged(UUID surveyId, UUID userId, String lastVisitIP, Integer count, Integer page,
+                                                                    Integer start, String sortField, String sortDir);
+    SurveyPassing saveSurveyPassing(SurveyPassingDTO dto) throws ObjectNotFoundException;
+    SurveyPassingDTO getSurveyPassing(UUID id) throws ObjectNotFoundException;
+    void deleteSurveyPassing(UUID id);
 }

@@ -4,24 +4,23 @@ import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.survey.model.SurveyQuestion;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class SurveyQuestionDTO extends IdObjectDTO {
     private UUID surveyPage;
-    private Integer sortOrder;
+    private Integer questionIndex;
     private String text;
     private UUID type;
     private Boolean required;
     private Boolean hidden;
     private List<SurveyAnswerVariantDTO> answers;
-    private SurveyVariantLogicDTO variantLogic;
+    private List<SurveyLogicTriggerDTO> logicTriggers;
 
     public static SurveyQuestionDTO prepare(SurveyQuestion surveyQuestion) {
         SurveyQuestionDTO model = new SurveyQuestionDTO();
         IdObjectDTO.prepare(model, surveyQuestion);
         model.setSurveyPage(surveyQuestion.getSurveyPage().getId());
-        model.setSortOrder(surveyQuestion.getSortOrder());
+        model.setQuestionIndex(surveyQuestion.getQuestionIndex());
         model.setText(surveyQuestion.getText());
         model.setType(surveyQuestion.getType());
         model.setRequired(surveyQuestion.getRequired());
@@ -37,12 +36,12 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         this.surveyPage = surveyPage;
     }
 
-    public Integer getSortOrder() {
-        return sortOrder;
+    public Integer getQuestionIndex() {
+        return questionIndex;
     }
 
-    public void setSortOrder(Integer sortOrder) {
-        this.sortOrder = sortOrder;
+    public void setQuestionIndex(Integer questionIndex) {
+        this.questionIndex = questionIndex;
     }
 
     public String getText() {
@@ -85,11 +84,11 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         this.answers = answers;
     }
 
-    public SurveyVariantLogicDTO getVariantLogic() {
-        return variantLogic;
+    public List<SurveyLogicTriggerDTO> getLogicTriggers() {
+        return logicTriggers;
     }
 
-    public void setVariantLogic(SurveyVariantLogicDTO variantLogic) {
-        this.variantLogic = variantLogic;
+    public void setLogicTriggers(List<SurveyLogicTriggerDTO> logicTriggers) {
+        this.logicTriggers = logicTriggers;
     }
 }

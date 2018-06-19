@@ -2,23 +2,25 @@ package com.gracelogic.platform.survey.dto.user;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 
 public class PageAnswersDTO {
     // question id, answer
     private HashMap<UUID, AnswerDTO> answers;
 
-    public String getQuestionIdsSeparatedByCommas() {
-        String str = "";
-        Set<UUID> ids = answers.keySet();
-        int i = 0;
-        for (UUID uuid : ids) {
-            str += "'" + uuid + "'";
-            i++;
-            if (i != ids.size()-1) str += ", ";
+    public boolean containsStoredFiles() {
+        for (Map.Entry<UUID, AnswerDTO> entry : answers.entrySet()) {
+            if (entry.getValue().getStoredFileId() != null) return true;
         }
-        return str;
+        return false;
+    }
+
+    public boolean containsNonTextAnswers() {
+        for (Map.Entry<UUID, AnswerDTO> entry : answers.entrySet()) {
+            if (entry.getValue().getAnswerId() != null) return true;
+        }
+        return false;
     }
 
     public String getAnswerIdsSeparatedByCommas() {

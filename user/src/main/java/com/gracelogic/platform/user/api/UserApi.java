@@ -75,7 +75,7 @@ public class UserApi extends AbstractAuthorizedController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Invalid credentials"),
             @ApiResponse(code = 423, message = "User blocked"),
-            @ApiResponse(code = 429, message = "Too many attemps"),
+            @ApiResponse(code = 429, message = "Too many attempts"),
             @ApiResponse(code = 422, message = "Not activated"),
             @ApiResponse(code = 510, message = "Not allowed IP"),
             @ApiResponse(code = 500, message = "Internal Server Error")})

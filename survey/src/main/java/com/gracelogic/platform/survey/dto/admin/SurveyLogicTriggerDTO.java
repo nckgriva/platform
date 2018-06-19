@@ -1,32 +1,42 @@
 package com.gracelogic.platform.survey.dto.admin;
 
 import com.gracelogic.platform.db.dto.IdObjectDTO;
-import com.gracelogic.platform.survey.model.SurveyVariantLogic;
+import com.gracelogic.platform.survey.model.SurveyLogicTrigger;
 
 import java.util.UUID;
 
-public class SurveyVariantLogicDTO extends IdObjectDTO {
-    private UUID answerVariant;
+public class SurveyLogicTriggerDTO extends IdObjectDTO {
+    private UUID surveyPage;
     private UUID surveyQuestion;
-    private boolean isSelectionRequired;
+    private UUID answerVariant;
+    private boolean isInteractionRequired;
     private UUID targetQuestion;
     private String newConclusion;
     private Integer pageIndex;
     private String newLink;
     private UUID logicType;
 
-    public static SurveyVariantLogicDTO prepare(SurveyVariantLogic variantLogic) {
-        SurveyVariantLogicDTO model = new SurveyVariantLogicDTO();
+    public static SurveyLogicTriggerDTO prepare(SurveyLogicTrigger variantLogic) {
+        SurveyLogicTriggerDTO model = new SurveyLogicTriggerDTO();
         IdObjectDTO.prepare(model, variantLogic);
+        model.setSurveyPage(variantLogic.getSurveyPage().getId());
         model.setSurveyQuestion(variantLogic.getSurveyQuestion().getId());
         model.setAnswerVariant(variantLogic.getAnswerVariant().getId());
-        model.setSelectionRequired(variantLogic.isSelectionRequired());
+        model.setInteractionRequired(variantLogic.isInteractionRequired());
         model.setTargetQuestion(variantLogic.getTargetQuestion().getId());
         model.setNewConclusion(variantLogic.getNewConclusion());
         model.setPageIndex(variantLogic.getPageIndex());
         model.setNewLink(variantLogic.getNewLink());
         model.setLogicType(variantLogic.getLogicType());
         return model;
+    }
+
+    public UUID getSurveyPage() {
+        return surveyPage;
+    }
+
+    public void setSurveyPage(UUID surveyPage) {
+        this.surveyPage = surveyPage;
     }
 
     public UUID getSurveyQuestion() {
@@ -43,14 +53,6 @@ public class SurveyVariantLogicDTO extends IdObjectDTO {
 
     public void setAnswerVariant(UUID answerVariant) {
         this.answerVariant = answerVariant;
-    }
-
-    public boolean isSelectionRequired() {
-        return isSelectionRequired;
-    }
-
-    public void setSelectionRequired(boolean selectionRequired) {
-        isSelectionRequired = selectionRequired;
     }
 
     public UUID getTargetQuestion() {
@@ -91,5 +93,13 @@ public class SurveyVariantLogicDTO extends IdObjectDTO {
 
     public void setLogicType(UUID logicType) {
         this.logicType = logicType;
+    }
+
+    public boolean isInteractionRequired() {
+        return isInteractionRequired;
+    }
+
+    public void setInteractionRequired(boolean interactionRequired) {
+        isInteractionRequired = interactionRequired;
     }
 }
