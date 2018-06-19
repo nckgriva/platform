@@ -6,7 +6,7 @@ import com.gracelogic.platform.survey.model.SurveyQuestionAnswer;
 import java.util.UUID;
 
 public class SurveyQuestionAnswerDTO extends IdObjectDTO {
-    private UUID surveyPassing;
+    private UUID surveySession;
     private UUID question;
     private UUID answerVariant;
     private String textAnswer;
@@ -15,7 +15,7 @@ public class SurveyQuestionAnswerDTO extends IdObjectDTO {
     public static SurveyQuestionAnswerDTO prepare(SurveyQuestionAnswer answer) {
         SurveyQuestionAnswerDTO model = new SurveyQuestionAnswerDTO();
         IdObjectDTO.prepare(model, answer);
-        model.setSurveyPassing(answer.getSurveyPassing().getId());
+        model.setSurveySession(answer.getSurveySession().getId());
         model.setQuestion(answer.getQuestion().getId());
         if (answer.getAnswerVariant() != null) model.setAnswerVariant(answer.getAnswerVariant().getId());
         model.setTextAnswer(answer.getTextAnswer());
@@ -24,12 +24,12 @@ public class SurveyQuestionAnswerDTO extends IdObjectDTO {
         return model;
     }
 
-    public UUID getSurveyPassing() {
-        return surveyPassing;
+    public UUID getSurveySession() {
+        return surveySession;
     }
 
-    public void setSurveyPassing(UUID surveyPassing) {
-        this.surveyPassing = surveyPassing;
+    public void setSurveySession(UUID surveySession) {
+        this.surveySession = surveySession;
     }
 
     public UUID getQuestion() {

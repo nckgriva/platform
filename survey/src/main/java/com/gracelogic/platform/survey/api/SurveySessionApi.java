@@ -4,12 +4,13 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.Path;
-import com.gracelogic.platform.survey.dto.admin.SurveyPassingDTO;
+import com.gracelogic.platform.survey.dto.admin.SurveySessionDTO;
 import com.gracelogic.platform.survey.dto.user.PageAnswersDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
-import com.gracelogic.platform.survey.model.SurveyPassing;
+import com.gracelogic.platform.survey.model.SurveySession;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
+import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
@@ -30,8 +31,8 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_SURVEY_PASSING)
-@Api(value = Path.API_SURVEY_PASSING, tags = {"Survey passing API"})
-public class SurveyPassingApi extends AbstractAuthorizedController {
+@Api(value = Path.API_SURVEY_PASSING, tags = {"Survey session API"})
+public class SurveySessionApi extends AbstractAuthorizedController {
 
     @Autowired
     private SurveyService surveyService;
@@ -45,13 +46,16 @@ public class SurveyPassingApi extends AbstractAuthorizedController {
             notes = "Get specified survey page",
             response = SurveyInteractionDTO.class
     )
-    @RequestMapping(method = RequestMethod.GET, value = "/{passing_id}/{page}")
+    @RequestMapping(method = RequestMethod.GET, value = "/{session_id}/{page}")
     @ResponseBody
-    public ResponseEntity getSurveyPage(@PathVariable(value = "passing_id") UUID surveyPassingId,
+    public ResponseEntity getSurveyPage(@PathVariable(value = "session_id") UUID surveySessionId,
                                         @PathVariable(value = "page") Integer pageIndex) {
         try {
-            SurveyInteractionDTO dto = surveyService.getSurveyPage(surveyPassingId, pageIndex);
+            SurveyInteractionDTO dto = surveyService.getSurveyPage(surveySessionId, pageIndex);
             return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (ForbiddenException forbiddenException) {
+            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
+                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException notFoundException) {
             return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
                     messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -63,13 +67,16 @@ public class SurveyPassingApi extends AbstractAuthorizedController {
             notes = "Saves user answers and returns SurveyInteractionDTO, which contains survey conclusion or next page",
             response = SurveyInteractionDTO.class
     )
-    @RequestMapping(method = RequestMethod.POST, value = "{passing_id}/save/")
+    @RequestMapping(method = RequestMethod.POST, value = "/{session_id}/save/")
     @ResponseBody
-    public ResponseEntity saveAnswersAndContinue(@PathVariable(value = "passing_id") UUID surveyPassingId,
+    public ResponseEntity saveAnswersAndContinue(@PathVariable(value = "session_id") UUID surveySessionId,
                                                  @RequestBody PageAnswersDTO pageAnswersDTO) {
         try {
-            SurveyInteractionDTO dto = surveyService.saveAnswersAndContinue(surveyPassingId, pageAnswersDTO);
+            SurveyInteractionDTO dto = surveyService.saveAnswersAndContinue(surveySessionId, pageAnswersDTO);
             return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (ForbiddenException forbiddenException) {
+            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
+                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException notFoundException) {
             return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
                     messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -81,12 +88,15 @@ public class SurveyPassingApi extends AbstractAuthorizedController {
             notes = "Restores last visited survey page",
             response = SurveyInteractionDTO.class
     )
-    @RequestMapping(method = RequestMethod.GET, value = "/{passing_id}/continue")
+    @RequestMapping(method = RequestMethod.GET, value = "/{session_id}/continue")
     @ResponseBody
-    public ResponseEntity continueSurvey(@PathVariable(value = "passing_id") UUID surveyPassingId) {
+    public ResponseEntity continueSurvey(@PathVariable(value = "session_id") UUID surveySessionId) {
         try {
-            SurveyInteractionDTO dto = surveyService.continueSurvey(surveyPassingId);
+            SurveyInteractionDTO dto = surveyService.continueSurvey(surveySessionId);
             return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (ForbiddenException forbiddenException) {
+            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
+                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException notFoundException) {
             return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
                     messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -94,8 +104,8 @@ public class SurveyPassingApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
-            value = "getSurveyPassingResults",
-            notes = "Get list of survey passing results",
+            value = "getSurveySessions",
+            notes = "Get list of survey sessions",
             response = EntityListResponse.class
     )
     @ApiResponses({
@@ -105,21 +115,21 @@ public class SurveyPassingApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY_RESULT:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getSurveyPassingResults(@RequestParam(value = "surveyId", required = false) UUID surveyId,
+    public ResponseEntity getSurveySessions(@RequestParam(value = "surveyId", required = false) UUID surveyId,
                                      @RequestParam(value = "userId", required = false) UUID userId,
                                      @RequestParam(value = "lastVisitIP", required = false) String lastVisitIP,
                                      @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                      @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                      @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                      @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
-        EntityListResponse<SurveyPassingDTO> results = surveyService.getSurveyPassingsPaged(surveyId, userId, lastVisitIP, count, null, start, sortField, sortDir);
-        return new ResponseEntity<EntityListResponse<SurveyPassingDTO>>(results, HttpStatus.OK);
+        EntityListResponse<SurveySessionDTO> results = surveyService.getSurveySessionsPaged(surveyId, userId, lastVisitIP, count, null, start, sortField, sortDir);
+        return new ResponseEntity<EntityListResponse<SurveySessionDTO>>(results, HttpStatus.OK);
     }
 
     @ApiOperation(
-            value = "getSurveyPassing",
+            value = "getSurveySession",
             notes = "Get survey passing",
-            response = SurveyPassingDTO.class
+            response = SurveySessionDTO.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -130,8 +140,8 @@ public class SurveyPassingApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity getSurveyPassing(@PathVariable(value = "id") UUID id) {
         try {
-            SurveyPassingDTO dto = surveyService.getSurveyPassing(id);
-            return new ResponseEntity<SurveyPassingDTO>(dto, HttpStatus.OK);
+            SurveySessionDTO dto = surveyService.getSurveySession(id);
+            return new ResponseEntity<SurveySessionDTO>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null,
                     LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -150,10 +160,10 @@ public class SurveyPassingApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY_RESULT:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
-    public ResponseEntity saveSurveyPassing(@RequestBody SurveyPassingDTO surveyPassingDTO) {
+    public ResponseEntity saveSurveyPassing(@RequestBody SurveySessionDTO surveySessionDTO) {
         try {
-            SurveyPassing surveyPassing = surveyService.saveSurveyPassing(surveyPassingDTO);
-            return new ResponseEntity<IDResponse>(new IDResponse(surveyPassing.getId()), HttpStatus.OK);
+            SurveySession surveySession = surveyService.saveSurveySession(surveySessionDTO);
+            return new ResponseEntity<IDResponse>(new IDResponse(surveySession.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
@@ -173,7 +183,7 @@ public class SurveyPassingApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity deleteSurveyPassing(@PathVariable(value = "id") UUID id) {
         try {
-            surveyService.deleteSurveyPassing(id);
+            surveyService.deleteSurveySession(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);

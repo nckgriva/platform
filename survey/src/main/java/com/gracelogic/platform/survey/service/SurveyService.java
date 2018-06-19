@@ -19,10 +19,10 @@ public interface SurveyService {
     SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId) throws ObjectNotFoundException;
 
     SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress) throws ObjectNotFoundException, ForbiddenException;
-    SurveyInteractionDTO saveAnswersAndContinue(UUID surveyPassingId, PageAnswersDTO dto) throws ObjectNotFoundException, ForbiddenException;
+    SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto) throws ObjectNotFoundException, ForbiddenException;
 
-    SurveyInteractionDTO getSurveyPage(UUID surveyPassingId, int pageIndex) throws ObjectNotFoundException, ForbiddenException;
-    SurveyInteractionDTO continueSurvey(UUID surveyPassingId) throws ObjectNotFoundException, ForbiddenException;
+    SurveyInteractionDTO getSurveyPage(UUID surveySessionId, int pageIndex) throws ObjectNotFoundException, ForbiddenException;
+    SurveyInteractionDTO continueSurvey(UUID surveySessionId) throws ObjectNotFoundException, ForbiddenException;
 
     EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir);
     Survey saveSurvey(SurveyDTO dto, AuthorizedUser user) throws ObjectNotFoundException;
@@ -53,13 +53,13 @@ public interface SurveyService {
     SurveyLogicTriggerDTO getSurveyLogicTrigger(UUID id) throws ObjectNotFoundException;
     void deleteSurveyLogicTrigger(UUID id);
 
-    EntityListResponse<SurveyPassingDTO> getSurveyPassingsPaged(UUID surveyId, UUID userId, String lastVisitIP, Integer count, Integer page,
-                                                                    Integer start, String sortField, String sortDir);
-    SurveyPassing saveSurveyPassing(SurveyPassingDTO dto) throws ObjectNotFoundException;
-    SurveyPassingDTO getSurveyPassing(UUID id) throws ObjectNotFoundException;
-    void deleteSurveyPassing(UUID id);
+    EntityListResponse<SurveySessionDTO> getSurveySessionsPaged(UUID surveyId, UUID userId, String lastVisitIP, Integer count, Integer page,
+                                                                Integer start, String sortField, String sortDir);
+    SurveySession saveSurveySession(SurveySessionDTO dto) throws ObjectNotFoundException;
+    SurveySessionDTO getSurveySession(UUID id) throws ObjectNotFoundException;
+    void deleteSurveySession(UUID id);
 
-    EntityListResponse<SurveyQuestionAnswerDTO> getSurveyQuestionAnswersPaged(UUID surveyPassingId, Integer count, Integer page,
+    EntityListResponse<SurveyQuestionAnswerDTO> getSurveyQuestionAnswersPaged(UUID surveySessionId, Integer count, Integer page,
                                                           Integer start, String sortField, String sortDir);
     SurveyQuestionAnswer saveSurveyQuestionAnswer(SurveyQuestionAnswerDTO dto) throws ObjectNotFoundException;
     SurveyQuestionAnswerDTO getSurveyQuestionAnswer(UUID id) throws ObjectNotFoundException;

@@ -5,16 +5,16 @@ import com.gracelogic.platform.survey.dto.admin.SurveyPageDTO;
 import java.util.UUID;
 
 public class SurveyInteractionDTO {
-    private UUID surveyPassingId;
+    private UUID surveySessionId;
     private SurveyPageDTO surveyPage;
     private SurveyConclusionDTO surveyConclusion;
 
-    public UUID getSurveyPassingId() {
-        return surveyPassingId;
+    public UUID getSurveySessionId() {
+        return surveySessionId;
     }
 
-    public void setSurveyPassingId(UUID surveyPassingId) {
-        this.surveyPassingId = surveyPassingId;
+    public void setSurveySessionId(UUID surveySessionId) {
+        this.surveySessionId = surveySessionId;
     }
 
     public SurveyPageDTO getSurveyPage() {

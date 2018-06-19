@@ -98,35 +98,35 @@ public class SurveyServiceImpl implements SurveyService {
             throw new ForbiddenException();
         }
 
-        SurveyPassing surveyPassing = new SurveyPassing();
-        surveyPassing.setStarted(new Date());
-        surveyPassing.setLastVisitIP(remoteAddress);
+        SurveySession surveySession = new SurveySession();
+        surveySession.setStarted(new Date());
+        surveySession.setLastVisitIP(remoteAddress);
         if (user != null) {
-            surveyPassing.setUser(idObjectService.getObjectById(User.class, user.getId()));
+            surveySession.setUser(idObjectService.getObjectById(User.class, user.getId()));
         }
 
         if (survey.getTimeLimit() != null && survey.getTimeLimit() > 0) {
             Calendar c = Calendar.getInstance();
             c.add(Calendar.MILLISECOND, survey.getTimeLimit().intValue());
-            surveyPassing.setExpirationDate(c.getTime());
+            surveySession.setExpirationDate(c.getTime());
         }
 
-        surveyPassing.setLastVisitedPageIndex(0);
-        surveyPassing.setLink(survey.getLink());
-        surveyPassing.setConclusion(survey.getConclusion());
-        surveyPassing.setSurvey(survey);
+        surveySession.setLastVisitedPageIndex(0);
+        surveySession.setLink(survey.getLink());
+        surveySession.setConclusion(survey.getConclusion());
+        surveySession.setSurvey(survey);
 
-        idObjectService.save(surveyPassing);
+        idObjectService.save(surveySession);
 
         SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
-        surveyInteractionDTO.setSurveyPassingId(surveyPassing.getId());
-        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveyPassing, 0));
+        surveyInteractionDTO.setSurveySessionId(surveySession.getId());
+        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, 0));
         return surveyInteractionDTO;
     }
 
-    private SurveyPageDTO getSurveyPage(SurveyPassing surveyPassing, int pageIndex) throws ObjectNotFoundException {
+    private SurveyPageDTO getSurveyPage(SurveySession surveySession, int pageIndex) throws ObjectNotFoundException {
         List<SurveyPage> surveyPages = idObjectService.getList(SurveyPage.class, null,
-                String.format("el.survey = '%s' AND el.pageIndex = '%s'", surveyPassing.getSurvey().getId(), pageIndex), null, null, null, null, 1);
+                String.format("el.survey = '%s' AND el.pageIndex = '%s'", surveySession.getSurvey().getId(), pageIndex), null, null, null, null, 1);
         if (surveyPages.size() <= 0) {
             throw new ObjectNotFoundException();
         }
@@ -180,54 +180,54 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyInteractionDTO getSurveyPage(UUID surveyPassingId, int pageIndex)
+    public SurveyInteractionDTO getSurveyPage(UUID surveySessionId, int pageIndex)
             throws ObjectNotFoundException, ForbiddenException {
-        SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
+        SurveySession surveySession = idObjectService.getObjectById(SurveySession.class, surveySessionId);
 
-        if (surveyPassing == null) throw new ObjectNotFoundException();
-        if (surveyPassing.getEnded() != null) throw new ForbiddenException();
-        if (surveyPassing.getExpirationDate() != null && surveyPassing.getExpirationDate().before(new Date())) throw new ForbiddenException();
+        if (surveySession == null) throw new ObjectNotFoundException();
+        if (surveySession.getEnded() != null) throw new ForbiddenException();
+        if (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(new Date())) throw new ForbiddenException();
 
-        surveyPassing.setLastVisitedPageIndex(pageIndex);
-        idObjectService.save(surveyPassing);
+        surveySession.setLastVisitedPageIndex(pageIndex);
+        idObjectService.save(surveySession);
 
         SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
-        surveyInteractionDTO.setSurveyPassingId(surveyPassing.getId());
-        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveyPassing, pageIndex));
+        surveyInteractionDTO.setSurveySessionId(surveySession.getId());
+        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, pageIndex));
 
         return surveyInteractionDTO;
     }
 
     @Override
-    public SurveyInteractionDTO continueSurvey(UUID surveyPassingId) throws ObjectNotFoundException, ForbiddenException {
-        SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
-        if (surveyPassing == null) throw new ObjectNotFoundException();
-        if (surveyPassing.getEnded() != null) throw new ForbiddenException();
-        if (surveyPassing.getExpirationDate() != null && surveyPassing.getExpirationDate().before(new Date())) throw new ForbiddenException();
+    public SurveyInteractionDTO continueSurvey(UUID surveySessionId) throws ObjectNotFoundException, ForbiddenException {
+        SurveySession surveySession = idObjectService.getObjectById(SurveySession.class, surveySessionId);
+        if (surveySession == null) throw new ObjectNotFoundException();
+        if (surveySession.getEnded() != null) throw new ForbiddenException();
+        if (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(new Date())) throw new ForbiddenException();
 
         SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
-        surveyInteractionDTO.setSurveyPassingId(surveyPassing.getId());
-        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveyPassing, surveyPassing.getLastVisitedPageIndex()));
+        surveyInteractionDTO.setSurveySessionId(surveySession.getId());
+        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, surveySession.getLastVisitedPageIndex()));
 
         return surveyInteractionDTO;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyInteractionDTO saveAnswersAndContinue(UUID surveyPassingId, PageAnswersDTO dto) throws ObjectNotFoundException, ForbiddenException {
-        final SurveyPassing surveyPassing = idObjectService.getObjectById(SurveyPassing.class, surveyPassingId);
+    public SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto) throws ObjectNotFoundException, ForbiddenException {
+        final SurveySession surveySession = idObjectService.getObjectById(SurveySession.class, surveySessionId);
 
-        if (surveyPassing == null) throw new ObjectNotFoundException();
-        if (surveyPassing.getEnded() != null) throw new ForbiddenException();
-        if (surveyPassing.getExpirationDate() != null && surveyPassing.getExpirationDate().before(new Date())) throw new ForbiddenException();
+        if (surveySession == null) throw new ObjectNotFoundException();
+        if (surveySession.getEnded() != null) throw new ForbiddenException();
+        if (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(new Date())) throw new ForbiddenException();
 
         boolean finishSurvey = false;
 
-        int nextPage = surveyPassing.getLastVisitedPageIndex()+1;
+        int nextPage = surveySession.getLastVisitedPageIndex()+1;
 
         // список вопросов от полученных ответов
         List<SurveyQuestion> surveyQuestions = idObjectService.getList(SurveyQuestion.class, null,
-                String.format("el.surveyPage = '%s'", surveyPassing.getLastVisitedPageIndex()),
+                String.format("el.surveyPage = '%s'", surveySession.getLastVisitedPageIndex()),
                 null, "el.questionIndex", null, null, null);
 
         // список вариантов ответов
@@ -242,7 +242,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         HashMap<SurveyQuestion, List<SurveyLogicTrigger>> triggersHashMap = asLogicTriggerListHashMap(
                 idObjectService.getList(SurveyLogicTrigger.class, null,
-                String.format("el.surveyPage = '%s'", surveyPassing.getLastVisitedPageIndex()),
+                String.format("el.surveyPage = '%s'", surveySession.getLastVisitedPageIndex()),
                         null, null, null, null));
 
         List<SurveyLogicTrigger> pageTriggers = triggersHashMap.get(null);
@@ -283,11 +283,11 @@ public class SurveyServiceImpl implements SurveyService {
 
                 if (triggered) {
                     if (trigger.getLogicActionType() == DataConstants.LogicActionType.CHANGE_CONCLUSION.getValue()) {
-                        surveyPassing.setConclusion(trigger.getNewConclusion());
+                        surveySession.setConclusion(trigger.getNewConclusion());
                     }
 
                     if (trigger.getLogicActionType() == DataConstants.LogicActionType.CHANGE_LINK.getValue()) {
-                        surveyPassing.setLink(trigger.getNewLink());
+                        surveySession.setLink(trigger.getNewLink());
                     }
 
                     if (trigger.getLogicActionType() == DataConstants.LogicActionType.GO_TO_PAGE.getValue()) {
@@ -299,7 +299,7 @@ public class SurveyServiceImpl implements SurveyService {
                 }
             }
 
-            SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveyPassing,
+            SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveySession,
                     question, answerVariant, textAnswer,
                     null); // TODO stored file
 
@@ -315,17 +315,17 @@ public class SurveyServiceImpl implements SurveyService {
         SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
         if (finishSurvey) {
             SurveyConclusionDTO surveyConclusionDTO = new SurveyConclusionDTO();
-            surveyConclusionDTO.setConclusion(surveyPassing.getConclusion());
-            surveyConclusionDTO.setLink(surveyPassing.getLink());
+            surveyConclusionDTO.setConclusion(surveySession.getConclusion());
+            surveyConclusionDTO.setLink(surveySession.getLink());
             surveyInteractionDTO.setSurveyConclusion(surveyConclusionDTO);
 
-            surveyPassing.setEnded(new Date());
+            surveySession.setEnded(new Date());
         } else {
-            surveyInteractionDTO.setSurveyPage(getSurveyPage(surveyPassing, nextPage));
-            surveyPassing.setLastVisitedPageIndex(nextPage);
+            surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, nextPage));
+            surveySession.setLastVisitedPageIndex(nextPage);
         }
 
-        idObjectService.save(surveyPassing);
+        idObjectService.save(surveySession);
         return surveyInteractionDTO;
     }
 
@@ -659,7 +659,7 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyPassingDTO> getSurveyPassingsPaged(UUID surveyId, UUID userId, String lastVisitIP,
+    public EntityListResponse<SurveySessionDTO> getSurveySessionsPaged(UUID surveyId, UUID userId, String lastVisitIP,
                                                                        Integer count, Integer page, Integer start,
                                                                        String sortField, String sortDir) {
         String countFetches = "";
@@ -679,21 +679,21 @@ public class SurveyServiceImpl implements SurveyService {
             cause += String.format("and el.survey = '%s' ", surveyId);
         }
 
-        int totalCount = idObjectService.getCount(SurveyPassing.class, null, countFetches, cause, params);
+        int totalCount = idObjectService.getCount(SurveySession.class, null, countFetches, cause, params);
         int totalPages = ((totalCount / count)) + 1;
         int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<SurveyPassingDTO> entityListResponse = new EntityListResponse<SurveyPassingDTO>();
-        entityListResponse.setEntity("surveyPassing");
+        EntityListResponse<SurveySessionDTO> entityListResponse = new EntityListResponse<SurveySessionDTO>();
+        entityListResponse.setEntity("surveySession");
         entityListResponse.setPage(page);
         entityListResponse.setPages(totalPages);
         entityListResponse.setTotalCount(totalCount);
 
-        List<SurveyPassing> items = idObjectService.getList(SurveyPassing.class, null, cause, params, sortField, sortDir, startRecord, count);
+        List<SurveySession> items = idObjectService.getList(SurveySession.class, null, cause, params, sortField, sortDir, startRecord, count);
 
         entityListResponse.setPartCount(items.size());
-        for (SurveyPassing e : items) {
-            SurveyPassingDTO el = SurveyPassingDTO.prepare(e);
+        for (SurveySession e : items) {
+            SurveySessionDTO el = SurveySessionDTO.prepare(e);
             entityListResponse.addData(el);
         }
 
@@ -702,15 +702,15 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyPassing saveSurveyPassing(SurveyPassingDTO dto) throws ObjectNotFoundException {
-        SurveyPassing entity;
+    public SurveySession saveSurveySession(SurveySessionDTO dto) throws ObjectNotFoundException {
+        SurveySession entity;
         if (dto.getId() != null) {
-            entity = idObjectService.getObjectById(SurveyPassing.class, dto.getId());
+            entity = idObjectService.getObjectById(SurveySession.class, dto.getId());
             if (entity == null) {
                 throw new ObjectNotFoundException();
             }
         } else {
-            entity = new SurveyPassing();
+            entity = new SurveySession();
         }
 
         if (dto.getUser() != null) {
@@ -728,27 +728,27 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public SurveyPassingDTO getSurveyPassing(UUID id) throws ObjectNotFoundException {
-        SurveyPassing entity = idObjectService.getObjectById(SurveyPassing.class, id);
+    public SurveySessionDTO getSurveySession(UUID id) throws ObjectNotFoundException {
+        SurveySession entity = idObjectService.getObjectById(SurveySession.class, id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
-        return SurveyPassingDTO.prepare(entity);
+        return SurveySessionDTO.prepare(entity);
     }
 
     @Override
-    public EntityListResponse<SurveyQuestionAnswerDTO> getSurveyQuestionAnswersPaged(UUID surveyPassingId,
+    public EntityListResponse<SurveyQuestionAnswerDTO> getSurveyQuestionAnswersPaged(UUID surveySessionId,
                                                                        Integer count, Integer page, Integer start,
                                                                        String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
 
-        if (surveyPassingId != null) {
-            cause += String.format("and el.surveyPassing = '%s' ", surveyPassingId);
+        if (surveySessionId != null) {
+            cause += String.format("and el.surveySession = '%s' ", surveySessionId);
         }
 
-        int totalCount = idObjectService.getCount(SurveyPassing.class, null, countFetches, cause, params);
+        int totalCount = idObjectService.getCount(SurveySession.class, null, countFetches, cause, params);
         int totalPages = ((totalCount / count)) + 1;
         int startRecord = page != null ? (page * count) - count : start;
 
@@ -783,7 +783,7 @@ public class SurveyServiceImpl implements SurveyService {
             entity = new SurveyQuestionAnswer();
         }
 
-        entity.setSurveyPassing(idObjectService.getObjectById(SurveyPassing.class, dto.getSurveyPassing()));
+        entity.setSurveySession(idObjectService.getObjectById(SurveySession.class, dto.getSurveySession()));
         entity.setQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getQuestion()));
         if (dto.getAnswerVariant() != null) entity.setAnswerVariant(idObjectService.getObjectById(SurveyAnswerVariant.class, dto.getAnswerVariant()));
         entity.setTextAnswer(dto.getTextAnswer());
@@ -894,9 +894,9 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteSurveyPassing(UUID id)
+    public void deleteSurveySession(UUID id)
     {
-        idObjectService.delete(SurveyQuestionAnswer.class, String.format("el.surveyPassing = '%s'", id), null);
+        idObjectService.delete(SurveyQuestionAnswer.class, String.format("el.surveySession = '%s'", id), null);
         idObjectService.delete(SurveyLogicTrigger.class, id);
     }
 

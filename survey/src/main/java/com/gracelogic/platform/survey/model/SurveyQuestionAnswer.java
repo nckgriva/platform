@@ -28,8 +28,8 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     private Date changed;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @Column(name = "survey_passing_id", nullable = false)
-    private SurveyPassing surveyPassing;
+    @Column(name = "survey_session_id", nullable = false)
+    private SurveySession surveySession;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @Column(name = "question_id", nullable = false)
@@ -48,9 +48,9 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
 
     public SurveyQuestionAnswer() {}
 
-    public SurveyQuestionAnswer(SurveyPassing surveyPassing, SurveyQuestion question, SurveyAnswerVariant answerVariant,
+    public SurveyQuestionAnswer(SurveySession surveySession, SurveyQuestion question, SurveyAnswerVariant answerVariant,
                                 String textAnswer, StoredFile storedFile) {
-        this.surveyPassing = surveyPassing;
+        this.surveySession = surveySession;
         this.question = question;
         this.answerVariant = answerVariant;
         this.textAnswer = textAnswer;
@@ -87,12 +87,12 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
         this.changed = changed;
     }
 
-    public SurveyPassing getSurveyPassing() {
-        return surveyPassing;
+    public SurveySession getSurveySession() {
+        return surveySession;
     }
 
-    public void setSurveyPassing(SurveyPassing surveyPassing) {
-        this.surveyPassing = surveyPassing;
+    public void setSurveySession(SurveySession surveySession) {
+        this.surveySession = surveySession;
     }
 
     public SurveyAnswerVariant getAnswerVariant() {

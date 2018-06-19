@@ -13,6 +13,7 @@ import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.model.Survey;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
+import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
@@ -69,6 +70,9 @@ public class SurveyApi extends AbstractAuthorizedController {
         try {
             SurveyInteractionDTO dto = surveyService.startSurvey(surveyId, getUser(), request.getRemoteAddr());
             return new ResponseEntity<SurveyInteractionDTO>(dto, HttpStatus.OK);
+        } catch (ForbiddenException forbiddenException) {
+            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
+                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException notFoundException) {
             return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
                     messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);

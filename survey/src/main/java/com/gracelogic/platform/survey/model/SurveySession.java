@@ -13,7 +13,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_PASSING")
-public class SurveyPassing extends IdObject<UUID> {
+public class SurveySession extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @Access(AccessType.PROPERTY)

@@ -1,12 +1,12 @@
 package com.gracelogic.platform.survey.dto.admin;
 
 import com.gracelogic.platform.db.dto.IdObjectDTO;
-import com.gracelogic.platform.survey.model.SurveyPassing;
+import com.gracelogic.platform.survey.model.SurveySession;
 
 import java.util.Date;
 import java.util.UUID;
 
-public class SurveyPassingDTO extends IdObjectDTO {
+public class SurveySessionDTO extends IdObjectDTO {
     private UUID user;
     private String lastVisitIP;
     private UUID survey;
@@ -15,16 +15,16 @@ public class SurveyPassingDTO extends IdObjectDTO {
     private Date expirationDate;
     private Integer lastVisitedPageIndex;
 
-    public static SurveyPassingDTO prepare(SurveyPassing surveyPassing) {
-        SurveyPassingDTO model = new SurveyPassingDTO();
-        IdObjectDTO.prepare(model, surveyPassing);
-        model.setUser(surveyPassing.getUser().getId());
-        model.setLastVisitIP(surveyPassing.getLastVisitIP());
-        model.setSurvey(surveyPassing.getSurvey().getId());
-        model.setStarted(surveyPassing.getStarted());
-        model.setEnded(surveyPassing.getEnded());
-        model.setLastVisitedPageIndex(surveyPassing.getLastVisitedPageIndex());
-        model.setExpirationDate(surveyPassing.getExpirationDate());
+    public static SurveySessionDTO prepare(SurveySession surveySession) {
+        SurveySessionDTO model = new SurveySessionDTO();
+        IdObjectDTO.prepare(model, surveySession);
+        model.setUser(surveySession.getUser().getId());
+        model.setLastVisitIP(surveySession.getLastVisitIP());
+        model.setSurvey(surveySession.getSurvey().getId());
+        model.setStarted(surveySession.getStarted());
+        model.setEnded(surveySession.getEnded());
+        model.setLastVisitedPageIndex(surveySession.getLastVisitedPageIndex());
+        model.setExpirationDate(surveySession.getExpirationDate());
         return model;
     }
 
