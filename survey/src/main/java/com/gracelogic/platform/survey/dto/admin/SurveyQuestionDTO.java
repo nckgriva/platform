@@ -13,6 +13,10 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private UUID type;
     private Boolean required;
     private Boolean hidden;
+    private Long scaleMinValue;
+    private Long scaleMaxValue;
+    private String attachmentExtensions;
+
     private List<SurveyAnswerVariantDTO> answers;
     private List<SurveyLogicTriggerDTO> logicTriggers;
 
@@ -25,6 +29,9 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         model.setType(surveyQuestion.getType());
         model.setRequired(surveyQuestion.getRequired());
         model.setHidden(surveyQuestion.getHidden());
+        model.setScaleMinValue(surveyQuestion.getScaleMinValue());
+        model.setScaleMaxValue(surveyQuestion.getScaleMaxValue());
+        model.setAttachmentExtensions(surveyQuestion.getAttachmentExtensions());
         return model;
     }
 
@@ -74,6 +81,30 @@ public class SurveyQuestionDTO extends IdObjectDTO {
 
     public void setHidden(Boolean hidden) {
         this.hidden = hidden;
+    }
+
+    public Long getScaleMinValue() {
+        return scaleMinValue;
+    }
+
+    public void setScaleMinValue(Long scaleMinValue) {
+        this.scaleMinValue = scaleMinValue;
+    }
+
+    public Long getScaleMaxValue() {
+        return scaleMaxValue;
+    }
+
+    public void setScaleMaxValue(Long scaleMaxValue) {
+        this.scaleMaxValue = scaleMaxValue;
+    }
+
+    public String getAttachmentExtensions() {
+        return attachmentExtensions;
+    }
+
+    public void setAttachmentExtensions(String attachmentExtensions) {
+        this.attachmentExtensions = attachmentExtensions;
     }
 
     public List<SurveyAnswerVariantDTO> getAnswers() {

@@ -232,7 +232,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         // список вариантов ответов
         HashMap<SurveyQuestion, SurveyAnswerVariant> surveyAnswersHashMap = new HashMap<>();
-
+        
         if (dto.containsNonTextAnswers()) {
             surveyAnswersHashMap = asAnswerVariantHashMap(
                     idObjectService.getList(SurveyAnswerVariant.class, null,
@@ -581,6 +581,9 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setSurveyPage(idObjectService.getObjectById(SurveyPage.class, dto.getSurveyPage()));
         entity.setText(dto.getText());
         entity.setType(dto.getType());
+        entity.setScaleMinValue(dto.getScaleMinValue());
+        entity.setScaleMaxValue(dto.getScaleMaxValue());
+        entity.setAttachmentExtensions(dto.getAttachmentExtensions());
         idObjectService.save(entity);
         return entity;
     }

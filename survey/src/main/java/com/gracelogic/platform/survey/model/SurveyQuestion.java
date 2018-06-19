@@ -46,6 +46,15 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "is_hidden", nullable = false)
     private Boolean hidden;
 
+    @Column(name = "scale_min_value", nullable = true)
+    private Long scaleMinValue;
+
+    @Column(name = "scale_max_value", nullable = true)
+    private Long scaleMaxValue;
+
+    @Column(name = "attachment_extensions", nullable = true)
+    private String attachmentExtensions;
+
     @Override
     public UUID getId() {
         return id;
@@ -100,6 +109,14 @@ public class SurveyQuestion extends IdObject<UUID> {
         this.text = text;
     }
 
+    public UUID getType() {
+        return type;
+    }
+
+    public void setType(UUID type) {
+        this.type = type;
+    }
+
     public Boolean getRequired() {
         return required;
     }
@@ -116,27 +133,27 @@ public class SurveyQuestion extends IdObject<UUID> {
         this.hidden = hidden;
     }
 
-    public boolean isRequired() {
-        return required;
+    public Long getScaleMinValue() {
+        return scaleMinValue;
     }
 
-    public void setRequired(boolean required) {
-        this.required = required;
+    public void setScaleMinValue(Long scaleMinValue) {
+        this.scaleMinValue = scaleMinValue;
     }
 
-    public boolean isHidden() {
-        return hidden;
+    public Long getScaleMaxValue() {
+        return scaleMaxValue;
     }
 
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
+    public void setScaleMaxValue(Long scaleMaxValue) {
+        this.scaleMaxValue = scaleMaxValue;
     }
 
-    public UUID getType() {
-        return type;
+    public String getAttachmentExtensions() {
+        return attachmentExtensions;
     }
 
-    public void setType(UUID type) {
-        this.type = type;
+    public void setAttachmentExtensions(String attachmentExtensions) {
+        this.attachmentExtensions = attachmentExtensions;
     }
 }
