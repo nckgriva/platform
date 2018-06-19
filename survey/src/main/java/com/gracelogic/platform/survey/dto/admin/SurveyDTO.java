@@ -17,8 +17,8 @@ public class SurveyDTO extends IdObjectDTO {
     private Integer maximumRespondents;
     private Long timeLimit;
     private UUID participationType;
-    private UUID answerSavingType;
     private UUID owner;
+    private Integer maxAttempts;
 
     public static SurveyDTO prepare(Survey survey) {
         SurveyDTO model = new SurveyDTO();
@@ -33,8 +33,8 @@ public class SurveyDTO extends IdObjectDTO {
         model.setMaximumRespondents(survey.getMaximumRespondents());
         model.setTimeLimit(survey.getTimeLimit());
         model.setParticipationType(survey.getParticipationType());
-        model.setAnswerSavingType(survey.getAnswerSavingType());
         model.setOwner(survey.getOwner().getId());
+        model.setMaxAttempts(survey.getMaxAttempts());
         return model;
     }
 
@@ -126,11 +126,11 @@ public class SurveyDTO extends IdObjectDTO {
         this.participationType = participationType;
     }
 
-    public UUID getAnswerSavingType() {
-        return answerSavingType;
+    public Integer getMaxAttempts() {
+        return maxAttempts;
     }
 
-    public void setAnswerSavingType(UUID answerSavingType) {
-        this.answerSavingType = answerSavingType;
+    public void setMaxAttempts(Integer maxAttempts) {
+        this.maxAttempts = maxAttempts;
     }
 }

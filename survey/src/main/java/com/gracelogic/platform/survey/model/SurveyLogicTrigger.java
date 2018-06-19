@@ -68,7 +68,7 @@ public class SurveyLogicTrigger extends IdObject<UUID> {
 
     @Column(name = "logic_type", nullable = false)
     @org.hibernate.annotations.Type(type = "pg-uuid")
-    private UUID logicType;
+    private UUID logicActionType;
 
     @Override
     public UUID getId() {
@@ -164,11 +164,11 @@ public class SurveyLogicTrigger extends IdObject<UUID> {
         this.newLink = newLink;
     }
 
-    public UUID getLogicType() {
-        return logicType;
+    public UUID getLogicActionType() {
+        return logicActionType;
     }
 
-    public void setLogicType(UUID logicType) {
-        this.logicType = logicType;
+    public void setLogicActionType(UUID logicActionType) {
+        this.logicActionType = logicActionType;
     }
 }

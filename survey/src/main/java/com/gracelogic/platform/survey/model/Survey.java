@@ -62,8 +62,8 @@ public class Survey extends IdObject<UUID> {
     @Column(name = "participation_type", nullable = false)
     private UUID participationType;
 
-    @Column(name = "answer_saving_type", nullable = false)
-    private UUID answerSavingType;
+    @Column(name = "max_attempts", nullable = true)
+    private Integer maxAttempts;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "OWNER_USER_ID", nullable = false)
@@ -187,19 +187,19 @@ public class Survey extends IdObject<UUID> {
         this.participationType = participationType;
     }
 
-    public UUID getAnswerSavingType() {
-        return answerSavingType;
-    }
-
-    public void setAnswerSavingType(UUID answerSavingType) {
-        this.answerSavingType = answerSavingType;
-    }
-
     public String getLink() {
         return link;
     }
 
     public void setLink(String link) {
         this.link = link;
+    }
+
+    public Integer getMaxAttempts() {
+        return maxAttempts;
+    }
+
+    public void setMaxAttempts(Integer maxAttempts) {
+        this.maxAttempts = maxAttempts;
     }
 }

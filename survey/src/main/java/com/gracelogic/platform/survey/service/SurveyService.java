@@ -57,4 +57,10 @@ public interface SurveyService {
     SurveyPassing saveSurveyPassing(SurveyPassingDTO dto) throws ObjectNotFoundException;
     SurveyPassingDTO getSurveyPassing(UUID id) throws ObjectNotFoundException;
     void deleteSurveyPassing(UUID id);
+
+    EntityListResponse<SurveyQuestionAnswerDTO> getSurveyQuestionAnswersPaged(UUID surveyPassingId, Integer count, Integer page,
+                                                          Integer start, String sortField, String sortDir);
+    SurveyQuestionAnswer saveSurveyQuestionAnswer(SurveyQuestionAnswerDTO dto) throws ObjectNotFoundException;
+    SurveyQuestionAnswerDTO getSurveyQuestionAnswer(UUID id) throws ObjectNotFoundException;
+    void deleteSurveyQuestionAnswer(UUID id);
 }

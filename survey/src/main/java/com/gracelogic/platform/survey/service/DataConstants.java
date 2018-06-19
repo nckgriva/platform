@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class DataConstants {
 
-    public enum LogicType {
+    public enum LogicActionType {
         /**
          * Hides a question on client machine
          */
@@ -38,28 +38,7 @@ public class DataConstants {
 
         private UUID value;
 
-        LogicType(UUID value) {
-            this.value = value;
-        }
-
-        public UUID getValue() {
-            return value;
-        }
-    }
-
-    public enum AnswerSavingType {
-        /**
-         * All answers from single page received in PageAnswersDTO
-         */
-        DEFAULT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
-        /**
-         * Sends single answer in AnswerDTO when it was selected by user
-         */
-        INSTANT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72"));
-
-        private UUID value;
-
-        AnswerSavingType(UUID value) {
+        LogicActionType(UUID value) {
             this.value = value;
         }
 
@@ -69,10 +48,6 @@ public class DataConstants {
     }
 
     public enum ParticipationType {
-        /**
-         * All users can participate in survey as many times as they like
-         */
-        UNLIMITED(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
         /**
          * Participation is limited by cookies
          */

@@ -27,8 +27,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Controller
-@RequestMapping(value = Path.API_SURVEY_QUESTION_ANSWER_VARIANT)
-@Api(value = Path.API_SURVEY_QUESTION_ANSWER_VARIANT, tags = {"Survey variant logic API"})
+@RequestMapping(value = Path.API_SURVEY_LOGIC)
+@Api(value = Path.API_SURVEY_LOGIC, tags = {"Survey logic triggers API"})
 public class SurveyLogicTriggerApi extends AbstractAuthorizedController {
     @Autowired
     private SurveyService surveyService;

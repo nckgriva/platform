@@ -14,20 +14,20 @@ public class SurveyLogicTriggerDTO extends IdObjectDTO {
     private String newConclusion;
     private Integer pageIndex;
     private String newLink;
-    private UUID logicType;
+    private UUID logicActionType;
 
-    public static SurveyLogicTriggerDTO prepare(SurveyLogicTrigger variantLogic) {
+    public static SurveyLogicTriggerDTO prepare(SurveyLogicTrigger trigger) {
         SurveyLogicTriggerDTO model = new SurveyLogicTriggerDTO();
-        IdObjectDTO.prepare(model, variantLogic);
-        model.setSurveyPage(variantLogic.getSurveyPage().getId());
-        model.setSurveyQuestion(variantLogic.getSurveyQuestion().getId());
-        model.setAnswerVariant(variantLogic.getAnswerVariant().getId());
-        model.setInteractionRequired(variantLogic.isInteractionRequired());
-        model.setTargetQuestion(variantLogic.getTargetQuestion().getId());
-        model.setNewConclusion(variantLogic.getNewConclusion());
-        model.setPageIndex(variantLogic.getPageIndex());
-        model.setNewLink(variantLogic.getNewLink());
-        model.setLogicType(variantLogic.getLogicType());
+        IdObjectDTO.prepare(model, trigger);
+        model.setSurveyPage(trigger.getSurveyPage().getId());
+        if (trigger.getSurveyQuestion() != null) model.setSurveyQuestion(trigger.getSurveyQuestion().getId());
+        if (trigger.getAnswerVariant() != null) model.setAnswerVariant(trigger.getAnswerVariant().getId());
+        model.setInteractionRequired(trigger.isInteractionRequired());
+        if (trigger.getTargetQuestion() != null) model.setTargetQuestion(trigger.getTargetQuestion().getId());
+        model.setNewConclusion(trigger.getNewConclusion());
+        model.setPageIndex(trigger.getPageIndex());
+        model.setNewLink(trigger.getNewLink());
+        model.setLogicActionType(trigger.getLogicActionType());
         return model;
     }
 
@@ -87,12 +87,12 @@ public class SurveyLogicTriggerDTO extends IdObjectDTO {
         this.newLink = newLink;
     }
 
-    public UUID getLogicType() {
-        return logicType;
+    public UUID getLogicActionType() {
+        return logicActionType;
     }
 
-    public void setLogicType(UUID logicType) {
-        this.logicType = logicType;
+    public void setLogicActionType(UUID logicActionType) {
+        this.logicActionType = logicActionType;
     }
 
     public boolean isInteractionRequired() {

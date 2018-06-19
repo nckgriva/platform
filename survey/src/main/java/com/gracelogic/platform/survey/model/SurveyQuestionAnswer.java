@@ -46,6 +46,8 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     @Column(name = "answer_stored_file", nullable = true)
     private StoredFile storedFile; // Для хранения прикрепленного пользователем файла
 
+    public SurveyQuestionAnswer() {}
+
     public SurveyQuestionAnswer(SurveyPassing surveyPassing, SurveyQuestion question, SurveyAnswerVariant answerVariant,
                                 String textAnswer, StoredFile storedFile) {
         this.surveyPassing = surveyPassing;

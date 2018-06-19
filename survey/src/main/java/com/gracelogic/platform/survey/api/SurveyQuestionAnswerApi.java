@@ -5,10 +5,10 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.Path;
-import com.gracelogic.platform.survey.dto.admin.SurveyQuestionDTO;
+import com.gracelogic.platform.survey.dto.admin.SurveyQuestionAnswerDTO;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
 import com.gracelogic.platform.survey.exception.ResultDependencyException;
-import com.gracelogic.platform.survey.model.SurveyQuestion;
+import com.gracelogic.platform.survey.model.SurveyQuestionAnswer;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
@@ -27,9 +27,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @Controller
-@RequestMapping(value = Path.API_SURVEY_QUESTION)
-@Api(value = Path.API_SURVEY_QUESTION, tags = {"Survey question API"})
-public class SurveyQuestionApi extends AbstractAuthorizedController {
+@RequestMapping(value = Path.API_SURVEY_ANSWER)
+@Api(value = Path.API_SURVEY_ANSWER, tags = {"Survey answer API"})
+public class SurveyQuestionAnswerApi extends AbstractAuthorizedController {
     @Autowired
     private SurveyService surveyService;
 
@@ -38,44 +38,44 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
     private ResourceBundleMessageSource messageSource;
 
     @ApiOperation(
-            value = "getSurveyQuestions",
-            notes = "Get list of survey questions",
+            value = "getSurveyQuestionAnswers",
+            notes = "Get list of survey question answers",
             response =  EntityListResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
-    @PreAuthorize("hasAuthority('SURVEY:SHOW')")
+    @PreAuthorize("hasAuthority('SURVEY_RESULT:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getSurveyQuestions(@RequestParam(value = "text", required = false) String text,
-                                     @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                     @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                     @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                     @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+    public ResponseEntity getSurveyQuestionAnswers(@RequestParam(value = "surveyPassingId", required = false) UUID surveyPassingId,
+                                             @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                             @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                             @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                             @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
 
-        EntityListResponse<SurveyQuestionDTO> properties = surveyService.getSurveyQuestionsPaged(text, count, null, start, sortField, sortDir);
-        return new ResponseEntity<EntityListResponse<SurveyQuestionDTO>>(properties, HttpStatus.OK);
+        EntityListResponse<SurveyQuestionAnswerDTO> properties = surveyService.getSurveyQuestionAnswersPaged(surveyPassingId, count, null, start, sortField, sortDir);
+        return new ResponseEntity<EntityListResponse<SurveyQuestionAnswerDTO>>(properties, HttpStatus.OK);
     }
 
     @ApiOperation(
-            value = "getSurveyQuestion",
+            value = "getSurveyQuestionAnswer",
             notes = "Get survey question",
-            response = SurveyQuestionDTO.class
+            response = SurveyQuestionAnswerDTO.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
-    @PreAuthorize("hasAuthority('SURVEY:SHOW')")
+    @PreAuthorize("hasAuthority('SURVEY_RESULT:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
-    public ResponseEntity getSurveyQuestion(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity getSurveyQuestionAnswer(@PathVariable(value = "id") UUID id) {
         try {
-            SurveyQuestionDTO dto = surveyService.getSurveyQuestion(id);
-            return new ResponseEntity<SurveyQuestionDTO>(dto, HttpStatus.OK);
+            SurveyQuestionAnswerDTO dto = surveyService.getSurveyQuestionAnswer(id);
+            return new ResponseEntity<SurveyQuestionAnswerDTO>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null,
                     LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -83,7 +83,7 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
-            value = "saveSurveyQuestion",
+            value = "saveSurveyQuestionAnswer",
             notes = "Save survey question",
             response = IDResponse.class
     )
@@ -91,13 +91,13 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
-    @PreAuthorize("hasAuthority('SURVEY:SAVE')")
+    @PreAuthorize("hasAuthority('SURVEY_RESULT:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
-    public ResponseEntity saveSurveyQuestion(@RequestBody SurveyQuestionDTO surveyQuestionDTO) {
+    public ResponseEntity saveSurveyQuestionAnswer(@RequestBody SurveyQuestionAnswerDTO surveyQuestionAnswerDTO) {
         try {
-            SurveyQuestion surveyQuestion = surveyService.saveSurveyQuestion(surveyQuestionDTO);
-            return new ResponseEntity<IDResponse>(new IDResponse(surveyQuestion.getId()), HttpStatus.OK);
+            SurveyQuestionAnswer surveyQuestionAnswer = surveyService.saveSurveyQuestionAnswer(surveyQuestionAnswerDTO);
+            return new ResponseEntity<IDResponse>(new IDResponse(surveyQuestionAnswer.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
@@ -105,27 +105,21 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
-            value = "deleteSurveyQuestion",
-            notes = "Delete survey question",
+            value = "deleteSurveyQuestionAnswer",
+            notes = "Delete survey question answer",
             response = EmptyResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
-    @PreAuthorize("hasAuthority('SURVEY:DELETE')")
+    @PreAuthorize("hasAuthority('SURVEY_RESULT:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
-    public ResponseEntity deleteSurveyQuestion(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity deleteSurveyQuestionAnswer(@PathVariable(value = "id") UUID id) {
         try {
-            surveyService.deleteSurveyQuestion(id, false);
+            surveyService.deleteSurveyQuestionAnswer(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
-        } catch (ResultDependencyException resultDependency) {
-            return new ResponseEntity<>(new ErrorResponse("db.RESULT_DEPENDENCY",
-                    messageSource.getMessage("db.RESULT_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        } catch (LogicDependencyException logicDependency) {
-            return new ResponseEntity<>(new ErrorResponse("db.LOGIC_DEPENDENCY",
-                    messageSource.getMessage("db.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
