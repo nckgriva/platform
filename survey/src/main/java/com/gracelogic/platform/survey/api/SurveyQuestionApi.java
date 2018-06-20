@@ -121,11 +121,11 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
             surveyService.deleteSurveyQuestion(id, false);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (ResultDependencyException resultDependency) {
-            return new ResponseEntity<>(new ErrorResponse("db.RESULT_DEPENDENCY",
-                    messageSource.getMessage("db.RESULT_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.RESULT_DEPENDENCY",
+                    messageSource.getMessage("survey.RESULT_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (LogicDependencyException logicDependency) {
-            return new ResponseEntity<>(new ErrorResponse("db.LOGIC_DEPENDENCY",
-                    messageSource.getMessage("db.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.LOGIC_DEPENDENCY",
+                    messageSource.getMessage("survey.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }

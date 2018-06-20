@@ -54,11 +54,11 @@ public class SurveySessionApi extends AbstractAuthorizedController {
             SurveyInteractionDTO dto = surveyService.getSurveyPage(surveySessionId, pageIndex);
             return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (ForbiddenException forbiddenException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
-                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
+                    messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException notFoundException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
-                    messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SESSION",
+                    messageSource.getMessage("survey.NO_SUCH_SESSION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -75,11 +75,11 @@ public class SurveySessionApi extends AbstractAuthorizedController {
             SurveyInteractionDTO dto = surveyService.saveAnswersAndContinue(surveySessionId, pageAnswersDTO);
             return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (ForbiddenException forbiddenException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
-                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
+                    messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException notFoundException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
-                    messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SESSION",
+                    messageSource.getMessage("survey.NO_SUCH_SESSION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -95,11 +95,11 @@ public class SurveySessionApi extends AbstractAuthorizedController {
             SurveyInteractionDTO dto = surveyService.continueSurvey(surveySessionId);
             return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (ForbiddenException forbiddenException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
-                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
+                    messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException notFoundException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
-                    messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SESSION",
+                    messageSource.getMessage("survey.NO_SUCH_SESSION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 

@@ -6,6 +6,7 @@ import com.gracelogic.platform.survey.dto.admin.*;
 import com.gracelogic.platform.survey.dto.user.PageAnswersDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
+import com.gracelogic.platform.survey.exception.RespondentLimitException;
 import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
 import com.gracelogic.platform.survey.model.*;
@@ -18,7 +19,8 @@ public interface SurveyService {
 
     SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId) throws ObjectNotFoundException;
 
-    SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress) throws ObjectNotFoundException, ForbiddenException;
+    SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress)
+            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException;
     SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto) throws ObjectNotFoundException, ForbiddenException;
 
     SurveyInteractionDTO getSurveyPage(UUID surveySessionId, int pageIndex) throws ObjectNotFoundException, ForbiddenException;

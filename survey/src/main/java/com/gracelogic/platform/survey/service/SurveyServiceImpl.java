@@ -9,6 +9,7 @@ import com.gracelogic.platform.survey.dto.user.PageAnswersDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyConclusionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
+import com.gracelogic.platform.survey.exception.RespondentLimitException;
 import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
 import com.gracelogic.platform.survey.model.*;
@@ -85,9 +86,8 @@ public class SurveyServiceImpl implements SurveyService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String remoteAddress)
-            throws ObjectNotFoundException, ForbiddenException {
+            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
-
         if (survey == null) {
              throw new ObjectNotFoundException();
         }
@@ -96,6 +96,24 @@ public class SurveyServiceImpl implements SurveyService {
 
         if (user == null && survey.getParticipationType() == DataConstants.ParticipationType.AUTHORIZATION_REQUIRED.getValue()) {
             throw new ForbiddenException();
+        }
+
+        if (survey.getMaxAttempts() != null && survey.getMaxAttempts() > 0) {
+            Integer passesFromThisIP = idObjectService.getCount(SurveySession.class, null, null,
+                    String.format("el.survey = '%s' AND (el.lastVisitIP = '%s' OR el.user = '%s')",
+                            survey.getId(), remoteAddress, user != null ? user.getId() : null),null);
+
+            if (passesFromThisIP >= survey.getMaxAttempts()) {
+                throw new ForbiddenException();
+            }
+        }
+
+        if (survey.getMaximumRespondents() != null && survey.getMaximumRespondents() > 0) {
+            Integer totalPasses = idObjectService.getCount(SurveySession.class, null, null,
+                    String.format("el.survey = '%s'", survey.getId()), null);
+            if (totalPasses >= survey.getMaximumRespondents()) {
+                throw new RespondentLimitException();
+            }
         }
 
         SurveySession surveySession = new SurveySession();
@@ -232,7 +250,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         // список вариантов ответов
         HashMap<SurveyQuestion, SurveyAnswerVariant> surveyAnswersHashMap = new HashMap<>();
-        
+
         if (dto.containsNonTextAnswers()) {
             surveyAnswersHashMap = asAnswerVariantHashMap(
                     idObjectService.getList(SurveyAnswerVariant.class, null,

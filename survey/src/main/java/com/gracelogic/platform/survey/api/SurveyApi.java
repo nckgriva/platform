@@ -9,6 +9,7 @@ import com.gracelogic.platform.survey.dto.admin.SurveyDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
+import com.gracelogic.platform.survey.exception.RespondentLimitException;
 import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.model.Survey;
 import com.gracelogic.platform.survey.service.SurveyService;
@@ -53,8 +54,8 @@ public class SurveyApi extends AbstractAuthorizedController {
             SurveyIntroductionDTO dto = surveyService.getSurveyIntroduction(surveyId);
             return new ResponseEntity<SurveyIntroductionDTO>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException notFoundException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
-                    messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SURVEY",
+                    messageSource.getMessage("survey.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -70,12 +71,15 @@ public class SurveyApi extends AbstractAuthorizedController {
         try {
             SurveyInteractionDTO dto = surveyService.startSurvey(surveyId, getUser(), request.getRemoteAddr());
             return new ResponseEntity<SurveyInteractionDTO>(dto, HttpStatus.OK);
+        } catch (RespondentLimitException respondentLimitException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.RESPONDENT_LIMIT",
+                    messageSource.getMessage("survey.RESPONDENT_LIMIT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ForbiddenException forbiddenException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.FORBIDDEN",
-                    messageSource.getMessage("surveys.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
+                    messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException notFoundException) {
-            return new ResponseEntity<>(new ErrorResponse("surveys.NO_SUCH_SURVEY",
-                    messageSource.getMessage("surveys.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SURVEY",
+                    messageSource.getMessage("survey.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -163,11 +167,11 @@ public class SurveyApi extends AbstractAuthorizedController {
             surveyService.deleteSurvey(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (ResultDependencyException resultDependency) {
-            return new ResponseEntity<>(new ErrorResponse("db.RESULT_DEPENDENCY",
-                    messageSource.getMessage("db.RESULT_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.RESULT_DEPENDENCY",
+                    messageSource.getMessage("survey.RESULT_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (LogicDependencyException logicDependency) {
-            return new ResponseEntity<>(new ErrorResponse("db.LOGIC_DEPENDENCY",
-                    messageSource.getMessage("db.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.LOGIC_DEPENDENCY",
+                    messageSource.getMessage("survey.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
