@@ -14,28 +14,28 @@ public class SurveyDTO extends IdObjectDTO {
     private Boolean allowReturn;
     private String introduction;
     private String conclusion;
-    private Integer maximumRespondents;
+    private Integer maxRespondents;
     private Long timeLimit;
-    private UUID participationType;
-    private UUID owner;
+    private UUID participationTypeId;
+    private UUID ownerId;
     private Integer maxAttempts;
 
-    public static SurveyDTO prepare(Survey survey) {
-        SurveyDTO model = new SurveyDTO();
-        IdObjectDTO.prepare(model, survey);
-        model.setName(survey.getName());
-        model.setExpirationDate(survey.getExpirationDate());
-        model.setShowProgress(survey.getShowProgress());
-        model.setShowQuestionNumber(survey.getShowQuestionNumber());
-        model.setAllowReturn(survey.getAllowReturn());
-        model.setIntroduction(survey.getIntroduction());
-        model.setConclusion(survey.getConclusion());
-        model.setMaximumRespondents(survey.getMaximumRespondents());
-        model.setTimeLimit(survey.getTimeLimit());
-        model.setParticipationType(survey.getParticipationType());
-        model.setOwner(survey.getOwner().getId());
-        model.setMaxAttempts(survey.getMaxAttempts());
-        return model;
+    public static SurveyDTO prepare(Survey model) {
+        SurveyDTO dto = new SurveyDTO();
+        IdObjectDTO.prepare(dto, model);
+        dto.setName(model.getName());
+        dto.setExpirationDate(model.getExpirationDate());
+        dto.setShowProgress(model.getShowProgress());
+        dto.setShowQuestionNumber(model.getShowQuestionNumber());
+        dto.setAllowReturn(model.getAllowReturn());
+        dto.setIntroduction(model.getIntroduction());
+        dto.setConclusion(model.getConclusion());
+        dto.setMaxRespondents(model.getMaxRespondents());
+        dto.setTimeLimit(model.getTimeLimit());
+        dto.setParticipationTypeId(model.getParticipationType().getId());
+        dto.setOwnerId(model.getOwner().getId());
+        dto.setMaxAttempts(model.getMaxAttempts());
+        return dto;
     }
 
     public String getName() {
@@ -94,12 +94,12 @@ public class SurveyDTO extends IdObjectDTO {
         this.conclusion = conclusion;
     }
 
-    public Integer getMaximumRespondents() {
-        return maximumRespondents;
+    public Integer getMaxRespondents() {
+        return maxRespondents;
     }
 
-    public void setMaximumRespondents(Integer maximumRespondents) {
-        this.maximumRespondents = maximumRespondents;
+    public void setMaxRespondents(Integer maxRespondents) {
+        this.maxRespondents = maxRespondents;
     }
 
     public Long getTimeLimit() {
@@ -110,20 +110,20 @@ public class SurveyDTO extends IdObjectDTO {
         this.timeLimit = timeLimit;
     }
 
-    public UUID getOwner() {
-        return owner;
+    public UUID getOwnerId() {
+        return ownerId;
     }
 
-    public void setOwner(UUID owner) {
-        this.owner = owner;
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 
-    public UUID getParticipationType() {
-        return participationType;
+    public UUID getParticipationTypeId() {
+        return participationTypeId;
     }
 
-    public void setParticipationType(UUID participationType) {
-        this.participationType = participationType;
+    public void setParticipationTypeId(UUID participationTypeId) {
+        this.participationTypeId = participationTypeId;
     }
 
     public Integer getMaxAttempts() {

@@ -3,44 +3,47 @@ package com.gracelogic.platform.survey.dto.admin;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.survey.model.SurveyQuestion;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 public class SurveyQuestionDTO extends IdObjectDTO {
-    private UUID surveyPage;
+    private UUID surveyPageId;
     private Integer questionIndex;
     private String text;
-    private UUID type;
+    private UUID surveyQuestionTypeId;
     private Boolean required;
     private Boolean hidden;
     private Long scaleMinValue;
     private Long scaleMaxValue;
     private String attachmentExtensions;
 
-    private List<SurveyAnswerVariantDTO> answers;
-    private List<SurveyLogicTriggerDTO> logicTriggers;
+    private List<SurveyAnswerVariantDTO> answers = new LinkedList<>();
+    private List<SurveyLogicTriggerDTO> logicTriggers = new LinkedList<>();
 
-    public static SurveyQuestionDTO prepare(SurveyQuestion surveyQuestion) {
-        SurveyQuestionDTO model = new SurveyQuestionDTO();
-        IdObjectDTO.prepare(model, surveyQuestion);
-        model.setSurveyPage(surveyQuestion.getSurveyPage().getId());
-        model.setQuestionIndex(surveyQuestion.getQuestionIndex());
-        model.setText(surveyQuestion.getText());
-        model.setType(surveyQuestion.getType());
-        model.setRequired(surveyQuestion.getRequired());
-        model.setHidden(surveyQuestion.getHidden());
-        model.setScaleMinValue(surveyQuestion.getScaleMinValue());
-        model.setScaleMaxValue(surveyQuestion.getScaleMaxValue());
-        model.setAttachmentExtensions(surveyQuestion.getAttachmentExtensions());
-        return model;
+    public static SurveyQuestionDTO prepare(SurveyQuestion model) {
+        SurveyQuestionDTO dto = new SurveyQuestionDTO();
+        IdObjectDTO.prepare(dto, model);
+        dto.setSurveyPageId(model.getSurveyPage().getId());
+        dto.setQuestionIndex(model.getQuestionIndex());
+        dto.setText(model.getText());
+        if (model.getSurveyQuestionType() != null) {
+            dto.setSurveyQuestionTypeId(model.getSurveyQuestionType().getId());
+        }
+        dto.setRequired(model.getRequired());
+        dto.setHidden(model.getHidden());
+        dto.setScaleMinValue(model.getScaleMinValue());
+        dto.setScaleMaxValue(model.getScaleMaxValue());
+        dto.setAttachmentExtensions(model.getAttachmentExtensions());
+        return dto;
     }
 
-    public UUID getSurveyPage() {
-        return surveyPage;
+    public UUID getSurveyPageId() {
+        return surveyPageId;
     }
 
-    public void setSurveyPage(UUID surveyPage) {
-        this.surveyPage = surveyPage;
+    public void setSurveyPageId(UUID surveyPageId) {
+        this.surveyPageId = surveyPageId;
     }
 
     public Integer getQuestionIndex() {
@@ -59,12 +62,12 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         this.text = text;
     }
 
-    public UUID getType() {
-        return type;
+    public UUID getSurveyQuestionTypeId() {
+        return surveyQuestionTypeId;
     }
 
-    public void setType(UUID type) {
-        this.type = type;
+    public void setSurveyQuestionTypeId(UUID surveyQuestionTypeId) {
+        this.surveyQuestionTypeId = surveyQuestionTypeId;
     }
 
     public Boolean getRequired() {

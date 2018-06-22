@@ -12,7 +12,7 @@ import java.util.UUID;
  Модель, определяющая, что опрос был начат пользователем User, во время started
  */
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_PASSING")
+@Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_SESSION")
 public class SurveySession extends IdObject<UUID> {
     @Id
     @Column(name = ID)
@@ -40,22 +40,22 @@ public class SurveySession extends IdObject<UUID> {
     @JoinColumn(name = "SURVEY_ID", nullable = false)
     private Survey survey;
 
-    @Column(name = "started_dt", nullable = false)
+    @Column(name = "STARTED_DT", nullable = false)
     private Date started;
 
-    @Column(name = "ended_dt", nullable = true)
+    @Column(name = "ENDED_DT", nullable = true)
     private Date ended;
 
-    @Column(name = "expiration_dt", nullable = true)
+    @Column(name = "EXPIRATION_DT", nullable = true)
     private Date expirationDate;
 
-    @Column(name = "conclusion", nullable = true)
+    @Column(name = "CONCLUSION", nullable = true)
     private String conclusion;
 
-    @Column(name = "link", nullable = true)
+    @Column(name = "LINK", nullable = true)
     private String link;
 
-    @Column(name = "last_visited_page_index", nullable = true)
+    @Column(name = "LAST_VISITED_PAGE_INDEX", nullable = true)
     private Integer lastVisitedPageIndex;
 
     @Override

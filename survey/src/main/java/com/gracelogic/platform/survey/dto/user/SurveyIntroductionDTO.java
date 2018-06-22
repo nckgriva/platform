@@ -6,9 +6,10 @@ public class SurveyIntroductionDTO {
     private String name;
     private String introduction;
     private Long timeLimit;
-    private boolean showQuestionNumber;
-    private boolean allowReturn;
-    private boolean showProgress;
+    private Boolean showQuestionNumber;
+    private Boolean allowReturn;
+    private Boolean showProgress;
+
     public SurveyIntroductionDTO(Survey survey) {
         this.name = survey.getName();
         this.introduction = survey.getIntroduction();

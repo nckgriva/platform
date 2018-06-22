@@ -2,6 +2,7 @@ package com.gracelogic.platform.survey.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
+import com.gracelogic.platform.dictionary.model.Dictionary;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -9,11 +10,11 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_PAGE")
-public class SurveyPage extends IdObject<UUID> {
+@Table(name = JPAProperties.TABLE_PREFIX + "LOGIC_ACTION_TYPE")
+public class LogicActionType extends IdObject<UUID> implements Dictionary {
     @Id
-    @Column(name = ID)
     @Access(AccessType.PROPERTY)
+    @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @org.hibernate.annotations.Type(type = "pg-uuid")
@@ -26,15 +27,8 @@ public class SurveyPage extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "SURVEY_ID", nullable = false)
-    private Survey survey;
-
-    @Column(name = "PAGE_INDEX", nullable = false)
-    private Integer pageIndex;
-
-    @Column(name = "DESCRIPTION", nullable = true)
-    private String description;
+    @Column(name = NAME, nullable = false)
+    private String name;
 
     @Override
     public UUID getId() {
@@ -66,27 +60,21 @@ public class SurveyPage extends IdObject<UUID> {
         this.changed = changed;
     }
 
-    public Survey getSurvey() {
-        return survey;
+    public String getName() {
+        return name;
     }
 
-    public void setSurvey(Survey survey) {
-        this.survey = survey;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Integer getPageIndex() {
-        return pageIndex;
+    @Override
+    public String getCode() {
+        return null;
     }
 
-    public void setPageIndex(Integer pageIndex) {
-        this.pageIndex = pageIndex;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    @Override
+    public Integer getSortOrder() {
+        return 0;
     }
 }

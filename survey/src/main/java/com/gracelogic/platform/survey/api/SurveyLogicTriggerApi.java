@@ -40,7 +40,7 @@ public class SurveyLogicTriggerApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "getSurveyLogicTriggers",
             notes = "Get list of survey logic triggers",
-            response =  EntityListResponse.class
+            response = EntityListResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -49,13 +49,17 @@ public class SurveyLogicTriggerApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getSurveyLogicTriggers(@RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                                  @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                                  @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                                  @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+    public ResponseEntity getSurveyLogicTriggers(
+            @RequestParam(value = "surveyQuestionId", required = false) UUID surveyQuestionId,
+            @RequestParam(value = "surveyPageId", required = false) UUID surveyPageId,
+            @RequestParam(value = "surveyAnswerVariantId", required = false) UUID surveyAnswerVariantId,
+            @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+            @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+            @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+            @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
 
-        EntityListResponse<SurveyLogicTriggerDTO> properties = surveyService.getSurveyLogicTriggersPaged(count, null, start, sortField, sortDir);
+        EntityListResponse<SurveyLogicTriggerDTO> properties = surveyService.getSurveyLogicTriggersPaged(surveyQuestionId, surveyPageId, surveyAnswerVariantId, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<SurveyLogicTriggerDTO>>(properties, HttpStatus.OK);
     }
 

@@ -42,7 +42,7 @@ public class SurveyAnswerVariantApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "getSurveyAnswerVariants",
             notes = "Get list of survey answer variants",
-            response =  EntityListResponse.class
+            response = EntityListResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -51,14 +51,15 @@ public class SurveyAnswerVariantApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getSurveyAnswerVariants(@RequestParam(value = "description", required = false) String description,
-                                     @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                     @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                     @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                     @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+    public ResponseEntity getSurveyAnswerVariants(@RequestParam(value = "surveyQuestionId", required = false) UUID surveyQuestionId,
+                                                  @RequestParam(value = "description", required = false) String description,
+                                                  @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                                  @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                                  @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                                  @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
 
-        EntityListResponse<SurveyAnswerVariantDTO> properties = surveyService.getSurveyAnswerVariantsPaged(description, count, null, start, sortField, sortDir);
+        EntityListResponse<SurveyAnswerVariantDTO> properties = surveyService.getSurveyAnswerVariantsPaged(surveyQuestionId, description, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<SurveyAnswerVariantDTO>>(properties, HttpStatus.OK);
     }
 

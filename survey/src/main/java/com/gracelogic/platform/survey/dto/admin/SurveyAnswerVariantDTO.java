@@ -6,29 +6,31 @@ import com.gracelogic.platform.survey.model.SurveyAnswerVariant;
 import java.util.UUID;
 
 public class SurveyAnswerVariantDTO extends IdObjectDTO {
-    private UUID surveyQuestion;
+    private UUID surveyQuestionId;
     private String text;
     private Integer sortOrder;
     private Boolean defaultVariant; // Вариант выбран по умолчанию
     private Integer weight; // Вес ответа для автоматической обработки
 
-    public static SurveyAnswerVariantDTO prepare(SurveyAnswerVariant surveyAnswerVariant) {
-        SurveyAnswerVariantDTO model = new SurveyAnswerVariantDTO();
-        IdObjectDTO.prepare(model, surveyAnswerVariant);
-        model.setSurveyQuestion(surveyAnswerVariant.getSurveyQuestion().getId());
-        model.setText(surveyAnswerVariant.getText());
-        model.setSortOrder(surveyAnswerVariant.getSortOrder());
-        model.setDefaultVariant(surveyAnswerVariant.getDefaultVariant());
-        model.setWeight(surveyAnswerVariant.getWeight());
-        return model;
+    public static SurveyAnswerVariantDTO prepare(SurveyAnswerVariant model) {
+        SurveyAnswerVariantDTO dto = new SurveyAnswerVariantDTO();
+        IdObjectDTO.prepare(dto, model);
+        if (model.getSurveyQuestion() != null) {
+            dto.setSurveyQuestionId(model.getSurveyQuestion().getId());
+        }
+        dto.setText(model.getText());
+        dto.setSortOrder(model.getSortOrder());
+        dto.setDefaultVariant(model.getDefaultVariant());
+        dto.setWeight(model.getWeight());
+        return dto;
     }
 
-    public UUID getSurveyQuestion() {
-        return surveyQuestion;
+    public UUID getSurveyQuestionId() {
+        return surveyQuestionId;
     }
 
-    public void setSurveyQuestion(UUID surveyQuestion) {
-        this.surveyQuestion = surveyQuestion;
+    public void setSurveyQuestionId(UUID surveyQuestionId) {
+        this.surveyQuestionId = surveyQuestionId;
     }
 
     public String getText() {

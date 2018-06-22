@@ -7,33 +7,37 @@ import java.util.Date;
 import java.util.UUID;
 
 public class SurveySessionDTO extends IdObjectDTO {
-    private UUID user;
+    private UUID userId;
     private String lastVisitIP;
-    private UUID survey;
+    private UUID surveyId;
     private Date started;
     private Date ended;
     private Date expirationDate;
     private Integer lastVisitedPageIndex;
 
-    public static SurveySessionDTO prepare(SurveySession surveySession) {
-        SurveySessionDTO model = new SurveySessionDTO();
-        IdObjectDTO.prepare(model, surveySession);
-        model.setUser(surveySession.getUser().getId());
-        model.setLastVisitIP(surveySession.getLastVisitIP());
-        model.setSurvey(surveySession.getSurvey().getId());
-        model.setStarted(surveySession.getStarted());
-        model.setEnded(surveySession.getEnded());
-        model.setLastVisitedPageIndex(surveySession.getLastVisitedPageIndex());
-        model.setExpirationDate(surveySession.getExpirationDate());
-        return model;
+    public static SurveySessionDTO prepare(SurveySession model) {
+        SurveySessionDTO dto = new SurveySessionDTO();
+        IdObjectDTO.prepare(dto, model);
+        if (model.getUser() != null) {
+            dto.setUserId(model.getUser().getId());
+        }
+        dto.setLastVisitIP(model.getLastVisitIP());
+        if (model.getSurvey() != null) {
+            dto.setSurveyId(model.getSurvey().getId());
+        }
+        dto.setStarted(model.getStarted());
+        dto.setEnded(model.getEnded());
+        dto.setLastVisitedPageIndex(model.getLastVisitedPageIndex());
+        dto.setExpirationDate(model.getExpirationDate());
+        return dto;
     }
 
-    public UUID getUser() {
-        return user;
+    public UUID getUserId() {
+        return userId;
     }
 
-    public void setUser(UUID user) {
-        this.user = user;
+    public void setUserId(UUID userId) {
+        this.userId = userId;
     }
 
     public String getLastVisitIP() {
@@ -44,12 +48,12 @@ public class SurveySessionDTO extends IdObjectDTO {
         this.lastVisitIP = lastVisitIP;
     }
 
-    public UUID getSurvey() {
-        return survey;
+    public UUID getSurveyId() {
+        return surveyId;
     }
 
-    public void setSurvey(UUID survey) {
-        this.survey = survey;
+    public void setSurveyId(UUID surveyId) {
+        this.surveyId = surveyId;
     }
 
     public Date getStarted() {

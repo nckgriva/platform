@@ -30,8 +30,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Controller
-@RequestMapping(value = Path.API_SURVEY_PASSING)
-@Api(value = Path.API_SURVEY_PASSING, tags = {"Survey session API"})
+@RequestMapping(value = Path.API_SURVEY_SESSION)
+@Api(value = Path.API_SURVEY_SESSION, tags = {"Survey session API"})
 public class SurveySessionApi extends AbstractAuthorizedController {
 
     @Autowired

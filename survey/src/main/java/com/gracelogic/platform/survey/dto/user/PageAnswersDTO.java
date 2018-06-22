@@ -8,6 +8,7 @@ import java.util.UUID;
 public class PageAnswersDTO {
     // question id, answer
     private HashMap<UUID, AnswerDTO> answers;
+    private UUID surveyPageId;
 
     public boolean containsStoredFiles() {
         for (Map.Entry<UUID, AnswerDTO> entry : answers.entrySet()) {
@@ -41,5 +42,13 @@ public class PageAnswersDTO {
 
     public void setAnswers(HashMap<UUID, AnswerDTO> answers) {
         this.answers = answers;
+    }
+
+    public UUID getSurveyPageId() {
+        return surveyPageId;
+    }
+
+    public void setSurveyPageId(UUID surveyPageId) {
+        this.surveyPageId = surveyPageId;
     }
 }

@@ -29,40 +29,41 @@ public class Survey extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Column(name = "expires_dt", nullable = true)
+    @Column(name = "EXPIRATION_DT", nullable = true)
     private Date expirationDate;
 
-    @Column(name = "is_show_progress", nullable = false)
+    @Column(name = "IS_SHOW_PROGRESS", nullable = false)
     private Boolean showProgress;
 
-    @Column(name = "is_show_question_number", nullable = false)
+    @Column(name = "IS_SHOW_QUESTION_NUMBER", nullable = false)
     private Boolean showQuestionNumber;
 
-    @Column(name = "is_allow_return", nullable = false)
+    @Column(name = "IS_ALLOW_RETURN", nullable = false)
     private Boolean allowReturn;
 
-    @Column(name = "introduction", nullable = true)
+    @Column(name = "INTRODUCTION", nullable = true)
     private String introduction;
 
-    @Column(name = "conclusion", nullable = true)
+    @Column(name = "CONCLUSION", nullable = true)
     private String conclusion;
 
-    @Column(name = "link", nullable = true)
+    @Column(name = "LINK", nullable = true)
     private String link;
 
-    @Column(name = "maximum_respondents", nullable = true)
-    private Integer maximumRespondents;
+    @Column(name = "MAX_RESPONDENTS", nullable = true)
+    private Integer maxRespondents;
 
-    @Column(name = "time_limit", nullable = true)
+    @Column(name = "TIME_LIMIT", nullable = true)
     private Long timeLimit;
 
-    @Column(name = "participation_type", nullable = false)
-    private UUID participationType;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "PARTICIPATION_TYPE_ID", nullable = false)
+    private ParticipationType participationType;
 
-    @Column(name = "max_attempts", nullable = true)
+    @Column(name = "MAX_ATTEMPTS", nullable = true)
     private Integer maxAttempts;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -155,12 +156,12 @@ public class Survey extends IdObject<UUID> {
         this.conclusion = conclusion;
     }
 
-    public Integer getMaximumRespondents() {
-        return maximumRespondents;
+    public Integer getMaxRespondents() {
+        return maxRespondents;
     }
 
-    public void setMaximumRespondents(Integer maximumRespondents) {
-        this.maximumRespondents = maximumRespondents;
+    public void setMaxRespondents(Integer maxRespondents) {
+        this.maxRespondents = maxRespondents;
     }
 
     public Long getTimeLimit() {
@@ -179,11 +180,11 @@ public class Survey extends IdObject<UUID> {
         this.owner = owner;
     }
 
-    public UUID getParticipationType() {
+    public ParticipationType getParticipationType() {
         return participationType;
     }
 
-    public void setParticipationType(UUID participationType) {
+    public void setParticipationType(ParticipationType participationType) {
         this.participationType = participationType;
     }
 

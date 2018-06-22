@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class DataConstants {
 
-    public enum LogicActionType {
+    public enum LogicActionTypes {
         /**
          * Hides a question on client machine
          */
@@ -38,7 +38,7 @@ public class DataConstants {
 
         private UUID value;
 
-        LogicActionType(UUID value) {
+        LogicActionTypes(UUID value) {
             this.value = value;
         }
 
@@ -47,7 +47,7 @@ public class DataConstants {
         }
     }
 
-    public enum ParticipationType {
+    public enum ParticipationTypes {
         /**
          * Participation is limited by cookies
          */
@@ -67,7 +67,7 @@ public class DataConstants {
 
         private UUID value;
 
-        ParticipationType(UUID value) {
+        ParticipationTypes(UUID value) {
             this.value = value;
         }
 
@@ -76,7 +76,7 @@ public class DataConstants {
         }
     }
 
-    public enum QuestionType {
+    public enum QuestionTypes {
         RADIOBUTTON(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
         CHECKBOX(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
         TEXT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
@@ -87,7 +87,7 @@ public class DataConstants {
 
         private UUID value;
 
-        QuestionType(UUID value) {
+        QuestionTypes(UUID value) {
             this.value = value;
         }
 

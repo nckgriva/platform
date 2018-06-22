@@ -6,61 +6,67 @@ import com.gracelogic.platform.survey.model.SurveyLogicTrigger;
 import java.util.UUID;
 
 public class SurveyLogicTriggerDTO extends IdObjectDTO {
-    private UUID surveyPage;
-    private UUID surveyQuestion;
-    private UUID answerVariant;
-    private boolean isInteractionRequired;
-    private UUID targetQuestion;
+    private UUID surveyPageId;
+    private UUID surveyQuestionId;
+    private UUID answerVariantId;
+    private Boolean isInteractionRequired;
+    private UUID targetQuestionId;
     private String newConclusion;
     private Integer pageIndex;
     private String newLink;
-    private UUID logicActionType;
+    private UUID logicActionTypeId;
 
-    public static SurveyLogicTriggerDTO prepare(SurveyLogicTrigger trigger) {
-        SurveyLogicTriggerDTO model = new SurveyLogicTriggerDTO();
-        IdObjectDTO.prepare(model, trigger);
-        model.setSurveyPage(trigger.getSurveyPage().getId());
-        if (trigger.getSurveyQuestion() != null) model.setSurveyQuestion(trigger.getSurveyQuestion().getId());
-        if (trigger.getAnswerVariant() != null) model.setAnswerVariant(trigger.getAnswerVariant().getId());
-        model.setInteractionRequired(trigger.isInteractionRequired());
-        if (trigger.getTargetQuestion() != null) model.setTargetQuestion(trigger.getTargetQuestion().getId());
-        model.setNewConclusion(trigger.getNewConclusion());
-        model.setPageIndex(trigger.getPageIndex());
-        model.setNewLink(trigger.getNewLink());
-        model.setLogicActionType(trigger.getLogicActionType());
-        return model;
+    public static SurveyLogicTriggerDTO prepare(SurveyLogicTrigger model) {
+        SurveyLogicTriggerDTO dto = new SurveyLogicTriggerDTO();
+        IdObjectDTO.prepare(dto, model);
+        dto.setSurveyPageId(model.getSurveyPage().getId());
+        if (model.getSurveyQuestion() != null) {
+            dto.setSurveyQuestionId(model.getSurveyQuestion().getId());
+        }
+        if (model.getAnswerVariant() != null) {
+            dto.setAnswerVariantId(model.getAnswerVariant().getId());
+        }
+        dto.setInteractionRequired(model.isInteractionRequired());
+        if (model.getTargetQuestion() != null) {
+            dto.setTargetQuestionId(model.getTargetQuestion().getId());
+        }
+        dto.setNewConclusion(model.getNewConclusion());
+        dto.setPageIndex(model.getPageIndex());
+        dto.setNewLink(model.getNewLink());
+        dto.setLogicActionTypeId(model.getLogicActionType().getId());
+        return dto;
     }
 
-    public UUID getSurveyPage() {
-        return surveyPage;
+    public UUID getSurveyPageId() {
+        return surveyPageId;
     }
 
-    public void setSurveyPage(UUID surveyPage) {
-        this.surveyPage = surveyPage;
+    public void setSurveyPageId(UUID surveyPageId) {
+        this.surveyPageId = surveyPageId;
     }
 
-    public UUID getSurveyQuestion() {
-        return surveyQuestion;
+    public UUID getSurveyQuestionId() {
+        return surveyQuestionId;
     }
 
-    public void setSurveyQuestion(UUID surveyQuestion) {
-        this.surveyQuestion = surveyQuestion;
+    public void setSurveyQuestionId(UUID surveyQuestionId) {
+        this.surveyQuestionId = surveyQuestionId;
     }
 
-    public UUID getAnswerVariant() {
-        return answerVariant;
+    public UUID getAnswerVariantId() {
+        return answerVariantId;
     }
 
-    public void setAnswerVariant(UUID answerVariant) {
-        this.answerVariant = answerVariant;
+    public void setAnswerVariantId(UUID answerVariantId) {
+        this.answerVariantId = answerVariantId;
     }
 
-    public UUID getTargetQuestion() {
-        return targetQuestion;
+    public UUID getTargetQuestionId() {
+        return targetQuestionId;
     }
 
-    public void setTargetQuestion(UUID targetQuestion) {
-        this.targetQuestion = targetQuestion;
+    public void setTargetQuestionId(UUID targetQuestionId) {
+        this.targetQuestionId = targetQuestionId;
     }
 
     public String getNewConclusion() {
@@ -87,12 +93,12 @@ public class SurveyLogicTriggerDTO extends IdObjectDTO {
         this.newLink = newLink;
     }
 
-    public UUID getLogicActionType() {
-        return logicActionType;
+    public UUID getLogicActionTypeId() {
+        return logicActionTypeId;
     }
 
-    public void setLogicActionType(UUID logicActionType) {
-        this.logicActionType = logicActionType;
+    public void setLogicActionTypeId(UUID logicActionTypeId) {
+        this.logicActionTypeId = logicActionTypeId;
     }
 
     public boolean isInteractionRequired() {

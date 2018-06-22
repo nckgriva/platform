@@ -39,7 +39,7 @@ public class SurveyPageApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "getSurveyPages",
             notes = "Get list of survey pages",
-            response =  EntityListResponse.class
+            response = EntityListResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -48,13 +48,14 @@ public class SurveyPageApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getSurveyPages(@RequestParam(value = "description", required = false) String description,
-                                     @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                     @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                     @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                     @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+    public ResponseEntity getSurveyPages(@RequestParam(value = "surveyId", required = false) UUID surveyId,
+                                         @RequestParam(value = "description", required = false) String description,
+                                         @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                         @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                         @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                         @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<SurveyPageDTO> properties = surveyService.getSurveyPagesPaged(description, count, null, start, sortField, sortDir);
+        EntityListResponse<SurveyPageDTO> properties = surveyService.getSurveyPagesPaged(surveyId, description, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<SurveyPageDTO>>(properties, HttpStatus.OK);
     }
 

@@ -6,54 +6,58 @@ import com.gracelogic.platform.survey.model.SurveyQuestionAnswer;
 import java.util.UUID;
 
 public class SurveyQuestionAnswerDTO extends IdObjectDTO {
-    private UUID surveySession;
-    private UUID question;
-    private UUID answerVariant;
-    private String textAnswer;
+    private UUID surveySessionId;
+    private UUID questionId;
+    private UUID answerVariantId;
+    private String text;
     private UUID storedFile;
 
-    public static SurveyQuestionAnswerDTO prepare(SurveyQuestionAnswer answer) {
-        SurveyQuestionAnswerDTO model = new SurveyQuestionAnswerDTO();
-        IdObjectDTO.prepare(model, answer);
-        model.setSurveySession(answer.getSurveySession().getId());
-        model.setQuestion(answer.getQuestion().getId());
-        if (answer.getAnswerVariant() != null) model.setAnswerVariant(answer.getAnswerVariant().getId());
-        model.setTextAnswer(answer.getTextAnswer());
-        if (answer.getStoredFile() != null) model.setStoredFile(answer.getStoredFile().getId());
+    public static SurveyQuestionAnswerDTO prepare(SurveyQuestionAnswer model) {
+        SurveyQuestionAnswerDTO dto = new SurveyQuestionAnswerDTO();
+        IdObjectDTO.prepare(dto, model);
+        dto.setSurveySessionId(model.getSurveySession().getId());
+        dto.setQuestionId(model.getQuestion().getId());
+        if (model.getAnswerVariant() != null) {
+            dto.setAnswerVariantId(model.getAnswerVariant().getId());
+        }
+        dto.setText(model.getText());
+        if (model.getStoredFile() != null) {
+            dto.setStoredFile(model.getStoredFile().getId());
+        }
 
-        return model;
+        return dto;
     }
 
-    public UUID getSurveySession() {
-        return surveySession;
+    public UUID getSurveySessionId() {
+        return surveySessionId;
     }
 
-    public void setSurveySession(UUID surveySession) {
-        this.surveySession = surveySession;
+    public void setSurveySessionId(UUID surveySessionId) {
+        this.surveySessionId = surveySessionId;
     }
 
-    public UUID getQuestion() {
-        return question;
+    public UUID getQuestionId() {
+        return questionId;
     }
 
-    public void setQuestion(UUID question) {
-        this.question = question;
+    public void setQuestionId(UUID questionId) {
+        this.questionId = questionId;
     }
 
-    public UUID getAnswerVariant() {
-        return answerVariant;
+    public UUID getAnswerVariantId() {
+        return answerVariantId;
     }
 
-    public void setAnswerVariant(UUID answerVariant) {
-        this.answerVariant = answerVariant;
+    public void setAnswerVariantId(UUID answerVariantId) {
+        this.answerVariantId = answerVariantId;
     }
 
-    public String getTextAnswer() {
-        return textAnswer;
+    public String getText() {
+        return text;
     }
 
-    public void setTextAnswer(String textAnswer) {
-        this.textAnswer = textAnswer;
+    public void setText(String text) {
+        this.text = text;
     }
 
     public UUID getStoredFile() {

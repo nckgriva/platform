@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_VARIANT_LOGIC")
+@Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_LOGIC_TRIGGER")
 public class SurveyLogicTrigger extends IdObject<UUID> {
     @Id
     @Column(name = ID)
@@ -51,24 +51,24 @@ public class SurveyLogicTrigger extends IdObject<UUID> {
      * Если TRUE, логика срабатывает при отвеченном вопросе/выбранном варианте
      */
     @Column(name = "IS_INTERACTION_REQUIRED", nullable = false)
-    private boolean isInteractionRequired;
+    private Boolean isInteractionRequired;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "TARGET_QUESTION_ID", nullable = false)
     private SurveyQuestion targetQuestion;
 
-    @Column(name = "new_conclusion", nullable = true)
+    @Column(name = "NEW_CONCLUSION", nullable = true)
     private String newConclusion;
 
-    @Column(name = "page_index", nullable = true)
+    @Column(name = "PAGE_INDEX", nullable = true)
     private Integer pageIndex;
 
-    @Column(name = "new_link", nullable = true)
+    @Column(name = "NEW_LINK", nullable = true)
     private String newLink;
 
-    @Column(name = "logic_type", nullable = false)
-    @org.hibernate.annotations.Type(type = "pg-uuid")
-    private UUID logicActionType;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "LOGIC_ACTION_TYPE_ID", nullable = false)
+    private LogicActionType logicActionType;
 
     @Override
     public UUID getId() {
@@ -164,11 +164,19 @@ public class SurveyLogicTrigger extends IdObject<UUID> {
         this.newLink = newLink;
     }
 
-    public UUID getLogicActionType() {
+    public Boolean getInteractionRequired() {
+        return isInteractionRequired;
+    }
+
+    public void setInteractionRequired(Boolean interactionRequired) {
+        isInteractionRequired = interactionRequired;
+    }
+
+    public LogicActionType getLogicActionType() {
         return logicActionType;
     }
 
-    public void setLogicActionType(UUID logicActionType) {
+    public void setLogicActionType(LogicActionType logicActionType) {
         this.logicActionType = logicActionType;
     }
 }

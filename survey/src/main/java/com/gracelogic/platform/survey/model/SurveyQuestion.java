@@ -30,29 +30,29 @@ public class SurveyQuestion extends IdObject<UUID> {
     @JoinColumn(name = "SURVEY_PAGE_ID", nullable = false)
     private SurveyPage surveyPage;
 
-    @Column(name = "question_index", nullable = false)
+    @Column(name = "QUESTION_INDEX", nullable = false)
     private Integer questionIndex;
 
-    @Column(name = "text", nullable = false)
+    @Column(name = "TEXT", nullable = false)
     private String text;
 
-    @Column(name = "type", nullable = false)
-    @org.hibernate.annotations.Type(type = "pg-uuid")
-    private UUID type;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "SURVEY_QUESTION_TYPE_ID", nullable = false)
+    private SurveyQuestionType surveyQuestionType;
 
-    @Column(name = "is_required", nullable = false)
+    @Column(name = "IS_REQUIRED", nullable = false)
     private Boolean required;
 
-    @Column(name = "is_hidden", nullable = false)
+    @Column(name = "IS_HIDDEN", nullable = false)
     private Boolean hidden;
 
-    @Column(name = "scale_min_value", nullable = true)
+    @Column(name = "SCALE_MIN_VALUE", nullable = true)
     private Long scaleMinValue;
 
-    @Column(name = "scale_max_value", nullable = true)
+    @Column(name = "SCALE_MAX_VALUE", nullable = true)
     private Long scaleMaxValue;
 
-    @Column(name = "attachment_extensions", nullable = true)
+    @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true)
     private String attachmentExtensions;
 
     @Override
@@ -109,12 +109,12 @@ public class SurveyQuestion extends IdObject<UUID> {
         this.text = text;
     }
 
-    public UUID getType() {
-        return type;
+    public SurveyQuestionType getSurveyQuestionType() {
+        return surveyQuestionType;
     }
 
-    public void setType(UUID type) {
-        this.type = type;
+    public void setSurveyQuestionType(SurveyQuestionType surveyQuestionType) {
+        this.surveyQuestionType = surveyQuestionType;
     }
 
     public Boolean getRequired() {

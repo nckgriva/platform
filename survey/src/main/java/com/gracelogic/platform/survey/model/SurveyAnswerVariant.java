@@ -30,16 +30,16 @@ public class SurveyAnswerVariant extends IdObject<UUID> {
     @JoinColumn(name = "SURVEY_QUESTION_ID", nullable = false)
     private SurveyQuestion surveyQuestion;
 
-    @Column(name = "text", nullable = false)
+    @Column(name = "TEXT", nullable = false)
     private String text;
 
-    @Column(name = "sort_order", nullable = false)
+    @Column(name = "SORT_ORDER", nullable = false)
     private Integer sortOrder;
 
-    @Column(name = "is_default_variant", nullable = false)
+    @Column(name = "IS_DEFAULT_VARIANT", nullable = false)
     private Boolean defaultVariant; // Вариант выбран по умолчанию
 
-    @Column(name = "weight", nullable = true)
+    @Column(name = "WEIGHT", nullable = true)
     private Integer weight; // Вес ответа для автоматической обработки
 
     @Override

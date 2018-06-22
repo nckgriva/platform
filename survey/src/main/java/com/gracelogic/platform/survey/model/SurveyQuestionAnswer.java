@@ -28,32 +28,32 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     private Date changed;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @Column(name = "survey_session_id", nullable = false)
+    @Column(name = "SURVEY_SESSION_ID", nullable = false)
     private SurveySession surveySession;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @Column(name = "question_id", nullable = false)
+    @Column(name = "QUESTION_ID", nullable = false)
     private SurveyQuestion question;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @Column(name = "answer_variant", nullable = true)
+    @Column(name = "ANSWER_VARIANT_ID", nullable = true)
     private SurveyAnswerVariant answerVariant;
 
-    @Column(name = "text_answer", nullable = true)
-    private String textAnswer;
+    @Column(name = "TEXT", nullable = true)
+    private String text;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @Column(name = "answer_stored_file", nullable = true)
+    @Column(name = "STORED_FILE_ID", nullable = true)
     private StoredFile storedFile; // Для хранения прикрепленного пользователем файла
 
     public SurveyQuestionAnswer() {}
 
     public SurveyQuestionAnswer(SurveySession surveySession, SurveyQuestion question, SurveyAnswerVariant answerVariant,
-                                String textAnswer, StoredFile storedFile) {
+                                String text, StoredFile storedFile) {
         this.surveySession = surveySession;
         this.question = question;
         this.answerVariant = answerVariant;
-        this.textAnswer = textAnswer;
+        this.text = text;
         this.storedFile = storedFile;
     }
 
@@ -103,12 +103,12 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
         this.answerVariant = answerVariant;
     }
 
-    public String getTextAnswer() {
-        return textAnswer;
+    public String getText() {
+        return text;
     }
 
-    public void setTextAnswer(String textAnswer) {
-        this.textAnswer = textAnswer;
+    public void setText(String text) {
+        this.text = text;
     }
 
     public StoredFile getStoredFile() {
