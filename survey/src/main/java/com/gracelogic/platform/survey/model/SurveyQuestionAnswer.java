@@ -28,22 +28,22 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     private Date changed;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @Column(name = "SURVEY_SESSION_ID", nullable = false)
+    @JoinColumn(name = "SURVEY_SESSION_ID", nullable = false)
     private SurveySession surveySession;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @Column(name = "QUESTION_ID", nullable = false)
+    @JoinColumn(name = "QUESTION_ID", nullable = false)
     private SurveyQuestion question;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @Column(name = "ANSWER_VARIANT_ID", nullable = true)
+    @JoinColumn(name = "ANSWER_VARIANT_ID", nullable = true)
     private SurveyAnswerVariant answerVariant;
 
     @Column(name = "TEXT", nullable = true)
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @Column(name = "STORED_FILE_ID", nullable = true)
+    @JoinColumn(name = "STORED_FILE_ID", nullable = true)
     private StoredFile storedFile; // Для хранения прикрепленного пользователем файла
 
     public SurveyQuestionAnswer() {}

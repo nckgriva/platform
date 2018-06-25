@@ -24,17 +24,13 @@ public class DataConstants {
          */
         CHANGE_CONCLUSION(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74")),
         /**
-         * Skips specified page
-         */
-        SKIP_PAGE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e75")),
-        /**
          * Change url when survey ends
          */
-        CHANGE_LINK(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e76")),
+        CHANGE_LINK(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e75")),
         /**
          * Go to specified page
          */
-        GO_TO_PAGE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e77"));
+        GO_TO_PAGE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e76"));
 
         private UUID value;
 
