@@ -332,7 +332,7 @@ public class SurveyServiceImpl implements SurveyService {
             }
 
             if (!finishSurvey) {
-                finishSurvey = trigger.getLogicActionType().getId() == DataConstants.LogicActionTypes.END_SURVEY.getValue();
+                finishSurvey = trigger.getLogicActionType().getId().equals(DataConstants.LogicActionTypes.END_SURVEY.getValue());
             }
         }
 
