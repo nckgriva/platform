@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "LOGIC_ACTION_TYPE")
-public class LogicActionType extends IdObject<UUID> implements Dictionary {
+@Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_LOGIC_ACTION_TYPE")
+public class SurveyLogicActionType extends IdObject<UUID> implements Dictionary {
     @Id
     @Access(AccessType.PROPERTY)
     @Column(name = ID)

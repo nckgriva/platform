@@ -61,7 +61,7 @@ public class Survey extends IdObject<UUID> {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "PARTICIPATION_TYPE_ID", nullable = false)
-    private ParticipationType participationType;
+    private SurveyParticipationType surveyParticipationType;
 
     @Column(name = "MAX_ATTEMPTS", nullable = true)
     private Integer maxAttempts;
@@ -180,12 +180,12 @@ public class Survey extends IdObject<UUID> {
         this.owner = owner;
     }
 
-    public ParticipationType getParticipationType() {
-        return participationType;
+    public SurveyParticipationType getSurveyParticipationType() {
+        return surveyParticipationType;
     }
 
-    public void setParticipationType(ParticipationType participationType) {
-        this.participationType = participationType;
+    public void setSurveyParticipationType(SurveyParticipationType surveyParticipationType) {
+        this.surveyParticipationType = surveyParticipationType;
     }
 
     public String getLink() {

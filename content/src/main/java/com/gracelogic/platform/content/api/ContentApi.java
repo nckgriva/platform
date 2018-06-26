@@ -91,7 +91,8 @@ public class ContentApi extends AbstractAuthorizedController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/element", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getElements(@ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
+    public ResponseEntity getElements(@ApiParam(name = "name", value = "name") @RequestParam(value = "name", required = false) String name,
+                                      @ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
                                       @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false) Boolean active,
                                       @ApiParam(name = "validOnDate", value = "validOnDate") @RequestParam(value = "validOnDate", required = false) String sValidOnDate,
                                       @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
@@ -116,7 +117,7 @@ public class ContentApi extends AbstractAuthorizedController {
             }
         }
 
-        EntityListResponse<ElementDTO> elements = contentService.getElementsPaged(sectionIds, active, validOnDate, null, length, page, start, sortField, sortDir);
+        EntityListResponse<ElementDTO> elements = contentService.getElementsPaged(name, sectionIds, active, validOnDate, null, length, page, start, sortField, sortDir);
 
         return new ResponseEntity<EntityListResponse<ElementDTO>>(elements, HttpStatus.OK);
     }

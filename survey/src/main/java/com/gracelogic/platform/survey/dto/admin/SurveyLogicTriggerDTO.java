@@ -33,7 +33,7 @@ public class SurveyLogicTriggerDTO extends IdObjectDTO {
         dto.setNewConclusion(model.getNewConclusion());
         dto.setPageIndex(model.getPageIndex());
         dto.setNewLink(model.getNewLink());
-        dto.setLogicActionTypeId(model.getLogicActionType().getId());
+        dto.setLogicActionTypeId(model.getSurveyLogicActionType().getId());
         return dto;
     }
 

@@ -32,7 +32,7 @@ public class SurveyDTO extends IdObjectDTO {
         dto.setConclusion(model.getConclusion());
         dto.setMaxRespondents(model.getMaxRespondents());
         dto.setTimeLimit(model.getTimeLimit());
-        dto.setParticipationTypeId(model.getParticipationType().getId());
+        dto.setParticipationTypeId(model.getSurveyParticipationType().getId());
         dto.setOwnerId(model.getOwner().getId());
         dto.setMaxAttempts(model.getMaxAttempts());
         return dto;

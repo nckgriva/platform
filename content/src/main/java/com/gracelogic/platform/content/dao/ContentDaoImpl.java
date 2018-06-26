@@ -2,6 +2,7 @@ package com.gracelogic.platform.content.dao;
 
 import com.gracelogic.platform.content.model.Element;
 import com.gracelogic.platform.db.service.IdObjectServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +15,7 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
     private static Logger logger = Logger.getLogger(ContentDaoImpl.class);
 
     @Override
-    public Integer getElementsCount(Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields) {
+    public Integer getElementsCount(String name, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields) {
         BigInteger count = null;
         StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_element where 1=1 ");
 
@@ -36,6 +37,10 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
                 queryStr.append(String.format("and fields ->> '%s' = '%s' ", key, fields.get(key)));
             }
         }
+        if (name != null && !StringUtils.isEmpty(name)) {
+            queryStr.append("and lower(name) like :name ");
+            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+        }
 
         try {
             Query query = getEntityManager().createNativeQuery(queryStr.toString());
@@ -53,7 +58,7 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
     }
 
     @Override
-    public List<Element> getElements(Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
+    public List<Element> getElements(String name, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
         List<Element> elements = Collections.emptyList();
         StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_element where 1=1 ");
 
@@ -74,6 +79,10 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
             for (String key : fields.keySet()) {
                 queryStr.append(String.format("and fields ->> '%s' = '%s' ", key, fields.get(key)));
             }
+        }
+        if (name != null && !StringUtils.isEmpty(name)) {
+            queryStr.append("and lower(name) like :name ");
+            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
         }
 
         appendSortClause(queryStr, sortField, sortDir);
