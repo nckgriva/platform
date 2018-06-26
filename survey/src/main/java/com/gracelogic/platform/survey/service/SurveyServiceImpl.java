@@ -168,7 +168,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     private SurveyPageDTO getSurveyPage(SurveySession surveySession, int pageIndex) throws ObjectNotFoundException {
         Map<String, Object> params = new HashMap<>();
-        String cause = "el.survey.id=:surveyId and el.pageIndex = :pageIndex";
+        String cause = "el.survey.id=:surveyId and el.pageIndex = :pageIndex ";
         params.put("surveyId", surveySession.getSurvey().getId());
         params.put("pageIndex", pageIndex);
 
@@ -197,14 +197,14 @@ public class SurveyServiceImpl implements SurveyService {
         if (!questionIds.isEmpty()) {
             // 2. Получение логики. Для веба выбор только HIDE_QUESTION/SHOW_QUESTION
             params.clear();
-            cause = "el.surveyQuestion.id in (:questionIds) AND el.logicActionType.id in (:logicActionTypeIds) ";
+            cause = "el.surveyQuestion.id in (:questionIds) AND el.surveyLogicActionType.id in (:logicActionTypeIds) ";
             params.put("questionIds", questionIds);
             Set<UUID> logicActionTypeIds = new HashSet<>();
             logicActionTypeIds.add(DataConstants.LogicActionTypes.HIDE_QUESTION.getValue());
             logicActionTypeIds.add(DataConstants.LogicActionTypes.SHOW_QUESTION.getValue());
             params.put("logicActionTypeIds", logicActionTypeIds);
-            HashMap<SurveyQuestion, List<SurveyLogicTrigger>> logicHashMap = asLogicTriggerListHashMap(idObjectService.getList(SurveyLogicTrigger.class, null,
-                    cause, params, null, null, null));
+            HashMap<SurveyQuestion, List<SurveyLogicTrigger>> logicHashMap = asLogicTriggerListHashMap(idObjectService.getList(SurveyLogicTrigger.class,
+                    null, cause, params, null, null, null));
 
             // 3. Получение вариантов ответа
             params.clear();
