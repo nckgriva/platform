@@ -236,7 +236,7 @@ public class SurveyServiceImpl implements SurveyService {
 
                 SurveyQuestionDTO surveyQuestionDTO = SurveyQuestionDTO.prepare(question);
                 surveyQuestionDTO.setLogicTriggers(logicTriggersDTO);
-                surveyQuestionDTO.setAnswers(answerVariantsDTO);
+                surveyQuestionDTO.setAnswerVariants(answerVariantsDTO);
                 surveyQuestionDTOs.add(surveyQuestionDTO);
             }
 

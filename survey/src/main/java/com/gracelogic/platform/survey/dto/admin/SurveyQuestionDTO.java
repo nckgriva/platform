@@ -18,7 +18,7 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private Long scaleMaxValue;
     private String attachmentExtensions;
 
-    private List<SurveyAnswerVariantDTO> answers = new LinkedList<>();
+    private List<SurveyAnswerVariantDTO> answerVariants = new LinkedList<>();
     private List<SurveyLogicTriggerDTO> logicTriggers = new LinkedList<>();
 
     public static SurveyQuestionDTO prepare(SurveyQuestion model) {
@@ -110,12 +110,12 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         this.attachmentExtensions = attachmentExtensions;
     }
 
-    public List<SurveyAnswerVariantDTO> getAnswers() {
-        return answers;
+    public List<SurveyAnswerVariantDTO> getAnswerVariants() {
+        return answerVariants;
     }
 
-    public void setAnswers(List<SurveyAnswerVariantDTO> answers) {
-        this.answers = answers;
+    public void setAnswerVariants(List<SurveyAnswerVariantDTO> answerVariants) {
+        this.answerVariants = answerVariants;
     }
 
     public List<SurveyLogicTriggerDTO> getLogicTriggers() {
