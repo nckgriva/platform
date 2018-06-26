@@ -67,7 +67,7 @@ public class SurveySessionApi extends AbstractAuthorizedController {
             notes = "Saves user answers and returns SurveyInteractionDTO, which contains survey conclusion or next page",
             response = SurveyInteractionDTO.class
     )
-    @RequestMapping(method = RequestMethod.POST, value = "/{session_id}/save/")
+    @RequestMapping(method = RequestMethod.POST, value = "/{session_id}/save")
     @ResponseBody
     public ResponseEntity saveAnswersAndContinue(@PathVariable(value = "session_id") UUID surveySessionId,
                                                  @RequestBody PageAnswersDTO pageAnswersDTO) {

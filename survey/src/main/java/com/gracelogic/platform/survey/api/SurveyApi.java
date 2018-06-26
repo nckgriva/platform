@@ -47,7 +47,7 @@ public class SurveyApi extends AbstractAuthorizedController {
             notes = "Sends initial survey information to user. This method does not begin the survey.",
             response = SurveyIntroductionDTO.class
     )
-    @RequestMapping(method = RequestMethod.GET, value = "/{id}/info/")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/info")
     @ResponseBody
     public ResponseEntity getInitialSurveyInfo(@PathVariable(value = "id") UUID surveyId) {
         try {
@@ -64,7 +64,7 @@ public class SurveyApi extends AbstractAuthorizedController {
             notes = "Starts survey and sends SurveyInteractionDTO with first page back to user",
             response = SurveyInteractionDTO.class
     )
-    @RequestMapping(method = RequestMethod.GET, value = "/{id}/start/")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/start")
     @ResponseBody
     public ResponseEntity startSurvey(HttpServletRequest request,
                                       @PathVariable(value = "id") UUID surveyId) {

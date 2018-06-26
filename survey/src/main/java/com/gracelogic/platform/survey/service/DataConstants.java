@@ -44,6 +44,7 @@ public class DataConstants {
     }
 
     public enum ParticipationTypes {
+        UNLIMITED(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
         /**
          * Participation is limited by cookies
          */
@@ -75,11 +76,12 @@ public class DataConstants {
     public enum QuestionTypes {
         RADIOBUTTON(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
         CHECKBOX(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
-        TEXT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
+        TEXT_SINGLE_LINE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
         COMBOBOX(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74")),
         LISTBOX(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e75")),
         RATING_SCALE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e76")),
-        ATTACHMENT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e77"));
+        ATTACHMENT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e77")),
+        TEXT_MULTILINE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e78"));
 
         private UUID value;
 
