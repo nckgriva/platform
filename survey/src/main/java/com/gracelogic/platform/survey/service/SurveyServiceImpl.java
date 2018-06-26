@@ -216,18 +216,26 @@ public class SurveyServiceImpl implements SurveyService {
 
             List<SurveyQuestionDTO> surveyQuestionDTOs = new LinkedList<>();
             for (SurveyQuestion question : questions) {
+                List<SurveyAnswerVariantDTO> answerVariantsDTO = null;
+                List<SurveyAnswerVariant> answersList = answerVariants.get(question);
+                if (answersList != null) {
+                    answerVariantsDTO = new LinkedList<>();
+                    for (SurveyAnswerVariant answerVariant : answersList) {
+                        answerVariantsDTO.add(SurveyAnswerVariantDTO.prepare(answerVariant));
+                    }
+                }
+
+                List<SurveyLogicTriggerDTO> logicTriggersDTO = null;
+                List<SurveyLogicTrigger> logicTriggerList = logicHashMap.get(question);
+                if (logicTriggerList != null) {
+                    logicTriggersDTO = new LinkedList<>();
+                    for (SurveyLogicTrigger trigger : logicTriggerList) {
+                        logicTriggersDTO.add(SurveyLogicTriggerDTO.prepare(trigger));
+                    }
+                }
+
                 SurveyQuestionDTO surveyQuestionDTO = SurveyQuestionDTO.prepare(question);
-
-                List<SurveyAnswerVariantDTO> answerVariantsDTO = new LinkedList<>();
-                for (SurveyAnswerVariant answerVariant : answerVariants.get(question)) {
-                    answerVariantsDTO.add(SurveyAnswerVariantDTO.prepare(answerVariant));
-                }
-
-                surveyQuestionDTO.setLogicTriggers(new LinkedList<SurveyLogicTriggerDTO>());
-
-                for (SurveyLogicTrigger trigger : logicHashMap.get(question)) {
-                    surveyQuestionDTO.getLogicTriggers().add(SurveyLogicTriggerDTO.prepare(trigger));
-                }
+                surveyQuestionDTO.setLogicTriggers(logicTriggersDTO);
                 surveyQuestionDTO.setAnswers(answerVariantsDTO);
                 surveyQuestionDTOs.add(surveyQuestionDTO);
             }
