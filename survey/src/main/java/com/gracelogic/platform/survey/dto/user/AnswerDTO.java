@@ -5,7 +5,7 @@ import java.util.UUID;
 public class AnswerDTO {
     private UUID answerId;
     private UUID storedFileId;
-    private String textAnswer;
+    private String text;
 
     public UUID getStoredFileId() {
         return storedFileId;
@@ -23,11 +23,11 @@ public class AnswerDTO {
         this.answerId = answerId;
     }
 
-    public String getTextAnswer() {
-        return textAnswer;
+    public String getText() {
+        return text;
     }
 
-    public void setTextAnswer(String textAnswer) {
-        this.textAnswer = textAnswer;
+    public void setText(String text) {
+        this.text = text;
     }
 }

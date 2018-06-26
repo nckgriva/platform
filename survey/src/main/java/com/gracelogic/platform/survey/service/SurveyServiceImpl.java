@@ -348,7 +348,7 @@ public class SurveyServiceImpl implements SurveyService {
                 SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveySession,
                         question,
                         answerVariant,
-                        answerDTO.getTextAnswer(),
+                        answerDTO.getText(),
                         null); // TODO: stored file
                 idObjectService.save(surveyQuestionAnswer);
 
