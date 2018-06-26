@@ -2,14 +2,12 @@ package com.gracelogic.platform.survey.service;
 
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
+import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.filestorage.model.StoredFile;
 import com.gracelogic.platform.survey.dto.admin.*;
-import com.gracelogic.platform.survey.dto.user.PageAnswersDTO;
-import com.gracelogic.platform.survey.dto.user.SurveyConclusionDTO;
-import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
-import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
+import com.gracelogic.platform.survey.dto.user.*;
 import com.gracelogic.platform.survey.exception.RespondentLimitException;
 import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
@@ -37,8 +35,17 @@ public class SurveyServiceImpl implements SurveyService {
     private DictionaryService ds;
 
     private enum LogicTriggerCheckItem {
+        PAGE,
         QUESTION,
         ANSWER,
+    }
+
+    private static <T extends IdObject<UUID>> HashMap<UUID, T> asUUIDHashMap(List<T> list) {
+        HashMap<UUID, T> hashMap = new HashMap<>();
+        for (T t : list) {
+            hashMap.put(t.getId(), t);
+        }
+        return hashMap;
     }
 
     private static HashMap<SurveyQuestion, List<SurveyAnswerVariant>> asListAnswerVariantHashMap(List<SurveyAnswerVariant> list) {
@@ -55,14 +62,6 @@ public class SurveyServiceImpl implements SurveyService {
             hashMap.put(variant.getSurveyQuestion(), variantList);
         }
 
-        return hashMap;
-    }
-
-    private static HashMap<SurveyQuestion, SurveyAnswerVariant> asAnswerVariantHashMap(List<SurveyAnswerVariant> list) {
-        HashMap<SurveyQuestion, SurveyAnswerVariant> hashMap = new HashMap<>();
-        for (SurveyAnswerVariant answerVariant : list) {
-            hashMap.put(answerVariant.getSurveyQuestion(), answerVariant);
-        }
         return hashMap;
     }
 
@@ -294,105 +293,111 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto) throws ObjectNotFoundException, ForbiddenException {
-        final SurveySession surveySession = idObjectService.getObjectById(SurveySession.class, surveySessionId);
+    public SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto)
+            throws ObjectNotFoundException, ForbiddenException {
+
+        SurveySession surveySession = idObjectService.getObjectById(SurveySession.class, surveySessionId);
+        final Date dateNow = new Date();
 
         if (surveySession == null) throw new ObjectNotFoundException();
         if (surveySession.getEnded() != null) throw new ForbiddenException();
-        if (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(new Date()))
+        if (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(dateNow))
             throw new ForbiddenException();
 
         boolean finishSurvey = false;
 
         int nextPage = surveySession.getLastVisitedPageIndex() + 1;
 
-        // список вопросов от полученных ответов
+        // 1. Получение списка вопросов по последней посещенной странице
         Map<String, Object> params = new HashMap<>();
-        params.put("surveyPageId", dto.getSurveyPageId());
+        params.put("lastVisitedPageIndex", surveySession.getLastVisitedPageIndex());
+        HashMap<UUID, SurveyQuestion> surveyQuestionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, null,
+                "el.surveyPage.pageIndex=:lastVisitedPageIndex",
+                params, "el.questionIndex", "ASC", null, null));
 
-        List<SurveyQuestion> surveyQuestions = idObjectService.getList(SurveyQuestion.class, null,
-                "el.surveyPage.id=:surveyPageId",
-                params, "el.questionIndex", "ASC", null, null);
-
-        // список вариантов ответов
-        HashMap<SurveyQuestion, SurveyAnswerVariant> surveyAnswersHashMap = new HashMap<>();
-
+        // 2. Получение всех вариантов ответов
+        HashMap<UUID, SurveyAnswerVariant> surveyAnswersHashMap = new HashMap<>();
         if (dto.containsNonTextAnswers()) {
             params.clear();
-            params.put("answerIds", dto.getAnswers().keySet());
-            surveyAnswersHashMap = asAnswerVariantHashMap(
+            params.put("questionIds", surveyQuestionsHashMap.keySet());
+            surveyAnswersHashMap = asUUIDHashMap(
                     idObjectService.getList(SurveyAnswerVariant.class, null,
-                            "el.id in (:answerIds)", params, null, null, null));
+                            "el.surveyQuestion.id in (:questionIds)", params, null, null, null));
         }
 
+        // 3. Получение логики по последней посещенной странице
         params.clear();
-        params.put("surveyPageId", dto.getSurveyPageId());
-        HashMap<SurveyQuestion, List<SurveyLogicTrigger>> triggersHashMap = asLogicTriggerListHashMap(
+        params.put("lastVisitedPageIndex", surveySession.getLastVisitedPageIndex());
+        // TODO: sort logic PAGE -> QUESTION INDEX -> ANSWER INDEX
+        List<SurveyLogicTrigger> logicTriggers =
                 idObjectService.getList(SurveyLogicTrigger.class, null,
-                        "el.surveyPage.id=:surveyPageId",
-                        params, null, null, null));
+                        "el.surveyPage.pageIndex=:lastVisitedPageIndex",
+                        params, null, null, null);
 
-        List<SurveyLogicTrigger> pageTriggers = triggersHashMap.get(null);
+        Set<UUID> answeredQuestions = new HashSet<>();
+        Set<UUID> selectedAnswers = new HashSet<>();
 
-        for (SurveyLogicTrigger trigger : pageTriggers) {
-            if (trigger.getSurveyLogicActionType().getId() == DataConstants.LogicActionTypes.GO_TO_PAGE.getValue()) {
-                nextPage = trigger.getPageIndex();
-            }
+        // Сохраним полученные ответы
+        for (Map.Entry<UUID, List<AnswerDTO>> entry : dto.getAnswers().entrySet()) {
+            for (AnswerDTO answerDTO : entry.getValue()) {
+                SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
+                SurveyAnswerVariant answerVariant = null;
+                if (answerDTO.getAnswerId() != null)
+                    answerVariant = surveyAnswersHashMap.get(answerDTO.getAnswerId());
 
-            if (!finishSurvey) {
-                finishSurvey = trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.END_SURVEY.getValue());
+                SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveySession,
+                        question,
+                        answerVariant,
+                        answerDTO.getTextAnswer(),
+                        null); // TODO: stored file
+                idObjectService.save(surveyQuestionAnswer);
+
+                answeredQuestions.add(question.getId());
+                if (answerVariant != null)
+                    selectedAnswers.add(answerVariant.getId());
             }
         }
 
-        for (SurveyQuestion question : surveyQuestions) {
-            SurveyAnswerVariant answerVariant = surveyAnswersHashMap.get(question);
-            String textAnswer = dto.getAnswers().get(question.getId()).getTextAnswer();
-
-            for (SurveyLogicTrigger trigger : triggersHashMap.get(question)) {
-                LogicTriggerCheckItem logicTriggerCheckItem = LogicTriggerCheckItem.ANSWER;
-                if (trigger.getAnswerVariant() == null) logicTriggerCheckItem = LogicTriggerCheckItem.QUESTION;
-
-                boolean triggered = false;
-
-                switch (logicTriggerCheckItem) {
-                    case ANSWER:
-                        boolean selectedTrigger = trigger.isInteractionRequired() && trigger.getAnswerVariant() == answerVariant;
-                        boolean unselectedTrigger = !trigger.isInteractionRequired() && answerVariant != null && trigger.getAnswerVariant() != answerVariant;
-
-                        triggered = selectedTrigger || unselectedTrigger;
-                        break;
-                    case QUESTION:
-                        boolean answeredTrigger = trigger.isInteractionRequired() && (answerVariant != null || StringUtils.isNotBlank(textAnswer));
-                        boolean unansweredTrigger = !trigger.isInteractionRequired() && answerVariant == null && StringUtils.isBlank(textAnswer);
-
-                        triggered = answeredTrigger || unansweredTrigger;
-                        break;
-                }
-
-                if (triggered) {
-                    if (trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.CHANGE_CONCLUSION.getValue())) {
-                        surveySession.setConclusion(trigger.getNewConclusion());
-                    }
-
-                    if (trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.CHANGE_LINK.getValue())) {
-                        surveySession.setLink(trigger.getNewLink());
-                    }
-
-                    if (trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.GO_TO_PAGE.getValue())) {
-                        nextPage = trigger.getPageIndex();
-                    }
-
-                    if (!finishSurvey) {
-                        finishSurvey = trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.END_SURVEY.getValue());
-                    }
-                }
+        // обработка логики
+        for (SurveyLogicTrigger trigger : logicTriggers) {
+            LogicTriggerCheckItem checkItem = LogicTriggerCheckItem.PAGE;
+            if (trigger.getSurveyQuestion() != null) {
+                checkItem = LogicTriggerCheckItem.QUESTION;
+                if (trigger.getAnswerVariant() != null) checkItem = LogicTriggerCheckItem.ANSWER;
             }
 
-            SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveySession,
-                    question, answerVariant, textAnswer,
-                    null); // TODO: stored file
+            boolean triggered = false;
+            switch (checkItem) {
+                case PAGE: triggered = true; break;
+                case QUESTION:
+                    boolean answeredTrigger = trigger.isInteractionRequired() && answeredQuestions.contains(trigger.getSurveyQuestion().getId());
+                    boolean unansweredTrigger = !trigger.isInteractionRequired() && !answeredQuestions.contains(trigger.getSurveyQuestion().getId());
+                    triggered = answeredTrigger || unansweredTrigger;
+                    break;
+                case ANSWER:
+                    boolean selectedTrigger = trigger.isInteractionRequired() && selectedAnswers.contains(trigger.getSurveyQuestion().getId());
+                    boolean unselectedTrigger = !trigger.isInteractionRequired() && !selectedAnswers.contains(trigger.getSurveyQuestion().getId());
+                    triggered = selectedTrigger || unselectedTrigger;
+                    break;
+            }
 
-            idObjectService.save(surveyQuestionAnswer);
+            if (triggered) {
+                if (trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.CHANGE_CONCLUSION.getValue())) {
+                    surveySession.setConclusion(trigger.getNewConclusion());
+                }
+
+                if (trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.CHANGE_LINK.getValue())) {
+                    surveySession.setLink(trigger.getNewLink());
+                }
+
+                if (trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.GO_TO_PAGE.getValue())) {
+                    nextPage = trigger.getPageIndex();
+                }
+
+                if (!finishSurvey) {
+                    finishSurvey = trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.END_SURVEY.getValue());
+                }
+            }
         }
 
         // если следующей страницы не существует, это финиш
@@ -411,7 +416,7 @@ public class SurveyServiceImpl implements SurveyService {
             surveyConclusionDTO.setLink(surveySession.getLink());
             surveyInteractionDTO.setSurveyConclusion(surveyConclusionDTO);
 
-            surveySession.setEnded(new Date());
+            surveySession.setEnded(dateNow);
         } else {
             surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, nextPage));
             surveySession.setLastVisitedPageIndex(nextPage);
