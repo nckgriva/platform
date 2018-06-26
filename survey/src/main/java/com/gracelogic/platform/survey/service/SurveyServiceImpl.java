@@ -106,7 +106,7 @@ public class SurveyServiceImpl implements SurveyService {
         if (survey.getExpirationDate() != null && survey.getExpirationDate().before(now))
             throw new ForbiddenException();
 
-        if (user == null && survey.getParticipationType().getId().equals(DataConstants.ParticipationTypes.AUTHORIZATION_REQUIRED.getValue())) {
+        if (user == null && survey.getSurveyParticipationType().getId().equals(DataConstants.ParticipationTypes.AUTHORIZATION_REQUIRED.getValue())) {
             throw new ForbiddenException();
         }
 
@@ -327,12 +327,12 @@ public class SurveyServiceImpl implements SurveyService {
         List<SurveyLogicTrigger> pageTriggers = triggersHashMap.get(null);
 
         for (SurveyLogicTrigger trigger : pageTriggers) {
-            if (trigger.getLogicActionType().getId() == DataConstants.LogicActionTypes.GO_TO_PAGE.getValue()) {
+            if (trigger.getSurveyLogicActionType().getId() == DataConstants.LogicActionTypes.GO_TO_PAGE.getValue()) {
                 nextPage = trigger.getPageIndex();
             }
 
             if (!finishSurvey) {
-                finishSurvey = trigger.getLogicActionType().getId().equals(DataConstants.LogicActionTypes.END_SURVEY.getValue());
+                finishSurvey = trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.END_SURVEY.getValue());
             }
         }
 
@@ -362,20 +362,20 @@ public class SurveyServiceImpl implements SurveyService {
                 }
 
                 if (triggered) {
-                    if (trigger.getLogicActionType().getId().equals(DataConstants.LogicActionTypes.CHANGE_CONCLUSION.getValue())) {
+                    if (trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.CHANGE_CONCLUSION.getValue())) {
                         surveySession.setConclusion(trigger.getNewConclusion());
                     }
 
-                    if (trigger.getLogicActionType().getId().equals(DataConstants.LogicActionTypes.CHANGE_LINK.getValue())) {
+                    if (trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.CHANGE_LINK.getValue())) {
                         surveySession.setLink(trigger.getNewLink());
                     }
 
-                    if (trigger.getLogicActionType().getId().equals(DataConstants.LogicActionTypes.GO_TO_PAGE.getValue())) {
+                    if (trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.GO_TO_PAGE.getValue())) {
                         nextPage = trigger.getPageIndex();
                     }
 
                     if (!finishSurvey) {
-                        finishSurvey = trigger.getLogicActionType().getId().equals(DataConstants.LogicActionTypes.END_SURVEY.getValue());
+                        finishSurvey = trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.END_SURVEY.getValue());
                     }
                 }
             }
@@ -468,7 +468,7 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setMaxRespondents(dto.getMaxRespondents());
         entity.setTimeLimit(dto.getTimeLimit());
         entity.setMaxAttempts(dto.getMaxAttempts());
-        entity.setParticipationType(ds.get(ParticipationType.class, dto.getParticipationTypeId()));
+        entity.setSurveyParticipationType(ds.get(SurveyParticipationType.class, dto.getParticipationTypeId()));
         entity.setOwner(idObjectService.getObjectById(User.class, user.getId()));
         return idObjectService.save(entity);
     }
@@ -748,7 +748,7 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setSurveyPage(idObjectService.getObjectById(SurveyPage.class, dto.getSurveyPageId()));
         entity.setSurveyQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getSurveyQuestionId()));
         entity.setAnswerVariant(idObjectService.getObjectById(SurveyAnswerVariant.class, dto.getAnswerVariantId()));
-        entity.setLogicActionType(ds.get(LogicActionType.class, dto.getLogicActionTypeId()));
+        entity.setSurveyLogicActionType(ds.get(SurveyLogicActionType.class, dto.getLogicActionTypeId()));
         entity.setNewConclusion(dto.getNewConclusion());
         entity.setNewLink(dto.getNewLink());
         entity.setPageIndex(dto.getPageIndex());

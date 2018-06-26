@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "PARTICIPATION_TYPE")
-public class ParticipationType extends IdObject<UUID> implements Dictionary {
+@Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_PARTICIPATION_TYPE")
+public class SurveyParticipationType extends IdObject<UUID> implements Dictionary {
     @Id
     @Access(AccessType.PROPERTY)
     @Column(name = ID)

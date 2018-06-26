@@ -68,7 +68,7 @@ public class SurveyLogicTrigger extends IdObject<UUID> {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "LOGIC_ACTION_TYPE_ID", nullable = false)
-    private LogicActionType logicActionType;
+    private SurveyLogicActionType surveyLogicActionType;
 
     @Override
     public UUID getId() {
@@ -172,11 +172,11 @@ public class SurveyLogicTrigger extends IdObject<UUID> {
         isInteractionRequired = interactionRequired;
     }
 
-    public LogicActionType getLogicActionType() {
-        return logicActionType;
+    public SurveyLogicActionType getSurveyLogicActionType() {
+        return surveyLogicActionType;
     }
 
-    public void setLogicActionType(LogicActionType logicActionType) {
-        this.logicActionType = logicActionType;
+    public void setSurveyLogicActionType(SurveyLogicActionType surveyLogicActionType) {
+        this.surveyLogicActionType = surveyLogicActionType;
     }
 }
