@@ -15,6 +15,7 @@ import com.gracelogic.platform.survey.model.Survey;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.user.exception.ForbiddenException;
+import com.gracelogic.platform.web.ServletUtils;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
@@ -69,7 +70,7 @@ public class SurveyApi extends AbstractAuthorizedController {
     public ResponseEntity startSurvey(HttpServletRequest request,
                                       @PathVariable(value = "id") UUID surveyId) {
         try {
-            SurveyInteractionDTO dto = surveyService.startSurvey(surveyId, getUser(), request.getRemoteAddr());
+            SurveyInteractionDTO dto = surveyService.startSurvey(surveyId, getUser(), ServletUtils.getRemoteAddress(request));
             return new ResponseEntity<SurveyInteractionDTO>(dto, HttpStatus.OK);
         } catch (RespondentLimitException respondentLimitException) {
             return new ResponseEntity<>(new ErrorResponse("survey.RESPONDENT_LIMIT",
@@ -86,7 +87,7 @@ public class SurveyApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "getSurveys",
             notes = "Get list of surveys",
-            response =  EntityListResponse.class
+            response = EntityListResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -96,10 +97,10 @@ public class SurveyApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getSurveys(@RequestParam(value = "name", required = false) String name,
-                                        @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                        @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                        @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                        @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                     @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                     @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                     @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                     @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
 
         EntityListResponse<SurveyDTO> properties = surveyService.getSurveysPaged(name, count, null, start, sortField, sortDir);
