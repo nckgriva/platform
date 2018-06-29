@@ -53,11 +53,15 @@ public class SurveyApi extends AbstractAuthorizedController {
     public ResponseEntity getInitialSurveyInfo(@PathVariable(value = "id") UUID surveyId) {
         try {
             SurveyIntroductionDTO dto = surveyService.getSurveyIntroduction(surveyId);
-            return new ResponseEntity<SurveyIntroductionDTO>(dto, HttpStatus.OK);
+            return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException notFoundException) {
             return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SURVEY",
                     messageSource.getMessage("survey.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ForbiddenException forbiddenException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
+                    messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
+
     }
 
     @ApiOperation(

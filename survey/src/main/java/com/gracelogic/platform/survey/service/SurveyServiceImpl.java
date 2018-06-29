@@ -82,11 +82,10 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Override
     public SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId)
-            throws ObjectNotFoundException {
+            throws ObjectNotFoundException, ForbiddenException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
-        if (survey == null) {
-            throw new ObjectNotFoundException();
-        }
+        if (survey == null) throw new ObjectNotFoundException();
+        if (!survey.isActive()) throw new ForbiddenException();
 
         return new SurveyIntroductionDTO(survey);
     }
@@ -96,9 +95,8 @@ public class SurveyServiceImpl implements SurveyService {
     public SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String ipAddress)
             throws ObjectNotFoundException, RespondentLimitException, ForbiddenException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
-        if (survey == null) {
-            throw new ObjectNotFoundException();
-        }
+        if (survey == null) throw new ObjectNotFoundException();
+        if (!survey.isActive()) throw new ForbiddenException();
 
         Date now = new Date();
 
@@ -167,7 +165,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     private SurveyPageDTO getSurveyPage(SurveySession surveySession, int pageIndex) throws ObjectNotFoundException {
         Map<String, Object> params = new HashMap<>();
-        String cause = "el.survey.id=:surveyId and el.pageIndex = :pageIndex ";
+        String cause = "el.survey.id=:surveyId and el.survey.active and el.pageIndex = :pageIndex ";
         params.put("surveyId", surveySession.getSurvey().getId());
         params.put("pageIndex", pageIndex);
 
