@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.UUID;
 
 public class SurveyDTO extends IdObjectDTO {
+    private Boolean active;
     private String name;
     private Date expirationDate;
     private Boolean showProgress;
@@ -23,6 +24,7 @@ public class SurveyDTO extends IdObjectDTO {
     public static SurveyDTO prepare(Survey model) {
         SurveyDTO dto = new SurveyDTO();
         IdObjectDTO.prepare(dto, model);
+        dto.setActive(model.isActive());
         dto.setName(model.getName());
         dto.setExpirationDate(model.getExpirationDate());
         dto.setShowProgress(model.getShowProgress());
@@ -36,6 +38,14 @@ public class SurveyDTO extends IdObjectDTO {
         dto.setOwnerId(model.getOwner().getId());
         dto.setMaxAttempts(model.getMaxAttempts());
         return dto;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public String getName() {

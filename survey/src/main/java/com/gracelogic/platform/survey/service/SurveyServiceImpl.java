@@ -410,6 +410,7 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
+        surveyInteractionDTO.setSurveySessionId(surveySession.getId());
         if (finishSurvey) {
             SurveyConclusionDTO surveyConclusionDTO = new SurveyConclusionDTO();
             surveyConclusionDTO.setConclusion(surveySession.getConclusion());
@@ -471,6 +472,7 @@ public class SurveyServiceImpl implements SurveyService {
             entity = new Survey();
         }
 
+        entity.setActive(dto.getActive());
         entity.setName(dto.getName());
         entity.setExpirationDate(dto.getExpirationDate());
         entity.setShowProgress(dto.getShowProgress());

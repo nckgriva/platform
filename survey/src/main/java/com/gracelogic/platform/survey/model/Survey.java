@@ -29,6 +29,9 @@ public class Survey extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
+    @Column(name = "IS_ACTIVE", nullable = false)
+    private boolean active;
+
     @Column(name = "NAME", nullable = false)
     private String name;
 
@@ -98,6 +101,14 @@ public class Survey extends IdObject<UUID> {
     @Override
     public void setChanged(Date changed) {
         this.changed = changed;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public String getName() {
