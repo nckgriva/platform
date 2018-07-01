@@ -33,6 +33,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
     private static final String ACTION_CREATE = "create";
     private static final String ACTION_EXECUTE = "execute";
     private static final String ACTION = "action";
+    private static final String USE_BILLING_AGREEMENT = "use_billing_agreement";
 
     private static final String SANDBOX_API_URL = "https://api.sandbox.paypal.com";
     private static final String PRODUCTION_API_URL = "https://api.paypal.com";
@@ -69,7 +70,8 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
             throw new PaymentExecutionException("Failed to get access token");
         }
 
-        if (request.getPeriodicity() == null) {
+        Boolean useBillingAgreement = Boolean.parseBoolean(request.getParams().get(USE_BILLING_AGREEMENT));
+        if (request.getPeriodicity() == null || !useBillingAgreement) {
             return executePayment(request, accessToken, apiUrl, propertyService, paymentService);
         } else {
             return executeBillingAgreement(request, accessToken, apiUrl, propertyService, paymentService);
