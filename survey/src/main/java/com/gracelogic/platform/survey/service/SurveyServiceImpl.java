@@ -366,7 +366,9 @@ public class SurveyServiceImpl implements SurveyService {
 
             boolean triggered = false;
             switch (checkItem) {
-                case PAGE: triggered = true; break;
+                case PAGE:
+                    triggered = true;
+                    break;
                 case QUESTION:
                     boolean answeredTrigger = trigger.isInteractionRequired() && answeredQuestions.contains(trigger.getSurveyQuestion().getId());
                     boolean unansweredTrigger = !trigger.isInteractionRequired() && !answeredQuestions.contains(trigger.getSurveyQuestion().getId());
@@ -633,16 +635,24 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyPageId, String text, Integer count, Integer page,
+    public EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, String text, Integer count, Integer page,
                                                                          Integer start, String sortField, String sortDir) {
-        String countFetches = "";
+        String countFetches = "left join el.surveyPage sp ";
+        String fetches = "left join el.surveyPage sp ";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (surveyId != null) {
+            cause += "and sp.survey.id=:surveyId ";
+            params.put("surveyId", surveyId);
+        }
 
         if (surveyPageId != null) {
             cause += "and el.surveyPage.id=:surveyPageId ";
             params.put("surveyPageId", surveyPageId);
         }
+
+
 
         if (!StringUtils.isEmpty(text)) {
             params.put("text", "%%" + StringUtils.lowerCase(text) + "%%");
@@ -1000,7 +1010,7 @@ public class SurveyServiceImpl implements SurveyService {
         params.put("answerVariantId", id);
 
         boolean isAnswered = idObjectService.checkExist(SurveyQuestionAnswer.class, null, "el.answerVariant.id=:answerVariantId",
-               params, 1) > 0;
+                params, 1) > 0;
         if (isAnswered) {
             throw new ResultDependencyException("Selected as answer");
         }
