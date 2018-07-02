@@ -11,6 +11,7 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private UUID surveyPageId;
     private Integer questionIndex;
     private String text;
+    private String description;
     private UUID surveyQuestionTypeId;
     private Boolean required;
     private Boolean hidden;
@@ -27,6 +28,7 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         dto.setSurveyPageId(model.getSurveyPage().getId());
         dto.setQuestionIndex(model.getQuestionIndex());
         dto.setText(model.getText());
+        dto.setDescription(model.getDescription());
         if (model.getSurveyQuestionType() != null) {
             dto.setSurveyQuestionTypeId(model.getSurveyQuestionType().getId());
         }
@@ -40,6 +42,14 @@ public class SurveyQuestionDTO extends IdObjectDTO {
 
     public UUID getSurveyPageId() {
         return surveyPageId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setSurveyPageId(UUID surveyPageId) {

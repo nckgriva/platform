@@ -702,6 +702,7 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setScaleMinValue(dto.getScaleMinValue());
         entity.setScaleMaxValue(dto.getScaleMaxValue());
         entity.setAttachmentExtensions(dto.getAttachmentExtensions());
+        entity.setDescription(dto.getDescription());
         return idObjectService.save(entity);
     }
 

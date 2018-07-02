@@ -36,6 +36,9 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "TEXT", nullable = false)
     private String text;
 
+    @Column(name = "DESCRIPTION", nullable = true)
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "SURVEY_QUESTION_TYPE_ID", nullable = false)
     private SurveyQuestionType surveyQuestionType;
@@ -155,5 +158,13 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setAttachmentExtensions(String attachmentExtensions) {
         this.attachmentExtensions = attachmentExtensions;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
