@@ -165,7 +165,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     private SurveyPageDTO getSurveyPage(SurveySession surveySession, int pageIndex) throws ObjectNotFoundException {
         Map<String, Object> params = new HashMap<>();
-        String cause = "el.survey.id=:surveyId and el.survey.active and el.pageIndex = :pageIndex ";
+        String cause = "el.survey.id=:surveyId and el.survey.active=true and el.pageIndex = :pageIndex ";
         params.put("surveyId", surveySession.getSurvey().getId());
         params.put("pageIndex", pageIndex);
 
@@ -444,7 +444,9 @@ public class SurveyServiceImpl implements SurveyService {
 
             boolean triggered = false;
             switch (checkItem) {
-                case PAGE: triggered = true; break;
+                case PAGE:
+                    triggered = true;
+                    break;
                 case QUESTION:
                     boolean answeredTrigger = trigger.isInteractionRequired() && answeredQuestions.contains(trigger.getSurveyQuestion().getId());
                     boolean unansweredTrigger = !trigger.isInteractionRequired() && !answeredQuestions.contains(trigger.getSurveyQuestion().getId());
@@ -711,11 +713,17 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyPageId, String text, Integer count, Integer page,
+    public EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, String text, boolean withVariants, Integer count, Integer page,
                                                                          Integer start, String sortField, String sortDir) {
-        String countFetches = "";
+        String countFetches = "left join el.surveyPage sp ";
+        String fetches = "left join el.surveyPage sp ";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (surveyId != null) {
+            cause += "and sp.survey.id=:surveyId ";
+            params.put("surveyId", surveyId);
+        }
 
         if (surveyPageId != null) {
             cause += "and el.surveyPage.id=:surveyPageId ";
@@ -737,12 +745,32 @@ public class SurveyServiceImpl implements SurveyService {
         entityListResponse.setPages(totalPages);
         entityListResponse.setTotalCount(totalCount);
 
-        List<SurveyQuestion> items = idObjectService.getList(SurveyQuestion.class, null, cause, params, sortField, sortDir, startRecord, count);
+        List<SurveyQuestion> items = idObjectService.getList(SurveyQuestion.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        Set<UUID> questionIds = new HashSet<>();
+        List<SurveyAnswerVariant> variants = Collections.emptyList();
+        if (withVariants) {
+            for (SurveyQuestion surveyQuestion : items) {
+                questionIds.add(surveyQuestion.getId());
+            }
+            if (!questionIds.isEmpty()) {
+                Map<String, Object> pms = new HashMap<>();
+                pms.put("questionIds", questionIds);
+                variants = idObjectService.getList(SurveyAnswerVariant.class, null, "el.surveyQuestion.id in (:questionIds)", pms, null, null, null);
+            }
+        }
 
         entityListResponse.setPartCount(items.size());
         for (SurveyQuestion e : items) {
             SurveyQuestionDTO el = SurveyQuestionDTO.prepare(e);
             entityListResponse.addData(el);
+            if (withVariants) {
+                for (SurveyAnswerVariant v : variants) {
+                    if (v.getSurveyQuestion().getId().equals(e.getId())) {
+                        SurveyAnswerVariantDTO dto = SurveyAnswerVariantDTO.prepare(v);
+                        el.getAnswerVariants().add(dto);
+                    }
+                }
+            }
         }
 
         return entityListResponse;
@@ -770,6 +798,7 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setScaleMinValue(dto.getScaleMinValue());
         entity.setScaleMaxValue(dto.getScaleMaxValue());
         entity.setAttachmentExtensions(dto.getAttachmentExtensions());
+        entity.setDescription(dto.getDescription());
         return idObjectService.save(entity);
     }
 
@@ -1078,7 +1107,7 @@ public class SurveyServiceImpl implements SurveyService {
         params.put("answerVariantId", id);
 
         boolean isAnswered = idObjectService.checkExist(SurveyQuestionAnswer.class, null, "el.answerVariant.id=:answerVariantId",
-               params, 1) > 0;
+                params, 1) > 0;
         if (isAnswered) {
             throw new ResultDependencyException("Selected as answer");
         }

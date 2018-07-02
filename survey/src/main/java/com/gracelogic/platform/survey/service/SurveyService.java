@@ -57,7 +57,7 @@ public interface SurveyService {
 
     void deleteSurveyPage(UUID id) throws LogicDependencyException, ResultDependencyException;
 
-    EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyPageId, String text, Integer count, Integer page,
+    EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, String text, boolean withVariants, Integer count, Integer page,
                                                                   Integer start, String sortField, String sortDir);
 
     SurveyQuestion saveSurveyQuestion(SurveyQuestionDTO dto) throws ObjectNotFoundException;
