@@ -687,8 +687,10 @@ public class SurveyServiceImpl implements SurveyService {
             entityListResponse.addData(el);
             if (withVariants) {
                 for (SurveyAnswerVariant v : variants) {
-                    SurveyAnswerVariantDTO dto = SurveyAnswerVariantDTO.prepare(v);
-                    el.getAnswerVariants().add(dto);
+                    if (v.getSurveyQuestion().getId().equals(e.getId())) {
+                        SurveyAnswerVariantDTO dto = SurveyAnswerVariantDTO.prepare(v);
+                        el.getAnswerVariants().add(dto);
+                    }
                 }
             }
         }
