@@ -755,7 +755,7 @@ public class SurveyServiceImpl implements SurveyService {
             if (!questionIds.isEmpty()) {
                 Map<String, Object> pms = new HashMap<>();
                 pms.put("questionIds", questionIds);
-                variants = idObjectService.getList(SurveyAnswerVariant.class, null, "el.surveyQuestion.id in (:questionIds)", pms, null, null, null);
+                variants = idObjectService.getList(SurveyAnswerVariant.class, null, "el.surveyQuestion.id in (:questionIds)", pms, "el.sortOrder ASC", null, null);
             }
         }
 
