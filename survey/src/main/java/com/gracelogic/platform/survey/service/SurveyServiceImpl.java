@@ -635,7 +635,7 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, String text, Integer count, Integer page,
+    public EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, String text, boolean withVariants, Integer count, Integer page,
                                                                          Integer start, String sortField, String sortDir) {
         String countFetches = "left join el.surveyPage sp ";
         String fetches = "left join el.surveyPage sp ";
@@ -651,8 +651,6 @@ public class SurveyServiceImpl implements SurveyService {
             cause += "and el.surveyPage.id=:surveyPageId ";
             params.put("surveyPageId", surveyPageId);
         }
-
-
 
         if (!StringUtils.isEmpty(text)) {
             params.put("text", "%%" + StringUtils.lowerCase(text) + "%%");
@@ -670,11 +668,29 @@ public class SurveyServiceImpl implements SurveyService {
         entityListResponse.setTotalCount(totalCount);
 
         List<SurveyQuestion> items = idObjectService.getList(SurveyQuestion.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        Set<UUID> questionIds = new HashSet<>();
+        List<SurveyAnswerVariant> variants = Collections.emptyList();
+        if (withVariants) {
+            for (SurveyQuestion surveyQuestion : items) {
+                questionIds.add(surveyQuestion.getId());
+            }
+            if (!questionIds.isEmpty()) {
+                Map<String, Object> pms = new HashMap<>();
+                pms.put("questionIds", questionIds);
+                variants = idObjectService.getList(SurveyAnswerVariant.class, null, "el.surveyQuestion.id in (:questionIds)", pms, null, null, null);
+            }
+        }
 
         entityListResponse.setPartCount(items.size());
         for (SurveyQuestion e : items) {
             SurveyQuestionDTO el = SurveyQuestionDTO.prepare(e);
             entityListResponse.addData(el);
+            if (withVariants) {
+                for (SurveyAnswerVariant v : variants) {
+                    SurveyAnswerVariantDTO dto = SurveyAnswerVariantDTO.prepare(v);
+                    el.getAnswerVariants().add(dto);
+                }
+            }
         }
 
         return entityListResponse;
