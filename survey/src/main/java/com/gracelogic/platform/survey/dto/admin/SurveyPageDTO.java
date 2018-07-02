@@ -3,10 +3,7 @@ package com.gracelogic.platform.survey.dto.admin;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.survey.model.SurveyPage;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class SurveyPageDTO extends IdObjectDTO {
     private UUID surveyId;
@@ -15,8 +12,8 @@ public class SurveyPageDTO extends IdObjectDTO {
     private List<SurveyQuestionDTO> questions = new LinkedList<>();
     private List<SurveyLogicTriggerDTO> logicTriggers = new LinkedList<>();
 
-    private Set<UUID> questionsToDelete;
-    private Set<UUID> logicTriggersToDelete;
+    private Set<UUID> questionsToDelete = new HashSet<>();
+    private Set<UUID> logicTriggersToDelete = new HashSet<>();
 
     public static SurveyPageDTO prepare(SurveyPage model) {
         SurveyPageDTO dto = new SurveyPageDTO();

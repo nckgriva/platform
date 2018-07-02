@@ -3,10 +3,7 @@ package com.gracelogic.platform.survey.dto.admin;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.survey.model.Survey;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class SurveyDTO extends IdObjectDTO {
     private Boolean active;
@@ -22,8 +19,9 @@ public class SurveyDTO extends IdObjectDTO {
     private UUID participationTypeId;
     private UUID ownerId;
     private Integer maxAttempts;
-    private List<SurveyPageDTO> pages;
-    private Set<UUID> pagesToDelete;
+
+    private List<SurveyPageDTO> pages = new LinkedList<>();
+    private Set<UUID> pagesToDelete = new HashSet<>();
 
     public static SurveyDTO prepare(Survey model) {
         SurveyDTO dto = new SurveyDTO();

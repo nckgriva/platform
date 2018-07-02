@@ -123,9 +123,10 @@ public class SurveyApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
-    public ResponseEntity getSurvey(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity getSurvey(@PathVariable(value = "id") UUID id,
+                                    @RequestParam(value = "entireSurvey", required = false) Boolean entireSurvey) {
         try {
-            SurveyDTO dto = surveyService.getSurvey(id);
+            SurveyDTO dto = surveyService.getSurvey(id, entireSurvey);
             return new ResponseEntity<SurveyDTO>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null,

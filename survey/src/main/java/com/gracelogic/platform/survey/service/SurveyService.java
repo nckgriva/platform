@@ -35,7 +35,7 @@ public interface SurveyService {
 
     Survey saveSurvey(SurveyDTO dto, AuthorizedUser user) throws ObjectNotFoundException;
 
-    SurveyDTO getSurvey(UUID surveyId) throws ObjectNotFoundException;
+    SurveyDTO getSurvey(UUID surveyId, boolean entire) throws ObjectNotFoundException;
 
     void deleteSurvey(UUID id) throws LogicDependencyException, ResultDependencyException;
 
