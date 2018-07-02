@@ -30,6 +30,9 @@ public interface SurveyService {
 
     EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
+    Survey saveEntireSurvey(SurveyDTO surveyDTO, AuthorizedUser user)
+            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException;
+
     Survey saveSurvey(SurveyDTO dto, AuthorizedUser user) throws ObjectNotFoundException;
 
     SurveyDTO getSurvey(UUID surveyId) throws ObjectNotFoundException;

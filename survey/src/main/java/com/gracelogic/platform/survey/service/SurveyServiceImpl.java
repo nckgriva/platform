@@ -185,6 +185,22 @@ public class SurveyServiceImpl implements SurveyService {
         List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, null,
                 cause, params, "el.questionIndex", "ASC", null, null);
 
+        // 2. Получение логики. Для веба выбор только HIDE_QUESTION/SHOW_QUESTION
+        params.clear();
+        cause = "el.surveyPage.pageIndex = :pageIndex AND el.surveyLogicActionType.id in (:logicActionTypeIds) ";
+        params.put("pageIndex", pageIndex);
+        Set<UUID> logicActionTypeIds = new HashSet<>();
+        logicActionTypeIds.add(DataConstants.LogicActionTypes.HIDE_QUESTION.getValue());
+        logicActionTypeIds.add(DataConstants.LogicActionTypes.SHOW_QUESTION.getValue());
+        params.put("logicActionTypeIds", logicActionTypeIds);
+        List<SurveyLogicTrigger> logicTriggers = idObjectService.getList(SurveyLogicTrigger.class,
+                null, cause, params, null, null, null);
+
+        List<SurveyLogicTriggerDTO> logicTriggersDTO = new LinkedList<>();
+        for (SurveyLogicTrigger trigger : logicTriggers) {
+            logicTriggersDTO.add(SurveyLogicTriggerDTO.prepare(trigger));
+        }
+        dto.setLogicTriggers(logicTriggersDTO);
 
         Set<UUID> questionIds = new HashSet<>();
         for (SurveyQuestion question : questions) {
@@ -192,17 +208,6 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         if (!questionIds.isEmpty()) {
-            // 2. Получение логики. Для веба выбор только HIDE_QUESTION/SHOW_QUESTION
-            params.clear();
-            cause = "el.surveyQuestion.id in (:questionIds) AND el.surveyLogicActionType.id in (:logicActionTypeIds) ";
-            params.put("questionIds", questionIds);
-            Set<UUID> logicActionTypeIds = new HashSet<>();
-            logicActionTypeIds.add(DataConstants.LogicActionTypes.HIDE_QUESTION.getValue());
-            logicActionTypeIds.add(DataConstants.LogicActionTypes.SHOW_QUESTION.getValue());
-            params.put("logicActionTypeIds", logicActionTypeIds);
-            HashMap<SurveyQuestion, List<SurveyLogicTrigger>> logicHashMap = asLogicTriggerListHashMap(idObjectService.getList(SurveyLogicTrigger.class,
-                    null, cause, params, null, null, null));
-
             // 3. Получение вариантов ответа
             params.clear();
             cause = "el.surveyQuestion.id in (:questionIds) ";
@@ -221,18 +226,7 @@ public class SurveyServiceImpl implements SurveyService {
                         answerVariantsDTO.add(SurveyAnswerVariantDTO.prepare(answerVariant));
                     }
                 }
-
-                List<SurveyLogicTriggerDTO> logicTriggersDTO = null;
-                List<SurveyLogicTrigger> logicTriggerList = logicHashMap.get(question);
-                if (logicTriggerList != null) {
-                    logicTriggersDTO = new LinkedList<>();
-                    for (SurveyLogicTrigger trigger : logicTriggerList) {
-                        logicTriggersDTO.add(SurveyLogicTriggerDTO.prepare(trigger));
-                    }
-                }
-
                 SurveyQuestionDTO surveyQuestionDTO = SurveyQuestionDTO.prepare(question);
-                surveyQuestionDTO.setLogicTriggers(logicTriggersDTO);
                 surveyQuestionDTO.setAnswerVariants(answerVariantsDTO);
                 surveyQuestionDTOs.add(surveyQuestionDTO);
             }
@@ -241,6 +235,90 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         return dto;
+    }
+
+    /**
+     * Saves or updates entire survey. Deletes specified pages, questions, answers and logic triggers.
+     * @param surveyDTO dto
+     * @return Created/updated survey id
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Survey saveEntireSurvey(SurveyDTO surveyDTO, AuthorizedUser user)
+            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException {
+
+        Survey survey = saveSurvey(surveyDTO, user);
+
+        Map<String, Object> params = new HashMap<>();
+
+        // Do not change operation order
+        // 1. Delete specified survey pages
+        if (surveyDTO.getPagesToDelete() != null && surveyDTO.getPagesToDelete().size() > 0) {
+            params.put("ids", surveyDTO.getPagesToDelete());
+            List<SurveyPage> pages = idObjectService.getList(SurveyPage.class, null, "el.id in (:ids)", params,
+                    null, null, null, null);
+            for (SurveyPage page : pages)
+                deleteSurveyPage(page.getId());
+            params.clear();
+        }
+
+        if (surveyDTO.getPages() != null) {
+            for (SurveyPageDTO surveyPageDTO : surveyDTO.getPages()) {
+
+                // 2. Delete specified survey logic triggers
+                if (surveyPageDTO.getLogicTriggersToDelete() != null && surveyPageDTO.getQuestionsToDelete().size() > 0) {
+                    params.put("ids", surveyPageDTO.getLogicTriggersToDelete());
+                    List<SurveyLogicTrigger> logicTriggers = idObjectService.getList(SurveyLogicTrigger.class, null, "el.id in (:ids)", params,
+                            null, null, null, null);
+                    for (SurveyLogicTrigger trigger : logicTriggers)
+                        deleteSurveyLogicTrigger(trigger.getId());
+
+                    params.clear();
+                }
+
+                // 3. Delete specified survey questions
+                if (surveyPageDTO.getQuestionsToDelete() != null && surveyPageDTO.getQuestionsToDelete().size() > 0) {
+                    params.put("ids", surveyPageDTO.getQuestionsToDelete());
+                    List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, null, "el.id in (:ids)", params,
+                            null, null, null, null);
+                    for (SurveyQuestion question : questions)
+                        deleteSurveyPage(question.getId());
+
+                    params.clear();
+                }
+
+                for (SurveyQuestionDTO questionDTO : surveyPageDTO.getQuestions()) {
+                    // 4. Delete specified survey answer variants
+                    if (questionDTO.getAnswersToDelete() != null && questionDTO.getAnswersToDelete().size() > 0) {
+                        params.put("ids", questionDTO.getAnswersToDelete());
+                        List<SurveyAnswerVariant> answers = idObjectService.getList(SurveyAnswerVariant.class, null, "el.id in (:ids)", params,
+                                null, null, null, null);
+                        for (SurveyAnswerVariant a : answers)
+                            deleteSurveyAnswerVariant(a.getId(), true);
+
+                        params.clear();
+                    }
+                }
+            }
+        }
+
+        for (SurveyPageDTO surveyPageDTO : surveyDTO.getPages()) {
+            saveSurveyPage(surveyPageDTO);
+
+            for (SurveyLogicTriggerDTO logicTriggerDTO : surveyPageDTO.getLogicTriggers()) {
+                saveSurveyLogicTrigger(logicTriggerDTO);
+            }
+
+            for (SurveyQuestionDTO surveyQuestionDTO : surveyPageDTO.getQuestions()) {
+                saveSurveyQuestion(surveyQuestionDTO);
+
+                for (SurveyAnswerVariantDTO answerVariantDTO : surveyQuestionDTO.getAnswerVariants()) {
+                    saveSurveyAnswerVariant(answerVariantDTO);
+                }
+            }
+        }
+
+        return survey;
     }
 
     @Transactional(rollbackFor = Exception.class)

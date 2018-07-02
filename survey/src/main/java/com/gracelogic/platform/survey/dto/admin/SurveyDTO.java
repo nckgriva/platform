@@ -4,6 +4,8 @@ import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.survey.model.Survey;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class SurveyDTO extends IdObjectDTO {
@@ -20,6 +22,8 @@ public class SurveyDTO extends IdObjectDTO {
     private UUID participationTypeId;
     private UUID ownerId;
     private Integer maxAttempts;
+    private List<SurveyPageDTO> pages;
+    private Set<UUID> pagesToDelete;
 
     public static SurveyDTO prepare(Survey model) {
         SurveyDTO dto = new SurveyDTO();
@@ -142,5 +146,21 @@ public class SurveyDTO extends IdObjectDTO {
 
     public void setMaxAttempts(Integer maxAttempts) {
         this.maxAttempts = maxAttempts;
+    }
+
+    public List<SurveyPageDTO> getPages() {
+        return pages;
+    }
+
+    public void setPages(List<SurveyPageDTO> pages) {
+        this.pages = pages;
+    }
+
+    public Set<UUID> getPagesToDelete() {
+        return pagesToDelete;
+    }
+
+    public void setPagesToDelete(Set<UUID> pagesToDelete) {
+        this.pagesToDelete = pagesToDelete;
     }
 }

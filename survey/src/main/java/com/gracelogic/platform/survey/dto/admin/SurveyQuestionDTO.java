@@ -5,6 +5,7 @@ import com.gracelogic.platform.survey.model.SurveyQuestion;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class SurveyQuestionDTO extends IdObjectDTO {
@@ -19,7 +20,8 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private String attachmentExtensions;
 
     private List<SurveyAnswerVariantDTO> answerVariants = new LinkedList<>();
-    private List<SurveyLogicTriggerDTO> logicTriggers = new LinkedList<>();
+    private Set<UUID> answersToDelete;
+
 
     public static SurveyQuestionDTO prepare(SurveyQuestion model) {
         SurveyQuestionDTO dto = new SurveyQuestionDTO();
@@ -118,11 +120,11 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         this.answerVariants = answerVariants;
     }
 
-    public List<SurveyLogicTriggerDTO> getLogicTriggers() {
-        return logicTriggers;
+    public Set<UUID> getAnswersToDelete() {
+        return answersToDelete;
     }
 
-    public void setLogicTriggers(List<SurveyLogicTriggerDTO> logicTriggers) {
-        this.logicTriggers = logicTriggers;
+    public void setAnswersToDelete(Set<UUID> answersToDelete) {
+        this.answersToDelete = answersToDelete;
     }
 }

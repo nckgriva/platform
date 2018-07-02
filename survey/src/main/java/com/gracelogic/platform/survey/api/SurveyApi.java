@@ -152,7 +152,32 @@ public class SurveyApi extends AbstractAuthorizedController {
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
+    }
 
+    @ApiOperation(
+            value = "saveEntireSurvey",
+            notes = "Save entire survey",
+            response = IDResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @PreAuthorize("hasAuthority('SURVEY:SAVE')")
+    @RequestMapping(method = RequestMethod.POST, value = "/saveEntire") // TODO: заменить saveEntire на более подходящее название
+    @ResponseBody
+    public ResponseEntity saveEntireSurvey(@RequestBody SurveyDTO surveyDTO) {
+        try {
+            Survey survey = surveyService.saveEntireSurvey(surveyDTO, getUser());
+            return new ResponseEntity<IDResponse>(new IDResponse(survey.getId()), HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }  catch (ResultDependencyException resultDependency) {
+            return new ResponseEntity<>(new ErrorResponse("survey.RESULT_DEPENDENCY", messageSource.getMessage("survey.RESULT_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (LogicDependencyException logicDependency) {
+            return new ResponseEntity<>(new ErrorResponse("survey.LOGIC_DEPENDENCY",
+                    messageSource.getMessage("survey.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @ApiOperation(

@@ -5,6 +5,7 @@ import com.gracelogic.platform.survey.model.SurveyPage;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class SurveyPageDTO extends IdObjectDTO {
@@ -12,6 +13,10 @@ public class SurveyPageDTO extends IdObjectDTO {
     private Integer pageIndex;
     private String description;
     private List<SurveyQuestionDTO> questions = new LinkedList<>();
+    private List<SurveyLogicTriggerDTO> logicTriggers = new LinkedList<>();
+
+    private Set<UUID> questionsToDelete;
+    private Set<UUID> logicTriggersToDelete;
 
     public static SurveyPageDTO prepare(SurveyPage model) {
         SurveyPageDTO dto = new SurveyPageDTO();
@@ -54,5 +59,29 @@ public class SurveyPageDTO extends IdObjectDTO {
 
     public void setQuestions(List<SurveyQuestionDTO> questions) {
         this.questions = questions;
+    }
+
+    public List<SurveyLogicTriggerDTO> getLogicTriggers() {
+        return logicTriggers;
+    }
+
+    public void setLogicTriggers(List<SurveyLogicTriggerDTO> logicTriggers) {
+        this.logicTriggers = logicTriggers;
+    }
+
+    public Set<UUID> getQuestionsToDelete() {
+        return questionsToDelete;
+    }
+
+    public void setQuestionsToDelete(Set<UUID> questionsToDelete) {
+        this.questionsToDelete = questionsToDelete;
+    }
+
+    public Set<UUID> getLogicTriggersToDelete() {
+        return logicTriggersToDelete;
+    }
+
+    public void setLogicTriggersToDelete(Set<UUID> logicTriggersToDelete) {
+        this.logicTriggersToDelete = logicTriggersToDelete;
     }
 }
