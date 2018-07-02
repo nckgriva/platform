@@ -669,7 +669,7 @@ public class SurveyServiceImpl implements SurveyService {
         entityListResponse.setPages(totalPages);
         entityListResponse.setTotalCount(totalCount);
 
-        List<SurveyQuestion> items = idObjectService.getList(SurveyQuestion.class, null, cause, params, sortField, sortDir, startRecord, count);
+        List<SurveyQuestion> items = idObjectService.getList(SurveyQuestion.class, fetches, cause, params, sortField, sortDir, startRecord, count);
 
         entityListResponse.setPartCount(items.size());
         for (SurveyQuestion e : items) {
