@@ -165,7 +165,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     private SurveyPageDTO getSurveyPage(SurveySession surveySession, int pageIndex) throws ObjectNotFoundException {
         Map<String, Object> params = new HashMap<>();
-        String cause = "el.survey.id=:surveyId and el.survey.active and el.pageIndex = :pageIndex ";
+        String cause = "el.survey.id=:surveyId and el.survey.active=true and el.pageIndex = :pageIndex ";
         params.put("surveyId", surveySession.getSurvey().getId());
         params.put("pageIndex", pageIndex);
 

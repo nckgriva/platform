@@ -30,7 +30,7 @@ public class Survey extends IdObject<UUID> {
     private Date changed;
 
     @Column(name = "IS_ACTIVE", nullable = false)
-    private boolean active;
+    private Boolean active;
 
     @Column(name = "NAME", nullable = false)
     private String name;
