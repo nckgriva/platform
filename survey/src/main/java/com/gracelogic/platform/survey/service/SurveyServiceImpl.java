@@ -592,38 +592,40 @@ public class SurveyServiceImpl implements SurveyService {
                 pagesDTO.put(page.getId(), SurveyPageDTO.prepare(page));
             }
 
-            params.clear();
-            params.put("pageIds", pagesDTO.keySet());
-            List<SurveyQuestion> surveyQuestions = idObjectService.getList(SurveyQuestion.class, null, "el.surveyPage.id in (:pageIds)", params,
-                    "el.questionIndex ASC", null, null);
+            if (!pagesDTO.isEmpty()) {
+                params.clear();
+                params.put("pageIds", pagesDTO.keySet());
+                List<SurveyQuestion> surveyQuestions = idObjectService.getList(SurveyQuestion.class, null, "el.surveyPage.id in (:pageIds)", params,
+                        "el.questionIndex ASC", null, null);
 
-            List<SurveyLogicTrigger> logicTriggers = idObjectService.getList(SurveyLogicTrigger.class, null, "el.surveyPage.id in (:pageIds)", params,
-                    null, null, null);
+                List<SurveyLogicTrigger> logicTriggers = idObjectService.getList(SurveyLogicTrigger.class, null, "el.surveyPage.id in (:pageIds)", params,
+                        null, null, null);
 
-            HashMap<UUID, SurveyQuestionDTO> questionsDTO = new HashMap<>();
-            for (SurveyQuestion question : surveyQuestions) {
-                SurveyQuestionDTO questionDTO = SurveyQuestionDTO.prepare(question);
-                questionsDTO.put(question.getId(), questionDTO);
-                pagesDTO.get(question.getSurveyPage().getId()).getQuestions().add(questionDTO);
-            }
+                HashMap<UUID, SurveyQuestionDTO> questionsDTO = new HashMap<>();
+                for (SurveyQuestion question : surveyQuestions) {
+                    SurveyQuestionDTO questionDTO = SurveyQuestionDTO.prepare(question);
+                    questionsDTO.put(question.getId(), questionDTO);
+                    pagesDTO.get(question.getSurveyPage().getId()).getQuestions().add(questionDTO);
+                }
 
-            for (SurveyLogicTrigger trigger : logicTriggers) {
-                SurveyLogicTriggerDTO dto = SurveyLogicTriggerDTO.prepare(trigger);
-                pagesDTO.get(trigger.getSurveyPage().getId()).getLogicTriggers().add(dto);
-            }
+                for (SurveyLogicTrigger trigger : logicTriggers) {
+                    SurveyLogicTriggerDTO dto = SurveyLogicTriggerDTO.prepare(trigger);
+                    pagesDTO.get(trigger.getSurveyPage().getId()).getLogicTriggers().add(dto);
+                }
 
-            params.clear();
-            params.put("questionIds", questionsDTO.keySet());
-            List<SurveyAnswerVariant> surveyAnswerVariant = idObjectService.getList(SurveyAnswerVariant.class, null, "el.surveyQuestion.id in (:questionIds)", params,
-                    "el.sortOrder ASC", null, null);
+                params.clear();
+                params.put("questionIds", questionsDTO.keySet());
+                List<SurveyAnswerVariant> surveyAnswerVariant = idObjectService.getList(SurveyAnswerVariant.class, null, "el.surveyQuestion.id in (:questionIds)", params,
+                        "el.sortOrder ASC", null, null);
 
-            for (SurveyAnswerVariant variant : surveyAnswerVariant) {
-                SurveyAnswerVariantDTO variantDTO = SurveyAnswerVariantDTO.prepare(variant);
-                questionsDTO.get(variant.getSurveyQuestion().getId()).getAnswerVariants().add(variantDTO);
-            }
+                for (SurveyAnswerVariant variant : surveyAnswerVariant) {
+                    SurveyAnswerVariantDTO variantDTO = SurveyAnswerVariantDTO.prepare(variant);
+                    questionsDTO.get(variant.getSurveyQuestion().getId()).getAnswerVariants().add(variantDTO);
+                }
 
-            for (SurveyPageDTO page : pagesDTO.values()) {
-                surveyDTO.getPages().add(page);
+                for (SurveyPageDTO page : pagesDTO.values()) {
+                    surveyDTO.getPages().add(page);
+                }
             }
         }
         return surveyDTO;
