@@ -94,9 +94,12 @@ public class SurveyServiceImpl implements SurveyService {
     @Override
     public SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String ipAddress)
             throws ObjectNotFoundException, RespondentLimitException, ForbiddenException {
+
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
-        if (survey == null) throw new ObjectNotFoundException();
-//        if (!survey.isActive()) throw new ForbiddenException();
+        if (survey == null) {
+            throw new ObjectNotFoundException();
+        }
+        System.out.println("check passed..");
 
         Date now = new Date();
 
@@ -165,7 +168,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     private SurveyPageDTO getSurveyPage(SurveySession surveySession, int pageIndex) throws ObjectNotFoundException {
         Map<String, Object> params = new HashMap<>();
-        String cause = "el.survey.id=:surveyId and el.survey.active=true and el.pageIndex = :pageIndex ";
+        String cause = "el.survey.id=:surveyId and el.pageIndex = :pageIndex ";
         params.put("surveyId", surveySession.getSurvey().getId());
         params.put("pageIndex", pageIndex);
 
