@@ -40,8 +40,12 @@ public class SurveyApi extends AbstractAuthorizedController {
     private SurveyService surveyService;
 
     @Autowired
-    @Qualifier("dbMessageSource")
+    @Qualifier("surveyMessageSource")
     private ResourceBundleMessageSource messageSource;
+
+    @Autowired
+    @Qualifier("dbMessageSource")
+    private ResourceBundleMessageSource dbMessageSource;
 
     @ApiOperation(
             value = "getInitialSurveyInfo",
@@ -129,7 +133,7 @@ public class SurveyApi extends AbstractAuthorizedController {
             SurveyDTO dto = surveyService.getSurvey(id, entireSurvey);
             return new ResponseEntity<SurveyDTO>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null,
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
                     LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
@@ -151,7 +155,7 @@ public class SurveyApi extends AbstractAuthorizedController {
             Survey survey = surveyService.saveSurvey(surveyDTO, getUser());
             return new ResponseEntity<IDResponse>(new IDResponse(survey.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -165,15 +169,16 @@ public class SurveyApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('SURVEY:SAVE')")
-    @RequestMapping(method = RequestMethod.POST, value = "/saveEntire") // TODO: заменить saveEntire на более подходящее название
+    @RequestMapping(method = RequestMethod.POST, value = "/saveEntire")
+    // TODO: заменить saveEntire на более подходящее название
     @ResponseBody
     public ResponseEntity saveEntireSurvey(@RequestBody SurveyDTO surveyDTO) {
         try {
             Survey survey = surveyService.saveEntireSurvey(surveyDTO, getUser());
             return new ResponseEntity<IDResponse>(new IDResponse(survey.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        }  catch (ResultDependencyException resultDependency) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ResultDependencyException resultDependency) {
             return new ResponseEntity<>(new ErrorResponse("survey.RESULT_DEPENDENCY", messageSource.getMessage("survey.RESULT_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (LogicDependencyException logicDependency) {
             return new ResponseEntity<>(new ErrorResponse("survey.LOGIC_DEPENDENCY",
@@ -204,7 +209,7 @@ public class SurveyApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("survey.LOGIC_DEPENDENCY",
                     messageSource.getMessage("survey.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 }

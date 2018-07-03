@@ -96,7 +96,7 @@ public class SurveyServiceImpl implements SurveyService {
             throws ObjectNotFoundException, RespondentLimitException, ForbiddenException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
         if (survey == null) throw new ObjectNotFoundException();
-        if (!survey.isActive()) throw new ForbiddenException();
+//        if (!survey.isActive()) throw new ForbiddenException();
 
         Date now = new Date();
 
