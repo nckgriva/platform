@@ -302,6 +302,7 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         for (SurveyPageDTO surveyPageDTO : surveyDTO.getPages()) {
+            surveyPageDTO.setSurveyId(survey.getId());
             saveSurveyPage(surveyPageDTO);
 
             for (SurveyLogicTriggerDTO logicTriggerDTO : surveyPageDTO.getLogicTriggers()) {
