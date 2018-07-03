@@ -248,7 +248,6 @@ public class SurveyServiceImpl implements SurveyService {
             throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException {
 
         Survey survey = saveSurvey(surveyDTO, user);
-
         Map<String, Object> params = new HashMap<>();
 
         // Do not change operation order
@@ -266,7 +265,7 @@ public class SurveyServiceImpl implements SurveyService {
             for (SurveyPageDTO surveyPageDTO : surveyDTO.getPages()) {
 
                 // 2. Delete specified survey logic triggers
-                if (surveyPageDTO.getLogicTriggersToDelete() != null && surveyPageDTO.getQuestionsToDelete().size() > 0) {
+                if (surveyPageDTO.getLogicTriggersToDelete() != null && surveyPageDTO.getLogicTriggersToDelete().size() > 0) {
                     params.put("ids", surveyPageDTO.getLogicTriggersToDelete());
                     List<SurveyLogicTrigger> logicTriggers = idObjectService.getList(SurveyLogicTrigger.class, null, "el.id in (:ids)", params,
                             null, null, null, null);
