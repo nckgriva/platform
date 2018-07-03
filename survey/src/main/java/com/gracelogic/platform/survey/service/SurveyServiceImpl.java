@@ -303,16 +303,19 @@ public class SurveyServiceImpl implements SurveyService {
 
         for (SurveyPageDTO surveyPageDTO : surveyDTO.getPages()) {
             surveyPageDTO.setSurveyId(survey.getId());
-            saveSurveyPage(surveyPageDTO);
+            SurveyPage surveyPage = saveSurveyPage(surveyPageDTO);
 
             for (SurveyLogicTriggerDTO logicTriggerDTO : surveyPageDTO.getLogicTriggers()) {
-                saveSurveyLogicTrigger(logicTriggerDTO);
+                logicTriggerDTO.setSurveyPageId(surveyPage.getId());
+                SurveyLogicTrigger surveyLogicTrigger = saveSurveyLogicTrigger(logicTriggerDTO);
             }
 
             for (SurveyQuestionDTO surveyQuestionDTO : surveyPageDTO.getQuestions()) {
-                saveSurveyQuestion(surveyQuestionDTO);
+                surveyQuestionDTO.setSurveyPageId(surveyPage.getId());
+                SurveyQuestion surveyQuestion = saveSurveyQuestion(surveyQuestionDTO);
 
                 for (SurveyAnswerVariantDTO answerVariantDTO : surveyQuestionDTO.getAnswerVariants()) {
+                    answerVariantDTO.setSurveyQuestionId(surveyQuestion.getId());
                     saveSurveyAnswerVariant(answerVariantDTO);
                 }
             }
