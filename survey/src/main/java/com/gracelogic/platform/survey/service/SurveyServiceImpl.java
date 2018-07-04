@@ -11,6 +11,7 @@ import com.gracelogic.platform.survey.dto.user.*;
 import com.gracelogic.platform.survey.exception.RespondentLimitException;
 import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
+import com.gracelogic.platform.survey.exception.UnansweredException;
 import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
@@ -376,7 +377,7 @@ public class SurveyServiceImpl implements SurveyService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto)
-            throws ObjectNotFoundException, ForbiddenException {
+            throws ObjectNotFoundException, ForbiddenException, UnansweredException {
 
         SurveySession surveySession = idObjectService.getObjectById(SurveySession.class, surveySessionId);
         final Date dateNow = new Date();
@@ -438,6 +439,11 @@ public class SurveyServiceImpl implements SurveyService {
                 if (answerVariant != null)
                     selectedAnswers.add(answerVariant.getId());
             }
+        }
+
+        for (Map.Entry<UUID, SurveyQuestion> entry : surveyQuestionsHashMap.entrySet()) {
+            if (entry.getValue().getRequired() && !answeredQuestions.contains(entry.getKey()))
+                throw new UnansweredException();
         }
 
         // обработка логики

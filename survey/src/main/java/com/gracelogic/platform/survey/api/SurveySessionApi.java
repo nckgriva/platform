@@ -7,6 +7,7 @@ import com.gracelogic.platform.survey.Path;
 import com.gracelogic.platform.survey.dto.admin.SurveySessionDTO;
 import com.gracelogic.platform.survey.dto.user.PageAnswersDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
+import com.gracelogic.platform.survey.exception.UnansweredException;
 import com.gracelogic.platform.survey.model.SurveySession;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
@@ -80,7 +81,11 @@ public class SurveySessionApi extends AbstractAuthorizedController {
         } catch (ObjectNotFoundException notFoundException) {
             return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SESSION",
                     messageSource.getMessage("survey.NO_SUCH_SESSION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (UnansweredException unansweredException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.UNANSWERED",
+                    messageSource.getMessage("survey.UNANSWERED", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
+
     }
 
     @ApiOperation(
