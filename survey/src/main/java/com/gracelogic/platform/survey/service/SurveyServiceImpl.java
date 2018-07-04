@@ -66,21 +66,6 @@ public class SurveyServiceImpl implements SurveyService {
         return hashMap;
     }
 
-    private static HashMap<SurveyQuestion, List<SurveyLogicTrigger>> asLogicTriggerListHashMap(List<SurveyLogicTrigger> list) {
-        HashMap<SurveyQuestion, List<SurveyLogicTrigger>> hashMap = new HashMap<>();
-        for (SurveyLogicTrigger variant : list) {
-            List<SurveyLogicTrigger> triggerList = hashMap.get(variant.getSurveyQuestion());
-            if (triggerList != null) {
-                triggerList.add(variant);
-                continue;
-            }
-            triggerList = new LinkedList<>();
-            triggerList.add(variant);
-            hashMap.put(variant.getSurveyQuestion(), triggerList);
-        }
-        return hashMap;
-    }
-
     @Override
     public SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId)
             throws ObjectNotFoundException, ForbiddenException {

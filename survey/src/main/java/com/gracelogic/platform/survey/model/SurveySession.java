@@ -4,6 +4,7 @@ import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.user.model.User;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -55,7 +56,8 @@ public class SurveySession extends IdObject<UUID> {
     @Column(name = "LINK", nullable = true)
     private String link;
 
-    @Column(name = "PAGE_VISIT_HISTORY", nullable = true)
+    @Type(type = "int-array")
+    @Column(name = "PAGE_VISIT_HISTORY", columnDefinition = "integer[]")
     private Integer[] pageVisitHistory;
 
     @Override
