@@ -613,14 +613,16 @@ public class SurveyServiceImpl implements SurveyService {
                     pagesDTO.get(trigger.getSurveyPage().getId()).getLogicTriggers().add(dto);
                 }
 
-                params.clear();
-                params.put("questionIds", questionsDTO.keySet());
-                List<SurveyAnswerVariant> surveyAnswerVariant = idObjectService.getList(SurveyAnswerVariant.class, null, "el.surveyQuestion.id in (:questionIds)", params,
-                        "el.sortOrder ASC", null, null);
+                if (!questionsDTO.isEmpty()) {
+                    params.clear();
+                    params.put("questionIds", questionsDTO.keySet());
+                    List<SurveyAnswerVariant> surveyAnswerVariant = idObjectService.getList(SurveyAnswerVariant.class, null, "el.surveyQuestion.id in (:questionIds)", params,
+                            "el.sortOrder ASC", null, null);
 
-                for (SurveyAnswerVariant variant : surveyAnswerVariant) {
-                    SurveyAnswerVariantDTO variantDTO = SurveyAnswerVariantDTO.prepare(variant);
-                    questionsDTO.get(variant.getSurveyQuestion().getId()).getAnswerVariants().add(variantDTO);
+                    for (SurveyAnswerVariant variant : surveyAnswerVariant) {
+                        SurveyAnswerVariantDTO variantDTO = SurveyAnswerVariantDTO.prepare(variant);
+                        questionsDTO.get(variant.getSurveyQuestion().getId()).getAnswerVariants().add(variantDTO);
+                    }
                 }
 
                 for (SurveyPageDTO page : pagesDTO.values()) {
