@@ -131,7 +131,7 @@ public class SurveyServiceImpl implements SurveyService {
             }
         }
 
-        //Check max respondents
+        // Check max respondents
         if (survey.getMaxRespondents() != null && survey.getMaxRespondents() > 0) {
             Map<String, Object> params = new HashMap<>();
             String cause = "el.survey.id=:surveyId ";
@@ -155,7 +155,9 @@ public class SurveyServiceImpl implements SurveyService {
             surveySession.setExpirationDate(new Date(now.getTime() + survey.getTimeLimit()));
         }
 
-        surveySession.setLastVisitedPageIndex(0);
+        Integer[] pageVisitHistory = new Integer[1];
+        pageVisitHistory[0] = 0;
+        surveySession.setPageVisitHistory(pageVisitHistory);
         surveySession.setLink(survey.getLink());
         surveySession.setConclusion(survey.getConclusion());
         surveySession.setSurvey(survey);
@@ -169,7 +171,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     private SurveyPageDTO getSurveyPage(SurveySession surveySession, int pageIndex) throws ObjectNotFoundException {
         Map<String, Object> params = new HashMap<>();
-        String cause = "el.survey.id=:surveyId and el.pageIndex = :pageIndex ";
+        String cause = "el.survey.id = :surveyId and el.pageIndex = :pageIndex ";
         params.put("surveyId", surveySession.getSurvey().getId());
         params.put("pageIndex", pageIndex);
 
@@ -234,7 +236,6 @@ public class SurveyServiceImpl implements SurveyService {
                 surveyQuestionDTO.setAnswerVariants(answerVariantsDTO);
                 surveyQuestionDTOs.add(surveyQuestionDTO);
             }
-
             dto.setQuestions(surveyQuestionDTOs);
         }
 
@@ -330,7 +331,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyInteractionDTO getSurveyPage(UUID surveySessionId, int pageIndex)
+    public SurveyInteractionDTO goToPage(UUID surveySessionId, int pageIndex)
             throws ObjectNotFoundException, ForbiddenException {
         SurveySession surveySession = idObjectService.getObjectById(SurveySession.class, surveySessionId);
 
@@ -344,13 +345,44 @@ public class SurveyServiceImpl implements SurveyService {
             throw new ForbiddenException();
         }
 
-        surveySession.setLastVisitedPageIndex(pageIndex);
+        Integer[] pagesHistory = Arrays.copyOf(surveySession.getPageVisitHistory(),
+                surveySession.getPageVisitHistory().length + 1);
+        pagesHistory[pagesHistory.length-1] = pageIndex;
+
+        surveySession.setPageVisitHistory(pagesHistory);
         idObjectService.save(surveySession);
 
         SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
         surveyInteractionDTO.setSurveySessionId(surveySession.getId());
         surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, pageIndex));
 
+        return surveyInteractionDTO;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public SurveyInteractionDTO goBack(UUID surveySessionId) throws ObjectNotFoundException, ForbiddenException {
+        SurveySession surveySession = idObjectService.getObjectById(SurveySession.class, surveySessionId);
+        if (surveySession == null) {
+            throw new ObjectNotFoundException();
+        }
+        if (surveySession.getEnded() != null || // session already ended
+                (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(new Date())) || // hit time limit
+                (surveySession.getPageVisitHistory() == null || surveySession.getPageVisitHistory().length == 0)) { // trying to go back to nothing
+            throw new ForbiddenException();
+        }
+
+        Integer[] visitHistory = null;
+        if (surveySession.getPageVisitHistory().length > 1) {
+            visitHistory = Arrays.copyOf(surveySession.getPageVisitHistory(), surveySession.getPageVisitHistory().length-1);
+        }
+
+        surveySession.setPageVisitHistory(visitHistory);
+
+        idObjectService.save(surveySession);
+
+        SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
+        surveyInteractionDTO.setSurveySessionId(surveySession.getId());
+        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, visitHistory[visitHistory.length-1]));
         return surveyInteractionDTO;
     }
 
@@ -369,7 +401,8 @@ public class SurveyServiceImpl implements SurveyService {
 
         SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
         surveyInteractionDTO.setSurveySessionId(surveySession.getId());
-        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, surveySession.getLastVisitedPageIndex()));
+        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession,
+                surveySession.getPageVisitHistory()[surveySession.getPageVisitHistory().length-1]));
 
         return surveyInteractionDTO;
     }
@@ -389,11 +422,12 @@ public class SurveyServiceImpl implements SurveyService {
 
         boolean finishSurvey = false;
 
-        int nextPage = surveySession.getLastVisitedPageIndex() + 1;
+        int lastVisitedPageIndex = surveySession.getPageVisitHistory()[surveySession.getPageVisitHistory().length-1];
+        int nextPage = lastVisitedPageIndex + 1;
 
         // 1. Получение списка вопросов по последней посещенной странице
         Map<String, Object> params = new HashMap<>();
-        params.put("lastVisitedPageIndex", surveySession.getLastVisitedPageIndex());
+        params.put("lastVisitedPageIndex", lastVisitedPageIndex);
         HashMap<UUID, SurveyQuestion> surveyQuestionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, null,
                 "el.surveyPage.pageIndex=:lastVisitedPageIndex",
                 params, "el.questionIndex", "ASC", null, null));
@@ -410,7 +444,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         // 3. Получение логики по последней посещенной странице
         params.clear();
-        params.put("lastVisitedPageIndex", surveySession.getLastVisitedPageIndex());
+        params.put("lastVisitedPageIndex", lastVisitedPageIndex);
         // TODO: sort logic PAGE -> QUESTION INDEX -> ANSWER INDEX
         List<SurveyLogicTrigger> logicTriggers =
                 idObjectService.getList(SurveyLogicTrigger.class, null,
@@ -510,7 +544,11 @@ public class SurveyServiceImpl implements SurveyService {
             surveySession.setEnded(dateNow);
         } else {
             surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, nextPage));
-            surveySession.setLastVisitedPageIndex(nextPage);
+
+            Integer[] pagesHistory = Arrays.copyOf(surveySession.getPageVisitHistory(),
+                    surveySession.getPageVisitHistory().length + 1);
+            pagesHistory[pagesHistory.length-1] = nextPage;
+            surveySession.setPageVisitHistory(pagesHistory);
         }
 
         idObjectService.save(surveySession);
@@ -1021,7 +1059,7 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setStarted(dto.getStarted());
         entity.setEnded(dto.getEnded());
         entity.setExpirationDate(dto.getExpirationDate());
-        entity.setLastVisitedPageIndex(dto.getLastVisitedPageIndex());
+        entity.setPageVisitHistory(dto.getPageVisitHistory());
 
         return idObjectService.save(entity);
     }

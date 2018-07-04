@@ -47,16 +47,36 @@ public class SurveySessionApi extends AbstractAuthorizedController {
     private ResourceBundleMessageSource dbMessageSource;
 
     @ApiOperation(
-            value = "getSurveyPage",
-            notes = "Get specified survey page",
+            value = "goToPage",
+            notes = "Go to the specified survey page",
             response = SurveyInteractionDTO.class
     )
     @RequestMapping(method = RequestMethod.GET, value = "/{session_id}/{page}")
     @ResponseBody
-    public ResponseEntity getSurveyPage(@PathVariable(value = "session_id") UUID surveySessionId,
+    public ResponseEntity goToPage(@PathVariable(value = "session_id") UUID surveySessionId,
                                         @PathVariable(value = "page") Integer pageIndex) {
         try {
-            SurveyInteractionDTO dto = surveyService.getSurveyPage(surveySessionId, pageIndex);
+            SurveyInteractionDTO dto = surveyService.goToPage(surveySessionId, pageIndex);
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (ForbiddenException forbiddenException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
+                    messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ObjectNotFoundException notFoundException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SESSION",
+                    messageSource.getMessage("survey.NO_SUCH_SESSION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
+            value = "goBack",
+            notes = "Returns back to the previous page, using page visit history",
+            response = SurveyInteractionDTO.class
+    )
+    @RequestMapping(method = RequestMethod.GET, value = "/{session_id}/back")
+    @ResponseBody
+    public ResponseEntity goBack(@PathVariable(value = "session_id") UUID surveySessionId) {
+        try {
+            SurveyInteractionDTO dto = surveyService.goBack(surveySessionId);
             return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (ForbiddenException forbiddenException) {
             return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",

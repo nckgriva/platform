@@ -13,7 +13,7 @@ public class SurveySessionDTO extends IdObjectDTO {
     private Date started;
     private Date ended;
     private Date expirationDate;
-    private Integer lastVisitedPageIndex;
+    private Integer[] pageVisitHistory;
 
     public static SurveySessionDTO prepare(SurveySession model) {
         SurveySessionDTO dto = new SurveySessionDTO();
@@ -27,7 +27,7 @@ public class SurveySessionDTO extends IdObjectDTO {
         }
         dto.setStarted(model.getStarted());
         dto.setEnded(model.getEnded());
-        dto.setLastVisitedPageIndex(model.getLastVisitedPageIndex());
+        dto.setPageVisitHistory(model.getPageVisitHistory());
         dto.setExpirationDate(model.getExpirationDate());
         return dto;
     }
@@ -72,12 +72,13 @@ public class SurveySessionDTO extends IdObjectDTO {
         this.ended = ended;
     }
 
-    public Integer getLastVisitedPageIndex() {
-        return lastVisitedPageIndex;
+
+    public Integer[] getPageVisitHistory() {
+        return pageVisitHistory;
     }
 
-    public void setLastVisitedPageIndex(Integer lastVisitedPageIndex) {
-        this.lastVisitedPageIndex = lastVisitedPageIndex;
+    public void setPageVisitHistory(Integer[] pageVisitHistory) {
+        this.pageVisitHistory = pageVisitHistory;
     }
 
     public Date getExpirationDate() {

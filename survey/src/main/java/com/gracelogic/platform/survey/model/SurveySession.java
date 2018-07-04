@@ -55,8 +55,8 @@ public class SurveySession extends IdObject<UUID> {
     @Column(name = "LINK", nullable = true)
     private String link;
 
-    @Column(name = "LAST_VISITED_PAGE_INDEX", nullable = true)
-    private Integer lastVisitedPageIndex;
+    @Column(name = "PAGE_VISIT_HISTORY", nullable = true)
+    private Integer[] pageVisitHistory;
 
     @Override
     public UUID getId() {
@@ -152,11 +152,11 @@ public class SurveySession extends IdObject<UUID> {
         this.link = link;
     }
 
-    public Integer getLastVisitedPageIndex() {
-        return lastVisitedPageIndex;
+    public Integer[] getPageVisitHistory() {
+        return pageVisitHistory;
     }
 
-    public void setLastVisitedPageIndex(Integer lastVisitedPageIndex) {
-        this.lastVisitedPageIndex = lastVisitedPageIndex;
+    public void setPageVisitHistory(Integer[] pageVisitHistory) {
+        this.pageVisitHistory = pageVisitHistory;
     }
 }
