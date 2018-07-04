@@ -35,7 +35,7 @@ public class SurveyQuestionAnswerApi extends AbstractAuthorizedController {
 
     @Autowired
     @Qualifier("dbMessageSource")
-    private ResourceBundleMessageSource messageSource;
+    private ResourceBundleMessageSource dbMessageSource;
 
     @ApiOperation(
             value = "getSurveyQuestionAnswers",
@@ -77,7 +77,7 @@ public class SurveyQuestionAnswerApi extends AbstractAuthorizedController {
             SurveyQuestionAnswerDTO dto = surveyService.getSurveyQuestionAnswer(id);
             return new ResponseEntity<SurveyQuestionAnswerDTO>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null,
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
                     LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
@@ -99,7 +99,7 @@ public class SurveyQuestionAnswerApi extends AbstractAuthorizedController {
             SurveyQuestionAnswer surveyQuestionAnswer = surveyService.saveSurveyQuestionAnswer(surveyQuestionAnswerDTO);
             return new ResponseEntity<IDResponse>(new IDResponse(surveyQuestionAnswer.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -121,7 +121,7 @@ public class SurveyQuestionAnswerApi extends AbstractAuthorizedController {
             surveyService.deleteSurveyQuestionAnswer(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 }
