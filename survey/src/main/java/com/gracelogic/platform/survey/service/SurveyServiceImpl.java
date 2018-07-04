@@ -634,6 +634,14 @@ public class SurveyServiceImpl implements SurveyService {
                 for (SurveyPageDTO page : pagesDTO.values()) {
                     surveyDTO.getPages().add(page);
                 }
+
+                Collections.sort(surveyDTO.getPages(), new Comparator<SurveyPageDTO>() {
+                    @Override
+                    public int compare(SurveyPageDTO o1, SurveyPageDTO o2) {
+                        return o1.getPageIndex().compareTo(o2.getPageIndex());
+                    }
+                });
+
             }
         }
         return surveyDTO;
