@@ -150,31 +150,15 @@ public class SurveyApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('SURVEY:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
-    public ResponseEntity saveSurvey(@RequestBody SurveyDTO surveyDTO) {
+    public ResponseEntity saveSurvey(@RequestBody SurveyDTO surveyDTO,
+                                     @RequestParam(value = "entireSurvey", required = false) Boolean entireSurvey) {
         try {
-            Survey survey = surveyService.saveSurvey(surveyDTO, getUser());
-            return new ResponseEntity<IDResponse>(new IDResponse(survey.getId()), HttpStatus.OK);
-        } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @ApiOperation(
-            value = "saveEntireSurvey",
-            notes = "Save entire survey",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
-    @PreAuthorize("hasAuthority('SURVEY:SAVE')")
-    @RequestMapping(method = RequestMethod.POST, value = "/saveEntire")
-    // TODO: заменить saveEntire на более подходящее название
-    @ResponseBody
-    public ResponseEntity saveEntireSurvey(@RequestBody SurveyDTO surveyDTO) {
-        try {
-            Survey survey = surveyService.saveEntireSurvey(surveyDTO, getUser());
+            Survey survey;
+            if (!entireSurvey) {
+                survey = surveyService.saveSurvey(surveyDTO, getUser());
+            } else {
+                survey = surveyService.saveEntireSurvey(surveyDTO, getUser());
+            }
             return new ResponseEntity<IDResponse>(new IDResponse(survey.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
