@@ -3,8 +3,11 @@ package com.gracelogic.platform.survey.model;
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.user.model.User;
+import com.vladmihalcea.hibernate.type.array.IntArrayType;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -14,6 +17,12 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_SESSION")
+@TypeDefs({
+        @TypeDef(
+                name = "int-array",
+                typeClass = IntArrayType.class
+        )
+})
 public class SurveySession extends IdObject<UUID> {
     @Id
     @Column(name = ID)
