@@ -8,6 +8,7 @@ import java.util.*;
 public class SurveyDTO extends IdObjectDTO {
     private Boolean active;
     private String name;
+    private Date startDate;
     private Date expirationDate;
     private Boolean showProgress;
     private Boolean showQuestionNumber;
@@ -19,6 +20,7 @@ public class SurveyDTO extends IdObjectDTO {
     private UUID participationTypeId;
     private UUID ownerId;
     private Integer maxAttempts;
+    private String link;
 
     private List<SurveyPageDTO> pages = new LinkedList<>();
     private Set<UUID> pagesToDelete = new HashSet<>();
@@ -28,6 +30,7 @@ public class SurveyDTO extends IdObjectDTO {
         IdObjectDTO.prepare(dto, model);
         dto.setActive(model.isActive());
         dto.setName(model.getName());
+        dto.setStartDate(model.getStartDate());
         dto.setExpirationDate(model.getExpirationDate());
         dto.setShowProgress(model.getShowProgress());
         dto.setShowQuestionNumber(model.getShowQuestionNumber());
@@ -39,6 +42,7 @@ public class SurveyDTO extends IdObjectDTO {
         dto.setParticipationTypeId(model.getSurveyParticipationType().getId());
         dto.setOwnerId(model.getOwner().getId());
         dto.setMaxAttempts(model.getMaxAttempts());
+        dto.setLink(model.getLink());
         return dto;
     }
 
@@ -160,5 +164,21 @@ public class SurveyDTO extends IdObjectDTO {
 
     public void setPagesToDelete(Set<UUID> pagesToDelete) {
         this.pagesToDelete = pagesToDelete;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
     }
 }

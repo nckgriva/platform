@@ -85,11 +85,15 @@ public class SurveyServiceImpl implements SurveyService {
         if (survey == null) {
             throw new ObjectNotFoundException();
         }
-        System.out.println("check passed..");
 
         Date now = new Date();
 
+        if (!survey.isActive()) throw new ForbiddenException();
+
         if (survey.getExpirationDate() != null && survey.getExpirationDate().before(now))
+            throw new ForbiddenException();
+
+        if (survey.getStartDate() != null && survey.getStartDate().after(now))
             throw new ForbiddenException();
 
         if (user == null && survey.getSurveyParticipationType().getId().equals(DataConstants.ParticipationTypes.AUTHORIZATION_REQUIRED.getValue())) {
@@ -352,15 +356,11 @@ public class SurveyServiceImpl implements SurveyService {
         }
         if (surveySession.getEnded() != null || // session already ended
                 (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(new Date())) || // hit time limit
-                (surveySession.getPageVisitHistory() == null || surveySession.getPageVisitHistory().length == 0)) { // trying to go back to nothing
+                (surveySession.getPageVisitHistory() == null || surveySession.getPageVisitHistory().length <= 1)) { // trying to go back to nothing
             throw new ForbiddenException();
         }
 
-        Integer[] visitHistory = null;
-        if (surveySession.getPageVisitHistory().length > 1) {
-            visitHistory = Arrays.copyOf(surveySession.getPageVisitHistory(), surveySession.getPageVisitHistory().length-1);
-        }
-
+        Integer[] visitHistory = Arrays.copyOf(surveySession.getPageVisitHistory(), surveySession.getPageVisitHistory().length-1);
         surveySession.setPageVisitHistory(visitHistory);
 
         idObjectService.save(surveySession);
@@ -587,12 +587,14 @@ public class SurveyServiceImpl implements SurveyService {
 
         entity.setActive(dto.getActive());
         entity.setName(dto.getName());
+        entity.setStartDate(dto.getStartDate());
         entity.setExpirationDate(dto.getExpirationDate());
         entity.setShowProgress(dto.getShowProgress());
         entity.setShowQuestionNumber(dto.getShowQuestionNumber());
         entity.setAllowReturn(dto.getAllowReturn());
         entity.setIntroduction(dto.getIntroduction());
         entity.setConclusion(dto.getConclusion());
+        entity.setLink(dto.getLink());
         entity.setMaxRespondents(dto.getMaxRespondents());
         entity.setTimeLimit(dto.getTimeLimit());
         entity.setMaxAttempts(dto.getMaxAttempts());
