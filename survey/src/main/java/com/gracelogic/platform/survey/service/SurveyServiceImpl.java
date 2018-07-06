@@ -400,21 +400,28 @@ public class SurveyServiceImpl implements SurveyService {
         SurveySession surveySession = idObjectService.getObjectById(SurveySession.class, surveySessionId);
         final Date dateNow = new Date();
 
-        if (surveySession == null) throw new ObjectNotFoundException();
-        if (surveySession.getEnded() != null) throw new ForbiddenException();
-        if (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(dateNow))
+        if (surveySession == null) {
+            throw new ObjectNotFoundException();
+        }
+        if (surveySession.getEnded() != null) {
             throw new ForbiddenException();
+        }
+        if (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(dateNow)) {
+            throw new ForbiddenException();
+        }
 
         boolean finishSurvey = false;
 
         int lastVisitedPageIndex = surveySession.getPageVisitHistory()[surveySession.getPageVisitHistory().length-1];
+        logger.info("lastVisitPageIndex:" + lastVisitedPageIndex);
         int nextPage = lastVisitedPageIndex + 1;
 
         // 1. Получение списка вопросов по последней посещенной странице
         Map<String, Object> params = new HashMap<>();
         params.put("lastVisitedPageIndex", lastVisitedPageIndex);
-        HashMap<UUID, SurveyQuestion> surveyQuestionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, null,
-                "el.surveyPage.pageIndex=:lastVisitedPageIndex",
+        params.put("surveyId", surveySession.getSurvey().getId());
+        HashMap<UUID, SurveyQuestion> surveyQuestionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, "left join el.surveyPage sp left join sp.survey sv",
+                "sv.id=:surveyId and sp.pageIndex=:lastVisitedPageIndex",
                 params, "el.questionIndex", "ASC", null, null));
 
         // 2. Получение всех вариантов ответов
@@ -430,10 +437,11 @@ public class SurveyServiceImpl implements SurveyService {
         // 3. Получение логики по последней посещенной странице
         params.clear();
         params.put("lastVisitedPageIndex", lastVisitedPageIndex);
+        params.put("surveyId", surveySession.getSurvey().getId());
         // TODO: sort logic PAGE -> QUESTION INDEX -> ANSWER INDEX
         List<SurveyLogicTrigger> logicTriggers =
-                idObjectService.getList(SurveyLogicTrigger.class, null,
-                        "el.surveyPage.pageIndex=:lastVisitedPageIndex",
+                idObjectService.getList(SurveyLogicTrigger.class, "left join el.surveyPage sp left join sp.survey sv",
+                        "sv.id=:surveyId and  sp.pageIndex=:lastVisitedPageIndex",
                         params, null, null, null);
 
         Set<UUID> answeredQuestions = new HashSet<>();

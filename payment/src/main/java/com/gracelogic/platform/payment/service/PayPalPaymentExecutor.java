@@ -70,8 +70,8 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
             throw new PaymentExecutionException("Failed to get access token");
         }
 
-        Boolean useBillingAgreement = Boolean.parseBoolean(request.getParams().get(USE_BILLING_AGREEMENT));
-        if (request.getPeriodicity() == null || !useBillingAgreement) {
+        Boolean useBillingAgreement = request.getParams().get(USE_BILLING_AGREEMENT) != null ? Boolean.parseBoolean(request.getParams().get(USE_BILLING_AGREEMENT)) : null;
+        if (request.getPeriodicity() == null || (useBillingAgreement != null && !useBillingAgreement)) {
             return executePayment(request, accessToken, apiUrl, propertyService, paymentService);
         } else {
             return executeBillingAgreement(request, accessToken, apiUrl, propertyService, paymentService);
