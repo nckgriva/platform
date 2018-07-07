@@ -224,17 +224,10 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
 
         int totalCount = idObjectService.getCount(StoredFile.class, null, null, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<StoredFileDTO> entityListResponse = new EntityListResponse<StoredFileDTO>();
-        entityListResponse.setEntity("storedFile");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<StoredFileDTO> entityListResponse = new EntityListResponse<StoredFileDTO>(totalCount, count, page, start);
 
-        List<StoredFile> items = idObjectService.getList(StoredFile.class, fetches, cause, params, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<StoredFile> items = idObjectService.getList(StoredFile.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (StoredFile e : items) {
             StoredFileDTO el = StoredFileDTO.prepare(e);
 

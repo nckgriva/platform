@@ -101,17 +101,10 @@ public class AccountServiceImpl implements AccountService {
         }
 
         int totalCount = idObjectService.getCount(Transaction.class, null, null, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<TransactionDTO> entityListResponse = new EntityListResponse<TransactionDTO>();
-        entityListResponse.setEntity("transaction");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<TransactionDTO> entityListResponse = new EntityListResponse<TransactionDTO>(totalCount, count, page, start);
 
-        List<Transaction> items = idObjectService.getList(Transaction.class, fetches, cause, params, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<Transaction> items = idObjectService.getList(Transaction.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (Transaction e : items) {
             TransactionDTO el = TransactionDTO.prepare(e);
             if (enrich) {
@@ -152,17 +145,11 @@ public class AccountServiceImpl implements AccountService {
         }
 
         int totalCount = idObjectService.getCount(Account.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<AccountDTO> entityListResponse = new EntityListResponse<AccountDTO>();
-        entityListResponse.setEntity("account");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<AccountDTO> entityListResponse = new EntityListResponse<AccountDTO>(totalCount, count, page, start);
 
-        List<Account> items = idObjectService.getList(Account.class, fetches, cause, params, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+
+        List<Account> items = idObjectService.getList(Account.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (Account e : items) {
             AccountDTO el = AccountDTO.prepare(e);
             if (enrich) {

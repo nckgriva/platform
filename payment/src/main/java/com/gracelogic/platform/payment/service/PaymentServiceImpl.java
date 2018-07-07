@@ -208,17 +208,10 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         int totalCount = idObjectService.getCount(Payment.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<PaymentDTO> entityListResponse = new EntityListResponse<PaymentDTO>();
-        entityListResponse.setEntity("payment");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<PaymentDTO> entityListResponse = new EntityListResponse<PaymentDTO>(totalCount, count, page, start);
 
-        List<Payment> items = idObjectService.getList(Payment.class, fetches, cause, params, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<Payment> items = idObjectService.getList(Payment.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (Payment e : items) {
             PaymentDTO el = PaymentDTO.prepare(e);
             if (enrich) {

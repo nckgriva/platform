@@ -88,17 +88,10 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
 
         int totalCount = feedbackDao.getFeedbacksCount(feedbackTypeId, startDate, endDate, fields);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<FeedbackDTO> entityListResponse = new EntityListResponse<FeedbackDTO>();
-        entityListResponse.setEntity("feedback");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<FeedbackDTO> entityListResponse = new EntityListResponse<FeedbackDTO>(totalCount, count, page, start);
 
-        List<Feedback> items = feedbackDao.getFeedbacks(feedbackTypeId, startDate, endDate, fields, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<Feedback> items = feedbackDao.getFeedbacks(feedbackTypeId, startDate, endDate, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (Feedback e : items) {
             FeedbackDTO el = FeedbackDTO.prepare(e);
             entityListResponse.addData(el);

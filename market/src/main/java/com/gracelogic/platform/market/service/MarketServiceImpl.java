@@ -721,16 +721,10 @@ public class MarketServiceImpl implements MarketService {
         }
 
         int totalCount = idObjectService.getCount(Order.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<OrderDTO> entityListResponse = new EntityListResponse<OrderDTO>();
-        entityListResponse.setEntity("order");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<OrderDTO> entityListResponse = new EntityListResponse<OrderDTO>(totalCount, count, page, start);
 
-        List<Order> items = idObjectService.getList(Order.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        List<Order> items = idObjectService.getList(Order.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
         List<OrderProduct> orderProducts = Collections.emptyList();
         if (withProducts && !items.isEmpty()) {
@@ -743,7 +737,6 @@ public class MarketServiceImpl implements MarketService {
             orderProducts = idObjectService.getList(OrderProduct.class, "left join fetch el.product", "el.order.id in (:orderIds)", productParams, null, null, null, null);
         }
 
-        entityListResponse.setPartCount(items.size());
         for (Order e : items) {
             OrderDTO el = OrderDTO.prepare(e);
             if (enrich) {
@@ -795,17 +788,11 @@ public class MarketServiceImpl implements MarketService {
             cause += "and el.active = :active ";
         }
         int totalCount = idObjectService.getCount(Product.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<ProductDTO> entityListResponse = new EntityListResponse<ProductDTO>();
-        entityListResponse.setEntity("product");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<ProductDTO> entityListResponse = new EntityListResponse<ProductDTO>(totalCount, count, page, start);
 
-        List<Product> items = idObjectService.getList(Product.class, fetches, cause, params, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<Product> items = idObjectService.getList(Product.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
+
         for (Product e : items) {
             ProductDTO el = ProductDTO.prepare(e);
             if (enrich) {
@@ -899,16 +886,10 @@ public class MarketServiceImpl implements MarketService {
         }
 
         int totalCount = idObjectService.getCount(Discount.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<DiscountDTO> entityListResponse = new EntityListResponse<DiscountDTO>();
-        entityListResponse.setEntity("discount");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<DiscountDTO> entityListResponse = new EntityListResponse<DiscountDTO>(totalCount, count, page, start);
 
-        List<Discount> items = idObjectService.getList(Discount.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        List<Discount> items = idObjectService.getList(Discount.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
         List<DiscountProduct> discountProducts = Collections.emptyList();
         if (withProducts && !items.isEmpty()) {
@@ -921,7 +902,6 @@ public class MarketServiceImpl implements MarketService {
             discountProducts = idObjectService.getList(DiscountProduct.class, "left join fetch el.product", "el.discount.id in (:discountIds)", productParams, null, null, null, null);
         }
 
-        entityListResponse.setPartCount(items.size());
         for (Discount e : items) {
             DiscountDTO el = DiscountDTO.prepare(e);
             if (enrich) {

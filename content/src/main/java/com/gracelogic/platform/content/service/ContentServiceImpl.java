@@ -198,18 +198,10 @@ public class ContentServiceImpl implements ContentService {
         }
 
         int totalCount = contentDao.getElementsCount(name, sectionIds, active, validOnDate, fields);
-        int totalPages = ((totalCount / count));
-        if (totalPages %2 != 0) {totalPages++;};
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<ElementDTO> entityListResponse = new EntityListResponse<ElementDTO>();
-        entityListResponse.setEntity("element");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<ElementDTO> entityListResponse = new EntityListResponse<ElementDTO>(totalCount, count, page, start);
 
-        List<Element> items = contentDao.getElements(name, sectionIds, active, validOnDate, fields, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<Element> items = contentDao.getElements(name, sectionIds, active, validOnDate, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (Element e : items) {
             ElementDTO el = ElementDTO.prepare(e);
             entityListResponse.addData(el);

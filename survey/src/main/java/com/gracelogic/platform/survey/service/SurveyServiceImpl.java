@@ -560,18 +560,11 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         int totalCount = idObjectService.getCount(Survey.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<SurveyDTO> entityListResponse = new EntityListResponse<SurveyDTO>();
-        entityListResponse.setEntity("survey");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<SurveyDTO> entityListResponse = new EntityListResponse<SurveyDTO>(totalCount, count, page, start);
 
-        List<Survey> items = idObjectService.getList(Survey.class, null, cause, params, sortField, sortDir, startRecord, count);
+        List<Survey> items = idObjectService.getList(Survey.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
-        entityListResponse.setPartCount(items.size());
         for (Survey e : items) {
             SurveyDTO el = SurveyDTO.prepare(e);
             entityListResponse.addData(el);
@@ -696,19 +689,12 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         int totalCount = idObjectService.getCount(SurveyAnswerVariant.class, null, null, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<SurveyAnswerVariantDTO> entityListResponse = new EntityListResponse<>();
-        entityListResponse.setEntity("surveyAnswerVariant");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<SurveyAnswerVariantDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<SurveyAnswerVariant> items = idObjectService.getList(SurveyAnswerVariant.class, null, cause,
-                params, sortField, sortDir, startRecord, count);
+                params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
-        entityListResponse.setPartCount(items.size());
         for (SurveyAnswerVariant e : items) {
             SurveyAnswerVariantDTO el = SurveyAnswerVariantDTO.prepare(e);
             entityListResponse.addData(el);
@@ -767,18 +753,11 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         int totalCount = idObjectService.getCount(SurveyPage.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<SurveyPageDTO> entityListResponse = new EntityListResponse<SurveyPageDTO>();
-        entityListResponse.setEntity("surveyPage");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<SurveyPageDTO> entityListResponse = new EntityListResponse<SurveyPageDTO>(totalCount, count, page, start);
 
-        List<SurveyPage> items = idObjectService.getList(SurveyPage.class, null, cause, params, sortField, sortDir, startRecord, count);
+        List<SurveyPage> items = idObjectService.getList(SurveyPage.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
-        entityListResponse.setPartCount(items.size());
         for (SurveyPage e : items) {
             SurveyPageDTO el = SurveyPageDTO.prepare(e);
             entityListResponse.addData(el);
@@ -840,16 +819,10 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         int totalCount = idObjectService.getCount(SurveyQuestion.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<SurveyQuestionDTO> entityListResponse = new EntityListResponse<SurveyQuestionDTO>();
-        entityListResponse.setEntity("surveyQuestion");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<SurveyQuestionDTO> entityListResponse = new EntityListResponse<SurveyQuestionDTO>(totalCount, count, page, start);
 
-        List<SurveyQuestion> items = idObjectService.getList(SurveyQuestion.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        List<SurveyQuestion> items = idObjectService.getList(SurveyQuestion.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         Set<UUID> questionIds = new HashSet<>();
         List<SurveyAnswerVariant> variants = Collections.emptyList();
         if (withVariants) {
@@ -863,7 +836,6 @@ public class SurveyServiceImpl implements SurveyService {
             }
         }
 
-        entityListResponse.setPartCount(items.size());
         for (SurveyQuestion e : items) {
             SurveyQuestionDTO el = SurveyQuestionDTO.prepare(e);
             entityListResponse.addData(el);
@@ -937,18 +909,11 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         int totalCount = idObjectService.getCount(SurveyLogicTrigger.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<SurveyLogicTriggerDTO> entityListResponse = new EntityListResponse<SurveyLogicTriggerDTO>();
-        entityListResponse.setEntity("surveyVariantLogic");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<SurveyLogicTriggerDTO> entityListResponse = new EntityListResponse<SurveyLogicTriggerDTO>(totalCount, count, page, start);
 
-        List<SurveyLogicTrigger> items = idObjectService.getList(SurveyLogicTrigger.class, null, cause, params, sortField, sortDir, startRecord, count);
+        List<SurveyLogicTrigger> items = idObjectService.getList(SurveyLogicTrigger.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
-        entityListResponse.setPartCount(items.size());
         for (SurveyLogicTrigger e : items) {
             SurveyLogicTriggerDTO el = SurveyLogicTriggerDTO.prepare(e);
             entityListResponse.addData(el);
@@ -1015,18 +980,11 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         int totalCount = idObjectService.getCount(SurveySession.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<SurveySessionDTO> entityListResponse = new EntityListResponse<SurveySessionDTO>();
-        entityListResponse.setEntity("surveySession");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<SurveySessionDTO> entityListResponse = new EntityListResponse<SurveySessionDTO>(totalCount, count, page, start);
 
-        List<SurveySession> items = idObjectService.getList(SurveySession.class, null, cause, params, sortField, sortDir, startRecord, count);
+        List<SurveySession> items = idObjectService.getList(SurveySession.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
-        entityListResponse.setPartCount(items.size());
         for (SurveySession e : items) {
             SurveySessionDTO el = SurveySessionDTO.prepare(e);
             entityListResponse.addData(el);
@@ -1081,19 +1039,12 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         int totalCount = idObjectService.getCount(SurveySession.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<SurveyQuestionAnswerDTO> entityListResponse = new EntityListResponse<SurveyQuestionAnswerDTO>();
-        entityListResponse.setEntity("surveyQuestionAnswer");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<SurveyQuestionAnswerDTO> entityListResponse = new EntityListResponse<SurveyQuestionAnswerDTO>(totalCount, count, page, start);
 
         List<SurveyQuestionAnswer> items = idObjectService.getList(SurveyQuestionAnswer.class, null, cause, params,
-                sortField, sortDir, startRecord, count);
+                sortField, sortDir, entityListResponse.getStartRecord(), count);
 
-        entityListResponse.setPartCount(items.size());
         for (SurveyQuestionAnswer e : items) {
             SurveyQuestionAnswerDTO el = SurveyQuestionAnswerDTO.prepare(e);
             entityListResponse.addData(el);

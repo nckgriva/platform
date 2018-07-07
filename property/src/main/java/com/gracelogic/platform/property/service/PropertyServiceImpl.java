@@ -110,17 +110,10 @@ public class PropertyServiceImpl implements PropertyService {
         }
 
         int totalCount = idObjectService.getCount(Property.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<PropertyDTO> entityListResponse = new EntityListResponse<PropertyDTO>();
-        entityListResponse.setEntity("property");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<PropertyDTO> entityListResponse = new EntityListResponse<PropertyDTO>(totalCount, count, page, start);
 
-        List<Property> items = idObjectService.getList(Property.class, fetches, cause, params, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<Property> items = idObjectService.getList(Property.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (Property e : items) {
             PropertyDTO el = PropertyDTO.prepare(e);
             entityListResponse.addData(el);

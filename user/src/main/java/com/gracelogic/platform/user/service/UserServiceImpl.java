@@ -719,7 +719,7 @@ public class UserServiceImpl implements UserService {
             if (!currentRoles.contains(roleId)) {
                 UserRole userRole = new UserRole();
                 userRole.setUser(user);
-                userRole.setRole(ds.get(Role.class, roleId));
+                userRole.setRole(idObjectService.getObjectById(Role.class, roleId));
                 idObjectService.save(userRole);
             }
         }
@@ -772,17 +772,11 @@ public class UserServiceImpl implements UserService {
         sortField = translateUserSortFieldToNative(sortField);
 
         int totalCount = userDao.getUsersCount(phone, email, approved, blocked, fields);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<UserDTO> entityListResponse = new EntityListResponse<UserDTO>();
-        entityListResponse.setEntity("user");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<UserDTO> entityListResponse = new EntityListResponse<UserDTO>(totalCount, count, page, start);
 
 
-        List<User> items = userDao.getUsers(phone, email, approved, blocked, fields, sortField, sortDir, startRecord, count);
+        List<User> items = userDao.getUsers(phone, email, approved, blocked, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
         List<UserRole> userRoles = Collections.emptyList();
         if (fetchRoles) {
             Set<UUID> userIds = new HashSet<>();
@@ -794,7 +788,6 @@ public class UserServiceImpl implements UserService {
             userRoles = idObjectService.getList(UserRole.class, null, "el.user.id in (:userIds)", params, null, null, null, null);
         }
 
-        entityListResponse.setPartCount(items.size());
         for (User e : items) {
             UserDTO el = UserDTO.prepare(e);
             for (UserRole ur : userRoles) {
@@ -846,16 +839,10 @@ public class UserServiceImpl implements UserService {
         }
 
         int totalCount = idObjectService.getCount(Role.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<RoleDTO> entityListResponse = new EntityListResponse<RoleDTO>();
-        entityListResponse.setEntity("role");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<RoleDTO> entityListResponse = new EntityListResponse<RoleDTO>(totalCount, count, page, start);
 
-        List<Role> items = idObjectService.getList(Role.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        List<Role> items = idObjectService.getList(Role.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
         List<RoleGrant> roleGrants = Collections.emptyList();
         if (fetchGrants && !items.isEmpty()) {
@@ -868,7 +855,6 @@ public class UserServiceImpl implements UserService {
             roleGrants = idObjectService.getList(RoleGrant.class, null, "el.role.id in (:roleIds)", grantParams, null, null, null, null);
         }
 
-        entityListResponse.setPartCount(items.size());
         for (Role e : items) {
             RoleDTO el = RoleDTO.prepare(e);
             for (RoleGrant rg : roleGrants) {
@@ -978,17 +964,10 @@ public class UserServiceImpl implements UserService {
         }
 
         int totalCount = idObjectService.getCount(UserSession.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<UserSessionDTO> entityListResponse = new EntityListResponse<UserSessionDTO>();
-        entityListResponse.setEntity("session");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<UserSessionDTO> entityListResponse = new EntityListResponse<UserSessionDTO>(totalCount, count, page, start);
 
-        List<UserSession> items = idObjectService.getList(UserSession.class, fetches, cause, params, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<UserSession> items = idObjectService.getList(UserSession.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (UserSession e : items) {
             UserSessionDTO el = UserSessionDTO.prepare(e);
             if (enrich) {
