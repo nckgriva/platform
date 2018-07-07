@@ -198,7 +198,8 @@ public class ContentServiceImpl implements ContentService {
         }
 
         int totalCount = contentDao.getElementsCount(name, sectionIds, active, validOnDate, fields);
-        int totalPages = ((totalCount / count)) + 1;
+        int totalPages = ((totalCount / count));
+        if (totalPages %2 != 0) {totalPages++;};
         int startRecord = page != null ? (page * count) - count : start;
 
         EntityListResponse<ElementDTO> entityListResponse = new EntityListResponse<ElementDTO>();
