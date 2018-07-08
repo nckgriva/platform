@@ -3,10 +3,7 @@ package com.gracelogic.platform.survey.dto.admin;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.survey.model.SurveyQuestion;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class SurveyQuestionDTO extends IdObjectDTO {
     private UUID surveyPageId;
@@ -22,7 +19,7 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private Boolean isCustomAnswerPossible;
 
     private List<SurveyAnswerVariantDTO> answerVariants = new LinkedList<>();
-    private Set<UUID> answersToDelete;
+    private Set<UUID> answersToDelete = new HashSet<>();
 
 
     public static SurveyQuestionDTO prepare(SurveyQuestion model) {
