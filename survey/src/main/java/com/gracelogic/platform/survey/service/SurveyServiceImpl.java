@@ -865,6 +865,7 @@ public class SurveyServiceImpl implements SurveyService {
             entity = new SurveyQuestion();
         }
 
+        entity.setCustomAnswerPossible(dto.getCustomAnswerPossible());
         entity.setQuestionIndex(dto.getQuestionIndex());
         entity.setHidden(dto.getHidden());
         entity.setRequired(dto.getRequired());

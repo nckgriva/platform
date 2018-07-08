@@ -19,6 +19,7 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private Long scaleMinValue;
     private Long scaleMaxValue;
     private String attachmentExtensions;
+    private Boolean isCustomAnswerPossible;
 
     private List<SurveyAnswerVariantDTO> answerVariants = new LinkedList<>();
     private Set<UUID> answersToDelete;
@@ -39,6 +40,7 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         dto.setScaleMinValue(model.getScaleMinValue());
         dto.setScaleMaxValue(model.getScaleMaxValue());
         dto.setAttachmentExtensions(model.getAttachmentExtensions());
+        dto.setCustomAnswerPossible(model.getCustomAnswerPossible());
         return dto;
     }
 
@@ -136,5 +138,13 @@ public class SurveyQuestionDTO extends IdObjectDTO {
 
     public void setAnswersToDelete(Set<UUID> answersToDelete) {
         this.answersToDelete = answersToDelete;
+    }
+
+    public Boolean getCustomAnswerPossible() {
+        return isCustomAnswerPossible;
+    }
+
+    public void setCustomAnswerPossible(Boolean customAnswerPossible) {
+        isCustomAnswerPossible = customAnswerPossible;
     }
 }

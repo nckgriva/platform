@@ -58,6 +58,9 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true)
     private String attachmentExtensions;
 
+    @Column(name = "IS_CUSTOM_ANSWER_POSSIBLE", nullable = true)
+    private Boolean isCustomAnswerPossible;
+
     @Override
     public UUID getId() {
         return id;
@@ -166,5 +169,13 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Boolean getCustomAnswerPossible() {
+        return isCustomAnswerPossible;
+    }
+
+    public void setCustomAnswerPossible(Boolean customAnswerPossible) {
+        isCustomAnswerPossible = customAnswerPossible;
     }
 }
