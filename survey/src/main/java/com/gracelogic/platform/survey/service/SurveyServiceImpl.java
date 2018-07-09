@@ -8,10 +8,7 @@ import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.filestorage.model.StoredFile;
 import com.gracelogic.platform.survey.dto.admin.*;
 import com.gracelogic.platform.survey.dto.user.*;
-import com.gracelogic.platform.survey.exception.RespondentLimitException;
-import com.gracelogic.platform.survey.exception.ResultDependencyException;
-import com.gracelogic.platform.survey.exception.LogicDependencyException;
-import com.gracelogic.platform.survey.exception.UnansweredException;
+import com.gracelogic.platform.survey.exception.*;
 import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
@@ -79,7 +76,7 @@ public class SurveyServiceImpl implements SurveyService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String ipAddress)
-            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException {
+            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsHitException {
 
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
         if (survey == null) {
@@ -120,7 +117,7 @@ public class SurveyServiceImpl implements SurveyService {
             Integer passesFromThisIP = idObjectService.checkExist(SurveySession.class, null, cause, params, survey.getMaxAttempts() + 1);
 
             if (passesFromThisIP >= survey.getMaxAttempts()) {
-                throw new ForbiddenException();
+                throw new MaxAttemptsHitException();
             }
         }
 

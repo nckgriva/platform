@@ -9,6 +9,7 @@ import com.gracelogic.platform.survey.dto.admin.SurveyDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
+import com.gracelogic.platform.survey.exception.MaxAttemptsHitException;
 import com.gracelogic.platform.survey.exception.RespondentLimitException;
 import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.model.Survey;
@@ -89,6 +90,9 @@ public class SurveyApi extends AbstractAuthorizedController {
         } catch (ObjectNotFoundException notFoundException) {
             return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SURVEY",
                     messageSource.getMessage("survey.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (MaxAttemptsHitException maxAttemptsException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.MAX_ATTEMPTS_HIT",
+                    messageSource.getMessage("survey.MAX_ATTEMPTS_HIT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
