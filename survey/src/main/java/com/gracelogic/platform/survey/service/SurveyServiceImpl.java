@@ -100,15 +100,19 @@ public class SurveyServiceImpl implements SurveyService {
             throw new ForbiddenException();
         }
 
-        //Check max attempts
+        // Check max attempts
         if (survey.getMaxAttempts() != null && survey.getMaxAttempts() > 0) {
             Map<String, Object> params = new HashMap<>();
             String cause = "el.survey.id=:surveyId ";
             params.put("surveyId", survey.getId());
-            if (user != null) {
+
+            if (survey.getSurveyParticipationType().getId().equals(DataConstants.ParticipationTypes.AUTHORIZATION_REQUIRED.getValue())) {
                 cause += "and el.user.id=:userId ";
                 params.put("userId", user.getId());
-            } else {
+            }
+
+            if (survey.getSurveyParticipationType().getId().equals(DataConstants.ParticipationTypes.IP_LIMITED.getValue()) ||
+                    survey.getSurveyParticipationType().getId().equals(DataConstants.ParticipationTypes.COOKIE_IP_LIMITED.getValue()) ) {
                 cause += "and el.lastVisitIP=:ip ";
                 params.put("ip", ipAddress);
             }
