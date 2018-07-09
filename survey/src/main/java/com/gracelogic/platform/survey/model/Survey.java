@@ -50,10 +50,10 @@ public class Survey extends IdObject<UUID> {
     @Column(name = "IS_ALLOW_RETURN", nullable = false)
     private Boolean allowReturn;
 
-    @Column(name = "INTRODUCTION", nullable = true, length = 2000)
+    @Column(name = "INTRODUCTION", nullable = true, length = 4000)
     private String introduction;
 
-    @Column(name = "CONCLUSION", nullable = true, length = 2000)
+    @Column(name = "CONCLUSION", nullable = true, length = 4000)
     private String conclusion;
 
     @Column(name = "LINK", nullable = true)

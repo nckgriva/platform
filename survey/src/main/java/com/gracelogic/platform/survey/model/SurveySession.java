@@ -59,7 +59,7 @@ public class SurveySession extends IdObject<UUID> {
     @Column(name = "EXPIRATION_DT", nullable = true)
     private Date expirationDate;
 
-    @Column(name = "CONCLUSION", nullable = true, length = 2000)
+    @Column(name = "CONCLUSION", nullable = true, length = 4000)
     private String conclusion;
 
     @Column(name = "LINK", nullable = true)
