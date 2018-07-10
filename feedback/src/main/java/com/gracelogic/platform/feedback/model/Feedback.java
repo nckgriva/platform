@@ -28,7 +28,7 @@ public class Feedback extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "FEEDBACK_TYPE_ID", nullable = false)
     private FeedbackType feedbackType;
 

@@ -32,7 +32,7 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
 
                 Set<Grant> grants = new HashSet<Grant>();
                 for (UserRole userRole : user.getUserRoles()) {
-                    for (RoleGrant roleGrant : userRole.getRole().getRoleGrantSet()) {
+                    for (RoleGrant roleGrant : userRole.getRole().getRoleGrants()) {
                         grants.add(roleGrant.getGrant());
                     }
                 }

@@ -5,10 +5,37 @@ import java.util.LinkedList;
 public class EntityListResponse<E extends IdObjectDTO> {
     private Integer pages = 0;
     private Integer page = 1;
-    private String entity;
-    private Integer partCount = 0;
     private Integer totalCount = 0;
     private Integer queriedCount = 0;
+    private Integer startRecord;
+
+    public EntityListResponse(Integer totalCount, Integer countPerPage, Integer page, Integer start) {
+        this.queriedCount = countPerPage;
+        this.totalCount = totalCount;
+
+        if (totalCount != null) {
+            this.pages = ((totalCount / countPerPage));
+            if (pages % 2 != 0) {
+                pages++;
+            }
+        }
+
+        if (page != null) {
+            this.page = page;
+            this.startRecord = (page * countPerPage) - countPerPage;
+        }
+        else {
+            if (countPerPage != null && start != null) {
+                if (start > countPerPage) {
+                    this.page = start / countPerPage;
+                }
+            }
+            this.startRecord = start;
+        }
+    }
+
+    public EntityListResponse() {
+    }
 
     private LinkedList<E> data = new LinkedList<E>();
 
@@ -27,15 +54,6 @@ public class EntityListResponse<E extends IdObjectDTO> {
     public void setPage(Integer page) {
         this.page = page;
     }
-
-    public String getEntity() {
-        return entity;
-    }
-
-    public void setEntity(String entity) {
-        this.entity = entity;
-    }
-
     public LinkedList<E> getData() {
         return data;
     }
@@ -46,14 +64,6 @@ public class EntityListResponse<E extends IdObjectDTO> {
 
     public void addData(E idObjectModel) {
         data.addLast(idObjectModel);
-    }
-
-    public Integer getPartCount() {
-        return partCount;
-    }
-
-    public void setPartCount(Integer partCount) {
-        this.partCount = partCount;
     }
 
     public Integer getTotalCount() {
@@ -81,4 +91,11 @@ public class EntityListResponse<E extends IdObjectDTO> {
         return getTotalCount();
     }
 
+    public Integer getStartRecord() {
+        return startRecord;
+    }
+
+    public void setStartRecord(Integer startRecord) {
+        this.startRecord = startRecord;
+    }
 }

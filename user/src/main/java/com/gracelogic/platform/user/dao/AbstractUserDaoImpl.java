@@ -27,43 +27,20 @@ public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
         }
 
         User user = null;
-        String query = String.format("select user from User user left join fetch user.userRoles where user.%s = :fieldValue", fieldName);
+        String query = String.format("select user from User user " +
+                "left join fetch user.userRoles ur " +
+                "left join fetch ur.role rl " +
+                "left join fetch rl.roleGrants rg " +
+                "left join fetch rg.grant gr " +
+                "where user.%s = :fieldValue", fieldName);
         try {
             user = getEntityManager().createQuery(query, User.class)
                     .setParameter("fieldValue", fieldValue)
                     .getSingleResult();
         } catch (Exception e) {
-            logger.debug(String.format("Failed to get user by field: %s", fieldName));
+            logger.debug(String.format("Failed to get user by field: %s", fieldName), e);
         }
         return user;
-    }
-
-    @Override
-    public Long getIncorrectLoginAttemptCount(UUID userId, Date startDate, Date endDate) {
-        Long result = null;
-        String query = "select count(incorrectLoginAttempt) from IncorrectLoginAttempt incorrectLoginAttempt where incorrectLoginAttempt.user.id = :userId " +
-                "and incorrectLoginAttempt.created >= :startDate and incorrectLoginAttempt.created <= :endDate";
-
-        try {
-            result = (Long) getEntityManager().createQuery(query)
-                    .setParameter("userId", userId)
-                    .setParameter("startDate", startDate)
-                    .setParameter("endDate", endDate)
-                    .getSingleResult();
-        } catch (Exception e) {
-            logger.error("Failed to get incorrect login attempt count", e);
-        }
-        return result != null ? result : 0L;
-    }
-
-    @Override
-    public IncorrectLoginAttempt saveIncorrectLoginAttempt(IncorrectLoginAttempt incorrectLoginAttempt) {
-        if (incorrectLoginAttempt.getId() == null) {
-            persistEntity(incorrectLoginAttempt);
-            return incorrectLoginAttempt;
-        } else {
-            return mergeEntity(incorrectLoginAttempt);
-        }
     }
 
     @Override

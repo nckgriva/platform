@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -74,7 +75,7 @@ public class UserApi extends AbstractAuthorizedController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Invalid credentials"),
             @ApiResponse(code = 423, message = "User blocked"),
-            @ApiResponse(code = 429, message = "Too many attemps"),
+            @ApiResponse(code = 429, message = "Too many attempts"),
             @ApiResponse(code = 422, message = "Not activated"),
             @ApiResponse(code = 510, message = "Not allowed IP"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
@@ -99,12 +100,14 @@ public class UserApi extends AbstractAuthorizedController {
                 if (authentication.isAuthenticated()) {
                     if (authentication.getDetails() instanceof AuthorizedUser) {
                         AuthorizedUser authorizedUser = ((AuthorizedUser) authentication.getDetails());
-
                         try {
-                            UserSession userSession = userService.updateSessionInfo(request.getSession(), authentication, request.getHeader("User-Agent"), false);
+                            HttpSession session = request.getSession(false);
+                            UserSession userSession = userService.updateSessionInfo(session, authentication, request.getHeader("User-Agent"), false);
                             if (userSession != null) {
                                 authorizedUser.setUserSessionId(userSession.getId());
                             }
+
+                            lifecycleService.login(authorizedUser, session);
                         } catch (Exception ignored) {
                         }
                     }

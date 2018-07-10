@@ -224,17 +224,10 @@ public class TaskServiceImpl implements TaskService {
         }
 
         int totalCount = idObjectService.getCount(Task.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<TaskDTO> entityListResponse = new EntityListResponse<TaskDTO>();
-        entityListResponse.setEntity("task");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<TaskDTO> entityListResponse = new EntityListResponse<TaskDTO>(totalCount, count, page, start);
 
-        List<Task> items = idObjectService.getList(Task.class, fetches, cause, params, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<Task> items = idObjectService.getList(Task.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (Task e : items) {
             TaskDTO el = TaskDTO.prepare(e);
             entityListResponse.addData(el);
@@ -280,17 +273,10 @@ public class TaskServiceImpl implements TaskService {
         }
 
         int totalCount = idObjectService.getCount(TaskExecutionLog.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<TaskExecutionLogDTO> entityListResponse = new EntityListResponse<TaskExecutionLogDTO>();
-        entityListResponse.setEntity("taskExecutionLog");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<TaskExecutionLogDTO> entityListResponse = new EntityListResponse<TaskExecutionLogDTO>(totalCount, count, page, start);
 
-        List<TaskExecutionLog> items = idObjectService.getList(TaskExecutionLog.class, fetches, cause, params, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<TaskExecutionLog> items = idObjectService.getList(TaskExecutionLog.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (TaskExecutionLog e : items) {
             TaskExecutionLogDTO el = TaskExecutionLogDTO.prepare(e);
             if (enrich) {

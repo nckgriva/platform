@@ -34,7 +34,7 @@ public class AuthCode extends IdObject<UUID> {
     @JoinColumn(name = "CODE_TYPE_ID", nullable = false)
     private AuthCodeType authCodeType;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 

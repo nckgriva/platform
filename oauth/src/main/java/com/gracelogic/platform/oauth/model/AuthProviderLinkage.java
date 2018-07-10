@@ -34,11 +34,11 @@ public class AuthProviderLinkage extends IdObject<UUID> {
     @Column(name = "EXTERNAL_USER_ID", nullable = true, length = 4000)
     private String externalUserId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "AUTH_PROVIDER_ID", nullable = false)
     private AuthProvider authProvider;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
 

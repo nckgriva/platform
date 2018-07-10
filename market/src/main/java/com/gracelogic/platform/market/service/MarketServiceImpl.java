@@ -559,10 +559,6 @@ public class MarketServiceImpl implements MarketService {
                         && product.getReferenceObjectId().equals(referenceObjectId)
                         && product.getProductType().getId().equals(productTypeId)) {
                     foundProducts.add(product);
-
-                    if (onlyPrimary) {
-                        break;
-                    }
                 }
             }
             result.put(referenceObjectId, foundProducts);
@@ -571,7 +567,7 @@ public class MarketServiceImpl implements MarketService {
         return result;
     }
 
-    public void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedUserId, Date checkOnDate) {
+    public void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedUserId, Date checkOnDate, boolean onlyPrimary) {
         if (objects == null || objects.isEmpty()) {
             return;
         }
@@ -589,7 +585,7 @@ public class MarketServiceImpl implements MarketService {
             purchased = getProductsPurchaseState(relatedUserId, referenceObjectIdsAndProductTypeIds, checkOnDate);
         }
 
-        Map<UUID, List<Product>> products = findProducts(referenceObjectIdsAndProductTypeIds, false);
+        Map<UUID, List<Product>> products = findProducts(referenceObjectIdsAndProductTypeIds, onlyPrimary);
 
         for (MarketAwareObjectDTO dto : objects) {
             if (dto.getId() == null) {
@@ -693,7 +689,7 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, Double totalAmountGreatThan, boolean onlyEmptyParentOrder, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -714,17 +710,21 @@ public class MarketServiceImpl implements MarketService {
             params.put("discountId", discountId);
         }
 
+        if (totalAmountGreatThan != null) {
+            Long totalAmountGreatThanAsLong = FinanceUtils.toDecimal(totalAmountGreatThan);
+            cause += "and el.totalAmount >= :totalAmountGreatThan ";
+            params.put("totalAmountGreatThan", totalAmountGreatThanAsLong);
+        }
+
+        if (onlyEmptyParentOrder) {
+            cause += "and el.parentOrder is null ";
+        }
+
         int totalCount = idObjectService.getCount(Order.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<OrderDTO> entityListResponse = new EntityListResponse<OrderDTO>();
-        entityListResponse.setEntity("order");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<OrderDTO> entityListResponse = new EntityListResponse<OrderDTO>(totalCount, count, page, start);
 
-        List<Order> items = idObjectService.getList(Order.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        List<Order> items = idObjectService.getList(Order.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
         List<OrderProduct> orderProducts = Collections.emptyList();
         if (withProducts && !items.isEmpty()) {
@@ -737,7 +737,6 @@ public class MarketServiceImpl implements MarketService {
             orderProducts = idObjectService.getList(OrderProduct.class, "left join fetch el.product", "el.order.id in (:orderIds)", productParams, null, null, null, null);
         }
 
-        entityListResponse.setPartCount(items.size());
         for (Order e : items) {
             OrderDTO el = OrderDTO.prepare(e);
             if (enrich) {
@@ -789,17 +788,11 @@ public class MarketServiceImpl implements MarketService {
             cause += "and el.active = :active ";
         }
         int totalCount = idObjectService.getCount(Product.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<ProductDTO> entityListResponse = new EntityListResponse<ProductDTO>();
-        entityListResponse.setEntity("product");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<ProductDTO> entityListResponse = new EntityListResponse<ProductDTO>(totalCount, count, page, start);
 
-        List<Product> items = idObjectService.getList(Product.class, fetches, cause, params, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<Product> items = idObjectService.getList(Product.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
+
         for (Product e : items) {
             ProductDTO el = ProductDTO.prepare(e);
             if (enrich) {
@@ -822,16 +815,6 @@ public class MarketServiceImpl implements MarketService {
             }
         } else {
             entity = new Product();
-        }
-
-        if ((entity.getId() != null && !entity.getPrimary() && dto.getPrimary()) || entity.getId() == null && dto.getPrimary()) {
-            Map<String, Object> params = new HashMap<>();
-            params.put("productTypeId", dto.getProductTypeId());
-            params.put("referenceObjectId", dto.getReferenceObjectId());
-
-            if (idObjectService.checkExist(Product.class, null, "el.productType.id=:productTypeId and el.referenceObjectId=:referenceObjectId and el.primary=true", params, 1) > 0) {
-                throw new PrimaryProductException();
-            }
         }
 
         if (dto.getOwnershipTypeId() != null && dto.getOwnershipTypeId().equals(DataConstants.OwnershipTypes.SUBSCRIPTION.getValue()) && dto.getLifetime() == null) {
@@ -903,16 +886,10 @@ public class MarketServiceImpl implements MarketService {
         }
 
         int totalCount = idObjectService.getCount(Discount.class, null, countFetches, cause, params);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
 
-        EntityListResponse<DiscountDTO> entityListResponse = new EntityListResponse<DiscountDTO>();
-        entityListResponse.setEntity("discount");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<DiscountDTO> entityListResponse = new EntityListResponse<DiscountDTO>(totalCount, count, page, start);
 
-        List<Discount> items = idObjectService.getList(Discount.class, fetches, cause, params, sortField, sortDir, startRecord, count);
+        List<Discount> items = idObjectService.getList(Discount.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
         List<DiscountProduct> discountProducts = Collections.emptyList();
         if (withProducts && !items.isEmpty()) {
@@ -925,7 +902,6 @@ public class MarketServiceImpl implements MarketService {
             discountProducts = idObjectService.getList(DiscountProduct.class, "left join fetch el.product", "el.discount.id in (:discountIds)", productParams, null, null, null, null);
         }
 
-        entityListResponse.setPartCount(items.size());
         for (Discount e : items) {
             DiscountDTO el = DiscountDTO.prepare(e);
             if (enrich) {

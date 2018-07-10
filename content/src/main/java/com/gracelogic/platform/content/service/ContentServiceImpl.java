@@ -159,7 +159,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public EntityListResponse<ElementDTO> getElementsPaged(Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<ElementDTO> getElementsPaged(String name, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         if (!StringUtils.isEmpty(sortField)) {
             //Т.к. в данном методе запрос используется нативный и требуется сохранить единообразие - транслируем название jpa полей в нативные sql
             if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
@@ -197,18 +197,11 @@ public class ContentServiceImpl implements ContentService {
             }
         }
 
-        int totalCount = contentDao.getElementsCount(sectionIds, active, validOnDate, fields);
-        int totalPages = ((totalCount / count)) + 1;
-        int startRecord = page != null ? (page * count) - count : start;
+        int totalCount = contentDao.getElementsCount(name, sectionIds, active, validOnDate, fields);
 
-        EntityListResponse<ElementDTO> entityListResponse = new EntityListResponse<ElementDTO>();
-        entityListResponse.setEntity("element");
-        entityListResponse.setPage(page);
-        entityListResponse.setPages(totalPages);
-        entityListResponse.setTotalCount(totalCount);
+        EntityListResponse<ElementDTO> entityListResponse = new EntityListResponse<ElementDTO>(totalCount, count, page, start);
 
-        List<Element> items = contentDao.getElements(sectionIds, active, validOnDate, fields, sortField, sortDir, startRecord, count);
-        entityListResponse.setPartCount(items.size());
+        List<Element> items = contentDao.getElements(name, sectionIds, active, validOnDate, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (Element e : items) {
             ElementDTO el = ElementDTO.prepare(e);
             entityListResponse.addData(el);

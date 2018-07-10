@@ -34,7 +34,7 @@ public interface IdObjectService {
 
     <T extends IdObject> T setIfModified(Class<T> clazz, T oldObject, Object newId);
 
-    void offsetFieldValue(Class clazz, Object id, String fieldName, Integer offsetValuet);
+    void offsetFieldValue(Class clazz, Object id, String fieldName, Integer offsetValue);
 
 
     <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult);
