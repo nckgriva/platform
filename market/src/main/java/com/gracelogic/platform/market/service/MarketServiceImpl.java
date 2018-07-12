@@ -745,7 +745,9 @@ public class MarketServiceImpl implements MarketService {
             if (withProducts && !orderProducts.isEmpty()) {
                 for (OrderProduct orderProduct : orderProducts) {
                     if (orderProduct.getOrder().getId().equals(e.getId())) {
-                        el.getProducts().add(ProductDTO.prepare(orderProduct.getProduct()));
+                        ProductDTO productDTO = ProductDTO.prepare(orderProduct.getProduct());
+                        productDTO.setLifetimeExpiration(orderProduct.getLifetimeExpiration());
+                        el.getProducts().add(productDTO);
                     }
                 }
             }
