@@ -11,6 +11,7 @@ import com.gracelogic.platform.user.dto.UserDTO;
 import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.service.UserLifecycleService;
+import com.gracelogic.platform.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
     @Autowired
     private DictionaryService ds;
 
+    @Autowired
+    private UserService userService;
+
 
     protected User processAuthorization(UUID authProviderId, String code, OAuthDTO OAuthDTO) {
         Map<String, Object> params = new HashMap<>();
@@ -51,7 +55,21 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
 
             //Register new user
             UserRegistrationDTO userRegistrationDTO = new UserRegistrationDTO();
+
+            if (!StringUtils.isEmpty(OAuthDTO.getEmail())) {
+                User anotherUser = userService.getUserByField("email", OAuthDTO.getEmail());
+                if (anotherUser != null && anotherUser.getEmailVerified()) {
+                    OAuthDTO.setEmail(null);
+                }
+            }
             userRegistrationDTO.setEmail(!StringUtils.isEmpty(OAuthDTO.getEmail()) ? OAuthDTO.getEmail() : null);
+
+            if (!StringUtils.isEmpty(OAuthDTO.getPhone())) {
+                User anotherUser = userService.getUserByField("phone", OAuthDTO.getPhone());
+                if (anotherUser != null && anotherUser.getPhoneVerified()) {
+                    OAuthDTO.setPhone(null);
+                }
+            }
             userRegistrationDTO.setPhone(!StringUtils.isEmpty(OAuthDTO.getPhone()) ? OAuthDTO.getPhone() : null);
 
             userRegistrationDTO.getFields().put(UserDTO.FIELD_NAME, !StringUtils.isEmpty(OAuthDTO.getFirstName()) ? OAuthDTO.getFirstName() : null);
