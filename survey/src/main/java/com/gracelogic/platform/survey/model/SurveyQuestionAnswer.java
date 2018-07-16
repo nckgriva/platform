@@ -46,6 +46,12 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     @JoinColumn(name = "STORED_FILE_ID", nullable = true)
     private StoredFile storedFile; // Для хранения прикрепленного пользователем файла
 
+    @Column(name = "SELECTED_MATRIX_ROW", nullable = true)
+    private Integer selectedMatrixRow;
+
+    @Column(name = "SELECTED_MATRIX_COLUMN", nullable = true)
+    private Integer selectedMatrixColumn;
+
     public SurveyQuestionAnswer() {}
 
     public SurveyQuestionAnswer(SurveySession surveySession, SurveyQuestion question, SurveyAnswerVariant answerVariant,
@@ -125,5 +131,21 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
 
     public void setQuestion(SurveyQuestion question) {
         this.question = question;
+    }
+
+    public Integer getSelectedMatrixRow() {
+        return selectedMatrixRow;
+    }
+
+    public void setSelectedMatrixRow(Integer selectedMatrixRow) {
+        this.selectedMatrixRow = selectedMatrixRow;
+    }
+
+    public Integer getSelectedMatrixColumn() {
+        return selectedMatrixColumn;
+    }
+
+    public void setSelectedMatrixColumn(Integer selectedMatrixColumn) {
+        this.selectedMatrixColumn = selectedMatrixColumn;
     }
 }

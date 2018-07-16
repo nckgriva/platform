@@ -11,6 +11,8 @@ public class SurveyQuestionAnswerDTO extends IdObjectDTO {
     private UUID answerVariantId;
     private String text;
     private UUID storedFile;
+    private Integer selectedMatrixRow;
+    private Integer selectedMatrixColumn;
 
     public static SurveyQuestionAnswerDTO prepare(SurveyQuestionAnswer model) {
         SurveyQuestionAnswerDTO dto = new SurveyQuestionAnswerDTO();
@@ -24,7 +26,8 @@ public class SurveyQuestionAnswerDTO extends IdObjectDTO {
         if (model.getStoredFile() != null) {
             dto.setStoredFile(model.getStoredFile().getId());
         }
-
+        dto.setSelectedMatrixRow(model.getSelectedMatrixRow());
+        dto.setSelectedMatrixColumn(model.getSelectedMatrixColumn());
         return dto;
     }
 
@@ -66,5 +69,21 @@ public class SurveyQuestionAnswerDTO extends IdObjectDTO {
 
     public void setStoredFile(UUID storedFile) {
         this.storedFile = storedFile;
+    }
+
+    public Integer getSelectedMatrixRow() {
+        return selectedMatrixRow;
+    }
+
+    public void setSelectedMatrixRow(Integer selectedMatrixRow) {
+        this.selectedMatrixRow = selectedMatrixRow;
+    }
+
+    public Integer getSelectedMatrixColumn() {
+        return selectedMatrixColumn;
+    }
+
+    public void setSelectedMatrixColumn(Integer selectedMatrixColumn) {
+        this.selectedMatrixColumn = selectedMatrixColumn;
     }
 }

@@ -756,7 +756,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(SurveyPage.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveyPageDTO> entityListResponse = new EntityListResponse<SurveyPageDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveyPageDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<SurveyPage> items = idObjectService.getList(SurveyPage.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
@@ -803,7 +803,7 @@ public class SurveyServiceImpl implements SurveyService {
         String countFetches = "left join el.surveyPage sp ";
         String fetches = "left join el.surveyPage sp ";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (surveyId != null) {
             cause += "and sp.survey.id=:surveyId ";
@@ -822,7 +822,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(SurveyQuestion.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveyQuestionDTO> entityListResponse = new EntityListResponse<SurveyQuestionDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveyQuestionDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<SurveyQuestion> items = idObjectService.getList(SurveyQuestion.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         Set<UUID> questionIds = new HashSet<>();
@@ -867,6 +867,8 @@ public class SurveyServiceImpl implements SurveyService {
             entity = new SurveyQuestion();
         }
 
+        entity.setMatrixColumns(dto.getMatrixColumns());
+        entity.setMatrixRows(dto.getMatrixRows());
         entity.setQuestionIndex(dto.getQuestionIndex());
         entity.setHidden(dto.getHidden());
         entity.setRequired(dto.getRequired());
@@ -895,7 +897,7 @@ public class SurveyServiceImpl implements SurveyService {
                                                                                  Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (surveyPageId != null) {
             cause += "and el.surveyPage.id=:surveyPageId ";
@@ -912,7 +914,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(SurveyLogicTrigger.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveyLogicTriggerDTO> entityListResponse = new EntityListResponse<SurveyLogicTriggerDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveyLogicTriggerDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<SurveyLogicTrigger> items = idObjectService.getList(SurveyLogicTrigger.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
@@ -964,7 +966,7 @@ public class SurveyServiceImpl implements SurveyService {
                                                                        String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (!StringUtils.isEmpty(lastVisitIP)) {
             params.put("ip", "%%" + lastVisitIP + "%%");
@@ -983,7 +985,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(SurveySession.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveySessionDTO> entityListResponse = new EntityListResponse<SurveySessionDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveySessionDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<SurveySession> items = idObjectService.getList(SurveySession.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
@@ -1034,7 +1036,7 @@ public class SurveyServiceImpl implements SurveyService {
                                                                                      String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (surveySessionId != null) {
             cause += String.format("and el.surveySession = '%s' ", surveySessionId);
@@ -1042,7 +1044,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(SurveySession.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveyQuestionAnswerDTO> entityListResponse = new EntityListResponse<SurveyQuestionAnswerDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveyQuestionAnswerDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<SurveyQuestionAnswer> items = idObjectService.getList(SurveyQuestionAnswer.class, null, cause, params,
                 sortField, sortDir, entityListResponse.getStartRecord(), count);
@@ -1073,6 +1075,8 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setAnswerVariant(idObjectService.getObjectById(SurveyAnswerVariant.class, dto.getAnswerVariantId()));
         entity.setText(dto.getText());
         entity.setStoredFile(idObjectService.getObjectById(StoredFile.class, dto.getStoredFile()));
+        entity.setSelectedMatrixColumn(dto.getSelectedMatrixColumn());
+        entity.setSelectedMatrixRow(dto.getSelectedMatrixRow());
 
         return idObjectService.save(entity);
     }

@@ -16,6 +16,8 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private Long scaleMinValue;
     private Long scaleMaxValue;
     private String attachmentExtensions;
+    private String[] matrixColumns;
+    private String[] matrixRows;
 
     private List<SurveyAnswerVariantDTO> answerVariants = new LinkedList<>();
     private Set<UUID> answersToDelete = new HashSet<>();
@@ -36,6 +38,8 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         dto.setScaleMinValue(model.getScaleMinValue());
         dto.setScaleMaxValue(model.getScaleMaxValue());
         dto.setAttachmentExtensions(model.getAttachmentExtensions());
+        dto.setMatrixColumns(model.getMatrixColumns());
+        dto.setMatrixRows(model.getMatrixRows());
         return dto;
     }
 
@@ -133,5 +137,21 @@ public class SurveyQuestionDTO extends IdObjectDTO {
 
     public void setAnswersToDelete(Set<UUID> answersToDelete) {
         this.answersToDelete = answersToDelete;
+    }
+
+    public String[] getMatrixColumns() {
+        return matrixColumns;
+    }
+
+    public void setMatrixColumns(String[] matrixColumns) {
+        this.matrixColumns = matrixColumns;
+    }
+
+    public String[] getMatrixRows() {
+        return matrixRows;
+    }
+
+    public void setMatrixRows(String[] matrixRows) {
+        this.matrixRows = matrixRows;
     }
 }

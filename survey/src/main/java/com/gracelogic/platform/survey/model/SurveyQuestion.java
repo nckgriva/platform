@@ -2,7 +2,11 @@ package com.gracelogic.platform.survey.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
+import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -10,6 +14,12 @@ import java.util.UUID;
 
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_QUESTION")
+@TypeDefs({
+        @TypeDef(
+                name = "string-array",
+                typeClass = StringArrayType.class
+        ),
+})
 public class SurveyQuestion extends IdObject<UUID> {
     @Id
     @Column(name = ID)
@@ -57,6 +67,14 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true)
     private String attachmentExtensions;
+
+    @Type(type = "string-array")
+    @Column(name = "MATRIX_ROWS", nullable = true)
+    private String[] matrixRows;
+
+    @Type(type = "string-array")
+    @Column(name = "MATRIX_COLUMNS", nullable = true)
+    private String[] matrixColumns;
 
     @Override
     public UUID getId() {
@@ -159,12 +177,27 @@ public class SurveyQuestion extends IdObject<UUID> {
     public void setAttachmentExtensions(String attachmentExtensions) {
         this.attachmentExtensions = attachmentExtensions;
     }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String[] getMatrixRows() {
+        return matrixRows;
+    }
+
+    public void setMatrixRows(String[] matrixRows) {
+        this.matrixRows = matrixRows;
+    }
+
+    public String[] getMatrixColumns() {
+        return matrixColumns;
+    }
+
+    public void setMatrixColumns(String[] matrixColumns) {
+        this.matrixColumns = matrixColumns;
     }
 }
