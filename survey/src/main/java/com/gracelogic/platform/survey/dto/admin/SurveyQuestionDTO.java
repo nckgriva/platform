@@ -12,7 +12,7 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private String description;
     private UUID surveyQuestionTypeId;
     private Boolean isRequired;
-    private Boolean isHidden;
+    private Boolean isHidden; 
     private Long scaleMinValue;
     private Long scaleMaxValue;
     private String attachmentExtensions;
