@@ -11,8 +11,8 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private String text;
     private String description;
     private UUID surveyQuestionTypeId;
-    private Boolean isRequired;
-    private Boolean isHidden; 
+    private Boolean required;
+    private Boolean hidden;
     private Long scaleMinValue;
     private Long scaleMaxValue;
     private String attachmentExtensions;
@@ -80,19 +80,19 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     }
 
     public Boolean getRequired() {
-        return isRequired;
+        return required;
     }
 
     public void setRequired(Boolean required) {
-        isRequired = required;
+        this.required = required;
     }
 
     public Boolean getHidden() {
-        return isHidden;
+        return hidden;
     }
 
     public void setHidden(Boolean hidden) {
-        isHidden = hidden;
+        this.hidden = hidden;
     }
 
     public Long getScaleMinValue() {

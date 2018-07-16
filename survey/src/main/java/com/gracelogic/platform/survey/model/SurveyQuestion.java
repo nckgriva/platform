@@ -44,10 +44,10 @@ public class SurveyQuestion extends IdObject<UUID> {
     private SurveyQuestionType surveyQuestionType;
 
     @Column(name = "IS_REQUIRED", nullable = false)
-    private Boolean isRequired;
+    private Boolean required;
 
     @Column(name = "IS_HIDDEN", nullable = false)
-    private Boolean isHidden;
+    private Boolean hidden;
 
     @Column(name = "SCALE_MIN_VALUE", nullable = true)
     private Long scaleMinValue;
@@ -121,19 +121,19 @@ public class SurveyQuestion extends IdObject<UUID> {
     }
 
     public Boolean getRequired() {
-        return isRequired;
+        return required;
     }
 
     public void setRequired(Boolean required) {
-        isRequired = required;
+        this.required = required;
     }
 
     public Boolean getHidden() {
-        return isHidden;
+        return hidden;
     }
 
     public void setHidden(Boolean hidden) {
-        isHidden = hidden;
+        this.hidden = hidden;
     }
 
     public Long getScaleMinValue() {

@@ -37,10 +37,10 @@ public class SurveyAnswerVariant extends IdObject<UUID> {
     private Integer sortOrder;
 
     @Column(name = "IS_DEFAULT_VARIANT", nullable = false)
-    private Boolean isDefaultVariant; // Вариант выбран по умолчанию
+    private Boolean defaultVariant; // Вариант выбран по умолчанию
 
     @Column(name = "IS_CUSTOM_VARIANT", nullable = true)
-    private Boolean isCustomVariant; // Вариант для самостоятельного ответа
+    private Boolean customVariant; // Вариант для самостоятельного ответа
 
     @Column(name = "WEIGHT", nullable = true)
     private Integer weight; // Вес ответа для автоматической обработки
@@ -100,19 +100,19 @@ public class SurveyAnswerVariant extends IdObject<UUID> {
     }
 
     public Boolean getDefaultVariant() {
-        return isDefaultVariant;
+        return defaultVariant;
     }
 
     public void setDefaultVariant(Boolean defaultVariant) {
-        isDefaultVariant = defaultVariant;
+        this.defaultVariant = defaultVariant;
     }
 
     public Boolean getCustomVariant() {
-        return isCustomVariant;
+        return customVariant;
     }
 
     public void setCustomVariant(Boolean customVariant) {
-        isCustomVariant = customVariant;
+        this.customVariant = customVariant;
     }
 
     public Integer getWeight() {
