@@ -44,10 +44,10 @@ public class SurveyQuestion extends IdObject<UUID> {
     private SurveyQuestionType surveyQuestionType;
 
     @Column(name = "IS_REQUIRED", nullable = false)
-    private Boolean required;
+    private Boolean isRequired;
 
     @Column(name = "IS_HIDDEN", nullable = false)
-    private Boolean hidden;
+    private Boolean isHidden;
 
     @Column(name = "SCALE_MIN_VALUE", nullable = true)
     private Long scaleMinValue;
@@ -57,9 +57,6 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true)
     private String attachmentExtensions;
-
-    @Column(name = "IS_CUSTOM_ANSWER_POSSIBLE", nullable = true)
-    private Boolean isCustomAnswerPossible;
 
     @Override
     public UUID getId() {
@@ -124,19 +121,19 @@ public class SurveyQuestion extends IdObject<UUID> {
     }
 
     public Boolean getRequired() {
-        return required;
+        return isRequired;
     }
 
     public void setRequired(Boolean required) {
-        this.required = required;
+        isRequired = required;
     }
 
     public Boolean getHidden() {
-        return hidden;
+        return isHidden;
     }
 
     public void setHidden(Boolean hidden) {
-        this.hidden = hidden;
+        isHidden = hidden;
     }
 
     public Long getScaleMinValue() {
@@ -169,13 +166,5 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Boolean getCustomAnswerPossible() {
-        return isCustomAnswerPossible;
-    }
-
-    public void setCustomAnswerPossible(Boolean customAnswerPossible) {
-        isCustomAnswerPossible = customAnswerPossible;
     }
 }

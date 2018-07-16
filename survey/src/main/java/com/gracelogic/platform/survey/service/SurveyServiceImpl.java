@@ -302,7 +302,7 @@ public class SurveyServiceImpl implements SurveyService {
 
             for (SurveyLogicTriggerDTO logicTriggerDTO : surveyPageDTO.getLogicTriggers()) {
                 logicTriggerDTO.setSurveyPageId(surveyPage.getId());
-                SurveyLogicTrigger surveyLogicTrigger = saveSurveyLogicTrigger(logicTriggerDTO);
+                saveSurveyLogicTrigger(logicTriggerDTO);
             }
 
             for (SurveyQuestionDTO surveyQuestionDTO : surveyPageDTO.getQuestions()) {
@@ -553,7 +553,7 @@ public class SurveyServiceImpl implements SurveyService {
     public EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (!StringUtils.isEmpty(name)) {
             params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
@@ -562,7 +562,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(Survey.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveyDTO> entityListResponse = new EntityListResponse<SurveyDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveyDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<Survey> items = idObjectService.getList(Survey.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
@@ -678,7 +678,7 @@ public class SurveyServiceImpl implements SurveyService {
     public EntityListResponse<SurveyAnswerVariantDTO> getSurveyAnswerVariantsPaged(UUID surveyQuestionId, String description, Integer count, Integer page,
                                                                                    Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (surveyQuestionId != null) {
             cause += "and el.surveyQuestion.id=:surveyQuestionId ";
@@ -717,6 +717,7 @@ public class SurveyServiceImpl implements SurveyService {
             entity = new SurveyAnswerVariant();
         }
 
+        entity.setCustomVariant(dto.getCustomVariant());
         entity.setDefaultVariant(dto.getDefaultVariant());
         entity.setSortOrder(dto.getSortOrder());
         entity.setSurveyQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getSurveyQuestionId()));
@@ -741,7 +742,7 @@ public class SurveyServiceImpl implements SurveyService {
                                                                  Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (surveyId != null) {
             cause += "and el.survey.id=:surveyId ";
@@ -866,7 +867,6 @@ public class SurveyServiceImpl implements SurveyService {
             entity = new SurveyQuestion();
         }
 
-        entity.setCustomAnswerPossible(dto.getCustomAnswerPossible());
         entity.setQuestionIndex(dto.getQuestionIndex());
         entity.setHidden(dto.getHidden());
         entity.setRequired(dto.getRequired());

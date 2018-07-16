@@ -11,12 +11,11 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private String text;
     private String description;
     private UUID surveyQuestionTypeId;
-    private Boolean required;
-    private Boolean hidden;
+    private Boolean isRequired;
+    private Boolean isHidden;
     private Long scaleMinValue;
     private Long scaleMaxValue;
     private String attachmentExtensions;
-    private Boolean isCustomAnswerPossible;
 
     private List<SurveyAnswerVariantDTO> answerVariants = new LinkedList<>();
     private Set<UUID> answersToDelete = new HashSet<>();
@@ -37,7 +36,6 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         dto.setScaleMinValue(model.getScaleMinValue());
         dto.setScaleMaxValue(model.getScaleMaxValue());
         dto.setAttachmentExtensions(model.getAttachmentExtensions());
-        dto.setCustomAnswerPossible(model.getCustomAnswerPossible());
         return dto;
     }
 
@@ -82,19 +80,19 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     }
 
     public Boolean getRequired() {
-        return required;
+        return isRequired;
     }
 
     public void setRequired(Boolean required) {
-        this.required = required;
+        isRequired = required;
     }
 
     public Boolean getHidden() {
-        return hidden;
+        return isHidden;
     }
 
     public void setHidden(Boolean hidden) {
-        this.hidden = hidden;
+        isHidden = hidden;
     }
 
     public Long getScaleMinValue() {
@@ -135,13 +133,5 @@ public class SurveyQuestionDTO extends IdObjectDTO {
 
     public void setAnswersToDelete(Set<UUID> answersToDelete) {
         this.answersToDelete = answersToDelete;
-    }
-
-    public Boolean getCustomAnswerPossible() {
-        return isCustomAnswerPossible;
-    }
-
-    public void setCustomAnswerPossible(Boolean customAnswerPossible) {
-        isCustomAnswerPossible = customAnswerPossible;
     }
 }

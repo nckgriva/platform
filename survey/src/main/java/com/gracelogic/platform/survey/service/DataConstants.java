@@ -81,7 +81,9 @@ public class DataConstants {
         LISTBOX(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e75")),
         RATING_SCALE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e76")),
         ATTACHMENT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e77")),
-        TEXT_MULTILINE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e78"));
+        TEXT_MULTILINE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e78")),
+        MATRIX_RADIOBUTTON(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e79")),
+        MATRIX_CHECKBOX(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e80"));
 
         private UUID value;
 

@@ -9,7 +9,8 @@ public class SurveyAnswerVariantDTO extends IdObjectDTO {
     private UUID surveyQuestionId;
     private String text;
     private Integer sortOrder;
-    private Boolean defaultVariant; // Вариант выбран по умолчанию
+    private Boolean isDefaultVariant; // Вариант выбран по умолчанию
+    private Boolean isCustomVariant;
     private Integer weight; // Вес ответа для автоматической обработки
 
     public static SurveyAnswerVariantDTO prepare(SurveyAnswerVariant model) {
@@ -21,6 +22,7 @@ public class SurveyAnswerVariantDTO extends IdObjectDTO {
         dto.setText(model.getText());
         dto.setSortOrder(model.getSortOrder());
         dto.setDefaultVariant(model.getDefaultVariant());
+        dto.setCustomVariant(model.getCustomVariant());
         dto.setWeight(model.getWeight());
         return dto;
     }
@@ -50,11 +52,19 @@ public class SurveyAnswerVariantDTO extends IdObjectDTO {
     }
 
     public Boolean getDefaultVariant() {
-        return defaultVariant;
+        return isDefaultVariant;
     }
 
     public void setDefaultVariant(Boolean defaultVariant) {
-        this.defaultVariant = defaultVariant;
+        isDefaultVariant = defaultVariant;
+    }
+
+    public Boolean getCustomVariant() {
+        return isCustomVariant;
+    }
+
+    public void setCustomVariant(Boolean customVariant) {
+        isCustomVariant = customVariant;
     }
 
     public Integer getWeight() {
