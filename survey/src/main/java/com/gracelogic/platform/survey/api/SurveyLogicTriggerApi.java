@@ -5,6 +5,7 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.Path;
 import com.gracelogic.platform.survey.dto.admin.SurveyLogicTriggerDTO;
+import com.gracelogic.platform.survey.exception.IncompleteDTOException;
 import com.gracelogic.platform.survey.model.SurveyLogicTrigger;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
@@ -107,6 +108,8 @@ public class SurveyLogicTriggerApi extends AbstractAuthorizedController {
             return new ResponseEntity<IDResponse>(new IDResponse(surveyLogicTrigger.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (IncompleteDTOException incompleteDTO) {
+            return new ResponseEntity<>(new ErrorResponse("survey.INCOMPLETE_DTO", incompleteDTO.getMessage()), HttpStatus.BAD_REQUEST);
         }
 
     }

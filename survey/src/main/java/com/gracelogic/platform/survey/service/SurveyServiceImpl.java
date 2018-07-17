@@ -13,6 +13,7 @@ import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.user.model.User;
+import com.sun.media.sound.InvalidDataException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -245,7 +246,7 @@ public class SurveyServiceImpl implements SurveyService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Survey saveEntireSurvey(SurveyDTO surveyDTO, AuthorizedUser user)
-            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException {
+            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException, IncompleteDTOException {
 
         Survey survey = saveSurvey(surveyDTO, user);
         Map<String, Object> params = new HashMap<>();
@@ -977,7 +978,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException {
+    public SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException, IncompleteDTOException {
         SurveyLogicTrigger entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(SurveyLogicTrigger.class, dto.getId());
@@ -993,6 +994,11 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setSurveyLogicActionType(ds.get(SurveyLogicActionType.class, dto.getLogicActionTypeId()));
         entity.setNewConclusion(dto.getNewConclusion());
         entity.setNewLink(dto.getNewLink());
+
+        if (dto.getPageIndex() == null && dto.getLogicActionTypeId().equals(DataConstants.LogicActionTypes.GO_TO_PAGE.getValue())) {
+            throw new IncompleteDTOException("expected page index, received null");
+        }
+
         entity.setPageIndex(dto.getPageIndex());
         entity.setInteractionRequired(dto.getInteractionRequired());
         entity.setTargetQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getTargetQuestionId()));
