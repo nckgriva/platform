@@ -43,7 +43,7 @@ public class SurveyLogicTrigger extends IdObject<UUID> {
     /**
      * Отслеживаемый вариант ответа
      */
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "ANSWER_VARIANT_ID", nullable = true)
     private SurveyAnswerVariant answerVariant;
 
@@ -53,7 +53,7 @@ public class SurveyLogicTrigger extends IdObject<UUID> {
     @Column(name = "IS_INTERACTION_REQUIRED", nullable = false)
     private Boolean isInteractionRequired;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "TARGET_QUESTION_ID", nullable = true)
     private SurveyQuestion targetQuestion;
 
