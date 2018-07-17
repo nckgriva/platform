@@ -71,6 +71,9 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "SCALE_MAX_VALUE_LABEL", nullable = true)
     private String scaleMaxValueLabel;
 
+    @Column(name = "SCALE_STEP_VALUE", nullable = true)
+    private Integer scaleStepValue;
+
     @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true)
     private String attachmentExtensions;
 
@@ -221,5 +224,13 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setScaleMaxValueLabel(String scaleMaxValueLabel) {
         this.scaleMaxValueLabel = scaleMaxValueLabel;
+    }
+
+    public Integer getScaleStepValue() {
+        return scaleStepValue;
+    }
+
+    public void setScaleStepValue(Integer scaleStepValue) {
+        this.scaleStepValue = scaleStepValue;
     }
 }

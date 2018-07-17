@@ -867,6 +867,7 @@ public class SurveyServiceImpl implements SurveyService {
             entity = new SurveyQuestion();
         }
 
+        entity.setScaleStepValue(dto.getScaleStepValue());
         entity.setScaleMaxValueLabel(dto.getScaleMaxValueLabel());
         entity.setScaleMinValueLabel(dto.getScaleMinValueLabel());
         entity.setMatrixColumns(dto.getMatrixColumns());
