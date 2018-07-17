@@ -38,6 +38,11 @@ public class SurveyServiceImpl implements SurveyService {
         ANSWER,
     }
 
+    /**
+     * Represents result set as UUID HashMap
+     * @param list ResultSet
+     * @param <T>
+     */
     private static <T extends IdObject<UUID>> HashMap<UUID, T> asUUIDHashMap(List<T> list) {
         HashMap<UUID, T> hashMap = new HashMap<>();
         for (T t : list) {
@@ -173,7 +178,7 @@ public class SurveyServiceImpl implements SurveyService {
         SurveyPage surveyPage = surveyPages.iterator().next();
         SurveyPageDTO dto = SurveyPageDTO.prepare(surveyPage);
 
-        // 1. Получение списка вопросов текущей страницы
+        // 1. Getting list of questions of the current page
         params.clear();
         cause = "el.surveyPage.id=:surveyPageId ";
         params.put("surveyPageId", surveyPage.getId());
@@ -181,7 +186,7 @@ public class SurveyServiceImpl implements SurveyService {
         List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, null,
                 cause, params, "el.questionIndex", "ASC", null, null);
 
-        // 2. Получение логики. Для веба выбор только HIDE_QUESTION/SHOW_QUESTION
+        // 2. Getting the logic. For the web, select only HIDE_QUESTION / SHOW_QUESTION
         params.clear();
         cause = "el.surveyPage.pageIndex = :pageIndex AND el.surveyLogicActionType.id in (:logicActionTypeIds) ";
         params.put("pageIndex", pageIndex);
@@ -204,7 +209,7 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         if (!questionIds.isEmpty()) {
-            // 3. Получение вариантов ответа
+            // 3. Getting answer variants
             params.clear();
             cause = "el.surveyQuestion.id in (:questionIds) ";
             params.put("questionIds", questionIds);
@@ -417,7 +422,7 @@ public class SurveyServiceImpl implements SurveyService {
         logger.info("lastVisitPageIndex:" + lastVisitedPageIndex);
         int nextPage = lastVisitedPageIndex + 1;
 
-        // 1. Получение списка вопросов по последней посещенной странице
+        // 1. Getting the list of questions on the last visited page
         Map<String, Object> params = new HashMap<>();
         params.put("lastVisitedPageIndex", lastVisitedPageIndex);
         params.put("surveyId", surveySession.getSurvey().getId());
@@ -425,7 +430,7 @@ public class SurveyServiceImpl implements SurveyService {
                 "sv.id=:surveyId and sp.pageIndex=:lastVisitedPageIndex",
                 params, "el.questionIndex", "ASC", null, null));
 
-        // 2. Получение всех вариантов ответов
+        // 2. Getting all answer variants by question ids
         HashMap<UUID, SurveyAnswerVariant> surveyAnswersHashMap = new HashMap<>();
         if (dto.containsNonTextAnswers()) {
             params.clear();
@@ -435,7 +440,7 @@ public class SurveyServiceImpl implements SurveyService {
                             "el.surveyQuestion.id in (:questionIds)", params, null, null, null));
         }
 
-        // 3. Получение логики по последней посещенной странице
+        // 3. Getting logic by last visited page
         params.clear();
         params.put("lastVisitedPageIndex", lastVisitedPageIndex);
         params.put("surveyId", surveySession.getSurvey().getId());
@@ -451,7 +456,7 @@ public class SurveyServiceImpl implements SurveyService {
         // question id, answer
         HashMap<UUID, List<SurveyQuestionAnswer>> matrixAnswers = new HashMap<>();
 
-        // Сохраним полученные ответы
+        // save received answers
         for (Map.Entry<UUID, List<AnswerDTO>> entry : dto.getAnswers().entrySet()) {
             for (AnswerDTO answerDTO : entry.getValue()) {
                 SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
@@ -459,10 +464,10 @@ public class SurveyServiceImpl implements SurveyService {
                 if (answerDTO.getAnswerId() != null)
                     answerVariant = surveyAnswersHashMap.get(answerDTO.getAnswerId());
 
-                // если пользователь выбрал вариант 'другое' и не ответил в текстовое поле обязательного вопроса
+                // if user selected custom variant and didn't answered in text field of required question
                 if (answerVariant != null && question.getRequired() != null && question.getRequired() &&
                         answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() &&
-                        StringUtils.isBlank(answerDTO.getText())) {
+                        StringUtils.isBlank(answerDTO.getText())) { // DO NOT simplify this if
                     throw new UnansweredException();
                 }
 
@@ -499,6 +504,7 @@ public class SurveyServiceImpl implements SurveyService {
             }
         }
 
+        // check all rows of required matrix question
         for (Map.Entry<UUID, List<SurveyQuestionAnswer>> entry : matrixAnswers.entrySet()) {
             SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
             HashSet<Integer> rowsAnswered = new HashSet<>();
@@ -515,7 +521,6 @@ public class SurveyServiceImpl implements SurveyService {
                 throw new UnansweredException();
         }
 
-        // обработка логики
         for (SurveyLogicTrigger trigger : logicTriggers) {
             LogicTriggerCheckItem checkItem = LogicTriggerCheckItem.PAGE;
             if (trigger.getSurveyQuestion() != null) {
@@ -559,7 +564,7 @@ public class SurveyServiceImpl implements SurveyService {
             }
         }
 
-        // если следующей страницы не существует, это финиш
+        // if next page is not exists, this is finish
         params.clear();
         params.put("surveyId", surveySession.getSurvey().getId());
         params.put("pageIndex", nextPage);
