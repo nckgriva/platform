@@ -994,7 +994,7 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setNewConclusion(dto.getNewConclusion());
         entity.setNewLink(dto.getNewLink());
         entity.setPageIndex(dto.getPageIndex());
-        entity.setInteractionRequired(dto.isInteractionRequired());
+        entity.setInteractionRequired(dto.getInteractionRequired());
         entity.setTargetQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getTargetQuestionId()));
 
         return idObjectService.save(entity);

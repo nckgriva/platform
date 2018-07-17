@@ -51,7 +51,7 @@ public class SurveyLogicTrigger extends IdObject<UUID> {
      * Если TRUE, логика срабатывает при отвеченном вопросе/выбранном варианте
      */
     @Column(name = "IS_INTERACTION_REQUIRED", nullable = false)
-    private Boolean isInteractionRequired;
+    private Boolean interactionRequired;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "TARGET_QUESTION_ID", nullable = true)
@@ -125,11 +125,11 @@ public class SurveyLogicTrigger extends IdObject<UUID> {
     }
 
     public boolean isInteractionRequired() {
-        return isInteractionRequired;
+        return interactionRequired;
     }
 
     public void setInteractionRequired(boolean interactionRequired) {
-        isInteractionRequired = interactionRequired;
+        this.interactionRequired = interactionRequired;
     }
 
     public SurveyQuestion getTargetQuestion() {
@@ -164,13 +164,6 @@ public class SurveyLogicTrigger extends IdObject<UUID> {
         this.newLink = newLink;
     }
 
-    public Boolean getInteractionRequired() {
-        return isInteractionRequired;
-    }
-
-    public void setInteractionRequired(Boolean interactionRequired) {
-        isInteractionRequired = interactionRequired;
-    }
 
     public SurveyLogicActionType getSurveyLogicActionType() {
         return surveyLogicActionType;
