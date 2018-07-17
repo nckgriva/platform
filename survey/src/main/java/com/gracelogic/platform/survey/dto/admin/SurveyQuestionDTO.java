@@ -15,6 +15,8 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private Boolean hidden;
     private Long scaleMinValue;
     private Long scaleMaxValue;
+    private String scaleMinValueLabel;
+    private String scaleMaxValueLabel;
     private String attachmentExtensions;
     private String[] matrixColumns;
     private String[] matrixRows;
@@ -40,6 +42,9 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         dto.setAttachmentExtensions(model.getAttachmentExtensions());
         dto.setMatrixColumns(model.getMatrixColumns());
         dto.setMatrixRows(model.getMatrixRows());
+
+        dto.setScaleMaxValueLabel(model.getScaleMaxValueLabel());
+        dto.setScaleMinValueLabel(model.getScaleMinValueLabel());
         return dto;
     }
 
@@ -153,5 +158,21 @@ public class SurveyQuestionDTO extends IdObjectDTO {
 
     public void setMatrixRows(String[] matrixRows) {
         this.matrixRows = matrixRows;
+    }
+
+    public String getScaleMinValueLabel() {
+        return scaleMinValueLabel;
+    }
+
+    public void setScaleMinValueLabel(String scaleMinValueLabel) {
+        this.scaleMinValueLabel = scaleMinValueLabel;
+    }
+
+    public String getScaleMaxValueLabel() {
+        return scaleMaxValueLabel;
+    }
+
+    public void setScaleMaxValueLabel(String scaleMaxValueLabel) {
+        this.scaleMaxValueLabel = scaleMaxValueLabel;
     }
 }

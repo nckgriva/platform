@@ -65,6 +65,12 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "SCALE_MAX_VALUE", nullable = true)
     private Long scaleMaxValue;
 
+    @Column(name = "SCALE_MIN_VALUE_LABEL", nullable = true)
+    private String scaleMinValueLabel;
+
+    @Column(name = "SCALE_MAX_VALUE_LABEL", nullable = true)
+    private String scaleMaxValueLabel;
+
     @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true)
     private String attachmentExtensions;
 
@@ -199,5 +205,21 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setMatrixColumns(String[] matrixColumns) {
         this.matrixColumns = matrixColumns;
+    }
+
+    public String getScaleMinValueLabel() {
+        return scaleMinValueLabel;
+    }
+
+    public void setScaleMinValueLabel(String scaleMinValueLabel) {
+        this.scaleMinValueLabel = scaleMinValueLabel;
+    }
+
+    public String getScaleMaxValueLabel() {
+        return scaleMaxValueLabel;
+    }
+
+    public void setScaleMaxValueLabel(String scaleMaxValueLabel) {
+        this.scaleMaxValueLabel = scaleMaxValueLabel;
     }
 }
