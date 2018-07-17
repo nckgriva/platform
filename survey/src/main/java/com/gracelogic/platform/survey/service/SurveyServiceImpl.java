@@ -460,7 +460,9 @@ public class SurveyServiceImpl implements SurveyService {
                     answerVariant = surveyAnswersHashMap.get(answerDTO.getAnswerId());
 
                 // если пользователь выбрал вариант 'другое' и не ответил в текстовое поле обязательного вопроса
-                if (answerVariant != null && question.getRequired() && answerVariant.getCustomVariant() && StringUtils.isBlank(answerDTO.getText())) {
+                if (answerVariant != null && question.getRequired() != null && question.getRequired() &&
+                        answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() &&
+                        StringUtils.isBlank(answerDTO.getText())) {
                     throw new UnansweredException();
                 }
 
