@@ -6,6 +6,8 @@ public class AnswerDTO {
     private UUID answerId;
     private UUID storedFileId;
     private String text;
+    private Integer selectedMatrixRow;
+    private Integer selectedMatrixColumn;
 
     public UUID getStoredFileId() {
         return storedFileId;
@@ -29,5 +31,21 @@ public class AnswerDTO {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public Integer getSelectedMatrixRow() {
+        return selectedMatrixRow;
+    }
+
+    public void setSelectedMatrixRow(Integer selectedMatrixRow) {
+        this.selectedMatrixRow = selectedMatrixRow;
+    }
+
+    public Integer getSelectedMatrixColumn() {
+        return selectedMatrixColumn;
+    }
+
+    public void setSelectedMatrixColumn(Integer selectedMatrixColumn) {
+        this.selectedMatrixColumn = selectedMatrixColumn;
     }
 }

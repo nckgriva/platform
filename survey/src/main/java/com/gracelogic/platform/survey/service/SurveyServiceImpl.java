@@ -448,6 +448,9 @@ public class SurveyServiceImpl implements SurveyService {
         Set<UUID> answeredQuestions = new HashSet<>();
         Set<UUID> selectedAnswers = new HashSet<>();
 
+        // question id, answer
+        HashMap<UUID, List<SurveyQuestionAnswer>> matrixAnswers = new HashMap<>();
+
         // Сохраним полученные ответы
         for (Map.Entry<UUID, List<AnswerDTO>> entry : dto.getAnswers().entrySet()) {
             for (AnswerDTO answerDTO : entry.getValue()) {
@@ -456,16 +459,52 @@ public class SurveyServiceImpl implements SurveyService {
                 if (answerDTO.getAnswerId() != null)
                     answerVariant = surveyAnswersHashMap.get(answerDTO.getAnswerId());
 
+                // если пользователь выбрал вариант 'другое' и не ответил в текстовое поле обязательного вопроса
+                if (answerVariant != null && question.getRequired() && answerVariant.getCustomVariant() && StringUtils.isBlank(answerDTO.getText())) {
+                    throw new UnansweredException();
+                }
+
                 SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveySession,
                         question,
                         answerVariant,
                         answerDTO.getText(),
                         null); // TODO: stored file
+
+                surveyQuestionAnswer.setSelectedMatrixRow(answerDTO.getSelectedMatrixRow());
+                surveyQuestionAnswer.setSelectedMatrixColumn(answerDTO.getSelectedMatrixColumn());
                 idObjectService.save(surveyQuestionAnswer);
 
-                answeredQuestions.add(question.getId());
+                boolean isMatrixQuestion = question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.getValue()) ||
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue());
+
+                // matrix question requirements will be checked later
+                if (!isMatrixQuestion) {
+                    answeredQuestions.add(question.getId());
+                } else {
+                    // put answer if matrix marked as required
+                    if (question.getRequired()) {
+                        List<SurveyQuestionAnswer> list = matrixAnswers.get(question.getId());
+                        if (list == null) {
+                            list = new ArrayList<>();
+                            matrixAnswers.put(question.getId(), list);
+                        }
+                        list.add(surveyQuestionAnswer);
+                    }
+                }
+
                 if (answerVariant != null)
                     selectedAnswers.add(answerVariant.getId());
+            }
+        }
+
+        for (Map.Entry<UUID, List<SurveyQuestionAnswer>> entry : matrixAnswers.entrySet()) {
+            SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
+            HashSet<Integer> rowsAnswered = new HashSet<>();
+            for (SurveyQuestionAnswer answer : entry.getValue()) {
+                rowsAnswered.add(answer.getSelectedMatrixRow());
+            }
+            if (rowsAnswered.size() == question.getMatrixRows().length) {
+                answeredQuestions.add(entry.getKey());
             }
         }
 
