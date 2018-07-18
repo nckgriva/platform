@@ -9,6 +9,7 @@ public class SurveyQuestionAnswerDTO extends IdObjectDTO {
     private UUID surveySessionId;
     private UUID questionId;
     private UUID answerVariantId;
+    private UUID surveyPageId;
     private String text;
     private UUID storedFile;
     private Integer selectedMatrixRow;
@@ -28,6 +29,7 @@ public class SurveyQuestionAnswerDTO extends IdObjectDTO {
         }
         dto.setSelectedMatrixRow(model.getSelectedMatrixRow());
         dto.setSelectedMatrixColumn(model.getSelectedMatrixColumn());
+        dto.setSurveyPageId(model.getSurveyPage().getId());
         return dto;
     }
 
@@ -85,5 +87,13 @@ public class SurveyQuestionAnswerDTO extends IdObjectDTO {
 
     public void setSelectedMatrixColumn(Integer selectedMatrixColumn) {
         this.selectedMatrixColumn = selectedMatrixColumn;
+    }
+
+    public UUID getSurveyPageId() {
+        return surveyPageId;
+    }
+
+    public void setSurveyPageId(UUID surveyPageId) {
+        this.surveyPageId = surveyPageId;
     }
 }

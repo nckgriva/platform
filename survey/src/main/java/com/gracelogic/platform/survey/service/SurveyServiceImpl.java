@@ -372,9 +372,30 @@ public class SurveyServiceImpl implements SurveyService {
 
         idObjectService.save(surveySession);
 
+        int previousPageIndex = visitHistory[visitHistory.length-1];
+
+        // question id, List<answerDTO>
+        HashMap<UUID, List<AnswerDTO>> pageAnswers = new HashMap<>();
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("pageIndex", previousPageIndex);
+
+        List<SurveyQuestionAnswer> answersList = idObjectService.getList(SurveyQuestionAnswer.class, null, "el.surveyPage=:pageIndex",
+                params, null, null, null);
+
+        for (SurveyQuestionAnswer model : answersList) {
+            List<AnswerDTO> answerDTOs = pageAnswers.get(model.getSurveyQuestion().getId());
+            if (answerDTOs == null) {
+                answerDTOs = new ArrayList<>();
+                pageAnswers.put(model.getSurveyQuestion().getId(), answerDTOs);
+            }
+            answerDTOs.add(AnswerDTO.fromModel(model));
+        }
+
         SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
         surveyInteractionDTO.setSurveySessionId(surveySession.getId());
-        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, visitHistory[visitHistory.length-1]));
+        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, previousPageIndex));
+        surveyInteractionDTO.setPageAnswers(pageAnswers);
         return surveyInteractionDTO;
     }
 
@@ -1128,6 +1149,7 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setSurveySession(idObjectService.getObjectById(SurveySession.class, dto.getSurveySessionId()));
         entity.setQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getQuestionId()));
         entity.setAnswerVariant(idObjectService.getObjectById(SurveyAnswerVariant.class, dto.getAnswerVariantId()));
+        entity.setSurveyPage(idObjectService.getObjectById(SurveyPage.class, dto.getSurveyPageId()));
         entity.setText(dto.getText());
         entity.setStoredFile(idObjectService.getObjectById(StoredFile.class, dto.getStoredFile()));
         entity.setSelectedMatrixColumn(dto.getSelectedMatrixColumn());

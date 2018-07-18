@@ -1,5 +1,7 @@
 package com.gracelogic.platform.survey.dto.user;
 
+import com.gracelogic.platform.survey.model.SurveyQuestionAnswer;
+
 import java.util.UUID;
 
 public class AnswerDTO {
@@ -8,6 +10,16 @@ public class AnswerDTO {
     private String text;
     private Integer selectedMatrixRow;
     private Integer selectedMatrixColumn;
+
+    public static AnswerDTO fromModel(SurveyQuestionAnswer model) {
+        AnswerDTO dto = new AnswerDTO();
+        dto.setAnswerId(model.getAnswerVariant() != null ? model.getAnswerVariant().getId() : null);
+        dto.setStoredFileId(model.getStoredFile() != null ? model.getStoredFile().getId() : null);
+        dto.setText(model.getText());
+        dto.setSelectedMatrixRow(model.getSelectedMatrixRow());
+        dto.setSelectedMatrixColumn(model.getSelectedMatrixColumn());
+        return dto;
+    }
 
     public UUID getStoredFileId() {
         return storedFileId;
