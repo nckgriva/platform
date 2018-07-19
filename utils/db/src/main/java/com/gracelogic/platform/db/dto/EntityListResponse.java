@@ -15,7 +15,7 @@ public class EntityListResponse<E extends IdObjectDTO> {
 
         if (totalCount != null) {
             this.pages = ((totalCount / countPerPage));
-            if (pages % 2 != 0) {
+            if (totalCount % 2 != 0) {
                 pages++;
             }
         }
