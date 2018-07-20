@@ -891,6 +891,7 @@ public class UserServiceImpl implements UserService {
 
         entity.setCode(dto.getCode());
         entity.setName(dto.getName());
+        entity.setDescription(dto.getDescription());
         idObjectService.save(entity);
 
         for (UUID grantId : dto.getGrants()) {
