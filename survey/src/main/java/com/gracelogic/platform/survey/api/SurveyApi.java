@@ -8,10 +8,7 @@ import com.gracelogic.platform.survey.Path;
 import com.gracelogic.platform.survey.dto.admin.SurveyDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyIntroductionDTO;
-import com.gracelogic.platform.survey.exception.LogicDependencyException;
-import com.gracelogic.platform.survey.exception.MaxAttemptsHitException;
-import com.gracelogic.platform.survey.exception.RespondentLimitException;
-import com.gracelogic.platform.survey.exception.ResultDependencyException;
+import com.gracelogic.platform.survey.exception.*;
 import com.gracelogic.platform.survey.model.Survey;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
@@ -171,6 +168,8 @@ public class SurveyApi extends AbstractAuthorizedController {
         } catch (LogicDependencyException logicDependency) {
             return new ResponseEntity<>(new ErrorResponse("survey.LOGIC_DEPENDENCY",
                     messageSource.getMessage("survey.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (IncompleteDTOException incompleteDTO) {
+            return new ResponseEntity<>(new ErrorResponse("survey.INCOMPLETE_DTO", incompleteDTO.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 

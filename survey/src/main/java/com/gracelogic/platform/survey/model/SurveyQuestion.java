@@ -2,7 +2,11 @@ package com.gracelogic.platform.survey.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
+import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -10,6 +14,12 @@ import java.util.UUID;
 
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_QUESTION")
+@TypeDefs({
+        @TypeDef(
+                name = "string-array",
+                typeClass = StringArrayType.class
+        ),
+})
 public class SurveyQuestion extends IdObject<UUID> {
     @Id
     @Column(name = ID)
@@ -55,11 +65,25 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "SCALE_MAX_VALUE", nullable = true)
     private Long scaleMaxValue;
 
+    @Column(name = "SCALE_MIN_VALUE_LABEL", nullable = true)
+    private String scaleMinValueLabel;
+
+    @Column(name = "SCALE_MAX_VALUE_LABEL", nullable = true)
+    private String scaleMaxValueLabel;
+
+    @Column(name = "SCALE_STEP_VALUE", nullable = true)
+    private Integer scaleStepValue;
+
     @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true)
     private String attachmentExtensions;
 
-    @Column(name = "IS_CUSTOM_ANSWER_POSSIBLE", nullable = true)
-    private Boolean isCustomAnswerPossible;
+    @Type(type = "string-array")
+    @Column(name = "MATRIX_ROWS", nullable = true)
+    private String[] matrixRows;
+
+    @Type(type = "string-array")
+    @Column(name = "MATRIX_COLUMNS", nullable = true)
+    private String[] matrixColumns;
 
     @Override
     public UUID getId() {
@@ -162,7 +186,6 @@ public class SurveyQuestion extends IdObject<UUID> {
     public void setAttachmentExtensions(String attachmentExtensions) {
         this.attachmentExtensions = attachmentExtensions;
     }
-
     public String getDescription() {
         return description;
     }
@@ -171,11 +194,43 @@ public class SurveyQuestion extends IdObject<UUID> {
         this.description = description;
     }
 
-    public Boolean getCustomAnswerPossible() {
-        return isCustomAnswerPossible;
+    public String[] getMatrixRows() {
+        return matrixRows;
     }
 
-    public void setCustomAnswerPossible(Boolean customAnswerPossible) {
-        isCustomAnswerPossible = customAnswerPossible;
+    public void setMatrixRows(String[] matrixRows) {
+        this.matrixRows = matrixRows;
+    }
+
+    public String[] getMatrixColumns() {
+        return matrixColumns;
+    }
+
+    public void setMatrixColumns(String[] matrixColumns) {
+        this.matrixColumns = matrixColumns;
+    }
+
+    public String getScaleMinValueLabel() {
+        return scaleMinValueLabel;
+    }
+
+    public void setScaleMinValueLabel(String scaleMinValueLabel) {
+        this.scaleMinValueLabel = scaleMinValueLabel;
+    }
+
+    public String getScaleMaxValueLabel() {
+        return scaleMaxValueLabel;
+    }
+
+    public void setScaleMaxValueLabel(String scaleMaxValueLabel) {
+        this.scaleMaxValueLabel = scaleMaxValueLabel;
+    }
+
+    public Integer getScaleStepValue() {
+        return scaleStepValue;
+    }
+
+    public void setScaleStepValue(Integer scaleStepValue) {
+        this.scaleStepValue = scaleStepValue;
     }
 }

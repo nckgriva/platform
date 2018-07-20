@@ -9,7 +9,7 @@ public class SurveyLogicTriggerDTO extends IdObjectDTO {
     private UUID surveyPageId;
     private UUID surveyQuestionId;
     private UUID answerVariantId;
-    private Boolean isInteractionRequired;
+    private Boolean interactionRequired;
     private UUID targetQuestionId;
     private String newConclusion;
     private Integer pageIndex;
@@ -101,11 +101,11 @@ public class SurveyLogicTriggerDTO extends IdObjectDTO {
         this.logicActionTypeId = logicActionTypeId;
     }
 
-    public boolean isInteractionRequired() {
-        return isInteractionRequired;
+    public Boolean getInteractionRequired() {
+        return interactionRequired;
     }
 
-    public void setInteractionRequired(boolean interactionRequired) {
-        isInteractionRequired = interactionRequired;
+    public void setInteractionRequired(Boolean interactionRequired) {
+        this.interactionRequired = interactionRequired;
     }
 }

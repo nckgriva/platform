@@ -13,6 +13,7 @@ import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.user.model.User;
+import com.sun.media.sound.InvalidDataException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,11 @@ public class SurveyServiceImpl implements SurveyService {
         ANSWER,
     }
 
+    /**
+     * Represents result set as UUID HashMap
+     * @param list ResultSet
+     * @param <T>
+     */
     private static <T extends IdObject<UUID>> HashMap<UUID, T> asUUIDHashMap(List<T> list) {
         HashMap<UUID, T> hashMap = new HashMap<>();
         for (T t : list) {
@@ -173,7 +179,7 @@ public class SurveyServiceImpl implements SurveyService {
         SurveyPage surveyPage = surveyPages.iterator().next();
         SurveyPageDTO dto = SurveyPageDTO.prepare(surveyPage);
 
-        // 1. Получение списка вопросов текущей страницы
+        // 1. Getting list of questions of the current page
         params.clear();
         cause = "el.surveyPage.id=:surveyPageId ";
         params.put("surveyPageId", surveyPage.getId());
@@ -181,7 +187,7 @@ public class SurveyServiceImpl implements SurveyService {
         List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, null,
                 cause, params, "el.questionIndex", "ASC", null, null);
 
-        // 2. Получение логики. Для веба выбор только HIDE_QUESTION/SHOW_QUESTION
+        // 2. Getting the logic. For the web, select only HIDE_QUESTION / SHOW_QUESTION
         params.clear();
         cause = "el.surveyPage.pageIndex = :pageIndex AND el.surveyLogicActionType.id in (:logicActionTypeIds) ";
         params.put("pageIndex", pageIndex);
@@ -204,7 +210,7 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         if (!questionIds.isEmpty()) {
-            // 3. Получение вариантов ответа
+            // 3. Getting answer variants
             params.clear();
             cause = "el.surveyQuestion.id in (:questionIds) ";
             params.put("questionIds", questionIds);
@@ -240,7 +246,7 @@ public class SurveyServiceImpl implements SurveyService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Survey saveEntireSurvey(SurveyDTO surveyDTO, AuthorizedUser user)
-            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException {
+            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException, IncompleteDTOException {
 
         Survey survey = saveSurvey(surveyDTO, user);
         Map<String, Object> params = new HashMap<>();
@@ -302,7 +308,7 @@ public class SurveyServiceImpl implements SurveyService {
 
             for (SurveyLogicTriggerDTO logicTriggerDTO : surveyPageDTO.getLogicTriggers()) {
                 logicTriggerDTO.setSurveyPageId(surveyPage.getId());
-                SurveyLogicTrigger surveyLogicTrigger = saveSurveyLogicTrigger(logicTriggerDTO);
+                saveSurveyLogicTrigger(logicTriggerDTO);
             }
 
             for (SurveyQuestionDTO surveyQuestionDTO : surveyPageDTO.getQuestions()) {
@@ -366,9 +372,30 @@ public class SurveyServiceImpl implements SurveyService {
 
         idObjectService.save(surveySession);
 
+        int previousPageIndex = visitHistory[visitHistory.length-1];
+
+        // question id, List<answerDTO>
+        HashMap<UUID, List<AnswerDTO>> pageAnswers = new HashMap<>();
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("pageIndex", previousPageIndex);
+
+        List<SurveyQuestionAnswer> answersList = idObjectService.getList(SurveyQuestionAnswer.class, "left join el.surveyPage sp", "sp.pageIndex=:pageIndex",
+                params, null, null, null);
+
+        for (SurveyQuestionAnswer model : answersList) {
+            List<AnswerDTO> answerDTOs = pageAnswers.get(model.getSurveyQuestion().getId());
+            if (answerDTOs == null) {
+                answerDTOs = new ArrayList<>();
+                pageAnswers.put(model.getSurveyQuestion().getId(), answerDTOs);
+            }
+            answerDTOs.add(AnswerDTO.fromModel(model));
+        }
+
         SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
         surveyInteractionDTO.setSurveySessionId(surveySession.getId());
-        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, visitHistory[visitHistory.length-1]));
+        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, previousPageIndex));
+        surveyInteractionDTO.setPageAnswers(pageAnswers);
         return surveyInteractionDTO;
     }
 
@@ -417,7 +444,7 @@ public class SurveyServiceImpl implements SurveyService {
         logger.info("lastVisitPageIndex:" + lastVisitedPageIndex);
         int nextPage = lastVisitedPageIndex + 1;
 
-        // 1. Получение списка вопросов по последней посещенной странице
+        // 1. Getting the list of questions on the last visited page
         Map<String, Object> params = new HashMap<>();
         params.put("lastVisitedPageIndex", lastVisitedPageIndex);
         params.put("surveyId", surveySession.getSurvey().getId());
@@ -425,7 +452,7 @@ public class SurveyServiceImpl implements SurveyService {
                 "sv.id=:surveyId and sp.pageIndex=:lastVisitedPageIndex",
                 params, "el.questionIndex", "ASC", null, null));
 
-        // 2. Получение всех вариантов ответов
+        // 2. Getting all answer variants by question ids
         HashMap<UUID, SurveyAnswerVariant> surveyAnswersHashMap = new HashMap<>();
         if (dto.containsNonTextAnswers()) {
             params.clear();
@@ -435,7 +462,7 @@ public class SurveyServiceImpl implements SurveyService {
                             "el.surveyQuestion.id in (:questionIds)", params, null, null, null));
         }
 
-        // 3. Получение логики по последней посещенной странице
+        // 3. Getting logic by last visited page
         params.clear();
         params.put("lastVisitedPageIndex", lastVisitedPageIndex);
         params.put("surveyId", surveySession.getSurvey().getId());
@@ -448,7 +475,10 @@ public class SurveyServiceImpl implements SurveyService {
         Set<UUID> answeredQuestions = new HashSet<>();
         Set<UUID> selectedAnswers = new HashSet<>();
 
-        // Сохраним полученные ответы
+        // question id, answer
+        HashMap<UUID, List<SurveyQuestionAnswer>> matrixAnswers = new HashMap<>();
+
+        // save received answers
         for (Map.Entry<UUID, List<AnswerDTO>> entry : dto.getAnswers().entrySet()) {
             for (AnswerDTO answerDTO : entry.getValue()) {
                 SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
@@ -456,16 +486,55 @@ public class SurveyServiceImpl implements SurveyService {
                 if (answerDTO.getAnswerId() != null)
                     answerVariant = surveyAnswersHashMap.get(answerDTO.getAnswerId());
 
+                // if user selected custom variant and didn't answered in text field of required question
+                if (answerVariant != null && question.getRequired() != null && question.getRequired() &&
+                        answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() &&
+                        StringUtils.isBlank(answerDTO.getText())) { // DO NOT simplify this if
+                    throw new UnansweredException();
+                }
+
                 SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveySession,
                         question,
                         answerVariant,
                         answerDTO.getText(),
                         null); // TODO: stored file
+
+                surveyQuestionAnswer.setSelectedMatrixRow(answerDTO.getSelectedMatrixRow());
+                surveyQuestionAnswer.setSelectedMatrixColumn(answerDTO.getSelectedMatrixColumn());
                 idObjectService.save(surveyQuestionAnswer);
 
-                answeredQuestions.add(question.getId());
+                boolean isMatrixQuestion = question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.getValue()) ||
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue());
+
+                // matrix question requirements will be checked later
+                if (!isMatrixQuestion) {
+                    answeredQuestions.add(question.getId());
+                } else {
+                    // put answer if matrix marked as required
+                    if (question.getRequired()) {
+                        List<SurveyQuestionAnswer> list = matrixAnswers.get(question.getId());
+                        if (list == null) {
+                            list = new ArrayList<>();
+                            matrixAnswers.put(question.getId(), list);
+                        }
+                        list.add(surveyQuestionAnswer);
+                    }
+                }
+
                 if (answerVariant != null)
                     selectedAnswers.add(answerVariant.getId());
+            }
+        }
+
+        // check all rows of required matrix question
+        for (Map.Entry<UUID, List<SurveyQuestionAnswer>> entry : matrixAnswers.entrySet()) {
+            SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
+            HashSet<Integer> rowsAnswered = new HashSet<>();
+            for (SurveyQuestionAnswer answer : entry.getValue()) {
+                rowsAnswered.add(answer.getSelectedMatrixRow());
+            }
+            if (rowsAnswered.size() == question.getMatrixRows().length) {
+                answeredQuestions.add(entry.getKey());
             }
         }
 
@@ -474,7 +543,6 @@ public class SurveyServiceImpl implements SurveyService {
                 throw new UnansweredException();
         }
 
-        // обработка логики
         for (SurveyLogicTrigger trigger : logicTriggers) {
             LogicTriggerCheckItem checkItem = LogicTriggerCheckItem.PAGE;
             if (trigger.getSurveyQuestion() != null) {
@@ -518,7 +586,7 @@ public class SurveyServiceImpl implements SurveyService {
             }
         }
 
-        // если следующей страницы не существует, это финиш
+        // if next page is not exists, this is finish
         params.clear();
         params.put("surveyId", surveySession.getSurvey().getId());
         params.put("pageIndex", nextPage);
@@ -553,7 +621,7 @@ public class SurveyServiceImpl implements SurveyService {
     public EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (!StringUtils.isEmpty(name)) {
             params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
@@ -562,7 +630,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(Survey.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveyDTO> entityListResponse = new EntityListResponse<SurveyDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveyDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<Survey> items = idObjectService.getList(Survey.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
@@ -678,7 +746,7 @@ public class SurveyServiceImpl implements SurveyService {
     public EntityListResponse<SurveyAnswerVariantDTO> getSurveyAnswerVariantsPaged(UUID surveyQuestionId, String description, Integer count, Integer page,
                                                                                    Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (surveyQuestionId != null) {
             cause += "and el.surveyQuestion.id=:surveyQuestionId ";
@@ -717,6 +785,7 @@ public class SurveyServiceImpl implements SurveyService {
             entity = new SurveyAnswerVariant();
         }
 
+        entity.setCustomVariant(dto.getCustomVariant());
         entity.setDefaultVariant(dto.getDefaultVariant());
         entity.setSortOrder(dto.getSortOrder());
         entity.setSurveyQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getSurveyQuestionId()));
@@ -741,7 +810,7 @@ public class SurveyServiceImpl implements SurveyService {
                                                                  Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (surveyId != null) {
             cause += "and el.survey.id=:surveyId ";
@@ -755,7 +824,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(SurveyPage.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveyPageDTO> entityListResponse = new EntityListResponse<SurveyPageDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveyPageDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<SurveyPage> items = idObjectService.getList(SurveyPage.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
@@ -802,7 +871,7 @@ public class SurveyServiceImpl implements SurveyService {
         String countFetches = "left join el.surveyPage sp ";
         String fetches = "left join el.surveyPage sp ";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (surveyId != null) {
             cause += "and sp.survey.id=:surveyId ";
@@ -821,7 +890,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(SurveyQuestion.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveyQuestionDTO> entityListResponse = new EntityListResponse<SurveyQuestionDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveyQuestionDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<SurveyQuestion> items = idObjectService.getList(SurveyQuestion.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         Set<UUID> questionIds = new HashSet<>();
@@ -866,7 +935,11 @@ public class SurveyServiceImpl implements SurveyService {
             entity = new SurveyQuestion();
         }
 
-        entity.setCustomAnswerPossible(dto.getCustomAnswerPossible());
+        entity.setScaleStepValue(dto.getScaleStepValue());
+        entity.setScaleMaxValueLabel(dto.getScaleMaxValueLabel());
+        entity.setScaleMinValueLabel(dto.getScaleMinValueLabel());
+        entity.setMatrixColumns(dto.getMatrixColumns());
+        entity.setMatrixRows(dto.getMatrixRows());
         entity.setQuestionIndex(dto.getQuestionIndex());
         entity.setHidden(dto.getHidden());
         entity.setRequired(dto.getRequired());
@@ -895,7 +968,7 @@ public class SurveyServiceImpl implements SurveyService {
                                                                                  Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (surveyPageId != null) {
             cause += "and el.surveyPage.id=:surveyPageId ";
@@ -912,7 +985,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(SurveyLogicTrigger.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveyLogicTriggerDTO> entityListResponse = new EntityListResponse<SurveyLogicTriggerDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveyLogicTriggerDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<SurveyLogicTrigger> items = idObjectService.getList(SurveyLogicTrigger.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
@@ -926,7 +999,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException {
+    public SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException, IncompleteDTOException {
         SurveyLogicTrigger entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(SurveyLogicTrigger.class, dto.getId());
@@ -942,8 +1015,13 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setSurveyLogicActionType(ds.get(SurveyLogicActionType.class, dto.getLogicActionTypeId()));
         entity.setNewConclusion(dto.getNewConclusion());
         entity.setNewLink(dto.getNewLink());
+
+        if (dto.getPageIndex() == null && dto.getLogicActionTypeId().equals(DataConstants.LogicActionTypes.GO_TO_PAGE.getValue())) {
+            throw new IncompleteDTOException("expected page index, received null");
+        }
+
         entity.setPageIndex(dto.getPageIndex());
-        entity.setInteractionRequired(dto.isInteractionRequired());
+        entity.setInteractionRequired(dto.getInteractionRequired());
         entity.setTargetQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getTargetQuestionId()));
 
         return idObjectService.save(entity);
@@ -964,7 +1042,7 @@ public class SurveyServiceImpl implements SurveyService {
                                                                        String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (!StringUtils.isEmpty(lastVisitIP)) {
             params.put("ip", "%%" + lastVisitIP + "%%");
@@ -983,7 +1061,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(SurveySession.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveySessionDTO> entityListResponse = new EntityListResponse<SurveySessionDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveySessionDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<SurveySession> items = idObjectService.getList(SurveySession.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
 
@@ -1034,7 +1112,7 @@ public class SurveyServiceImpl implements SurveyService {
                                                                                      String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (surveySessionId != null) {
             cause += String.format("and el.surveySession = '%s' ", surveySessionId);
@@ -1042,7 +1120,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         int totalCount = idObjectService.getCount(SurveySession.class, null, countFetches, cause, params);
 
-        EntityListResponse<SurveyQuestionAnswerDTO> entityListResponse = new EntityListResponse<SurveyQuestionAnswerDTO>(totalCount, count, page, start);
+        EntityListResponse<SurveyQuestionAnswerDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
         List<SurveyQuestionAnswer> items = idObjectService.getList(SurveyQuestionAnswer.class, null, cause, params,
                 sortField, sortDir, entityListResponse.getStartRecord(), count);
@@ -1071,8 +1149,11 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setSurveySession(idObjectService.getObjectById(SurveySession.class, dto.getSurveySessionId()));
         entity.setQuestion(idObjectService.getObjectById(SurveyQuestion.class, dto.getQuestionId()));
         entity.setAnswerVariant(idObjectService.getObjectById(SurveyAnswerVariant.class, dto.getAnswerVariantId()));
+        entity.setSurveyPage(idObjectService.getObjectById(SurveyPage.class, dto.getSurveyPageId()));
         entity.setText(dto.getText());
         entity.setStoredFile(idObjectService.getObjectById(StoredFile.class, dto.getStoredFile()));
+        entity.setSelectedMatrixColumn(dto.getSelectedMatrixColumn());
+        entity.setSelectedMatrixRow(dto.getSelectedMatrixRow());
 
         return idObjectService.save(entity);
     }

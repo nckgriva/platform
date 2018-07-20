@@ -1,9 +1,14 @@
 package com.gracelogic.platform.market.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
+import com.gracelogic.platform.db.dto.JsonDateDeserializer;
+import com.gracelogic.platform.db.dto.JsonDateSerializer;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.market.model.Product;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class ProductDTO extends IdObjectDTO {
@@ -19,6 +24,9 @@ public class ProductDTO extends IdObjectDTO {
     private String currencyName;
     private UUID ownershipTypeId;
     private String ownershipTypeName;
+
+    //Transient value
+    private Date lifetimeExpiration;
 
     public String getName() {
         return name;
@@ -120,6 +128,16 @@ public class ProductDTO extends IdObjectDTO {
 
     public void setOwnershipTypeName(String ownershipTypeName) {
         this.ownershipTypeName = ownershipTypeName;
+    }
+
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    public Date getLifetimeExpiration() {
+        return lifetimeExpiration;
+    }
+
+    public void setLifetimeExpiration(Date lifetimeExpiration) {
+        this.lifetimeExpiration = lifetimeExpiration;
     }
 
     public static ProductDTO prepare(Product model) {

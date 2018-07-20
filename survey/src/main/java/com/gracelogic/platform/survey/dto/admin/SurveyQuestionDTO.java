@@ -15,8 +15,12 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private Boolean hidden;
     private Long scaleMinValue;
     private Long scaleMaxValue;
+    private String scaleMinValueLabel;
+    private String scaleMaxValueLabel;
+    private Integer scaleStepValue;
     private String attachmentExtensions;
-    private Boolean isCustomAnswerPossible;
+    private String[] matrixColumns;
+    private String[] matrixRows;
 
     private List<SurveyAnswerVariantDTO> answerVariants = new LinkedList<>();
     private Set<UUID> answersToDelete = new HashSet<>();
@@ -37,7 +41,12 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         dto.setScaleMinValue(model.getScaleMinValue());
         dto.setScaleMaxValue(model.getScaleMaxValue());
         dto.setAttachmentExtensions(model.getAttachmentExtensions());
-        dto.setCustomAnswerPossible(model.getCustomAnswerPossible());
+        dto.setMatrixColumns(model.getMatrixColumns());
+        dto.setMatrixRows(model.getMatrixRows());
+
+        dto.setScaleMaxValueLabel(model.getScaleMaxValueLabel());
+        dto.setScaleMinValueLabel(model.getScaleMinValueLabel());
+        dto.setScaleStepValue(model.getScaleStepValue());
         return dto;
     }
 
@@ -137,11 +146,43 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         this.answersToDelete = answersToDelete;
     }
 
-    public Boolean getCustomAnswerPossible() {
-        return isCustomAnswerPossible;
+    public String[] getMatrixColumns() {
+        return matrixColumns;
     }
 
-    public void setCustomAnswerPossible(Boolean customAnswerPossible) {
-        isCustomAnswerPossible = customAnswerPossible;
+    public void setMatrixColumns(String[] matrixColumns) {
+        this.matrixColumns = matrixColumns;
+    }
+
+    public String[] getMatrixRows() {
+        return matrixRows;
+    }
+
+    public void setMatrixRows(String[] matrixRows) {
+        this.matrixRows = matrixRows;
+    }
+
+    public String getScaleMinValueLabel() {
+        return scaleMinValueLabel;
+    }
+
+    public void setScaleMinValueLabel(String scaleMinValueLabel) {
+        this.scaleMinValueLabel = scaleMinValueLabel;
+    }
+
+    public String getScaleMaxValueLabel() {
+        return scaleMaxValueLabel;
+    }
+
+    public void setScaleMaxValueLabel(String scaleMaxValueLabel) {
+        this.scaleMaxValueLabel = scaleMaxValueLabel;
+    }
+
+    public Integer getScaleStepValue() {
+        return scaleStepValue;
+    }
+
+    public void setScaleStepValue(Integer scaleStepValue) {
+        this.scaleStepValue = scaleStepValue;
     }
 }

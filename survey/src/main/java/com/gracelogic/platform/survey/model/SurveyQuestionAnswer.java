@@ -32,8 +32,12 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     private SurveySession surveySession;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "PAGE_ID", nullable = false)
+    private SurveyPage surveyPage;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "QUESTION_ID", nullable = false)
-    private SurveyQuestion question;
+    private SurveyQuestion surveyQuestion;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "ANSWER_VARIANT_ID", nullable = true)
@@ -46,12 +50,19 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     @JoinColumn(name = "STORED_FILE_ID", nullable = true)
     private StoredFile storedFile; // Для хранения прикрепленного пользователем файла
 
+    @Column(name = "SELECTED_MATRIX_ROW", nullable = true)
+    private Integer selectedMatrixRow;
+
+    @Column(name = "SELECTED_MATRIX_COLUMN", nullable = true)
+    private Integer selectedMatrixColumn;
+
     public SurveyQuestionAnswer() {}
 
     public SurveyQuestionAnswer(SurveySession surveySession, SurveyQuestion question, SurveyAnswerVariant answerVariant,
                                 String text, StoredFile storedFile) {
         this.surveySession = surveySession;
-        this.question = question;
+        this.surveyPage = question.getSurveyPage();
+        this.surveyQuestion = question;
         this.answerVariant = answerVariant;
         this.text = text;
         this.storedFile = storedFile;
@@ -120,10 +131,42 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     }
 
     public SurveyQuestion getQuestion() {
-        return question;
+        return surveyQuestion;
     }
 
     public void setQuestion(SurveyQuestion question) {
-        this.question = question;
+        this.surveyQuestion = question;
+    }
+
+    public Integer getSelectedMatrixRow() {
+        return selectedMatrixRow;
+    }
+
+    public void setSelectedMatrixRow(Integer selectedMatrixRow) {
+        this.selectedMatrixRow = selectedMatrixRow;
+    }
+
+    public Integer getSelectedMatrixColumn() {
+        return selectedMatrixColumn;
+    }
+
+    public void setSelectedMatrixColumn(Integer selectedMatrixColumn) {
+        this.selectedMatrixColumn = selectedMatrixColumn;
+    }
+
+    public SurveyPage getSurveyPage() {
+        return surveyPage;
+    }
+
+    public void setSurveyPage(SurveyPage surveyPage) {
+        this.surveyPage = surveyPage;
+    }
+
+    public SurveyQuestion getSurveyQuestion() {
+        return surveyQuestion;
+    }
+
+    public void setSurveyQuestion(SurveyQuestion surveyQuestion) {
+        this.surveyQuestion = surveyQuestion;
     }
 }
