@@ -487,10 +487,39 @@ public class SurveyServiceImpl implements SurveyService {
                     answerVariant = surveyAnswersHashMap.get(answerDTO.getAnswerId());
 
                 // if user selected custom variant and didn't answered in text field of required question
-                if (answerVariant != null && question.getRequired() != null && question.getRequired() &&
+                if (answerVariant != null && question.getRequired() &&
                         answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() &&
                         StringUtils.isBlank(answerDTO.getText())) { // DO NOT simplify this if
-                    throw new UnansweredException();
+                    throw new UnansweredException("Custom text field of question " + question.getText() + " is required");
+                }
+
+                boolean isTextFieldRequired = question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.TEXT_MULTILINE.getValue()) ||
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.TEXT_SINGLE_LINE.getValue()) ||
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.RATING_SCALE.getValue());
+
+                if (question.getRequired() && isTextFieldRequired && StringUtils.isBlank(answerDTO.getText())) {
+                    throw new UnansweredException("Text field of question \"" + question.getText() + "\" is required");
+                }
+
+                boolean isMatrixQuestion = question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.getValue()) ||
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue());
+
+                if (isMatrixQuestion && (answerDTO.getSelectedMatrixColumn() == null || answerDTO.getSelectedMatrixRow() == null)) {
+                    throw new UnansweredException("You're answering to matrix question without specified row index or column index");
+                }
+
+                if (isMatrixQuestion) {
+                    int maxRows = question.getMatrixRows().length;
+                    if (surveyAnswersHashMap.get(question.getId()) != null) { // if matrix has custom variant
+                        maxRows++;
+                    }
+
+                    boolean rowIndexCheck = answerDTO.getSelectedMatrixRow() >= 0 && answerDTO.getSelectedMatrixRow() < maxRows;
+                    boolean columnIndexCheck = answerDTO.getSelectedMatrixColumn() >= 0 && answerDTO.getSelectedMatrixColumn() < question.getMatrixColumns().length;
+
+                    if (!rowIndexCheck || !columnIndexCheck) {
+                        throw new ForbiddenException("You're answering to rows or columns that don't exist");
+                    }
                 }
 
                 SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveySession,
@@ -503,14 +532,11 @@ public class SurveyServiceImpl implements SurveyService {
                 surveyQuestionAnswer.setSelectedMatrixColumn(answerDTO.getSelectedMatrixColumn());
                 idObjectService.save(surveyQuestionAnswer);
 
-                boolean isMatrixQuestion = question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.getValue()) ||
-                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue());
-
                 // matrix question requirements will be checked later
                 if (!isMatrixQuestion) {
                     answeredQuestions.add(question.getId());
                 } else {
-                    // put answer if matrix marked as required
+                    // put answer to matrixAnswers if matrix marked as required
                     if (question.getRequired()) {
                         List<SurveyQuestionAnswer> list = matrixAnswers.get(question.getId());
                         if (list == null) {
@@ -529,11 +555,20 @@ public class SurveyServiceImpl implements SurveyService {
         // check all rows of required matrix question
         for (Map.Entry<UUID, List<SurveyQuestionAnswer>> entry : matrixAnswers.entrySet()) {
             SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
-            HashSet<Integer> rowsAnswered = new HashSet<>();
-            for (SurveyQuestionAnswer answer : entry.getValue()) {
-                rowsAnswered.add(answer.getSelectedMatrixRow());
+            HashSet<Integer> rowsTotal = new HashSet<>();
+            for (int i = 0; i < question.getMatrixRows().length; i++) {
+                rowsTotal.add(i);
             }
-            if (rowsAnswered.size() == question.getMatrixRows().length) {
+            if (surveyAnswersHashMap.get(question.getId()) != null) { // if matrix has custom variant
+                rowsTotal.add(question.getMatrixRows().length); // add it as last row
+            }
+
+            HashSet<Integer> rowIndexesAnswered = new HashSet<>();
+            for (SurveyQuestionAnswer answer : entry.getValue()) {
+                rowIndexesAnswered.add(answer.getSelectedMatrixRow());
+            }
+
+            if (rowIndexesAnswered.equals(rowsTotal)) {
                 answeredQuestions.add(entry.getKey());
             }
         }
