@@ -452,14 +452,17 @@ public class SurveyServiceImpl implements SurveyService {
                 "sv.id=:surveyId and sp.pageIndex=:lastVisitedPageIndex",
                 params, "el.questionIndex", "ASC", null, null));
 
-        // 2. Getting all answer variants by question ids
+        // 2. Getting all answer variants
+        // Stored by survey answer id
         HashMap<UUID, SurveyAnswerVariant> surveyAnswersHashMap = new HashMap<>();
+        HashMap<SurveyQuestion, List<SurveyAnswerVariant>> answerVariantsByQuestion = new HashMap<>();
         if (dto.containsNonTextAnswers()) {
             params.clear();
             params.put("questionIds", surveyQuestionsHashMap.keySet());
-            surveyAnswersHashMap = asUUIDHashMap(
-                    idObjectService.getList(SurveyAnswerVariant.class, null,
-                            "el.surveyQuestion.id in (:questionIds)", params, null, null, null));
+            List<SurveyAnswerVariant> list = idObjectService.getList(SurveyAnswerVariant.class, null,
+                    "el.surveyQuestion.id in (:questionIds)", params, null, null, null);
+            surveyAnswersHashMap = asUUIDHashMap(list);
+            answerVariantsByQuestion = asListAnswerVariantHashMap(list);
         }
 
         // 3. Getting logic by last visited page
@@ -510,7 +513,7 @@ public class SurveyServiceImpl implements SurveyService {
 
                 if (isMatrixQuestion) {
                     int maxRows = question.getMatrixRows().length;
-                    if (surveyAnswersHashMap.get(question.getId()) != null) { // if matrix has custom variant
+                    if (answerVariantsByQuestion.get(question) != null) { // if matrix has custom variant
                         maxRows++;
                     }
 
@@ -565,7 +568,8 @@ public class SurveyServiceImpl implements SurveyService {
             for (int i = 0; i < question.getMatrixRows().length; i++) {
                 rowsTotal.add(i);
             }
-            if (surveyAnswersHashMap.get(question.getId()) != null) { // if matrix has custom variant
+
+            if (answerVariantsByQuestion.get(question) != null) { // if matrix has custom variant
                 rowsTotal.add(question.getMatrixRows().length); // add it as last row
             }
 
