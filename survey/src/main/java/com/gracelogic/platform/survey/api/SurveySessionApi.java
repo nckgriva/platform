@@ -101,13 +101,13 @@ public class SurveySessionApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (ForbiddenException forbiddenException) {
             return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
-                    messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+                    messageSource.getMessage(forbiddenException.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException notFoundException) {
             return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SESSION",
                     messageSource.getMessage("survey.NO_SUCH_SESSION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (UnansweredException unansweredException) {
             return new ResponseEntity<>(new ErrorResponse("survey.UNANSWERED",
-                    messageSource.getMessage("survey.UNANSWERED", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+                    messageSource.getMessage(unansweredException.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }

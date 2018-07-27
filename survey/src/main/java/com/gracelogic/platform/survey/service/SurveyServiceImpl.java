@@ -505,7 +505,7 @@ public class SurveyServiceImpl implements SurveyService {
                         question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue());
 
                 if (isMatrixQuestion && (answerDTO.getSelectedMatrixColumn() == null || answerDTO.getSelectedMatrixRow() == null)) {
-                    throw new UnansweredException("You're answering to matrix question without specified row index or column index");
+                    throw new UnansweredException("You're answering to matrix question \"" + question.getText() + "\" without specified row index or column index");
                 }
 
                 if (isMatrixQuestion) {
@@ -517,8 +517,14 @@ public class SurveyServiceImpl implements SurveyService {
                     boolean rowIndexCheck = answerDTO.getSelectedMatrixRow() >= 0 && answerDTO.getSelectedMatrixRow() < maxRows;
                     boolean columnIndexCheck = answerDTO.getSelectedMatrixColumn() >= 0 && answerDTO.getSelectedMatrixColumn() < question.getMatrixColumns().length;
 
-                    if (!rowIndexCheck || !columnIndexCheck) {
-                        throw new ForbiddenException("You're answering to rows or columns that don't exist");
+                    if (!rowIndexCheck) {
+                        throw new ForbiddenException("You're answering to matrix row that don't exist. Expected 0-" + (maxRows-1)
+                                + ", but received " + answerDTO.getSelectedMatrixRow());
+                    }
+
+                    if (!columnIndexCheck) {
+                        throw new ForbiddenException("You're answering to matrix row that don't exist. Expected 0-" +
+                                (question.getMatrixColumns().length-1) + ", but received " + answerDTO.getSelectedMatrixColumn());
                     }
                 }
 
