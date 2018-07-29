@@ -81,6 +81,43 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
+    public SurveyInteractionDTO startSurveyPreview(UUID surveyId, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException{
+        Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
+        if (survey == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        Date now = new Date();
+
+        SurveySession surveySession = new SurveySession();
+        surveySession.setStarted(now);
+        surveySession.setLastVisitIP(ipAddress);
+        if (user != null) {
+            surveySession.setUser(idObjectService.getObjectById(User.class, user.getId()));
+        }
+
+        if (survey.getTimeLimit() != null && survey.getTimeLimit() > 0) {
+            surveySession.setExpirationDate(new Date(now.getTime() + survey.getTimeLimit()));
+        }
+
+        Integer[] pageVisitHistory = new Integer[1];
+        pageVisitHistory[0] = 0;
+        surveySession.setPageVisitHistory(pageVisitHistory);
+        surveySession.setLink(survey.getLink());
+        surveySession.setPreviewSession(true);
+        surveySession.setConclusion(survey.getConclusion());
+        surveySession.setSurvey(survey);
+        idObjectService.save(surveySession);
+
+        SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
+        surveyInteractionDTO.setSurveySessionId(surveySession.getId());
+        surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, 0));
+        return surveyInteractionDTO;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String ipAddress)
             throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsHitException {
 
@@ -157,6 +194,7 @@ public class SurveyServiceImpl implements SurveyService {
         surveySession.setLink(survey.getLink());
         surveySession.setConclusion(survey.getConclusion());
         surveySession.setSurvey(survey);
+        surveySession.setPreviewSession(false);
         idObjectService.save(surveySession);
 
         SurveyInteractionDTO surveyInteractionDTO = new SurveyInteractionDTO();
@@ -321,7 +359,6 @@ public class SurveyServiceImpl implements SurveyService {
                 }
             }
         }
-
         return survey;
     }
 
@@ -434,6 +471,8 @@ public class SurveyServiceImpl implements SurveyService {
         if (surveySession.getEnded() != null) {
             throw new ForbiddenException();
         }
+
+        // if user passing time limited survey
         if (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(dateNow)) {
             throw new ForbiddenException();
         }
@@ -469,7 +508,7 @@ public class SurveyServiceImpl implements SurveyService {
         params.clear();
         params.put("lastVisitedPageIndex", lastVisitedPageIndex);
         params.put("surveyId", surveySession.getSurvey().getId());
-        // TODO: sort logic PAGE -> QUESTION INDEX -> ANSWER INDEX
+        // TODO: sort logic by 1. PAGE -> 2. QUESTION INDEX -> 3. ANSWER INDEX
         List<SurveyLogicTrigger> logicTriggers =
                 idObjectService.getList(SurveyLogicTrigger.class, "left join el.surveyPage sp left join sp.survey sv",
                         "sv.id=:surveyId and  sp.pageIndex=:lastVisitedPageIndex",
@@ -539,8 +578,9 @@ public class SurveyServiceImpl implements SurveyService {
 
                 surveyQuestionAnswer.setSelectedMatrixRow(answerDTO.getSelectedMatrixRow());
                 surveyQuestionAnswer.setSelectedMatrixColumn(answerDTO.getSelectedMatrixColumn());
-                idObjectService.save(surveyQuestionAnswer);
-
+                if (!surveySession.getPreviewSession()) {
+                    idObjectService.save(surveyQuestionAnswer);
+                }
                 // matrix question requirements will be checked later
                 if (!isMatrixQuestion) {
                     answeredQuestions.add(question.getId());

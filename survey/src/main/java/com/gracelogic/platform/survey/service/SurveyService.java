@@ -20,6 +20,9 @@ public interface SurveyService {
     SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String ipAddress)
             throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsHitException;
 
+    SurveyInteractionDTO startSurveyPreview(UUID surveyId, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException;
+
     SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto)
             throws ObjectNotFoundException, ForbiddenException, UnansweredException;
 

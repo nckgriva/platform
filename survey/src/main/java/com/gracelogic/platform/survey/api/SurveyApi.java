@@ -94,6 +94,25 @@ public class SurveyApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
+            value = "startSurveyPreview",
+            notes = "Starts survey preview. This method is only available to users which have SURVEY:SAVE grant.",
+            response = SurveyInteractionDTO.class
+    )
+    @PreAuthorize("hasAuthority('SURVEY:SAVE')")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/start_preview")
+    @ResponseBody
+    public ResponseEntity startSurveyPreview(HttpServletRequest request,
+                                      @PathVariable(value = "id") UUID surveyId) {
+        try {
+            SurveyInteractionDTO dto = surveyService.startSurveyPreview(surveyId, getUser(), ServletUtils.getRemoteAddress(request));
+            return new ResponseEntity<SurveyInteractionDTO>(dto, HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
+                    LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
             value = "getSurveys",
             notes = "Get list of surveys",
             response = EntityListResponse.class

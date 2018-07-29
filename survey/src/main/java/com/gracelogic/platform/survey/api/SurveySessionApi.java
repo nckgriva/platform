@@ -107,7 +107,6 @@ public class SurveySessionApi extends AbstractAuthorizedController {
         } catch (UnansweredException unansweredException) {
             return new ResponseEntity<>(new ErrorResponse("survey.UNANSWERED", unansweredException.getMessage()), HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @ApiOperation(
