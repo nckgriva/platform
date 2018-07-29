@@ -35,7 +35,7 @@ public interface SurveyService {
     EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     Survey saveEntireSurvey(SurveyDTO surveyDTO, AuthorizedUser user)
-            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException, IncompleteDTOException;
+            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException, BadDTOException;
 
     Survey saveSurvey(SurveyDTO dto, AuthorizedUser user) throws ObjectNotFoundException;
 
@@ -73,7 +73,7 @@ public interface SurveyService {
     EntityListResponse<SurveyLogicTriggerDTO> getSurveyLogicTriggersPaged(UUID surveyQuestionId, UUID surveyPageId, UUID surveyAnswerVariantId, Integer count, Integer page,
                                                                           Integer start, String sortField, String sortDir);
 
-    SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException, IncompleteDTOException;
+    SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException, BadDTOException;
 
     SurveyLogicTriggerDTO getSurveyLogicTrigger(UUID id) throws ObjectNotFoundException;
 

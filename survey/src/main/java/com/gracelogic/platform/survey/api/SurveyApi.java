@@ -187,8 +187,8 @@ public class SurveyApi extends AbstractAuthorizedController {
         } catch (LogicDependencyException logicDependency) {
             return new ResponseEntity<>(new ErrorResponse("survey.LOGIC_DEPENDENCY",
                     messageSource.getMessage("survey.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        } catch (IncompleteDTOException incompleteDTO) {
-            return new ResponseEntity<>(new ErrorResponse("survey.INCOMPLETE_DTO", incompleteDTO.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (BadDTOException badDTO) {
+            return new ResponseEntity<>(new ErrorResponse("survey.BAD_DTO", badDTO.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 

@@ -13,7 +13,6 @@ import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.user.model.User;
-import com.sun.media.sound.InvalidDataException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -284,7 +283,7 @@ public class SurveyServiceImpl implements SurveyService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Survey saveEntireSurvey(SurveyDTO surveyDTO, AuthorizedUser user)
-            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException, IncompleteDTOException {
+            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException, BadDTOException {
 
         Survey survey = saveSurvey(surveyDTO, user);
         Map<String, Object> params = new HashMap<>();
@@ -344,8 +343,16 @@ public class SurveyServiceImpl implements SurveyService {
             surveyPageDTO.setSurveyId(survey.getId());
             SurveyPage surveyPage = saveSurveyPage(surveyPageDTO);
 
+            // page layer: here we can update existing logic triggers OR add new PAGE LOGIC TRIGGER
             for (SurveyLogicTriggerDTO logicTriggerDTO : surveyPageDTO.getLogicTriggers()) {
                 logicTriggerDTO.setSurveyPageId(surveyPage.getId());
+
+                if (logicTriggerDTO.getId() == null && (logicTriggerDTO.getAnswerVariantId() != null ||
+                        logicTriggerDTO.getSurveyQuestionId() != null ||
+                        logicTriggerDTO.getTargetQuestionId() != null)) {
+                    throw new BadDTOException("Logic trigger on page " + surveyPage.getPageIndex() + " contains incompatible fields. " +
+                            "If you're trying to create new logic trigger for question or answer variant, put this model to corresponding DTO.");
+                }
                 saveSurveyLogicTrigger(logicTriggerDTO);
             }
 
@@ -353,9 +360,37 @@ public class SurveyServiceImpl implements SurveyService {
                 surveyQuestionDTO.setSurveyPageId(surveyPage.getId());
                 SurveyQuestion surveyQuestion = saveSurveyQuestion(surveyQuestionDTO);
 
+                // question layer: NEW QUESTION LOGIC TRIGGERS ONLY
+                for (SurveyLogicTriggerDTO logicTriggerDTO : surveyQuestionDTO.getLogicTriggersToAdd()) {
+                    logicTriggerDTO.setSurveyQuestionId(surveyQuestion.getId());
+                    logicTriggerDTO.setSurveyPageId(surveyPage.getId());
+                    if (logicTriggerDTO.getId() != null) {
+                        throw new BadDTOException("Logic trigger for question " + surveyQuestion.getText() + " already contains id. " +
+                                "If you're trying to update logic trigger, put this model to SurveyPageDTO.logicTriggers.");
+                    }
+                    if (logicTriggerDTO.getAnswerVariantId() != null) {
+                        throw new BadDTOException("Logic trigger for question " + surveyQuestion.getText() + " contains incompatible fields." +
+                                "If you're trying to create new logic trigger for answer variant, put this model to corresponding DTO.");
+                    }
+                    saveSurveyLogicTrigger(logicTriggerDTO);
+                }
+
                 for (SurveyAnswerVariantDTO answerVariantDTO : surveyQuestionDTO.getAnswerVariants()) {
                     answerVariantDTO.setSurveyQuestionId(surveyQuestion.getId());
-                    saveSurveyAnswerVariant(answerVariantDTO);
+                    SurveyAnswerVariant variant = saveSurveyAnswerVariant(answerVariantDTO);
+
+                    // answer layer: NEW ANSWER VARIANT LOGIC TRIGGERS ONLY
+                    for (SurveyLogicTriggerDTO logicTriggerDTO : answerVariantDTO.getLogicTriggersToAdd()) {
+                        logicTriggerDTO.setSurveyQuestionId(surveyQuestion.getId());
+                        logicTriggerDTO.setSurveyPageId(surveyPage.getId());
+                        logicTriggerDTO.setAnswerVariantId(variant.getId());
+
+                        if (logicTriggerDTO.getId() != null) {
+                            throw new BadDTOException("Logic trigger for answer variant " + variant.getText() + " already contains id. " +
+                                    "If you're trying to update logic trigger, put this model to SurveyPageDTO.logicTriggers.");
+                        }
+                        saveSurveyLogicTrigger(logicTriggerDTO);
+                    }
                 }
             }
         }
@@ -1084,7 +1119,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException, IncompleteDTOException {
+    public SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException, BadDTOException {
         SurveyLogicTrigger entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(SurveyLogicTrigger.class, dto.getId());
@@ -1102,7 +1137,7 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setNewLink(dto.getNewLink());
 
         if (dto.getPageIndex() == null && dto.getLogicActionTypeId().equals(DataConstants.LogicActionTypes.GO_TO_PAGE.getValue())) {
-            throw new IncompleteDTOException("expected page index, received null");
+            throw new BadDTOException("expected page index, received null");
         }
 
         entity.setPageIndex(dto.getPageIndex());

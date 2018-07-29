@@ -22,7 +22,10 @@ public class SurveyDTO extends IdObjectDTO {
     private Integer maxAttempts;
     private String link;
 
+    // CLIENT<-->SERVER
     private List<SurveyPageDTO> pages = new LinkedList<>();
+
+    // CLIENT->SERVER
     private Set<UUID> pagesToDelete = new HashSet<>();
 
     public static SurveyDTO prepare(Survey model) {
