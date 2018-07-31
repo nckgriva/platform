@@ -319,7 +319,7 @@ public class SurveyServiceImpl implements SurveyService {
                     List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, null, "el.id in (:ids)", params,
                             null, null, null, null);
                     for (SurveyQuestion question : questions)
-                        deleteSurveyQuestion(question.getId(), false);
+                        deleteSurveyQuestion(question.getId(), true);
 
                     params.clear();
                 }
