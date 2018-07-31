@@ -733,7 +733,11 @@ public class SurveyServiceImpl implements SurveyService {
             surveySession.setPageVisitHistory(pagesHistory);
         }
 
-        idObjectService.save(surveySession);
+        if (finishSurvey && surveySession.getPreviewSession()) {
+            idObjectService.delete(SurveySession.class, surveySession.getId());
+        } else {
+            idObjectService.save(surveySession);
+        }
         return surveyInteractionDTO;
     }
 
