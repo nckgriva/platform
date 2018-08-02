@@ -615,9 +615,7 @@ public class SurveyServiceImpl implements SurveyService {
 
                 surveyQuestionAnswer.setSelectedMatrixRow(answerDTO.getSelectedMatrixRow());
                 surveyQuestionAnswer.setSelectedMatrixColumn(answerDTO.getSelectedMatrixColumn());
-                if (!surveySession.getPreviewSession()) {
-                    idObjectService.save(surveyQuestionAnswer);
-                }
+                idObjectService.save(surveyQuestionAnswer);
                 // matrix question requirements will be checked later
                 if (!isMatrixQuestion) {
                     answeredQuestions.add(question.getId());
@@ -736,6 +734,9 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         if (finishSurvey && surveySession.getPreviewSession()) {
+            params.clear();
+            params.put("surveySessionId", surveySession.getId());
+            idObjectService.delete(SurveyQuestionAnswer.class, "el.surveySession.id = :surveySessionId", params);
             idObjectService.delete(SurveySession.class, surveySession.getId());
         } else {
             idObjectService.save(surveySession);
