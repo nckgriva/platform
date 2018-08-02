@@ -451,8 +451,10 @@ public class SurveyServiceImpl implements SurveyService {
 
         Map<String, Object> params = new HashMap<>();
         params.put("pageIndex", previousPageIndex);
+        params.put("surveySessionId", surveySession.getId());
 
-        List<SurveyQuestionAnswer> answersList = idObjectService.getList(SurveyQuestionAnswer.class, "left join el.surveyPage sp", "sp.pageIndex=:pageIndex",
+        List<SurveyQuestionAnswer> answersList = idObjectService.getList(SurveyQuestionAnswer.class, "left join el.surveyPage sp",
+                "el.surveySession.id = :surveySessionId AND sp.pageIndex=:pageIndex",
                 params, null, null, null);
 
         for (SurveyQuestionAnswer model : answersList) {

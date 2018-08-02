@@ -22,13 +22,13 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     private String[] matrixColumns;
     private String[] matrixRows;
 
+    // CLIENT<-->SERVER
+    private List<SurveyAnswerVariantDTO> answerVariants = new LinkedList<>();
     /**
      * Logic triggers that must be added to this question
      */
     // CLIENT->SERVER
     private List<SurveyLogicTriggerDTO> logicTriggersToAdd = new LinkedList<>();
-    // CLIENT<-->SERVER
-    private List<SurveyAnswerVariantDTO> answerVariants = new LinkedList<>();
     // CLIENT->SERVER
     private Set<UUID> answersToDelete = new HashSet<>();
 
