@@ -562,8 +562,8 @@ public class SurveyServiceImpl implements SurveyService {
             for (AnswerDTO answerDTO : entry.getValue()) {
                 SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
                 SurveyAnswerVariant answerVariant = null;
-                if (answerDTO.getAnswerId() != null)
-                    answerVariant = surveyAnswersHashMap.get(answerDTO.getAnswerId());
+                if (answerDTO.getAnswerVariantId() != null)
+                    answerVariant = surveyAnswersHashMap.get(answerDTO.getAnswerVariantId());
 
                 // if user selected custom variant and didn't answered in text field of required question
                 if (answerVariant != null && question.getRequired() &&

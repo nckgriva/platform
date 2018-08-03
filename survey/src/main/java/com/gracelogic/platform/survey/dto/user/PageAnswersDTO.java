@@ -17,7 +17,7 @@ public class PageAnswersDTO {
     public boolean containsNonTextAnswers() {
         for (Map.Entry<UUID, List<AnswerDTO>> entry : answers.entrySet()) {
             for (AnswerDTO answerDTO: entry.getValue())
-                if (answerDTO.getAnswerId() != null) return true;
+                if (answerDTO.getAnswerVariantId() != null) return true;
         }
         return false;
     }

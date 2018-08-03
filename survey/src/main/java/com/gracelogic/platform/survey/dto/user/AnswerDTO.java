@@ -5,7 +5,7 @@ import com.gracelogic.platform.survey.model.SurveyQuestionAnswer;
 import java.util.UUID;
 
 public class AnswerDTO {
-    private UUID answerId;
+    private UUID answerVariantId;
     private UUID storedFileId;
     private String text;
     private Integer selectedMatrixRow;
@@ -13,7 +13,7 @@ public class AnswerDTO {
 
     public static AnswerDTO fromModel(SurveyQuestionAnswer model) {
         AnswerDTO dto = new AnswerDTO();
-        dto.setAnswerId(model.getAnswerVariant() != null ? model.getAnswerVariant().getId() : null);
+        dto.setAnswerVariantId(model.getAnswerVariant() != null ? model.getAnswerVariant().getId() : null);
         dto.setStoredFileId(model.getStoredFile() != null ? model.getStoredFile().getId() : null);
         dto.setText(model.getText());
         dto.setSelectedMatrixRow(model.getSelectedMatrixRow());
@@ -29,12 +29,12 @@ public class AnswerDTO {
         this.storedFileId = storedFileId;
     }
 
-    public UUID getAnswerId() {
-        return answerId;
+    public UUID getAnswerVariantId() {
+        return answerVariantId;
     }
 
-    public void setAnswerId(UUID answerId) {
-        this.answerId = answerId;
+    public void setAnswerVariantId(UUID answerVariantId) {
+        this.answerVariantId = answerVariantId;
     }
 
     public String getText() {
