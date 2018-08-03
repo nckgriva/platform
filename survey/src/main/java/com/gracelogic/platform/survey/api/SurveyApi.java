@@ -95,10 +95,10 @@ public class SurveyApi extends AbstractAuthorizedController {
 
     @ApiOperation(
             value = "startSurveyPreview",
-            notes = "Starts survey preview. This method is only available to users which have SURVEY:SAVE grant.",
+            notes = "Starts survey preview. This method is only available to users which have SURVEY:SHOW grant.",
             response = SurveyInteractionDTO.class
     )
-    @PreAuthorize("hasAuthority('SURVEY:SAVE')")
+    @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}/start_preview")
     @ResponseBody
     public ResponseEntity startSurveyPreview(HttpServletRequest request,
