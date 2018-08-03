@@ -517,11 +517,23 @@ public class SurveyServiceImpl implements SurveyService {
         boolean finishSurvey = false;
 
         int lastVisitedPageIndex = surveySession.getPageVisitHistory()[surveySession.getPageVisitHistory().length-1];
-        logger.info("lastVisitPageIndex:" + lastVisitedPageIndex);
+        logger.info("lastVisitPageIndex: " + lastVisitedPageIndex);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("sessionId", surveySession.getId());
+        params.put("pageIndex", lastVisitedPageIndex);
+        List<SurveyQuestionAnswer> possibleAnswers = idObjectService.getList(SurveyQuestionAnswer.class, "left join el.surveyPage sp",
+                "el.surveySessionId = :sessionId AND sp.pageIndex = :pageIndex",
+                params, null, null, null);
+
+        for (SurveyQuestionAnswer questionAnswer : possibleAnswers) {
+            idObjectService.delete(SurveyQuestionAnswer.class, questionAnswer.getId());
+        }
+
         int nextPage = lastVisitedPageIndex + 1;
 
         // 1. Getting the list of questions on the last visited page
-        Map<String, Object> params = new HashMap<>();
+        params.clear();
         params.put("lastVisitedPageIndex", lastVisitedPageIndex);
         params.put("surveyId", surveySession.getSurvey().getId());
         HashMap<UUID, SurveyQuestion> surveyQuestionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, "left join el.surveyPage sp left join sp.survey sv",
