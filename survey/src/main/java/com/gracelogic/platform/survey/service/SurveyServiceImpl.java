@@ -523,7 +523,7 @@ public class SurveyServiceImpl implements SurveyService {
         params.put("sessionId", surveySession.getId());
         params.put("pageIndex", lastVisitedPageIndex);
         List<SurveyQuestionAnswer> possibleAnswers = idObjectService.getList(SurveyQuestionAnswer.class, "left join el.surveyPage sp",
-                "el.surveySessionId = :sessionId AND sp.pageIndex = :pageIndex",
+                "el.surveySession.id = :sessionId AND sp.pageIndex = :pageIndex",
                 params, null, null, null);
 
         for (SurveyQuestionAnswer questionAnswer : possibleAnswers) {
