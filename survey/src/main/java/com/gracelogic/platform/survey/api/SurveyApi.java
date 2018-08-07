@@ -28,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
@@ -190,8 +191,8 @@ public class SurveyApi extends AbstractAuthorizedController {
                     messageSource.getMessage("survey.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (BadDTOException badDTO) {
             return new ResponseEntity<>(new ErrorResponse("survey.BAD_DTO", badDTO.getMessage()), HttpStatus.BAD_REQUEST);
-        } catch (GenericJDBCException genericJBDC) {
-            return new ResponseEntity<>(new ErrorResponse("survey.DEPENDENCY_ERROR", genericJBDC.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (PersistenceException persistenceException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.DEPENDENCY_ERROR", persistenceException.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
