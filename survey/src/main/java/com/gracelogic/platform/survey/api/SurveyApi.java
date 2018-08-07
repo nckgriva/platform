@@ -18,6 +18,7 @@ import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
 import io.swagger.annotations.*;
+import org.hibernate.exception.GenericJDBCException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -189,6 +190,8 @@ public class SurveyApi extends AbstractAuthorizedController {
                     messageSource.getMessage("survey.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (BadDTOException badDTO) {
             return new ResponseEntity<>(new ErrorResponse("survey.BAD_DTO", badDTO.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (GenericJDBCException genericJBDC) {
+            return new ResponseEntity<>(new ErrorResponse("survey.DEPENDENCY_ERROR", genericJBDC.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
