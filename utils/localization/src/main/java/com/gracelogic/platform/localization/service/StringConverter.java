@@ -37,8 +37,14 @@ public class StringConverter {
         try {
             StringBuilder sb = new StringBuilder(source);
             int index = 0;
+            int prevIndex;
             while (index != -1) {
+                prevIndex = index;
                 index = processNext(sb, index, currentLocale);
+
+                if (index == prevIndex) {
+                    break;
+                }
             }
             return sb.toString();
         }
