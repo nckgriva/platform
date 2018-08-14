@@ -1085,6 +1085,15 @@ public class SurveyServiceImpl implements SurveyService {
             if (dto.getScaleMaxValueLabel() == null) dto.setScaleMaxValueLabel(dto.getScaleMaxValue().toString());
         }
 
+        if (surveyQuestionType.getCode().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.name()) ||
+            surveyQuestionType.getCode().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.name())) {
+            if (dto.getMatrixColumns() == null || dto.getMatrixColumns().length == 0)
+                throw new BadDTOException("Question \"" + dto.getText() + "\" requires at least one column");
+
+            if (dto.getMatrixRows() == null || dto.getMatrixRows().length == 0)
+                throw new BadDTOException("Question \"" + dto.getText() + "\" requires at least one row");
+        }
+
         SurveyPage surveyPage = idObjectService.getObjectById(SurveyPage.class, dto.getSurveyPageId());
         if (surveyPage == null) {
             throw new BadDTOException("Survey page for question \"" + dto.getText() + "\" is not found");
