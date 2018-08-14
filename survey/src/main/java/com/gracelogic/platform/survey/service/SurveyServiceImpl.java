@@ -1063,7 +1063,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyQuestion saveSurveyQuestion(SurveyQuestionDTO dto) throws ObjectNotFoundException {
+    public SurveyQuestion saveSurveyQuestion(SurveyQuestionDTO dto) throws ObjectNotFoundException, BadDTOException {
         SurveyQuestion entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(SurveyQuestion.class, dto.getId());
@@ -1074,6 +1074,22 @@ public class SurveyServiceImpl implements SurveyService {
             entity = new SurveyQuestion();
         }
 
+        SurveyQuestionType surveyQuestionType = ds.get(SurveyQuestionType.class, dto.getSurveyQuestionTypeId());
+        if (surveyQuestionType.getCode().equals(DataConstants.QuestionTypes.RATING_SCALE.name())) {
+
+            if (dto.getScaleMinValue() == null) throw new BadDTOException("Question \"" + dto.getText() + "\" has no scale min value");
+            if (dto.getScaleMaxValue() == null) throw new BadDTOException("Question \"" + dto.getText() + "\" has no scale max value");
+
+            if (dto.getScaleStepValue() == null) dto.setScaleStepValue(1);
+            if (dto.getScaleMinValueLabel() == null) dto.setScaleMinValueLabel(dto.getScaleMinValue().toString());
+            if (dto.getScaleMaxValueLabel() == null) dto.setScaleMaxValueLabel(dto.getScaleMaxValue().toString());
+        }
+
+        SurveyPage surveyPage = idObjectService.getObjectById(SurveyPage.class, dto.getSurveyPageId());
+        if (surveyPage == null) {
+            throw new BadDTOException("Survey page for question \"" + dto.getText() + "\" is not found");
+        }
+
         entity.setScaleStepValue(dto.getScaleStepValue());
         entity.setScaleMaxValueLabel(dto.getScaleMaxValueLabel());
         entity.setScaleMinValueLabel(dto.getScaleMinValueLabel());
@@ -1082,9 +1098,9 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setQuestionIndex(dto.getQuestionIndex());
         entity.setHidden(dto.getHidden());
         entity.setRequired(dto.getRequired());
-        entity.setSurveyPage(idObjectService.getObjectById(SurveyPage.class, dto.getSurveyPageId()));
+        entity.setSurveyPage(surveyPage);
         entity.setText(dto.getText());
-        entity.setSurveyQuestionType(ds.get(SurveyQuestionType.class, dto.getSurveyQuestionTypeId()));
+        entity.setSurveyQuestionType(surveyQuestionType);
         entity.setScaleMinValue(dto.getScaleMinValue());
         entity.setScaleMaxValue(dto.getScaleMaxValue());
         entity.setAttachmentExtensions(dto.getAttachmentExtensions());
