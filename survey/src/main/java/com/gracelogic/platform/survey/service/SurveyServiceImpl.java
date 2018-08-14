@@ -1075,7 +1075,7 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         SurveyQuestionType surveyQuestionType = ds.get(SurveyQuestionType.class, dto.getSurveyQuestionTypeId());
-        if (surveyQuestionType.getCode().equals(DataConstants.QuestionTypes.RATING_SCALE.name())) {
+        if (surveyQuestionType.getId().equals(DataConstants.QuestionTypes.RATING_SCALE.getValue())) {
 
             if (dto.getScaleMinValue() == null) throw new BadDTOException("Question \"" + dto.getText() + "\" has no scale min value");
             if (dto.getScaleMaxValue() == null) throw new BadDTOException("Question \"" + dto.getText() + "\" has no scale max value");
@@ -1085,8 +1085,8 @@ public class SurveyServiceImpl implements SurveyService {
             if (dto.getScaleMaxValueLabel() == null) dto.setScaleMaxValueLabel(dto.getScaleMaxValue().toString());
         }
 
-        if (surveyQuestionType.getCode().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.name()) ||
-            surveyQuestionType.getCode().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.name())) {
+        if (surveyQuestionType.getId().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.getValue()) ||
+            surveyQuestionType.getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue())) {
             if (dto.getMatrixColumns() == null || dto.getMatrixColumns().length == 0)
                 throw new BadDTOException("Question \"" + dto.getText() + "\" requires at least one column");
 
