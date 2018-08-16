@@ -4,6 +4,8 @@ package com.gracelogic.platform.survey.api;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
+import com.gracelogic.platform.property.dto.PropertyDTO;
+import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.survey.Path;
 import com.gracelogic.platform.survey.dto.admin.SurveyDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
@@ -47,6 +49,29 @@ public class SurveyApi extends AbstractAuthorizedController {
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource dbMessageSource;
 
+    @Autowired
+    private PropertyService propertyService;
+
+
+    @ApiOperation(
+            value = "getBaseUrl",
+            notes = "Returns base url for survey.link setup purposes",
+            response = PropertyDTO.class
+    )
+    @RequestMapping(method = RequestMethod.GET, value = "/base_url")
+    @ResponseBody
+    @PreAuthorize("hasAuthority('SURVEY:SAVE')")
+    public ResponseEntity getBaseUrl() {
+        String propertyName = "web:base_url";
+        String propertyValue = propertyService.getPropertyValue(propertyName);
+
+        PropertyDTO propertyDTO = new PropertyDTO();
+        propertyDTO.setValue(propertyValue);
+        propertyDTO.setName(propertyName);
+
+        return new ResponseEntity<>(propertyDTO, HttpStatus.OK);
+    }
+
     @ApiOperation(
             value = "getInitialSurveyInfo",
             notes = "Sends initial survey information to user. This method does not begin the survey.",
@@ -65,7 +90,6 @@ public class SurveyApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
                     messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @ApiOperation(
