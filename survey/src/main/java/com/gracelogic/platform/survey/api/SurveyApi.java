@@ -20,7 +20,7 @@ import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
 import io.swagger.annotations.*;
-import org.hibernate.exception.GenericJDBCException;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.util.*;
 
 @Controller
@@ -52,6 +54,25 @@ public class SurveyApi extends AbstractAuthorizedController {
     @Autowired
     private PropertyService propertyService;
 
+    @ApiOperation(
+            value = "exportResults",
+            notes = "Exports survey results to csv file"
+    )
+    @PreAuthorize("hasAuthority('SURVEY_RESULT:SHOW')")
+    @RequestMapping(method = RequestMethod.GET, value="/export")
+    public void exportResults(HttpServletResponse response) {
+        try {
+            String test = "test;test;test";
+            byte[] bytes = test.getBytes();
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            IOUtils.copy(bais, response.getOutputStream());
+            response.setContentType("application/csv");
+            response.setContentLength(bytes.length);
+            response.flushBuffer();
+        } catch (Exception ignored) {
+
+        }
+    }
 
     @ApiOperation(
             value = "getBaseUrl",

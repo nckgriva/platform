@@ -6,8 +6,6 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.Path;
 import com.gracelogic.platform.survey.dto.admin.SurveyQuestionAnswerDTO;
-import com.gracelogic.platform.survey.exception.LogicDependencyException;
-import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.model.SurveyQuestionAnswer;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
