@@ -62,7 +62,7 @@ public class SurveyApi extends AbstractAuthorizedController {
     )
     @PreAuthorize("hasAuthority('SURVEY_RESULT:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value="/{id}/export")
-    public ResponseEntity exportResults(@PathVariable(value = "id") UUID surveyId, HttpServletResponse response) {
+    public void exportResults(@PathVariable(value = "id") UUID surveyId, HttpServletResponse response) {
         try {
             String date = new SimpleDateFormat("dd_MM_yyyy").format(new Date());
             String fileName = "survey_export_" + date + ".csv";
@@ -71,17 +71,13 @@ public class SurveyApi extends AbstractAuthorizedController {
             byte[] bytes = results.getBytes("UTF-8");
             IOUtils.copy(new ByteArrayInputStream(bytes), response.getOutputStream());
             response.setContentType("text/csv");
+            response.setCharacterEncoding("UTF-8");
             response.addHeader("Content-Disposition", String.format("attachment;filename=%s", fileName));
             response.setContentLength(bytes.length);
             response.flushBuffer();
-        } catch (IOException ioException) {
+        } catch (Exception ignored) {
 
-        } catch (ObjectNotFoundException o) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
-                    LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
-        return null;
     }
 
     @ApiOperation(
