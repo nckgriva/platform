@@ -45,9 +45,7 @@ public class SurveyServiceImpl implements SurveyService {
      */
     private static <T extends IdObject<UUID>> HashMap<UUID, T> asUUIDHashMap(List<T> list) {
         HashMap<UUID, T> hashMap = new HashMap<>();
-        for (T t : list) {
-            hashMap.put(t.getId(), t);
-        }
+        for (T t : list) hashMap.put(t.getId(), t);
         return hashMap;
     }
 
@@ -76,9 +74,8 @@ public class SurveyServiceImpl implements SurveyService {
         Map<String, Object> params = new HashMap<>();
         params.put("surveyId", surveyId);
         List<SurveyQuestionAnswer> listAnswers = idObjectService.getList(SurveyQuestionAnswer.class,
-                "left join el.surveySession ss", "ss.survey.id=:surveyId ",
-                params, null, null, null);
-
+                "left join el.surveySession ss", "ss.survey.id = :surveyId ",
+                params, null, null, null, null);
 
         Set<UUID> questionIds = new HashSet<>();
         for (SurveyQuestionAnswer answer : listAnswers) {
@@ -88,7 +85,7 @@ public class SurveyServiceImpl implements SurveyService {
         params.put("questionIds", questionIds);
 
         HashMap<UUID, SurveyQuestion> questionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, null, "el.id in (:questionIds) ",
-                params, null, null, null));
+                params, null, null, null, null));
         HashMap<UUID, SurveyAnswerVariant> answerVariantHashMap = asUUIDHashMap(idObjectService.getList(SurveyAnswerVariant.class,
                 null, "el.surveyQuestion.id in (:questionIds) ",
                 params, null, null, null, null));
