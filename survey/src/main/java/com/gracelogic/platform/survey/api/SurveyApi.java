@@ -68,10 +68,9 @@ public class SurveyApi extends AbstractAuthorizedController {
             String fileName = "survey_export_" + date + ".csv";
 
             String results = surveyService.exportResults(surveyId);
-            byte[] bytes = results.getBytes();
+            byte[] bytes = results.getBytes("UTF-8");
             IOUtils.copy(new ByteArrayInputStream(bytes), response.getOutputStream());
             response.setContentType("text/csv");
-            
             response.addHeader("Content-Disposition", String.format("attachment;filename=%s", fileName));
             response.setContentLength(bytes.length);
             response.flushBuffer();
