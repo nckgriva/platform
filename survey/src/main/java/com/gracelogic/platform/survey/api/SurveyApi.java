@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -67,13 +66,12 @@ public class SurveyApi extends AbstractAuthorizedController {
             String date = new SimpleDateFormat("dd_MM_yyyy").format(new Date());
             String fileName = "survey_export_" + date + ".csv";
 
-            String results = surveyService.exportResults(surveyId);
-            byte[] bytes = results.getBytes("UTF-8");
-            IOUtils.copy(new ByteArrayInputStream(bytes), response.getOutputStream());
             response.setContentType("text/csv");
             response.setCharacterEncoding("UTF-8");
             response.addHeader("Content-Disposition", String.format("attachment;filename=%s", fileName));
-            response.setContentLength(bytes.length);
+
+            response.getWriter().print(surveyService.exportResults(surveyId));
+            response.getWriter().flush();
             response.flushBuffer();
         } catch (Exception ignored) {
 
