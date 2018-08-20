@@ -67,7 +67,7 @@ public class SurveyApi extends AbstractAuthorizedController {
             String fileName = "survey_export_" + date + ".csv";
 
             response.setContentType("text/csv");
-            response.setCharacterEncoding("UTF-8");
+            response.setCharacterEncoding("windows-1251");
             response.addHeader("Content-Disposition", String.format("attachment;filename=%s", fileName));
 
             response.getWriter().print(surveyService.exportResults(surveyId));
