@@ -68,23 +68,23 @@ public class SurveyServiceImpl implements SurveyService {
         return hashMap;
     }
 
-
     public String exportResults(UUID surveyId) throws ObjectNotFoundException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
         if (survey == null) throw new ObjectNotFoundException();
-        String results = "question_answer_id;question_id;question_text;answer_variant_id;answer_text;answer_matrix_row;answer_matrix_column\n";
+        String results = "question_answer_id;question_id;question_text;answer_variant_id;answer_variant_text;answer_text;answer_matrix_row;answer_matrix_column\n";
 
         Map<String, Object> params = new HashMap<>();
         params.put("surveyId", surveyId);
         List<SurveyQuestionAnswer> listAnswers = idObjectService.getList(SurveyQuestionAnswer.class,
                 "left join el.surveySession ss", "ss.survey.id=:surveyId ",
                 params, null, null, null);
-        params.clear();
 
-        HashSet<UUID> questionIds = new HashSet<>();
+
+        Set<UUID> questionIds = new HashSet<>();
         for (SurveyQuestionAnswer answer : listAnswers) {
             questionIds.add(answer.getQuestion().getId());
         }
+        params.clear();
         params.put("questionIds", questionIds);
 
         HashMap<UUID, SurveyQuestion> questionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, null, "el.id in (:questionIds) ",
@@ -95,9 +95,9 @@ public class SurveyServiceImpl implements SurveyService {
         params.clear();
 
         for (SurveyQuestionAnswer answer : listAnswers) {
-            results += String.format("%s;%s;%s;%s;%s;%s;%s\n", answer.getId(), answer.getSurveyQuestion().getId(),
+            results += String.format("%s;%s;%s;%s;%s;%s;%s;%s\n", answer.getId(), answer.getSurveyQuestion().getId(),
                     questionsHashMap.get(answer.getSurveyQuestion().getId()).getText(), answer.getAnswerVariant() != null ? answer.getAnswerVariant().getId() : "",
-                    answer.getAnswerVariant() != null ? answerVariantHashMap.get(answer.getAnswerVariant().getId()).getText() : "",
+                    answer.getAnswerVariant() != null ? answerVariantHashMap.get(answer.getAnswerVariant().getId()).getText() : "", answer.getText() != null ? answer.getText() : "",
                     answer.getSelectedMatrixRow() != null ? answer.getSelectedMatrixRow() : "", answer.getSelectedMatrixColumn() != null ? answer.getSelectedMatrixColumn() : "");
         }
 
