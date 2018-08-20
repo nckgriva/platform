@@ -87,10 +87,10 @@ public class SurveyServiceImpl implements SurveyService {
         }
         params.put("questionIds", questionIds);
 
-        HashMap<UUID, SurveyQuestion> questionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, null, "el.id in (:questionIds)",
+        HashMap<UUID, SurveyQuestion> questionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, null, "el.id in (:questionIds) ",
                 params, null, null, null));
         HashMap<UUID, SurveyAnswerVariant> answerVariantHashMap = asUUIDHashMap(idObjectService.getList(SurveyAnswerVariant.class,
-                null, "el.surveyQuestion.id in (:questionIds)",
+                null, "el.surveyQuestion.id in (:questionIds) ",
                 params, null, null, null, null));
         params.clear();
 

@@ -75,7 +75,7 @@ public class SurveyApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
                     LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-        
+
         return null;
     }
 
