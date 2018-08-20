@@ -77,6 +77,8 @@ public class SurveyServiceImpl implements SurveyService {
                 "left join el.surveySession ss", "ss.survey.id = :surveyId ",
                 params, null, null, null, null);
 
+        if (listAnswers.size() == 0) return results;
+
         Set<UUID> questionIds = new HashSet<>();
         for (SurveyQuestionAnswer answer : listAnswers) {
             questionIds.add(answer.getQuestion().getId());
