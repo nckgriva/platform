@@ -34,6 +34,7 @@ import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.*;
 
 @Controller
@@ -60,7 +61,7 @@ public class SurveyApi extends AbstractAuthorizedController {
     )
     @PreAuthorize("hasAuthority('SURVEY_RESULT:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value="/{id}/export")
-    public void exportResults(@PathVariable(value = "id") UUID surveyId, HttpServletResponse response) {
+    public ResponseEntity exportResults(@PathVariable(value = "id") UUID surveyId, HttpServletResponse response) {
         try {
             String test = surveyService.exportResults(surveyId);
             byte[] bytes = test.getBytes();
@@ -68,9 +69,14 @@ public class SurveyApi extends AbstractAuthorizedController {
             response.setContentType("application/csv");
             response.setContentLength(bytes.length);
             response.flushBuffer();
-        } catch (Exception ignored) {
+        } catch (IOException ioException) {
 
+        } catch (ObjectNotFoundException o) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
+                    LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
+        
+        return null;
     }
 
     @ApiOperation(
