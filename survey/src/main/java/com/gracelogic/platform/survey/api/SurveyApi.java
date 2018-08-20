@@ -59,13 +59,12 @@ public class SurveyApi extends AbstractAuthorizedController {
             notes = "Exports survey results to csv file"
     )
     @PreAuthorize("hasAuthority('SURVEY_RESULT:SHOW')")
-    @RequestMapping(method = RequestMethod.GET, value="/export")
-    public void exportResults(HttpServletResponse response) {
+    @RequestMapping(method = RequestMethod.GET, value="/{id}/export")
+    public void exportResults(@PathVariable(value = "id") UUID surveyId, HttpServletResponse response) {
         try {
-            String test = "test;test;test";
+            String test = surveyService.exportResults(surveyId);
             byte[] bytes = test.getBytes();
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            IOUtils.copy(bais, response.getOutputStream());
+            IOUtils.copy(new ByteArrayInputStream(bytes), response.getOutputStream());
             response.setContentType("application/csv");
             response.setContentLength(bytes.length);
             response.flushBuffer();

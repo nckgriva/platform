@@ -15,6 +15,8 @@ import java.util.UUID;
 
 public interface SurveyService {
 
+    String exportResults(UUID surveyId) throws ObjectNotFoundException;
+
     SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId) throws ObjectNotFoundException, ForbiddenException;
 
     SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String ipAddress)
