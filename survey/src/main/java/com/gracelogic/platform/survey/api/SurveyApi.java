@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
@@ -63,10 +64,15 @@ public class SurveyApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET, value="/{id}/export")
     public ResponseEntity exportResults(@PathVariable(value = "id") UUID surveyId, HttpServletResponse response) {
         try {
-            String test = surveyService.exportResults(surveyId);
-            byte[] bytes = test.getBytes();
+            String date = new SimpleDateFormat("dd_MM_yyyy").format(new Date());
+            String fileName = "survey_export_" + date + ".csv";
+
+            String results = surveyService.exportResults(surveyId);
+            byte[] bytes = results.getBytes();
             IOUtils.copy(new ByteArrayInputStream(bytes), response.getOutputStream());
-            response.setContentType("application/csv");
+            response.setContentType("text/csv");
+            
+            response.addHeader("Content-Disposition", String.format("attachment;filename=%s", fileName));
             response.setContentLength(bytes.length);
             response.flushBuffer();
         } catch (IOException ioException) {
