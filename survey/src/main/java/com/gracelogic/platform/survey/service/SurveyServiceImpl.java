@@ -74,7 +74,7 @@ public class SurveyServiceImpl implements SurveyService {
         Map<String, Object> params = new HashMap<>();
         params.put("surveyId", surveyId);
         List<SurveyQuestionAnswer> listAnswers = idObjectService.getList(SurveyQuestionAnswer.class,
-                "left join el.surveySession ss", "ss.previewSession = false && ss.ended != null && ss.survey.id = :surveyId ",
+                "left join el.surveySession ss", "ss.previewSession = false and ss.ended != null and ss.survey.id = :surveyId ",
                 params, null, null, null, null);
 
         if (listAnswers.size() == 0) return results;
