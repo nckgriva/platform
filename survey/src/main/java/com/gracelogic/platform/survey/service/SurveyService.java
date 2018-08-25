@@ -26,7 +26,7 @@ public interface SurveyService {
             throws ObjectNotFoundException;
 
     SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto)
-            throws ObjectNotFoundException, ForbiddenException, UnansweredException;
+            throws ObjectNotFoundException, ForbiddenException, UnansweredException, UnansweredOtherOptionException;
 
     SurveyInteractionDTO goToPage(UUID surveySessionId, int pageIndex) throws ObjectNotFoundException, ForbiddenException;
 

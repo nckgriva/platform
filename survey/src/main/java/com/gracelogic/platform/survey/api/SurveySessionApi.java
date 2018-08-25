@@ -8,6 +8,7 @@ import com.gracelogic.platform.survey.dto.admin.SurveySessionDTO;
 import com.gracelogic.platform.survey.dto.user.PageAnswersDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
 import com.gracelogic.platform.survey.exception.UnansweredException;
+import com.gracelogic.platform.survey.exception.UnansweredOtherOptionException;
 import com.gracelogic.platform.survey.model.SurveySession;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
@@ -106,6 +107,9 @@ public class SurveySessionApi extends AbstractAuthorizedController {
                     messageSource.getMessage("survey.NO_SUCH_SESSION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (UnansweredException unansweredException) {
             return new ResponseEntity<>(new ErrorResponse("survey.UNANSWERED", unansweredException.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (UnansweredOtherOptionException unansweredOtherException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.UNANSWERED_OTHER_OPTION",
+                    messageSource.getMessage("survey.UNANSWERED_OTHER_OPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 

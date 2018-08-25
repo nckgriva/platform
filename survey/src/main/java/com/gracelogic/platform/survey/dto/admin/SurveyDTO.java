@@ -13,6 +13,7 @@ public class SurveyDTO extends IdObjectDTO {
     private Boolean showProgress;
     private Boolean showQuestionNumber;
     private Boolean allowReturn;
+    private Boolean clarifyCustomAnswer;
     private String introduction;
     private String conclusion;
     private Integer maxRespondents;
@@ -35,9 +36,9 @@ public class SurveyDTO extends IdObjectDTO {
         dto.setName(model.getName());
         dto.setStartDate(model.getStartDate());
         dto.setExpirationDate(model.getExpirationDate());
-        dto.setShowProgress(model.getShowProgress());
-        dto.setShowQuestionNumber(model.getShowQuestionNumber());
-        dto.setAllowReturn(model.getAllowReturn());
+        dto.setShowProgress(model.isShowProgress());
+        dto.setShowQuestionNumber(model.isShowQuestionNumber());
+        dto.setAllowReturn(model.isReturnAllowed());
         dto.setIntroduction(model.getIntroduction());
         dto.setConclusion(model.getConclusion());
         dto.setMaxRespondents(model.getMaxRespondents());
@@ -46,6 +47,7 @@ public class SurveyDTO extends IdObjectDTO {
         dto.setOwnerId(model.getOwner().getId());
         dto.setMaxAttempts(model.getMaxAttempts());
         dto.setLink(model.getLink());
+        dto.setClarifyCustomAnswer(model.getClarifyCustomAnswer());
         return dto;
     }
 
@@ -183,5 +185,13 @@ public class SurveyDTO extends IdObjectDTO {
 
     public void setLink(String link) {
         this.link = link;
+    }
+
+    public Boolean getClarifyCustomAnswer() {
+        return clarifyCustomAnswer;
+    }
+
+    public void setClarifyCustomAnswer(Boolean clarifyCustomAnswer) {
+        this.clarifyCustomAnswer = clarifyCustomAnswer;
     }
 }

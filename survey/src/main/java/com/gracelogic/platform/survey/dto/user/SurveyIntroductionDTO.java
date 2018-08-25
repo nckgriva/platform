@@ -13,10 +13,10 @@ public class SurveyIntroductionDTO {
     public SurveyIntroductionDTO(Survey survey) {
         this.name = survey.getName();
         this.introduction = survey.getIntroduction();
-        this.allowReturn = survey.getAllowReturn();
-        this.showQuestionNumber = survey.getShowQuestionNumber();
-        this.allowReturn = survey.getAllowReturn();
-        this.showProgress = survey.getShowProgress();
+        this.allowReturn = survey.isReturnAllowed();
+        this.showQuestionNumber = survey.isShowQuestionNumber();
+        this.allowReturn = survey.isReturnAllowed();
+        this.showProgress = survey.isShowProgress();
     }
 
     public String getIntroduction() {

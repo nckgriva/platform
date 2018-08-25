@@ -69,7 +69,7 @@ public class SurveyServiceImpl implements SurveyService {
     public String exportResults(UUID surveyId) throws ObjectNotFoundException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
         if (survey == null) throw new ObjectNotFoundException();
-        String results = "question_answer_id;question_id;question_text;answer_variant_id;answer_variant_text;answer_text;answer_matrix_row;answer_matrix_column\n";
+        String results = "question_answer_id;question_id;question_text;answer_variant_id;answer_variant_text;answer_text;matrix_row_name;matrix_column_name\n";
 
         Map<String, Object> params = new HashMap<>();
         params.put("surveyId", surveyId);
@@ -94,10 +94,12 @@ public class SurveyServiceImpl implements SurveyService {
         params.clear();
 
         for (SurveyQuestionAnswer answer : listAnswers) {
+            SurveyQuestion question = questionsHashMap.get(answer.getSurveyQuestion().getId());
             results += String.format("%s;%s;%s;%s;%s;%s;%s;%s\n", answer.getId(), answer.getSurveyQuestion().getId(),
-                    questionsHashMap.get(answer.getSurveyQuestion().getId()).getText(), answer.getAnswerVariant() != null ? answer.getAnswerVariant().getId() : "",
+                    question.getText(), answer.getAnswerVariant() != null ? answer.getAnswerVariant().getId() : "",
                     answer.getAnswerVariant() != null ? answerVariantHashMap.get(answer.getAnswerVariant().getId()).getText() : "", answer.getText() != null ? answer.getText() : "",
-                    answer.getSelectedMatrixRow() != null ? answer.getSelectedMatrixRow() : "", answer.getSelectedMatrixColumn() != null ? answer.getSelectedMatrixColumn() : "");
+                    answer.getSelectedMatrixRow() != null ? question.getMatrixRows()[answer.getSelectedMatrixRow()] : "",
+                    answer.getSelectedMatrixColumn() != null ? question.getMatrixColumns()[answer.getSelectedMatrixColumn()] : "");
         }
 
         return results;
@@ -532,7 +534,7 @@ public class SurveyServiceImpl implements SurveyService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto)
-            throws ObjectNotFoundException, ForbiddenException, UnansweredException {
+            throws ObjectNotFoundException, ForbiddenException, UnansweredException, UnansweredOtherOptionException {
 
         SurveySession surveySession = idObjectService.getObjectById(SurveySession.class, surveySessionId);
         final Date dateNow = new Date();
@@ -548,6 +550,8 @@ public class SurveyServiceImpl implements SurveyService {
         if (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(dateNow)) {
             throw new ForbiddenException();
         }
+
+        Survey survey = idObjectService.getObjectById(Survey.class, surveySession.getSurvey().getId());
 
         boolean finishSurvey = false;
 
@@ -615,8 +619,14 @@ public class SurveyServiceImpl implements SurveyService {
                 // if user selected custom variant and didn't answered in text field of required question
                 if (answerVariant != null && question.getRequired() &&
                         answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() &&
-                        StringUtils.isBlank(answerDTO.getText())) { // DO NOT simplify this if
-                    throw new UnansweredException("Custom text field of question " + question.getText() + " is required");
+                        StringUtils.isBlank(answerDTO.getText())) {
+                    throw new UnansweredOtherOptionException("Custom text field of question is required", question.getText());
+                }
+
+                if (survey.getClarifyCustomAnswer() &&
+                        answerVariant != null && answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() &&
+                        StringUtils.isBlank(answerDTO.getText())) {
+                    throw new UnansweredOtherOptionException("Custom text field of question is required", question.getText());
                 }
 
                 boolean isTextFieldRequired = question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.TEXT_MULTILINE.getValue()) ||
@@ -624,14 +634,14 @@ public class SurveyServiceImpl implements SurveyService {
                         question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.RATING_SCALE.getValue());
 
                 if (question.getRequired() && isTextFieldRequired && StringUtils.isBlank(answerDTO.getText())) {
-                    throw new UnansweredException("Text field of question \"" + question.getText() + "\" is required");
+                    throw new UnansweredException("Text field of question is required", question.getText());
                 }
 
                 boolean isMatrixQuestion = question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.getValue()) ||
                         question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue());
 
                 if (isMatrixQuestion && (answerDTO.getSelectedMatrixColumn() == null || answerDTO.getSelectedMatrixRow() == null)) {
-                    throw new UnansweredException("You're answering to matrix question \"" + question.getText() + "\" without specified row index or column index");
+                    throw new UnansweredException("You're answering to matrix question without specified row index or column index", question.getText());
                 }
 
                 if (isMatrixQuestion) {
@@ -707,7 +717,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         for (Map.Entry<UUID, SurveyQuestion> entry : surveyQuestionsHashMap.entrySet()) {
             if (entry.getValue().getRequired() && !answeredQuestions.contains(entry.getKey()))
-                throw new UnansweredException();
+                throw new UnansweredException("Unanswered", entry.getValue().getText());
         }
 
         for (SurveyLogicTrigger trigger : logicTriggers) {
@@ -836,6 +846,7 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setShowProgress(dto.getShowProgress());
         entity.setShowQuestionNumber(dto.getShowQuestionNumber());
         entity.setAllowReturn(dto.getAllowReturn());
+        entity.setClarifyCustomAnswer(dto.getClarifyCustomAnswer());
         entity.setIntroduction(dto.getIntroduction());
         entity.setConclusion(dto.getConclusion());
         entity.setLink(dto.getLink());
