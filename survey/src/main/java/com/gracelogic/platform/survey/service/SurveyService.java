@@ -98,4 +98,22 @@ public interface SurveyService {
     SurveyQuestionAnswerDTO getSurveyQuestionAnswer(UUID id) throws ObjectNotFoundException;
 
     void deleteSurveyQuestionAnswer(UUID id);
+
+    EntityListResponse<SurveyAnswerVariantCatalogDTO> getSurveyAnswerVariantCatalogsPaged(String name, Integer count, Integer page,
+                                                                                          Integer start, String sortField, String sortDir);
+
+    SurveyAnswerVariantCatalogDTO getSurveyAnswerVariantCatalog(UUID id) throws ObjectNotFoundException;
+
+    SurveyAnswerVariantCatalog saveSurveyAnswerVariantCatalog(SurveyAnswerVariantCatalogDTO dto) throws ObjectNotFoundException;
+
+    void deleteSurveyAnswerVariantCatalog(UUID id);
+
+    EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getSurveyAnswerVariantCatalogItemsPaged(String text, Integer count, Integer page,
+                                                                                                  Integer start, String sortField, String sortDir);
+
+    SurveyAnswerVariantCatalogItemDTO getSurveyAnswerVariantCatalogItem(UUID id) throws ObjectNotFoundException;
+
+    SurveyAnswerVariantCatalogItem saveSurveyAnswerVariantCatalogItem(SurveyAnswerVariantCatalogItemDTO dto) throws ObjectNotFoundException;
+
+    void deleteSurveyAnswerVariantCatalogItem(UUID id);
 }

@@ -1501,4 +1501,126 @@ public class SurveyServiceImpl implements SurveyService {
     public void deleteSurveyQuestionAnswer(UUID id) {
         idObjectService.delete(SurveyQuestionAnswer.class, id);
     }
+
+    @Override
+    public EntityListResponse<SurveyAnswerVariantCatalogDTO> getSurveyAnswerVariantCatalogsPaged(String name, Integer count, Integer page,
+                                                                                                 Integer start, String sortField, String sortDir) {
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<>();
+
+        if (!StringUtils.isEmpty(name)) {
+            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+            cause += "and lower(el.name) like :name ";
+        }
+
+        int totalCount = idObjectService.getCount(SurveyAnswerVariant.class, null, null, cause, params);
+
+        EntityListResponse<SurveyAnswerVariantCatalogDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
+
+        List<SurveyAnswerVariantCatalog> items = idObjectService.getList(SurveyAnswerVariantCatalog.class, null, cause,
+                params, sortField, sortDir, entityListResponse.getStartRecord(), count);
+
+        for (SurveyAnswerVariantCatalog e : items) {
+            SurveyAnswerVariantCatalogDTO el = SurveyAnswerVariantCatalogDTO.prepare(e);
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
+
+    @Override
+    public SurveyAnswerVariantCatalogDTO getSurveyAnswerVariantCatalog(UUID id) throws ObjectNotFoundException {
+        SurveyAnswerVariantCatalog entity = idObjectService.getObjectById(SurveyAnswerVariantCatalog.class, id);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+        return SurveyAnswerVariantCatalogDTO.prepare(entity);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public SurveyAnswerVariantCatalog saveSurveyAnswerVariantCatalog(SurveyAnswerVariantCatalogDTO dto) throws ObjectNotFoundException {
+        SurveyAnswerVariantCatalog entity;
+        if (dto.getId() != null) {
+            entity = idObjectService.getObjectById(SurveyAnswerVariantCatalog.class, dto.getId());
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
+        } else {
+            entity = new SurveyAnswerVariantCatalog();
+        }
+
+        entity.setName(dto.getName());
+
+        return idObjectService.save(entity);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteSurveyAnswerVariantCatalog(UUID id) {
+        idObjectService.delete(SurveyAnswerVariantCatalog.class, id);
+    }
+
+    @Override
+    public EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getSurveyAnswerVariantCatalogItemsPaged(String text, Integer count, Integer page,
+                                                                                                         Integer start, String sortField, String sortDir) {
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<>();
+
+        if (!StringUtils.isEmpty(text)) {
+            params.put("text", "%%" + StringUtils.lowerCase(text) + "%%");
+            cause += "and lower(el.text) like :text ";
+        }
+
+        int totalCount = idObjectService.getCount(SurveyAnswerVariant.class, null, null, cause, params);
+
+        EntityListResponse<SurveyAnswerVariantCatalogItemDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
+
+        List<SurveyAnswerVariantCatalogItem> items = idObjectService.getList(SurveyAnswerVariantCatalogItem.class, null, cause,
+                params, sortField, sortDir, entityListResponse.getStartRecord(), count);
+
+        for (SurveyAnswerVariantCatalogItem e : items) {
+            SurveyAnswerVariantCatalogItemDTO el = SurveyAnswerVariantCatalogItemDTO.prepare(e);
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
+
+    @Override
+    public SurveyAnswerVariantCatalogItemDTO getSurveyAnswerVariantCatalogItem(UUID id) throws ObjectNotFoundException {
+        SurveyAnswerVariantCatalogItem entity = idObjectService.getObjectById(SurveyAnswerVariantCatalogItem.class, id);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+        return SurveyAnswerVariantCatalogItemDTO.prepare(entity);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public SurveyAnswerVariantCatalogItem saveSurveyAnswerVariantCatalogItem(SurveyAnswerVariantCatalogItemDTO dto) throws ObjectNotFoundException {
+        SurveyAnswerVariantCatalogItem entity;
+        if (dto.getId() != null) {
+            entity = idObjectService.getObjectById(SurveyAnswerVariantCatalogItem.class, dto.getId());
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
+        } else {
+            entity = new SurveyAnswerVariantCatalogItem();
+        }
+
+        SurveyAnswerVariantCatalog catalog = idObjectService.getObjectById(SurveyAnswerVariantCatalog.class, dto.getCatalogId());
+        if (catalog == null) throw new ObjectNotFoundException();
+
+        entity.setText(dto.getText());
+        entity.setCatalog(catalog);
+
+        return idObjectService.save(entity);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteSurveyAnswerVariantCatalogItem(UUID id) {
+        idObjectService.delete(SurveyAnswerVariantCatalogItem.class, id);
+    }
 }

@@ -17,4 +17,8 @@ public class Path extends PlatformPath {
 
     public static final String API_SURVEY_QUESTION_ANSWER_VARIANT = API_SURVEY_QUESTION + "/variant";
 
+    public static final String API_SURVEY_QUESTION_ANSWER_VARIANT_CATALOG = API_SURVEY_QUESTION + "/variant/catalog";
+
+    public static final String API_SURVEY_QUESTION_ANSWER_VARIANT_CATALOG_ITEM = API_SURVEY_QUESTION_ANSWER_VARIANT_CATALOG + "/item";
+
 }
