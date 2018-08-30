@@ -52,12 +52,13 @@ public class SurveyAnswerVariantCatalogItemApi {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getSurveyAnswerVariantCatalogItems(@RequestParam(value = "name", required = false) String name,
+    public ResponseEntity getSurveyAnswerVariantCatalogItems(@RequestParam(value = "catalogId", required = false) UUID catalogId,
+                                                         @RequestParam(value = "text", required = false) String text,
                                                          @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                                          @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                                          @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                                          @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
-        EntityListResponse<SurveyAnswerVariantCatalogItemDTO> properties = surveyService.getSurveyAnswerVariantCatalogItemsPaged(name, count, null, start, sortField, sortDir);
+        EntityListResponse<SurveyAnswerVariantCatalogItemDTO> properties = surveyService.getSurveyAnswerVariantCatalogItemsPaged(catalogId, text, count, null, start, sortField, sortDir);
         return new ResponseEntity<>(properties, HttpStatus.OK);
     }
 

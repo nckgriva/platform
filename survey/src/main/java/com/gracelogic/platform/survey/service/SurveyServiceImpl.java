@@ -1562,10 +1562,15 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getSurveyAnswerVariantCatalogItemsPaged(String text, Integer count, Integer page,
+    public EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getSurveyAnswerVariantCatalogItemsPaged(UUID catalogId, String text, Integer count, Integer page,
                                                                                                          Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
+
+        if (catalogId != null) {
+            cause += "and el.catalog.id=:catalogId ";
+            params.put("catalogId", catalogId);
+        }
 
         if (!StringUtils.isEmpty(text)) {
             params.put("text", "%%" + StringUtils.lowerCase(text) + "%%");

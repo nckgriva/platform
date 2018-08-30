@@ -108,7 +108,7 @@ public interface SurveyService {
 
     void deleteSurveyAnswerVariantCatalog(UUID id);
 
-    EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getSurveyAnswerVariantCatalogItemsPaged(String text, Integer count, Integer page,
+    EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getSurveyAnswerVariantCatalogItemsPaged(UUID catalogId, String text, Integer count, Integer page,
                                                                                                   Integer start, String sortField, String sortDir);
 
     SurveyAnswerVariantCatalogItemDTO getSurveyAnswerVariantCatalogItem(UUID id) throws ObjectNotFoundException;
