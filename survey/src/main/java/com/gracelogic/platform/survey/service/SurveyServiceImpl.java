@@ -1513,7 +1513,7 @@ public class SurveyServiceImpl implements SurveyService {
             cause += "and lower(el.name) like :name ";
         }
 
-        int totalCount = idObjectService.getCount(SurveyAnswerVariant.class, null, null, cause, params);
+        int totalCount = idObjectService.getCount(SurveyAnswerVariantCatalog.class, null, null, cause, params);
 
         EntityListResponse<SurveyAnswerVariantCatalogDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
@@ -1577,7 +1577,7 @@ public class SurveyServiceImpl implements SurveyService {
             cause += "and lower(el.text) like :text ";
         }
 
-        int totalCount = idObjectService.getCount(SurveyAnswerVariant.class, null, null, cause, params);
+        int totalCount = idObjectService.getCount(SurveyAnswerVariantCatalogItem.class, null, null, cause, params);
 
         EntityListResponse<SurveyAnswerVariantCatalogItemDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
