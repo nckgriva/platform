@@ -205,4 +205,52 @@ public class FileStorageApi extends AbstractAuthorizedController {
 
         return new ResponseEntity<EntityListResponse<StoredFileDTO>>(storedFiles, HttpStatus.OK);
     }
+
+    @ApiOperation(
+            value = "getStoredFile",
+            notes = "Get stored file",
+            response = StoredFileDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @PreAuthorize("hasAuthority('FILE_STORAGE:SHOW')")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    @ResponseBody
+    public ResponseEntity getStoredFile(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id,
+                                        @ApiParam(name = "enrich", value = "enrich") @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich) {
+        try {
+            StoredFileDTO storedFileDTO = fileStorageService.getStoredFile(id, enrich);
+            return new ResponseEntity<StoredFileDTO>(storedFileDTO, HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+
+        }
+    }
+
+    @ApiOperation(
+            value = "createStoredFile",
+            notes = "Create new stored file",
+            response = EmptyResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @PreAuthorize("hasAuthority('FILE_STORAGE:SAVE')")
+    @RequestMapping(method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity createStoredFile(@ModelAttribute StoredFileDTO dto) {
+        try {
+            fileStorageService.createStoredFile(dto.getStoreModeId(), dto.getReferenceObjectId(), null, null, dto.getMeta());
+        } catch (UnsupportedStoreModeException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.UNSUPPORTED_STORE_MODE", messageSource.getMessage("fileStorage.UNSUPPORTED_STORE_MODE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (IOException e) {
+            logger.error("Failed to create file", e);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+    }
 }

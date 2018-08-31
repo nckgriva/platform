@@ -278,6 +278,21 @@ public class FileStorageServiceImpl implements FileStorageService {
         return new File(buildLocalStoringPath(storedFile.getId(), storedFile.getReferenceObjectId(), storedFile.getExtension()));
     }
 
+    @Override
+    public StoredFileDTO getStoredFile(UUID id, boolean enrich) throws ObjectNotFoundException {
+        StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, enrich ? "left join fetch el.storeMode" : null, id);
+        if (storedFile == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        StoredFileDTO storedFileDTO = StoredFileDTO.prepare(storedFile);
+        if (enrich) {
+            StoredFileDTO.enrich(storedFileDTO, storedFile);
+        }
+
+        return storedFileDTO;
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteStoredFile(UUID id, boolean withContent) {
