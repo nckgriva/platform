@@ -242,7 +242,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @PreAuthorize("hasAuthority('FILE_STORAGE:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
-    public ResponseEntity createStoredFile(@ModelAttribute StoredFileDTO dto) {
+    public ResponseEntity createStoredFile(@RequestBody StoredFileDTO dto) {
         try {
             StoredFile storedFile = fileStorageService.createStoredFile(dto.getStoreModeId(), dto.getReferenceObjectId(), null, null, dto.getMeta());
             return new ResponseEntity<IDResponse>(new IDResponse(storedFile.getId()), HttpStatus.OK);
