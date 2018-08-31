@@ -239,7 +239,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('FILE_STORAGE:SAVE')")
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
     public ResponseEntity createStoredFile(@ModelAttribute StoredFileDTO dto) {
         try {
