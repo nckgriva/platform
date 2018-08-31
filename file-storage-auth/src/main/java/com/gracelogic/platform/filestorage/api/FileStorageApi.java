@@ -14,6 +14,7 @@ import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
+import com.gracelogic.platform.web.dto.IDResponse;
 import io.swagger.annotations.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -243,14 +244,13 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity createStoredFile(@ModelAttribute StoredFileDTO dto) {
         try {
-            fileStorageService.createStoredFile(dto.getStoreModeId(), dto.getReferenceObjectId(), null, null, dto.getMeta());
+            StoredFile storedFile = fileStorageService.createStoredFile(dto.getStoreModeId(), dto.getReferenceObjectId(), null, null, dto.getMeta());
+            return new ResponseEntity<IDResponse>(new IDResponse(storedFile.getId()), HttpStatus.OK);
         } catch (UnsupportedStoreModeException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.UNSUPPORTED_STORE_MODE", messageSource.getMessage("fileStorage.UNSUPPORTED_STORE_MODE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (IOException e) {
             logger.error("Failed to create file", e);
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
-        return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 }
