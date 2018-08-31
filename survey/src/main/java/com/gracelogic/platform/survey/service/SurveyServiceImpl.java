@@ -1559,6 +1559,10 @@ public class SurveyServiceImpl implements SurveyService {
     @Override
     public void deleteSurveyAnswerVariantCatalog(UUID id) {
         idObjectService.delete(SurveyAnswerVariantCatalog.class, id);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("catalogId", id);
+        idObjectService.delete(SurveyAnswerVariantCatalogItem.class, "el.catalog.id=:catalogId", params);
     }
 
     @Override
