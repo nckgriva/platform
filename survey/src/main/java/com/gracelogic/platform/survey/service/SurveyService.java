@@ -15,13 +15,18 @@ import java.util.UUID;
 
 public interface SurveyService {
 
+    String exportResults(UUID surveyId) throws ObjectNotFoundException;
+
     SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId) throws ObjectNotFoundException, ForbiddenException;
 
     SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String ipAddress)
             throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsHitException;
 
+    SurveyInteractionDTO startSurveyPreview(UUID surveyId, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException;
+
     SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto)
-            throws ObjectNotFoundException, ForbiddenException, UnansweredException;
+            throws ObjectNotFoundException, ForbiddenException, UnansweredException, UnansweredOtherOptionException;
 
     SurveyInteractionDTO goToPage(UUID surveySessionId, int pageIndex) throws ObjectNotFoundException, ForbiddenException;
 
@@ -32,7 +37,7 @@ public interface SurveyService {
     EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     Survey saveEntireSurvey(SurveyDTO surveyDTO, AuthorizedUser user)
-            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException, IncompleteDTOException;
+            throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException, BadDTOException;
 
     Survey saveSurvey(SurveyDTO dto, AuthorizedUser user) throws ObjectNotFoundException;
 
@@ -61,7 +66,7 @@ public interface SurveyService {
     EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, String text, boolean withVariants, Integer count, Integer page,
                                                                   Integer start, String sortField, String sortDir);
 
-    SurveyQuestion saveSurveyQuestion(SurveyQuestionDTO dto) throws ObjectNotFoundException;
+    SurveyQuestion saveSurveyQuestion(SurveyQuestionDTO dto) throws ObjectNotFoundException, BadDTOException;
 
     SurveyQuestionDTO getSurveyQuestion(UUID surveyQuestionId) throws ObjectNotFoundException;
 
@@ -70,7 +75,7 @@ public interface SurveyService {
     EntityListResponse<SurveyLogicTriggerDTO> getSurveyLogicTriggersPaged(UUID surveyQuestionId, UUID surveyPageId, UUID surveyAnswerVariantId, Integer count, Integer page,
                                                                           Integer start, String sortField, String sortDir);
 
-    SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException, IncompleteDTOException;
+    SurveyLogicTrigger saveSurveyLogicTrigger(SurveyLogicTriggerDTO dto) throws ObjectNotFoundException, BadDTOException;
 
     SurveyLogicTriggerDTO getSurveyLogicTrigger(UUID id) throws ObjectNotFoundException;
 
@@ -93,4 +98,22 @@ public interface SurveyService {
     SurveyQuestionAnswerDTO getSurveyQuestionAnswer(UUID id) throws ObjectNotFoundException;
 
     void deleteSurveyQuestionAnswer(UUID id);
+
+    EntityListResponse<SurveyAnswerVariantCatalogDTO> getSurveyAnswerVariantCatalogsPaged(String name, Integer count, Integer page,
+                                                                                          Integer start, String sortField, String sortDir);
+
+    SurveyAnswerVariantCatalogDTO getSurveyAnswerVariantCatalog(UUID id) throws ObjectNotFoundException;
+
+    SurveyAnswerVariantCatalog saveSurveyAnswerVariantCatalog(SurveyAnswerVariantCatalogDTO dto) throws ObjectNotFoundException;
+
+    void deleteSurveyAnswerVariantCatalog(UUID id);
+
+    EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getSurveyAnswerVariantCatalogItemsPaged(UUID catalogId, String text, Integer count, Integer page,
+                                                                                                  Integer start, String sortField, String sortDir);
+
+    SurveyAnswerVariantCatalogItemDTO getSurveyAnswerVariantCatalogItem(UUID id) throws ObjectNotFoundException;
+
+    SurveyAnswerVariantCatalogItem saveSurveyAnswerVariantCatalogItem(SurveyAnswerVariantCatalogItemDTO dto) throws ObjectNotFoundException;
+
+    void deleteSurveyAnswerVariantCatalogItem(UUID id);
 }

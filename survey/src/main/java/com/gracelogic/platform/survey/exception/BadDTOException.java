@@ -1,14 +1,14 @@
 package com.gracelogic.platform.survey.exception;
 
-public class IncompleteDTOException extends Exception{
+public class BadDTOException extends Exception{
     private String message;
 
-    public IncompleteDTOException(String message) {
+    public BadDTOException(String message) {
         super(message);
         this.message = message;
     }
 
-    public IncompleteDTOException() {
+    public BadDTOException() {
         super("");
         message = null;
     }

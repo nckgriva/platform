@@ -2,7 +2,6 @@ package com.gracelogic.platform.survey.dto.admin;
 
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.survey.model.SurveyQuestionAnswer;
-
 import java.util.UUID;
 
 public class SurveyQuestionAnswerDTO extends IdObjectDTO {

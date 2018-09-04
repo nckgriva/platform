@@ -3,6 +3,8 @@ package com.gracelogic.platform.survey.dto.admin;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.survey.model.SurveyAnswerVariant;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 public class SurveyAnswerVariantDTO extends IdObjectDTO {
@@ -12,6 +14,13 @@ public class SurveyAnswerVariantDTO extends IdObjectDTO {
     private Boolean defaultVariant; // Вариант выбран по умолчанию
     private Boolean customVariant;
     private Integer weight; // Вес ответа для автоматической обработки
+
+    /**
+     * Logic triggers that must be added to this answer variant
+     */
+    // CLIENT->SERVER
+    private List<SurveyLogicTriggerDTO> logicTriggersToAdd = new LinkedList<>();
+
 
     public static SurveyAnswerVariantDTO prepare(SurveyAnswerVariant model) {
         SurveyAnswerVariantDTO dto = new SurveyAnswerVariantDTO();
@@ -73,5 +82,13 @@ public class SurveyAnswerVariantDTO extends IdObjectDTO {
 
     public void setWeight(Integer weight) {
         this.weight = weight;
+    }
+
+    public List<SurveyLogicTriggerDTO> getLogicTriggersToAdd() {
+        return logicTriggersToAdd;
+    }
+
+    public void setLogicTriggersToAdd(List<SurveyLogicTriggerDTO> logicTriggersToAdd) {
+        this.logicTriggersToAdd = logicTriggersToAdd;
     }
 }

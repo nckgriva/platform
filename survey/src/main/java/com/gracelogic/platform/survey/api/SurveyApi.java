@@ -4,6 +4,8 @@ package com.gracelogic.platform.survey.api;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
+import com.gracelogic.platform.property.dto.PropertyDTO;
+import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.survey.Path;
 import com.gracelogic.platform.survey.dto.admin.SurveyDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
@@ -18,6 +20,7 @@ import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
 import io.swagger.annotations.*;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -27,7 +30,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
@@ -44,6 +51,51 @@ public class SurveyApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource dbMessageSource;
+
+    @Autowired
+    private PropertyService propertyService;
+
+    @ApiOperation(
+            value = "exportResults",
+            notes = "Exports survey results to csv file"
+    )
+    @PreAuthorize("hasAuthority('SURVEY_RESULT:SHOW')")
+    @RequestMapping(method = RequestMethod.GET, value="/{id}/export")
+    public void exportResults(@PathVariable(value = "id") UUID surveyId, HttpServletResponse response) {
+        try {
+            String date = new SimpleDateFormat("dd_MM_yyyy").format(new Date());
+            String fileName = "survey_export_" + date + ".csv";
+
+            response.setContentType("text/csv");
+            response.setCharacterEncoding("windows-1251");
+            response.addHeader("Content-Disposition", String.format("attachment;filename=%s", fileName));
+
+            response.getWriter().print(surveyService.exportResults(surveyId));
+            response.getWriter().flush();
+            response.flushBuffer();
+        } catch (Exception ignored) {
+
+        }
+    }
+
+    @ApiOperation(
+            value = "getBaseUrl",
+            notes = "Returns base url for survey.link setup purposes",
+            response = PropertyDTO.class
+    )
+    @RequestMapping(method = RequestMethod.GET, value = "/base_url")
+    @ResponseBody
+    @PreAuthorize("hasAuthority('SURVEY:SAVE')")
+    public ResponseEntity getBaseUrl() {
+        String propertyName = "web:base_url";
+        String propertyValue = propertyService.getPropertyValue(propertyName);
+
+        PropertyDTO propertyDTO = new PropertyDTO();
+        propertyDTO.setValue(propertyValue);
+        propertyDTO.setName(propertyName);
+
+        return new ResponseEntity<>(propertyDTO, HttpStatus.OK);
+    }
 
     @ApiOperation(
             value = "getInitialSurveyInfo",
@@ -63,7 +115,6 @@ public class SurveyApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
                     messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @ApiOperation(
@@ -90,6 +141,25 @@ public class SurveyApi extends AbstractAuthorizedController {
         } catch (MaxAttemptsHitException maxAttemptsException) {
             return new ResponseEntity<>(new ErrorResponse("survey.MAX_ATTEMPTS_HIT",
                     messageSource.getMessage("survey.MAX_ATTEMPTS_HIT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
+            value = "startSurveyPreview",
+            notes = "Starts survey preview. This method is only available to users which have SURVEY:SHOW grant.",
+            response = SurveyInteractionDTO.class
+    )
+    @PreAuthorize("hasAuthority('SURVEY:SHOW')")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/start_preview")
+    @ResponseBody
+    public ResponseEntity startSurveyPreview(HttpServletRequest request,
+                                      @PathVariable(value = "id") UUID surveyId) {
+        try {
+            SurveyInteractionDTO dto = surveyService.startSurveyPreview(surveyId, getUser(), ServletUtils.getRemoteAddress(request));
+            return new ResponseEntity<SurveyInteractionDTO>(dto, HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
+                    LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -131,7 +201,7 @@ public class SurveyApi extends AbstractAuthorizedController {
     public ResponseEntity getSurvey(@PathVariable(value = "id") UUID id,
                                     @RequestParam(value = "entireSurvey", required = false) Boolean entireSurvey) {
         try {
-            SurveyDTO dto = surveyService.getSurvey(id, entireSurvey);
+            SurveyDTO dto = surveyService.getSurvey(id, entireSurvey != null ? entireSurvey : false);
             return new ResponseEntity<SurveyDTO>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
@@ -168,8 +238,10 @@ public class SurveyApi extends AbstractAuthorizedController {
         } catch (LogicDependencyException logicDependency) {
             return new ResponseEntity<>(new ErrorResponse("survey.LOGIC_DEPENDENCY",
                     messageSource.getMessage("survey.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        } catch (IncompleteDTOException incompleteDTO) {
-            return new ResponseEntity<>(new ErrorResponse("survey.INCOMPLETE_DTO", incompleteDTO.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (BadDTOException badDTO) {
+            return new ResponseEntity<>(new ErrorResponse("survey.BAD_DTO", badDTO.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (PersistenceException persistenceException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.DEPENDENCY_ERROR", persistenceException.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 

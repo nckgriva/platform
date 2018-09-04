@@ -35,7 +35,7 @@ public class PropertyApi extends AbstractAuthorizedController {
     private PropertyService propertyService;
 
     @ApiOperation(
-            value = "getPropeties",
+            value = "getProperties",
             notes = "Get list of properties",
             response =  EntityListResponse.class
     )

@@ -32,4 +32,6 @@ public interface FileStorageService {
     File getFile(StoredFile storedFile) throws UnsupportedStoreModeException, StoredFileDataUnavailableException;
 
     void writeStoredFileDataToOutputStream(StoredFile storedFile, OutputStream os) throws UnsupportedStoreModeException, StoredFileDataUnavailableException, IOException;
+
+    StoredFileDTO getStoredFile(UUID id, boolean enrich) throws ObjectNotFoundException;
 }

@@ -12,9 +12,7 @@ import org.hibernate.annotations.TypeDefs;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
-/*
- Модель, определяющая, что опрос был начат пользователем User, во время started
- */
+
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_SESSION")
 @TypeDefs({
@@ -68,6 +66,11 @@ public class SurveySession extends IdObject<UUID> {
     @Type(type = "int-array")
     @Column(name = "PAGE_VISIT_HISTORY", columnDefinition = "integer[]")
     private Integer[] pageVisitHistory;
+    /**
+     * Detects if survey creator passing this survey
+     */
+    @Column(name = "IS_PREVIEW_SESSION", nullable = false)
+    private Boolean previewSession;
 
     @Override
     public UUID getId() {
@@ -169,5 +172,13 @@ public class SurveySession extends IdObject<UUID> {
 
     public void setPageVisitHistory(Integer[] pageVisitHistory) {
         this.pageVisitHistory = pageVisitHistory;
+    }
+
+    public Boolean getPreviewSession() {
+        return previewSession;
+    }
+
+    public void setPreviewSession(Boolean previewSession) {
+        this.previewSession = previewSession;
     }
 }

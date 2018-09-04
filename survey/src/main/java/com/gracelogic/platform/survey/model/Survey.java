@@ -49,6 +49,11 @@ public class Survey extends IdObject<UUID> {
 
     @Column(name = "IS_ALLOW_RETURN", nullable = false)
     private Boolean allowReturn;
+    /**
+     * When answering to custom answer variant, user must specify text field of it, even if question is non required
+     */
+    @Column(name = "IS_CLARIFY_CUSTOM_ANSWER", nullable = false)
+    private Boolean clarifyCustomAnswer;
 
     @Column(name = "INTRODUCTION", nullable = true, length = 4000)
     private String introduction;
@@ -138,7 +143,7 @@ public class Survey extends IdObject<UUID> {
         this.expirationDate = expirationDate;
     }
 
-    public Boolean getShowProgress() {
+    public Boolean isShowProgress() {
         return showProgress;
     }
 
@@ -146,7 +151,7 @@ public class Survey extends IdObject<UUID> {
         this.showProgress = showProgress;
     }
 
-    public Boolean getShowQuestionNumber() {
+    public Boolean isShowQuestionNumber() {
         return showQuestionNumber;
     }
 
@@ -154,7 +159,7 @@ public class Survey extends IdObject<UUID> {
         this.showQuestionNumber = showQuestionNumber;
     }
 
-    public Boolean getAllowReturn() {
+    public Boolean isReturnAllowed() {
         return allowReturn;
     }
 
@@ -224,5 +229,13 @@ public class Survey extends IdObject<UUID> {
 
     public void setMaxAttempts(Integer maxAttempts) {
         this.maxAttempts = maxAttempts;
+    }
+
+    public Boolean getClarifyCustomAnswer() {
+        return clarifyCustomAnswer;
+    }
+
+    public void setClarifyCustomAnswer(Boolean clarifyCustomAnswer) {
+        this.clarifyCustomAnswer = clarifyCustomAnswer;
     }
 }

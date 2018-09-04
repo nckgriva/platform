@@ -6,6 +6,7 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.Path;
 import com.gracelogic.platform.survey.dto.admin.SurveyQuestionDTO;
+import com.gracelogic.platform.survey.exception.BadDTOException;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
 import com.gracelogic.platform.survey.exception.ResultDependencyException;
 import com.gracelogic.platform.survey.model.SurveyQuestion;
@@ -107,8 +108,9 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
             return new ResponseEntity<IDResponse>(new IDResponse(surveyQuestion.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (BadDTOException badDTO) {
+            return new ResponseEntity<>(new ErrorResponse("survey.BAD_DTO", badDTO.getMessage()), HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @ApiOperation(

@@ -9,9 +9,12 @@ public class SurveyPageDTO extends IdObjectDTO {
     private UUID surveyId;
     private Integer pageIndex;
     private String description;
+
+    // CLIENT<-->SERVER
     private List<SurveyQuestionDTO> questions = new LinkedList<>();
     private List<SurveyLogicTriggerDTO> logicTriggers = new LinkedList<>();
 
+    // CLIENT->SERVER
     private Set<UUID> questionsToDelete = new HashSet<>();
     private Set<UUID> logicTriggersToDelete = new HashSet<>();
 

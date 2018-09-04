@@ -8,6 +8,7 @@ import com.gracelogic.platform.survey.dto.admin.SurveySessionDTO;
 import com.gracelogic.platform.survey.dto.user.PageAnswersDTO;
 import com.gracelogic.platform.survey.dto.user.SurveyInteractionDTO;
 import com.gracelogic.platform.survey.exception.UnansweredException;
+import com.gracelogic.platform.survey.exception.UnansweredOtherOptionException;
 import com.gracelogic.platform.survey.model.SurveySession;
 import com.gracelogic.platform.survey.service.SurveyService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
@@ -100,16 +101,16 @@ public class SurveySessionApi extends AbstractAuthorizedController {
             SurveyInteractionDTO dto = surveyService.saveAnswersAndContinue(surveySessionId, pageAnswersDTO);
             return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (ForbiddenException forbiddenException) {
-            return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
-                    messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN", forbiddenException.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException notFoundException) {
             return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SESSION",
                     messageSource.getMessage("survey.NO_SUCH_SESSION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (UnansweredException unansweredException) {
-            return new ResponseEntity<>(new ErrorResponse("survey.UNANSWERED",
-                    messageSource.getMessage("survey.UNANSWERED", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.UNANSWERED", unansweredException.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (UnansweredOtherOptionException unansweredOtherException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.UNANSWERED_OTHER_OPTION",
+                    messageSource.getMessage("survey.UNANSWERED_OTHER_OPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @ApiOperation(
