@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.UUID;
 
 public interface TaskService {
-    void executeTask(UUID taskId, String parameter, UUID method);
+    void executeTask(Task task, String parameter, UUID method);
 
     void setTaskExecutionState(UUID taskExecutionId, UUID stateId);
 
