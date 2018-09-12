@@ -43,7 +43,7 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     @JoinColumn(name = "ANSWER_VARIANT_ID", nullable = true)
     private SurveyAnswerVariant answerVariant;
 
-    @Column(name = "TEXT", nullable = true)
+    @Column(name = "TEXT", nullable = true, length = 4000)
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)

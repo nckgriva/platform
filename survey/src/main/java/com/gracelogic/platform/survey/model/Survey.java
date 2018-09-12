@@ -61,7 +61,7 @@ public class Survey extends IdObject<UUID> {
     @Column(name = "CONCLUSION", nullable = true, length = 4000)
     private String conclusion;
 
-    @Column(name = "LINK", nullable = true)
+    @Column(name = "LINK", nullable = true, length = 2000) // 2000 is maximum url length based on https://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
     private String link;
 
     @Column(name = "MAX_RESPONDENTS", nullable = true)

@@ -43,10 +43,10 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "QUESTION_INDEX", nullable = false)
     private Integer questionIndex;
 
-    @Column(name = "TEXT", nullable = false)
+    @Column(name = "TEXT", nullable = false, length = 4000)
     private String text;
 
-    @Column(name = "DESCRIPTION", nullable = true)
+    @Column(name = "DESCRIPTION", nullable = true, length = 4000)
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -74,7 +74,7 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "SCALE_STEP_VALUE", nullable = true)
     private Integer scaleStepValue;
 
-    @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true)
+    @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true, length = 4000)
     private String attachmentExtensions;
 
     @Type(type = "string-array")

@@ -33,7 +33,7 @@ public class SurveyPage extends IdObject<UUID> {
     @Column(name = "PAGE_INDEX", nullable = false)
     private Integer pageIndex;
 
-    @Column(name = "DESCRIPTION", nullable = true)
+    @Column(name = "DESCRIPTION", nullable = true, length = 4000)
     private String description;
 
     @Override

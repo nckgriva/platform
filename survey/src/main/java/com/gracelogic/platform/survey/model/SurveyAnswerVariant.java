@@ -30,7 +30,7 @@ public class SurveyAnswerVariant extends IdObject<UUID> {
     @JoinColumn(name = "SURVEY_QUESTION_ID", nullable = false)
     private SurveyQuestion surveyQuestion;
 
-    @Column(name = "TEXT", nullable = false)
+    @Column(name = "TEXT", nullable = false, length=4000)
     private String text;
 
     @Column(name = "SORT_ORDER", nullable = false)
