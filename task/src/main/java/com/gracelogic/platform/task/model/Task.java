@@ -39,7 +39,7 @@ public class Task extends IdObject<UUID> {
     @Column(name = "CRON_EXPRESSION", nullable = true)
     private String cronExpression;
 
-    @Column(name = "PARAMETER", nullable = true)
+    @Column(name = "PARAMETER", nullable = false)
     private String parameter;
 
     @Column(name = "LAST_EXECUTION_DATE", nullable = true)
