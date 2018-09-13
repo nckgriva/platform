@@ -17,7 +17,7 @@ public class SurveyLogicTriggerDTO extends IdObjectDTO {
     private UUID logicActionTypeId;
 
 
-    // this is used only in client -> server when creating LogicTrigger in SurveyQuestionDTO. Indicates target question index in arrived array
+    // this is used only in client -> server when creating LogicTrigger in SurveyQuestionDTO. Indicates target question index
     private Integer targetQuestionIndex;
 
     public static SurveyLogicTriggerDTO prepare(SurveyLogicTrigger model) {

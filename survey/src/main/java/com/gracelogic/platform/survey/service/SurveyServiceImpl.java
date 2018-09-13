@@ -76,40 +76,126 @@ public class SurveyServiceImpl implements SurveyService {
     public String exportResults(UUID surveyId) throws ObjectNotFoundException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
         if (survey == null) throw new ObjectNotFoundException();
-        String results = "question_answer_id;question_id;question_text;answer_variant_id;answer_variant_text;answer_text;matrix_row_name;matrix_column_name\n";
 
         Map<String, Object> params = new HashMap<>();
         params.put("surveyId", surveyId);
-        List<SurveyQuestionAnswer> listAnswers = idObjectService.getList(SurveyQuestionAnswer.class,
-                "left join el.surveySession ss", "ss.previewSession = false and ss.ended != null and ss.survey.id = :surveyId ",
+
+        // at first get suitable sessions
+        List<SurveySession> sessionsList = idObjectService.getList(SurveySession.class, null,
+                "ss.previewSession = false and ss.ended != null and ss.survey.id = :surveyId ",
                 params, null, null, null, null);
 
-        if (listAnswers.size() == 0) return results;
+        if (sessionsList.size() == 0) return "";
 
-        Set<UUID> questionIds = new HashSet<>();
-        for (SurveyQuestionAnswer answer : listAnswers) {
-            questionIds.add(answer.getQuestion().getId());
-        }
-        params.clear();
-        params.put("questionIds", questionIds);
-
-        HashMap<UUID, SurveyQuestion> questionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, null, "el.id in (:questionIds) ",
-                params, null, null, null, null));
-        HashMap<UUID, SurveyAnswerVariant> answerVariantHashMap = asUUIDHashMap(idObjectService.getList(SurveyAnswerVariant.class,
-                null, "el.surveyQuestion.id in (:questionIds) ",
-                params, null, null, null, null));
+        HashMap<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> answersBySessionAndQuestion = new HashMap<>();
         params.clear();
 
-        for (SurveyQuestionAnswer answer : listAnswers) {
-            SurveyQuestion question = questionsHashMap.get(answer.getSurveyQuestion().getId());
-            results += String.format("%s;%s;%s;%s;%s;%s;%s;%s\n", answer.getId(), answer.getSurveyQuestion().getId(),
-                    question.getText(), answer.getAnswerVariant() != null ? answer.getAnswerVariant().getId() : "",
-                    answer.getAnswerVariant() != null ? answerVariantHashMap.get(answer.getAnswerVariant().getId()).getText() : "", answer.getText() != null ? answer.getText() : "",
-                    answer.getSelectedMatrixRow() != null ? question.getMatrixRows()[answer.getSelectedMatrixRow()] : "",
-                    answer.getSelectedMatrixColumn() != null ? question.getMatrixColumns()[answer.getSelectedMatrixColumn()] : "");
+        HashSet<UUID> sessionIds = new HashSet<>();
+        for (SurveySession session : sessionsList) sessionIds.add(session.getId());
+        params.put("surveySessionIds", sessionIds);
+
+        List<SurveyQuestionAnswer> answersList = idObjectService.getList(SurveyQuestionAnswer.class, null,
+                "el.surveySession.id in (:surveySessionIds)", params, null, null, null, null);
+
+        params.clear();
+        params.put("surveyId", surveyId);
+        // get all questions by this survey
+        HashMap<UUID, SurveyQuestion> surveyQuestions = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, "left join el.surveyPage sp",
+                "sp.survey.id = surveyId", params, "el.questionIndex", "ASC", null, null));
+
+        HashSet<UUID> answerVariantIds = new HashSet<>();
+        for (SurveyQuestionAnswer answer : answersList) {
+            if (answer.getAnswerVariant() != null)
+                answerVariantIds.add(answer.getAnswerVariant().getId());
+        }
+        params.clear();
+        params.put("answerVariantIds", answerVariantIds);
+        HashMap<UUID, SurveyAnswerVariant> surveyAnswerVariants = asUUIDHashMap(idObjectService.getList(SurveyAnswerVariant.class, null,
+                "el.id in (:answerVariantIds)", params, null, null, null, null));
+
+        for (SurveyQuestionAnswer answer : answersList) {
+            if (!answersBySessionAndQuestion.containsKey(answer.getSurveySession().getId())) {
+
+                HashMap<UUID, List<SurveyQuestionAnswer>> answersByQuestion = new HashMap<>();
+                List<SurveyQuestionAnswer> questionAnswers = new ArrayList<>();
+                questionAnswers.add(answer);
+
+                answersByQuestion.put(answer.getQuestion().getId(), questionAnswers);
+                answersBySessionAndQuestion.put(answer.getSurveySession().getId(), answersByQuestion);
+                continue;
+            }
+
+            if (!answersBySessionAndQuestion.get(answer.getSurveySession().getId()).containsKey(answer.getQuestion().getId())) {
+                HashMap<UUID, List<SurveyQuestionAnswer>> answersByQuestion = new HashMap<>();
+                List<SurveyQuestionAnswer> questionAnswers = new ArrayList<>();
+                questionAnswers.add(answer);
+
+                answersBySessionAndQuestion.get(answer.getSurveySession().getId()).put(answer.getQuestion().getId(), questionAnswers);
+                continue;
+            }
+
+            answersBySessionAndQuestion.get(answer.getSurveySession().getId()).get(answer.getQuestion().getId()).add(answer);
         }
 
-        return results;
+        char separator = ';';
+        boolean isFirst = true;
+        StringBuilder pattern = new StringBuilder();
+        StringBuilder resultsBuilder = new StringBuilder();
+        for (Map.Entry<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> entry : answersBySessionAndQuestion.entrySet()) {
+
+            HashMap<SurveyQuestion, String> answersAsString = new HashMap<>();
+            for (Map.Entry<UUID, List<SurveyQuestionAnswer>> questionAnswers : entry.getValue().entrySet()) {
+                SurveyQuestion surveyQuestion = surveyQuestions.get(questionAnswers.getKey());
+                List<SurveyQuestionAnswer> answers = questionAnswers.getValue();
+
+                // text values
+                if (surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.TEXT_SINGLE_LINE.getValue()) ||
+                        surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.TEXT_MULTILINE.getValue()) ||
+                        surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.RATING_SCALE.getValue())) {
+                    answersAsString.put(surveyQuestion, answers.get(0).getText());
+                    continue;
+                }
+
+                // single answer variant values
+                if (surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.RADIOBUTTON.getValue()) ||
+                        surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.COMBOBOX.getValue())) {
+                    SurveyQuestionAnswer questionAnswer = answers.get(0);
+                    SurveyAnswerVariant answerVariant = surveyAnswerVariants.get(questionAnswer.getAnswerVariant().getId());
+
+                    String text = questionAnswer.getText() != null ? questionAnswer.getText() : answerVariant.getText();
+                    answersAsString.put(surveyQuestion, text);
+                    continue;
+                }
+
+                // multiple answer variant values
+                if (surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.CHECKBOX.getValue()) ||
+                        surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.LISTBOX.getValue())) {
+                    StringBuilder multiple = new StringBuilder().append("\"");
+
+                    for (SurveyQuestionAnswer answer : answers) {
+                        SurveyAnswerVariant answerVariant = surveyAnswerVariants.get(answer.getAnswerVariant().getId());
+                        String text = answer.getText() != null ? answer.getText() : answerVariant.getText();
+                        multiple.append(text).append(separator);
+                    }
+                    multiple.deleteCharAt(multiple.length()-1).append('\"');
+                    answersAsString.put(surveyQuestion, multiple.toString());
+                }
+            }
+
+            StringBuilder singleResult = new StringBuilder();
+            for (Map.Entry<UUID, SurveyQuestion> questionEntry : surveyQuestions.entrySet()) {
+                SurveyQuestion question = questionEntry.getValue();
+                if (isFirst) pattern.append(question.getText()).append(';');
+                singleResult.append(answersAsString.containsKey(question) ? answersAsString.get(question) + ';' : ';');
+            }
+
+            singleResult.deleteCharAt(singleResult.length()-1).append('\n');
+            resultsBuilder.append(singleResult);
+            isFirst = false;
+        }
+        pattern.deleteCharAt(pattern.length()-1).append('\n');
+
+        return pattern.append(resultsBuilder).toString();
     }
 
     @Override
