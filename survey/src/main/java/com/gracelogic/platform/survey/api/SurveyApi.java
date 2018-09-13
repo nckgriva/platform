@@ -34,6 +34,7 @@ import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -73,8 +74,12 @@ public class SurveyApi extends AbstractAuthorizedController {
             response.getWriter().print(surveyService.exportResults(surveyId));
             response.getWriter().flush();
             response.flushBuffer();
-        } catch (Exception ignored) {
-
+        } catch (Exception exception) {
+            try {
+                PrintWriter pw = response.getWriter();
+                pw.write(exception.toString());
+                pw.close();
+            } catch (Exception ignored) { }
         }
     }
 
