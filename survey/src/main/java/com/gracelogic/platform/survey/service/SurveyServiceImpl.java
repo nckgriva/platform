@@ -160,9 +160,10 @@ public class SurveyServiceImpl implements SurveyService {
                 if (surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.RADIOBUTTON.getValue()) ||
                         surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.COMBOBOX.getValue())) {
                     SurveyQuestionAnswer questionAnswer = answers.get(0);
-                    SurveyAnswerVariant answerVariant = surveyAnswerVariants.get(questionAnswer.getAnswerVariant().getId());
+                    SurveyAnswerVariant answerVariant = questionAnswer.getAnswerVariant() != null ?
+                            surveyAnswerVariants.get(questionAnswer.getAnswerVariant().getId()) : null;
 
-                    String text = questionAnswer.getText() != null ? questionAnswer.getText() : answerVariant.getText();
+                    String text = questionAnswer.getText() != null ? questionAnswer.getText() : answerVariant != null ? answerVariant.getText() : "";
                     answersAsString.put(surveyQuestion, text);
                     continue;
                 }
