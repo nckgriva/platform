@@ -101,7 +101,7 @@ public class SurveyServiceImpl implements SurveyService {
         params.put("surveyId", surveyId);
         // get all questions by this survey
         HashMap<UUID, SurveyQuestion> surveyQuestions = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, "left join el.surveyPage sp",
-                "sp.survey.id = surveyId", params, "el.questionIndex", "ASC", null, null));
+                "sp.survey.id = :surveyId", params, "el.questionIndex", "ASC", null, null));
 
         HashSet<UUID> answerVariantIds = new HashSet<>();
         for (SurveyQuestionAnswer answer : answersList) {
