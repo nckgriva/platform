@@ -82,7 +82,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         // at first get suitable sessions
         List<SurveySession> sessionsList = idObjectService.getList(SurveySession.class, null,
-                "ss.previewSession = false and ss.ended != null and ss.survey.id = :surveyId ",
+                "el.previewSession = false and el.ended != null and el.survey.id = :surveyId ",
                 params, null, null, null, null);
 
         if (sessionsList.size() == 0) return "";
