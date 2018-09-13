@@ -77,7 +77,7 @@ public class SurveyApi extends AbstractAuthorizedController {
         } catch (Exception exception) {
             try {
                 PrintWriter pw = response.getWriter();
-                pw.write(exception.toString());
+                exception.printStackTrace(pw);
                 pw.close();
             } catch (Exception ignored) { }
         }
