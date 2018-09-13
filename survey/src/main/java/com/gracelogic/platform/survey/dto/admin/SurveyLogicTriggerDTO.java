@@ -16,6 +16,10 @@ public class SurveyLogicTriggerDTO extends IdObjectDTO {
     private String newLink;
     private UUID logicActionTypeId;
 
+
+    // this is used only in client -> server when creating LogicTrigger in SurveyQuestionDTO. Indicates target question index in arrived array
+    private Integer targetQuestionIndex;
+
     public static SurveyLogicTriggerDTO prepare(SurveyLogicTrigger model) {
         SurveyLogicTriggerDTO dto = new SurveyLogicTriggerDTO();
         IdObjectDTO.prepare(dto, model);
@@ -107,5 +111,13 @@ public class SurveyLogicTriggerDTO extends IdObjectDTO {
 
     public void setInteractionRequired(Boolean interactionRequired) {
         this.interactionRequired = interactionRequired;
+    }
+
+    public Integer getTargetQuestionIndex() {
+        return targetQuestionIndex;
+    }
+
+    public void setTargetQuestionIndex(Integer targetQuestionIndex) {
+        this.targetQuestionIndex = targetQuestionIndex;
     }
 }
