@@ -64,6 +64,7 @@ public class SurveyApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET, value="/{id}/export")
     public void exportResults(@PathVariable(value = "id") UUID surveyId, HttpServletResponse response) {
         try {
+            String results = surveyService.exportResults(surveyId);
             String date = new SimpleDateFormat("dd_MM_yyyy").format(new Date());
             String fileName = "survey_export_" + date + ".csv";
 
@@ -71,7 +72,7 @@ public class SurveyApi extends AbstractAuthorizedController {
             response.setCharacterEncoding("windows-1251");
             response.addHeader("Content-Disposition", String.format("attachment;filename=%s", fileName));
 
-            response.getWriter().print(surveyService.exportResults(surveyId));
+            response.getWriter().print(results);
             response.getWriter().flush();
             response.flushBuffer();
         } catch (Exception exception) {
