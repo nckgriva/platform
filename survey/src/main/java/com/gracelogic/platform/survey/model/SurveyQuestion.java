@@ -237,15 +237,19 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     @Override
     public String toString() {
+        String surveyPageId = surveyPage != null ? surveyPage.getId().toString() : "null";
+        String surveyQuestionTypeId = surveyQuestionType != null ? surveyQuestionType.getId().toString() : "null";
+        String surveyMatrixRows = matrixRows != null ? Arrays.toString(matrixRows) : "null";
+        String surveyMatrixColumns = matrixColumns != null ? Arrays.toString(matrixColumns) : "null";
         return "SurveyQuestion{" +
                 "id=" + id +
                 ", created=" + created +
                 ", changed=" + changed +
-                ", surveyPage=" + surveyPage +
+                ", surveyPage=" + surveyPageId +
                 ", questionIndex=" + questionIndex +
                 ", text='" + text + '\'' +
                 ", description='" + description + '\'' +
-                ", surveyQuestionType=" + surveyQuestionType +
+                ", surveyQuestionType=" + surveyQuestionTypeId +
                 ", required=" + required +
                 ", hidden=" + hidden +
                 ", scaleMinValue=" + scaleMinValue +
@@ -254,8 +258,8 @@ public class SurveyQuestion extends IdObject<UUID> {
                 ", scaleMaxValueLabel='" + scaleMaxValueLabel + '\'' +
                 ", scaleStepValue=" + scaleStepValue +
                 ", attachmentExtensions='" + attachmentExtensions + '\'' +
-                ", matrixRows=" + Arrays.toString(matrixRows) +
-                ", matrixColumns=" + Arrays.toString(matrixColumns) +
+                ", matrixRows=" + surveyMatrixRows +
+                ", matrixColumns=" + surveyMatrixColumns +
                 '}';
     }
 }
