@@ -97,11 +97,13 @@ public class SurveyServiceImpl implements SurveyService {
         List<SurveyQuestionAnswer> answersList = idObjectService.getList(SurveyQuestionAnswer.class, null,
                 "el.surveySession.id in (:surveySessionIds)", params, null, null, null, null);
 
+        if (answersList.size() == 0) return "";
+
         params.clear();
         params.put("surveyId", surveyId);
         // get all questions by this survey
         HashMap<UUID, SurveyQuestion> surveyQuestions = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, "left join el.surveyPage sp",
-                "sp.survey.id = :surveyId", params, "el.questionIndex", "ASC", null, null));
+                "sp.survey.id = :surveyId", params, null, null, null, null));
 
         HashSet<UUID> answerVariantIds = new HashSet<>();
         for (SurveyQuestionAnswer answer : answersList) {
@@ -170,7 +172,7 @@ public class SurveyServiceImpl implements SurveyService {
 
                     SurveyAnswerVariant answerVariant = surveyAnswerVariants.get(questionAnswer.getAnswerVariant().getId());
 
-                    String text = answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() ? questionAnswer.getText() : answerVariant.getText();
+                    String text = answerVariant.getCustomVariant() ? questionAnswer.getText() : answerVariant.getText();
                     answersAsString.put(surveyQuestion, text);
                     continue;
                 }
@@ -181,9 +183,33 @@ public class SurveyServiceImpl implements SurveyService {
                     StringBuilder multiple = new StringBuilder().append("\"");
 
                     for (SurveyQuestionAnswer answer : answers) {
+                        if (answer.getAnswerVariant() == null) {
+                            throw new InternalErrorException("Question answer is not valid, please contact app developer. Survey answer:\n"
+                                    + answer.toString() + "\nSurvey question:\n" + surveyQuestion.toString());
+                        }
+
                         SurveyAnswerVariant answerVariant = surveyAnswerVariants.get(answer.getAnswerVariant().getId());
                         String text = answer.getText() != null ? answer.getText() : answerVariant.getText();
                         multiple.append(text).append(separator);
+                    }
+                    multiple.deleteCharAt(multiple.length()-1).append('\"');
+                    answersAsString.put(surveyQuestion, multiple.toString());
+                }
+
+                // matrixes
+                if (surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue()) ||
+                    surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.getValue())) {
+                    StringBuilder multiple = new StringBuilder().append("\"");
+
+                    for (SurveyQuestionAnswer answer : answers) {
+                        if (answer.getAnswerVariant() == null)  throw new InternalErrorException("Question answer is not valid, please contact app developer. Survey answer:\n"
+                                    + answer.toString() + "\nSurvey question:\n" + surveyQuestion.toString());
+
+                        SurveyAnswerVariant answerVariant = surveyAnswerVariants.get(answer.getAnswerVariant().getId());
+                        String customText = answerVariant.getCustomVariant() ? answer.getText() : null;
+                        String rowString = surveyQuestion.getMatrixRows()[answer.getSelectedMatrixRow()];
+                        String columnString = surveyQuestion.getMatrixColumns()[answer.getSelectedMatrixColumn()];
+                        multiple.append(customText != null ? customText : rowString + separator + columnString + separator);
                     }
                     multiple.deleteCharAt(multiple.length()-1).append('\"');
                     answersAsString.put(surveyQuestion, multiple.toString());
@@ -753,18 +779,28 @@ public class SurveyServiceImpl implements SurveyService {
             for (AnswerDTO answerDTO : entry.getValue()) {
                 SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
                 SurveyAnswerVariant answerVariant = null;
+
+                boolean isAnswerVariantSpecifyRequired =
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.LISTBOX.getValue()) ||
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.CHECKBOX.getValue()) ||
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.RADIOBUTTON.getValue()) ||
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.COMBOBOX.getValue());
+
                 if (answerDTO.getAnswerVariantId() != null)
                     answerVariant = surveyAnswersHashMap.get(answerDTO.getAnswerVariantId());
+                else {
+                    if (isAnswerVariantSpecifyRequired) throw new ForbiddenException("Answer variant not specified");
+                }
 
                 // if user selected custom variant and didn't answered in text field of required question
-                if (answerVariant != null && question.getRequired() &&
-                        answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() &&
+                if (answerVariant != null && question.getRequired() && answerVariant.getCustomVariant() &&
                         StringUtils.isBlank(answerDTO.getText())) {
                     throw new UnansweredOtherOptionException("Custom text field of question is required", question.getText());
                 }
 
+                // if user selected custom variant but not clarifyed it
                 if (survey.getClarifyCustomAnswer() &&
-                        answerVariant != null && answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() &&
+                        answerVariant != null && answerVariant.getCustomVariant() &&
                         StringUtils.isBlank(answerDTO.getText())) {
                     throw new UnansweredOtherOptionException("Custom text field of question is required", question.getText());
                 }
@@ -776,14 +812,14 @@ public class SurveyServiceImpl implements SurveyService {
                 if (question.getRequired() && isTextFieldRequired && StringUtils.isBlank(answerDTO.getText())) {
                     throw new UnansweredException("Text field of question is required", question.getText());
                 }
-
                 boolean isMatrixQuestion = question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.getValue()) ||
                         question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue());
 
                 if (isMatrixQuestion && (answerDTO.getSelectedMatrixColumn() == null || answerDTO.getSelectedMatrixRow() == null)) {
-                    throw new UnansweredException("You're answering to matrix question without specified row index or column index", question.getText());
+                    throw new ForbiddenException("You're answering to matrix question without specified row index or column index");
                 }
 
+                // check out of bounds
                 if (isMatrixQuestion) {
                     int maxRows = question.getMatrixRows().length;
                     if (answerVariantsByQuestion.get(question) != null) { // if matrix has custom variant
@@ -802,6 +838,10 @@ public class SurveyServiceImpl implements SurveyService {
                         throw new ForbiddenException("You're answering to matrix row that don't exist. Expected 0-" +
                                 (question.getMatrixColumns().length-1) + ", but received " + answerDTO.getSelectedMatrixColumn());
                     }
+
+                    // custom matrix variant is always last row now. If it not specified then this is non-valid answer
+                    boolean answeringToCustomVariant = answerDTO.getSelectedMatrixRow() == maxRows-1;
+                    if (answeringToCustomVariant && answerVariant == null) throw new ForbiddenException("Answer variant not specified");
                 }
 
                 SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveySession,

@@ -39,8 +39,8 @@ public class SurveyAnswerVariant extends IdObject<UUID> {
     @Column(name = "IS_DEFAULT_VARIANT", nullable = false)
     private Boolean defaultVariant; // Вариант выбран по умолчанию
 
-    @Column(name = "IS_CUSTOM_VARIANT", nullable = true)
-    private Boolean customVariant; // Вариант для самостоятельного ответа
+    @Column(name = "IS_CUSTOM_VARIANT", nullable = false)
+    private Boolean customVariant; // Вариант самостоятельного ответа
 
     @Column(name = "WEIGHT", nullable = true)
     private Integer weight; // Вес ответа для автоматической обработки
