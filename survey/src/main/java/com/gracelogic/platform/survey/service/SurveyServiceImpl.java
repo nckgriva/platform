@@ -73,7 +73,7 @@ public class SurveyServiceImpl implements SurveyService {
         return hashMap;
     }
 
-    public String exportResults(UUID surveyId) throws ObjectNotFoundException {
+    public String exportResults(UUID surveyId) throws ObjectNotFoundException, InternalErrorException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
         if (survey == null) throw new ObjectNotFoundException();
 
@@ -114,6 +114,7 @@ public class SurveyServiceImpl implements SurveyService {
                 "el.id in (:answerVariantIds)", params, null, null, null, null));
 
         for (SurveyQuestionAnswer answer : answersList) {
+            // if no such session
             if (!answersBySessionAndQuestion.containsKey(answer.getSurveySession().getId())) {
 
                 HashMap<UUID, List<SurveyQuestionAnswer>> answersByQuestion = new HashMap<>();
@@ -125,8 +126,8 @@ public class SurveyServiceImpl implements SurveyService {
                 continue;
             }
 
+            // if has session, but don't have such question
             if (!answersBySessionAndQuestion.get(answer.getSurveySession().getId()).containsKey(answer.getQuestion().getId())) {
-                HashMap<UUID, List<SurveyQuestionAnswer>> answersByQuestion = new HashMap<>();
                 List<SurveyQuestionAnswer> questionAnswers = new ArrayList<>();
                 questionAnswers.add(answer);
 
@@ -160,10 +161,16 @@ public class SurveyServiceImpl implements SurveyService {
                 if (surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.RADIOBUTTON.getValue()) ||
                         surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.COMBOBOX.getValue())) {
                     SurveyQuestionAnswer questionAnswer = answers.get(0);
-                    SurveyAnswerVariant answerVariant = questionAnswer.getAnswerVariant() != null ?
-                            surveyAnswerVariants.get(questionAnswer.getAnswerVariant().getId()) : null;
 
-                    String text = questionAnswer.getText() != null ? questionAnswer.getText() : answerVariant != null ? answerVariant.getText() : "";
+                    if (questionAnswer.getAnswerVariant() == null) {
+                        // should never happen, but anyway
+                        throw new InternalErrorException("Question answer is not valid, please contact app developer. Survey answer:\n"
+                                + questionAnswer.toString() + "\nSurvey question:\n" + surveyQuestion.toString());
+                    }
+
+                    SurveyAnswerVariant answerVariant = surveyAnswerVariants.get(questionAnswer.getAnswerVariant().getId());
+
+                    String text = answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() ? questionAnswer.getText() : answerVariant.getText();
                     answersAsString.put(surveyQuestion, text);
                     continue;
                 }

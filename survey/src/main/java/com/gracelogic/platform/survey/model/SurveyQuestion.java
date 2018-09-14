@@ -9,6 +9,7 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
@@ -232,5 +233,29 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setScaleStepValue(Integer scaleStepValue) {
         this.scaleStepValue = scaleStepValue;
+    }
+
+    @Override
+    public String toString() {
+        return "SurveyQuestion{" +
+                "id=" + id +
+                ", created=" + created +
+                ", changed=" + changed +
+                ", surveyPage=" + surveyPage +
+                ", questionIndex=" + questionIndex +
+                ", text='" + text + '\'' +
+                ", description='" + description + '\'' +
+                ", surveyQuestionType=" + surveyQuestionType +
+                ", required=" + required +
+                ", hidden=" + hidden +
+                ", scaleMinValue=" + scaleMinValue +
+                ", scaleMaxValue=" + scaleMaxValue +
+                ", scaleMinValueLabel='" + scaleMinValueLabel + '\'' +
+                ", scaleMaxValueLabel='" + scaleMaxValueLabel + '\'' +
+                ", scaleStepValue=" + scaleStepValue +
+                ", attachmentExtensions='" + attachmentExtensions + '\'' +
+                ", matrixRows=" + Arrays.toString(matrixRows) +
+                ", matrixColumns=" + Arrays.toString(matrixColumns) +
+                '}';
     }
 }

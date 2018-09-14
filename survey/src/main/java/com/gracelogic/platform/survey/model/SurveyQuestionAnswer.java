@@ -169,4 +169,21 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     public void setSurveyQuestion(SurveyQuestion surveyQuestion) {
         this.surveyQuestion = surveyQuestion;
     }
+
+    @Override
+    public String toString() {
+        return "SurveyQuestionAnswer{" +
+                "id=" + id +
+                ", created=" + created +
+                ", changed=" + changed +
+                ", surveySession=" + surveySession +
+                ", surveyPage=" + surveyPage +
+                ", surveyQuestion=" + surveyQuestion +
+                ", answerVariant=" + answerVariant +
+                ", text='" + text + '\'' +
+                ", storedFile=" + storedFile +
+                ", selectedMatrixRow=" + selectedMatrixRow +
+                ", selectedMatrixColumn=" + selectedMatrixColumn +
+                '}';
+    }
 }
