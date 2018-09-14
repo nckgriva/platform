@@ -202,11 +202,8 @@ public class SurveyServiceImpl implements SurveyService {
                     StringBuilder multiple = new StringBuilder().append("\"");
 
                     for (SurveyQuestionAnswer answer : answers) {
-                        if (answer.getAnswerVariant() == null)  throw new InternalErrorException("Question answer is not valid, please contact app developer. Survey answer:\n"
-                                    + answer.toString() + "\nSurvey question:\n" + surveyQuestion.toString());
-
-                        SurveyAnswerVariant answerVariant = surveyAnswerVariants.get(answer.getAnswerVariant().getId());
-                        String customText = answerVariant.getCustomVariant() ? answer.getText() : null;
+                        SurveyAnswerVariant answerVariant = answer.getAnswerVariant() != null ? surveyAnswerVariants.get(answer.getAnswerVariant().getId()) : null;
+                        String customText = answerVariant != null && answerVariant.getCustomVariant() ? answer.getText() : null;
                         String rowString = surveyQuestion.getMatrixRows()[answer.getSelectedMatrixRow()];
                         String columnString = surveyQuestion.getMatrixColumns()[answer.getSelectedMatrixColumn()];
                         multiple.append(customText != null ? customText : rowString + separator + columnString + separator);
