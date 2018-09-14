@@ -205,7 +205,7 @@ public class SurveyServiceImpl implements SurveyService {
                         SurveyAnswerVariant answerVariant = answer.getAnswerVariant() != null ? surveyAnswerVariants.get(answer.getAnswerVariant().getId()) : null;
                         String columnString = surveyQuestion.getMatrixColumns()[answer.getSelectedMatrixColumn()];
                         if (answerVariant != null) {
-                            String customText = answerVariant.getCustomVariant() ? answer.getText();
+                            String customText = answer.getText();
                             multiple.append(customText).append(separator).append(columnString).append(separator);
                         } else {
                             String rowText = surveyQuestion.getMatrixRows()[answer.getSelectedMatrixRow()];
