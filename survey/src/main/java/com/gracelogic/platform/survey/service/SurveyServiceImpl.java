@@ -203,10 +203,14 @@ public class SurveyServiceImpl implements SurveyService {
 
                     for (SurveyQuestionAnswer answer : answers) {
                         SurveyAnswerVariant answerVariant = answer.getAnswerVariant() != null ? surveyAnswerVariants.get(answer.getAnswerVariant().getId()) : null;
-                        String customText = answerVariant != null && answerVariant.getCustomVariant() ? answer.getText() : null;
-                        String rowString = surveyQuestion.getMatrixRows()[answer.getSelectedMatrixRow()];
                         String columnString = surveyQuestion.getMatrixColumns()[answer.getSelectedMatrixColumn()];
-                        multiple.append((customText != null ? customText : rowString) + separator + columnString + separator);
+                        if (answerVariant != null) {
+                            String customText = answerVariant.getCustomVariant() ? answer.getText();
+                            multiple.append(customText).append(separator).append(columnString).append(separator);
+                        } else {
+                            String rowText = surveyQuestion.getMatrixRows()[answer.getSelectedMatrixRow()];
+                            multiple.append(rowText).append(separator).append(columnString).append(separator);
+                        }
                     }
                     multiple.deleteCharAt(multiple.length()-1).append('\"');
                     answersAsString.put(surveyQuestion, multiple.toString());
