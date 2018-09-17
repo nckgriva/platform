@@ -248,11 +248,11 @@ public class SurveyApi extends AbstractAuthorizedController {
                     messageSource.getMessage("survey.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (BadDTOException badDTO) {
             return new ResponseEntity<>(new ErrorResponse("survey.BAD_DTO", badDTO.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (PropertyValueException propertyValueException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.BAD_DTO_INCOMPATIBLE_VALUE",
+                    messageSource.getMessage("survey.BAD_DTO_INCOMPATIBLE_VALUE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (PersistenceException persistenceException) {
             return new ResponseEntity<>(new ErrorResponse("survey.DEPENDENCY_ERROR", persistenceException.getMessage()), HttpStatus.BAD_REQUEST);
-        } catch (PropertyValueException propertyValueException) {
-            return new ResponseEntity<>(new ErrorResponse("survey.BAD_DTO",
-                    messageSource.getMessage("survey.BAD_DTO_INCOMPATIBLE_VALUE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
