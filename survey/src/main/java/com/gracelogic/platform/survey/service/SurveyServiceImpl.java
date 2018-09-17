@@ -533,6 +533,8 @@ public class SurveyServiceImpl implements SurveyService {
                     }
 
                     SurveyLogicTrigger trigger = saveSurveyLogicTrigger(logicTriggerDTO);
+
+                    // if there is target question pointer and no target question specified
                     if (logicTriggerDTO.getTargetQuestionIndex() != null)
                         targetQuestionTriggers.put(logicTriggerDTO, trigger);
                 }

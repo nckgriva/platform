@@ -21,6 +21,7 @@ import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
 import io.swagger.annotations.*;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.PropertyValueException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -240,7 +241,8 @@ public class SurveyApi extends AbstractAuthorizedController {
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ResultDependencyException resultDependency) {
-            return new ResponseEntity<>(new ErrorResponse("survey.RESULT_DEPENDENCY", messageSource.getMessage("survey.RESULT_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("survey.RESULT_DEPENDENCY",
+                    messageSource.getMessage("survey.RESULT_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (LogicDependencyException logicDependency) {
             return new ResponseEntity<>(new ErrorResponse("survey.LOGIC_DEPENDENCY",
                     messageSource.getMessage("survey.LOGIC_DEPENDENCY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -248,6 +250,9 @@ public class SurveyApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("survey.BAD_DTO", badDTO.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (PersistenceException persistenceException) {
             return new ResponseEntity<>(new ErrorResponse("survey.DEPENDENCY_ERROR", persistenceException.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (PropertyValueException propertyValueException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.BAD_DTO",
+                    messageSource.getMessage("survey.BAD_DTO_INCOMPATIBLE_INDEX_VALUE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
