@@ -252,7 +252,7 @@ public class SurveyApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("survey.DEPENDENCY_ERROR", persistenceException.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (PropertyValueException propertyValueException) {
             return new ResponseEntity<>(new ErrorResponse("survey.BAD_DTO",
-                    messageSource.getMessage("survey.BAD_DTO_INCOMPATIBLE_INDEX_VALUE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+                    messageSource.getMessage("survey.BAD_DTO_INCOMPATIBLE_VALUE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
