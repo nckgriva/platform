@@ -391,20 +391,26 @@ public class SurveyServiceImpl implements SurveyService {
 
         // 2. Getting the logic. For the web, select only HIDE_QUESTION / SHOW_QUESTION
         params.clear();
-        cause = "el.surveyPage.pageIndex = :pageIndex AND el.surveyLogicActionType.id in (:logicActionTypeIds) ";
-        params.put("pageIndex", pageIndex);
+        cause = "el.surveyPage.id = :surveyPageId AND el.surveyLogicActionType.id in (:logicActionTypeIds) ";
         Set<UUID> logicActionTypeIds = new HashSet<>();
         logicActionTypeIds.add(DataConstants.LogicActionTypes.HIDE_QUESTION.getValue());
         logicActionTypeIds.add(DataConstants.LogicActionTypes.SHOW_QUESTION.getValue());
+        params.put("surveyPageId", surveyPage.getId());
         params.put("logicActionTypeIds", logicActionTypeIds);
         List<SurveyLogicTrigger> logicTriggers = idObjectService.getList(SurveyLogicTrigger.class,
                 null, cause, params, null, null, null);
 
-        List<SurveyLogicTriggerDTO> logicTriggersDTO = new LinkedList<>();
+        HashMap<SurveyAnswerVariant, List<SurveyLogicTriggerDTO>> triggersForAnswers = new HashMap<>();
         for (SurveyLogicTrigger trigger : logicTriggers) {
-            logicTriggersDTO.add(SurveyLogicTriggerDTO.prepare(trigger));
+            if (!triggersForAnswers.containsKey(trigger.getAnswerVariant())) {
+                List<SurveyLogicTriggerDTO> list = new LinkedList<>();
+                list.add(SurveyLogicTriggerDTO.prepare(trigger));
+                triggersForAnswers.put(trigger.getAnswerVariant(), list);
+                continue;
+            }
+
+            triggersForAnswers.get(trigger.getAnswerVariant()).add(SurveyLogicTriggerDTO.prepare(trigger));
         }
-        dto.setLogicTriggers(logicTriggersDTO);
 
         Set<UUID> questionIds = new HashSet<>();
         for (SurveyQuestion question : questions) {
@@ -427,9 +433,15 @@ public class SurveyServiceImpl implements SurveyService {
                 if (answersList != null) {
                     answerVariantsDTO = new LinkedList<>();
                     for (SurveyAnswerVariant answerVariant : answersList) {
-                        answerVariantsDTO.add(SurveyAnswerVariantDTO.prepare(answerVariant));
+                        SurveyAnswerVariantDTO answerVariantDTO = SurveyAnswerVariantDTO.prepare(answerVariant);
+                        // add web logic triggers if exists
+                        if (triggersForAnswers.containsKey(answerVariant)) {
+                            answerVariantDTO.setWebLogicTriggers(triggersForAnswers.get(answerVariant));
+                        }
+                        answerVariantsDTO.add(answerVariantDTO);
                     }
                 }
+
                 SurveyQuestionDTO surveyQuestionDTO = SurveyQuestionDTO.prepare(question);
                 surveyQuestionDTO.setAnswerVariants(answerVariantsDTO);
                 surveyQuestionDTOs.add(surveyQuestionDTO);
