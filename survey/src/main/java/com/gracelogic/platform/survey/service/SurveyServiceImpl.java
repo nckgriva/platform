@@ -651,6 +651,16 @@ public class SurveyServiceImpl implements SurveyService {
         if (surveySession == null) {
             throw new ObjectNotFoundException();
         }
+
+        Survey survey = idObjectService.getObjectById(Survey.class, surveySession.getSurvey().getId());
+        if (survey == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        if (!survey.isReturnAllowed()) {
+            throw new ForbiddenException();
+        }
+
         if (surveySession.getEnded() != null || // session already ended
                 (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(new Date())) || // hit time limit
                 (surveySession.getPageVisitHistory() == null || surveySession.getPageVisitHistory().length <= 1)) { // trying to go back to nothing
