@@ -783,11 +783,11 @@ public class SurveyServiceImpl implements SurveyService {
                         "sv.id=:surveyId and  sp.pageIndex=:lastVisitedPageIndex",
                         params, null, null, null);
 
-        Set<UUID> answeredQuestions = new HashSet<>();
+        Set<UUID> completelyAnsweredQuestions = new HashSet<>();
         Set<UUID> selectedAnswers = new HashSet<>();
 
-        // question id, answer
-        HashMap<UUID, List<SurveyQuestionAnswer>> matrixAnswers = new HashMap<>();
+        HashMap<UUID, List<SurveyQuestionAnswer>> questionAnswers = new HashMap<>();
+        Set<UUID> matrixQuestionIds = new HashSet<>();
 
         // save received answers
         for (Map.Entry<UUID, List<AnswerDTO>> entry : dto.getAnswers().entrySet()) {
@@ -867,20 +867,19 @@ public class SurveyServiceImpl implements SurveyService {
 
                 surveyQuestionAnswer.setSelectedMatrixRow(answerDTO.getSelectedMatrixRow());
                 surveyQuestionAnswer.setSelectedMatrixColumn(answerDTO.getSelectedMatrixColumn());
-                idObjectService.save(surveyQuestionAnswer);
-                // matrix question requirements will be checked later
+
+                List<SurveyQuestionAnswer> list = questionAnswers.get(question.getId());
+                if (list == null) {
+                    list = new ArrayList<>();
+                    questionAnswers.put(question.getId(), list);
+                }
+                list.add(surveyQuestionAnswer);
+
                 if (!isMatrixQuestion) {
-                    answeredQuestions.add(question.getId());
-                } else {
-                    // put answer to matrixAnswers if matrix marked as required
-                    if (question.getRequired()) {
-                        List<SurveyQuestionAnswer> list = matrixAnswers.get(question.getId());
-                        if (list == null) {
-                            list = new ArrayList<>();
-                            matrixAnswers.put(question.getId(), list);
-                        }
-                        list.add(surveyQuestionAnswer);
-                    }
+                    completelyAnsweredQuestions.add(question.getId());
+                } else if (isMatrixQuestion && question.getRequired()) {
+                    // matrix question requirements will be checked later
+                    matrixQuestionIds.add(question.getId());
                 }
 
                 if (answerVariant != null)
@@ -889,8 +888,8 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         // check all rows of required matrix question
-        for (Map.Entry<UUID, List<SurveyQuestionAnswer>> entry : matrixAnswers.entrySet()) {
-            SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
+        for (UUID questionId : matrixQuestionIds) {
+            SurveyQuestion question = surveyQuestionsHashMap.get(questionId);
             HashSet<Integer> rowsTotal = new HashSet<>();
             for (int i = 0; i < question.getMatrixRows().length; i++) {
                 rowsTotal.add(i);
@@ -901,17 +900,17 @@ public class SurveyServiceImpl implements SurveyService {
             }
 
             HashSet<Integer> rowIndexesAnswered = new HashSet<>();
-            for (SurveyQuestionAnswer answer : entry.getValue()) {
+            for (SurveyQuestionAnswer answer : questionAnswers.get(questionId)) {
                 rowIndexesAnswered.add(answer.getSelectedMatrixRow());
             }
 
             if (rowIndexesAnswered.equals(rowsTotal)) {
-                answeredQuestions.add(entry.getKey());
+                completelyAnsweredQuestions.add(questionId);
             }
         }
 
         for (Map.Entry<UUID, SurveyQuestion> entry : surveyQuestionsHashMap.entrySet()) {
-            if (entry.getValue().getRequired() && !answeredQuestions.contains(entry.getKey()))
+            if (entry.getValue().getRequired() && !completelyAnsweredQuestions.contains(entry.getKey()))
                 throw new UnansweredException("Unanswered", entry.getValue().getText());
         }
 
@@ -928,8 +927,8 @@ public class SurveyServiceImpl implements SurveyService {
                     triggered = true;
                     break;
                 case QUESTION:
-                    boolean answeredTrigger = trigger.isInteractionRequired() && answeredQuestions.contains(trigger.getSurveyQuestion().getId());
-                    boolean unansweredTrigger = !trigger.isInteractionRequired() && !answeredQuestions.contains(trigger.getSurveyQuestion().getId());
+                    boolean answeredTrigger = trigger.isInteractionRequired() && completelyAnsweredQuestions.contains(trigger.getSurveyQuestion().getId());
+                    boolean unansweredTrigger = !trigger.isInteractionRequired() && !completelyAnsweredQuestions.contains(trigger.getSurveyQuestion().getId());
                     triggered = answeredTrigger || unansweredTrigger;
                     break;
                 case ANSWER:
@@ -955,6 +954,18 @@ public class SurveyServiceImpl implements SurveyService {
                 if (!finishSurvey) {
                     finishSurvey = trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.END_SURVEY.getValue());
                 }
+
+                // answers is not needed because question is hidden
+                if (trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.HIDE_QUESTION.getValue())) {
+                    questionAnswers.remove(trigger.getTargetQuestion().getId());
+                }
+            }
+        }
+
+        // finally, save answers
+        for (List<SurveyQuestionAnswer> answers : questionAnswers.values()) {
+            for (SurveyQuestionAnswer answer : answers) {
+                idObjectService.save(answer);
             }
         }
 
@@ -1314,6 +1325,8 @@ public class SurveyServiceImpl implements SurveyService {
         } else {
             entity = new SurveyQuestion();
         }
+
+        if (dto.getSurveyQuestionTypeId() == null) throw new BadDTOException("No question type specified");
 
         SurveyQuestionType surveyQuestionType = ds.get(SurveyQuestionType.class, dto.getSurveyQuestionTypeId());
         if (surveyQuestionType.getId().equals(DataConstants.QuestionTypes.RATING_SCALE.getValue())) {
