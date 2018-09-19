@@ -1767,6 +1767,18 @@ public class SurveyServiceImpl implements SurveyService {
         } else {
             entity = new SurveyAnswerVariantCatalog();
         }
+        Map<String, Object> params = new HashMap<>();
+        if (dto.getItemsToDelete() != null && dto.getItemsToDelete().size() > 0) {
+            params.put("itemIds", dto.getItemsToDelete());
+            idObjectService.delete(SurveyAnswerVariantCatalogItem.class, "el.id in (:itemIds)", params);
+        }
+        params.clear();
+
+        if (dto.getItems() != null && dto.getItems().size() > 0) {
+            for (SurveyAnswerVariantCatalogItemDTO itemDTO : dto.getItems()) {
+                saveSurveyAnswerVariantCatalogItem(itemDTO);
+            }
+        }
 
         entity.setName(dto.getName());
 
