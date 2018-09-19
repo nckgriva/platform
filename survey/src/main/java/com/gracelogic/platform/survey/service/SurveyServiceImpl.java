@@ -866,7 +866,7 @@ public class SurveyServiceImpl implements SurveyService {
 
                     // custom matrix variant is always last row now. If it not specified then this is non-valid answer
                     boolean answeringToCustomVariant = answerDTO.getSelectedMatrixRow() == maxRows-1;
-                    if (answeringToCustomVariant && answerVariant == null) throw new ForbiddenException("Answer variant not specified");
+                    if (answeringToCustomVariant && answerVariant == null) throw new ForbiddenException("Custom answer variant not specified");
                 }
 
                 SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveySession,
@@ -880,7 +880,7 @@ public class SurveyServiceImpl implements SurveyService {
 
                 List<SurveyQuestionAnswer> list = questionAnswers.get(question.getId());
                 if (list == null) {
-                    list = new ArrayList<>();
+                    list = new LinkedList<>();
                     questionAnswers.put(question.getId(), list);
                 }
                 list.add(surveyQuestionAnswer);
@@ -942,8 +942,8 @@ public class SurveyServiceImpl implements SurveyService {
                     triggered = answeredTrigger || unansweredTrigger;
                     break;
                 case ANSWER:
-                    boolean selectedTrigger = trigger.isInteractionRequired() && selectedAnswers.contains(trigger.getSurveyQuestion().getId());
-                    boolean unselectedTrigger = !trigger.isInteractionRequired() && !selectedAnswers.contains(trigger.getSurveyQuestion().getId());
+                    boolean selectedTrigger = trigger.isInteractionRequired() && selectedAnswers.contains(trigger.getAnswerVariant().getId());
+                    boolean unselectedTrigger = !trigger.isInteractionRequired() && !selectedAnswers.contains(trigger.getAnswerVariant().getId());
                     triggered = selectedTrigger || unselectedTrigger;
                     break;
             }
