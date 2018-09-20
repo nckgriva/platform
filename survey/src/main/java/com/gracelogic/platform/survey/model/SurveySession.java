@@ -41,7 +41,7 @@ public class SurveySession extends IdObject<UUID> {
     @JoinColumn(name = "USER_ID", nullable = true)
     private User user;
 
-    @Column(name = "LAST_VISIT_IP", nullable = true)
+    @Column(name = "LAST_VISIT_IP", nullable = true, length = 40)
     private String lastVisitIP;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -60,7 +60,7 @@ public class SurveySession extends IdObject<UUID> {
     @Column(name = "CONCLUSION", nullable = true, length = 4000)
     private String conclusion;
 
-    @Column(name = "LINK", nullable = true)
+    @Column(name = "LINK", nullable = true, length = 2000)
     private String link;
 
     @Type(type = "int-array")

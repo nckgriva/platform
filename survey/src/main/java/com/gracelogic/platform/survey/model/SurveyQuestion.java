@@ -9,6 +9,7 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
@@ -43,10 +44,10 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "QUESTION_INDEX", nullable = false)
     private Integer questionIndex;
 
-    @Column(name = "TEXT", nullable = false)
+    @Column(name = "TEXT", nullable = false, length = 4000)
     private String text;
 
-    @Column(name = "DESCRIPTION", nullable = true)
+    @Column(name = "DESCRIPTION", nullable = true, length = 4000)
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -74,7 +75,7 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "SCALE_STEP_VALUE", nullable = true)
     private Integer scaleStepValue;
 
-    @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true)
+    @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true, length = 4000)
     private String attachmentExtensions;
 
     @Type(type = "string-array")
@@ -232,5 +233,33 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setScaleStepValue(Integer scaleStepValue) {
         this.scaleStepValue = scaleStepValue;
+    }
+
+    @Override
+    public String toString() {
+        String surveyPageId = surveyPage != null ? surveyPage.getId().toString() : "null";
+        String surveyQuestionTypeId = surveyQuestionType != null ? surveyQuestionType.getId().toString() : "null";
+        String surveyMatrixRows = matrixRows != null ? Arrays.toString(matrixRows) : "null";
+        String surveyMatrixColumns = matrixColumns != null ? Arrays.toString(matrixColumns) : "null";
+        return "SurveyQuestion{" +
+                "id=" + id +
+                ", created=" + created +
+                ", changed=" + changed +
+                ", surveyPage=" + surveyPageId +
+                ", questionIndex=" + questionIndex +
+                ", text='" + text + '\'' +
+                ", description='" + description + '\'' +
+                ", surveyQuestionType=" + surveyQuestionTypeId +
+                ", required=" + required +
+                ", hidden=" + hidden +
+                ", scaleMinValue=" + scaleMinValue +
+                ", scaleMaxValue=" + scaleMaxValue +
+                ", scaleMinValueLabel='" + scaleMinValueLabel + '\'' +
+                ", scaleMaxValueLabel='" + scaleMaxValueLabel + '\'' +
+                ", scaleStepValue=" + scaleStepValue +
+                ", attachmentExtensions='" + attachmentExtensions + '\'' +
+                ", matrixRows=" + surveyMatrixRows +
+                ", matrixColumns=" + surveyMatrixColumns +
+                '}';
     }
 }

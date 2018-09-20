@@ -16,6 +16,11 @@ public class SurveyAnswerVariantDTO extends IdObjectDTO {
     private Integer weight; // Вес ответа для автоматической обработки
 
     /**
+     * Survey logic triggers with type HIDE_QUESTION / SHOW_QUESTION for web
+     */
+    private List<SurveyLogicTriggerDTO> webLogicTriggers;
+
+    /**
      * Logic triggers that must be added to this answer variant
      */
     // CLIENT->SERVER
@@ -90,5 +95,13 @@ public class SurveyAnswerVariantDTO extends IdObjectDTO {
 
     public void setLogicTriggersToAdd(List<SurveyLogicTriggerDTO> logicTriggersToAdd) {
         this.logicTriggersToAdd = logicTriggersToAdd;
+    }
+
+    public List<SurveyLogicTriggerDTO> getWebLogicTriggers() {
+        return webLogicTriggers;
+    }
+
+    public void setWebLogicTriggers(List<SurveyLogicTriggerDTO> webLogicTriggers) {
+        this.webLogicTriggers = webLogicTriggers;
     }
 }

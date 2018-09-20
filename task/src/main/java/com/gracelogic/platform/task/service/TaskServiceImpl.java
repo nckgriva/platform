@@ -37,14 +37,11 @@ public class TaskServiceImpl implements TaskService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void executeTask(UUID taskId, String parameter, UUID method) {
-        if (checkTaskExist(taskId, parameter)) {
-            logger.debug("Task already exist - skip it");
-            return;
-        }
-
-        Task task = idObjectService.getObjectById(Task.class, taskId);
-
+    public void executeTask(Task task, String parameter, UUID method) {
+//        if (checkTaskExist(task.getId(), parameter)) {
+//            logger.debug("Task already exist - skip it");
+//            return;
+//        }
         TaskExecutionLog execution = new TaskExecutionLog();
         execution.setTask(task);
         execution.setMethod(ds.get(TaskExecuteMethod.class, method));
@@ -59,14 +56,13 @@ public class TaskServiceImpl implements TaskService {
         params.put("taskId", taskId);
         params.put("parameter", parameter);
         params.put("stateId", DataConstants.TaskExecutionStates.CREATED.getValue());
-        Integer count = idObjectService.checkExist(TaskExecutionLog.class, null, "el.task.id=:taskId and el.parameter=:parameter and el.state.id=:stateId", params, 1);
-        return count > 0;
+        return idObjectService.checkExist(TaskExecutionLog.class, null, "el.task.id=:taskId and el.parameter=:parameter and el.state.id=:stateId", params, 1) > 0;
     }
 
-    protected void executeTaskInOtherTransaction(UUID taskId, String parameter, UUID method) {
-        TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
-        taskService.executeTask(taskId, parameter, method);
-    }
+//    protected void executeTaskInOtherTransaction(UUID taskId, String parameter, UUID method) {
+//        TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
+//        taskService.executeTask(taskId, parameter, method);
+//    }
 
     protected void setTaskExecutionStateInOtherTransaction(UUID taskExecutionId, UUID stateId) {
         TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
@@ -111,8 +107,8 @@ public class TaskServiceImpl implements TaskService {
             //Получить класс исполнителя и вызвать у него execute с параметрами
             setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.COMPLETED.getValue());
         } catch (Exception e) {
-            setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.FAIL.getValue());
             logger.error(String.format("Failed to complete task: %s", execution.getTask().getServiceName()), e);
+            setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.FAIL.getValue());
         }
 
         updateLastExecutionDateInOtherTransaction(execution.getTask().getId());
@@ -120,10 +116,11 @@ public class TaskServiceImpl implements TaskService {
         idObjectService.save(execution);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void scheduleCronTasks() {
         Date currentDate = new Date();
-        List<Task> tasks = idObjectService.getList(Task.class, null, "el.active = true and el.cronExpression is not null", null, "el.lastExecutionDate", "ASC", null, null);
+        List<Task> tasks = idObjectService.getList(Task.class, null, "el.active=true and el.cronExpression is not null", null, "el.lastExecutionDate", "ASC", null, null);
 
         for (Task task : tasks) {
             try {
@@ -138,7 +135,7 @@ public class TaskServiceImpl implements TaskService {
                     }
 
                     if (nextExecutionDate.getTime() <= currentDate.getTime()) {
-                        executeTaskInOtherTransaction(task.getId(), task.getParameter(), DataConstants.TaskExecutionMethods.CRON.getValue());
+                        executeTask(task, task.getParameter(), DataConstants.TaskExecutionMethods.CRON.getValue());
                     }
                 }
             } catch (Exception e) {

@@ -30,7 +30,7 @@ public class SurveyAnswerVariantCatalogItem extends IdObject<UUID> {
     @JoinColumn(name = "CATALOG_ID", nullable = false)
     private SurveyAnswerVariantCatalog catalog;
 
-    @Column(name = "TEXT", nullable = false)
+    @Column(name = "TEXT", nullable = false, length = 4000)
     private String text;
 
     public UUID getId() {

@@ -43,7 +43,7 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
     @JoinColumn(name = "ANSWER_VARIANT_ID", nullable = true)
     private SurveyAnswerVariant answerVariant;
 
-    @Column(name = "TEXT", nullable = true)
+    @Column(name = "TEXT", nullable = true, length = 4000)
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
@@ -168,5 +168,28 @@ public class SurveyQuestionAnswer extends IdObject<UUID> {
 
     public void setSurveyQuestion(SurveyQuestion surveyQuestion) {
         this.surveyQuestion = surveyQuestion;
+    }
+
+    @Override
+    public String toString() {
+        String answerVariantId = answerVariant != null ? answerVariant.getId().toString() : "null";
+        String storedFileId = storedFile != null ? storedFile.getId().toString() : "null";
+        String surveySessionId = surveySession != null ? surveySession.getId().toString() : "null";
+        String surveyPageId = surveyPage != null ? surveyPage.getId().toString() : "null";
+        String surveyQuestionId = surveyQuestion != null ? surveyQuestion.getId().toString() : "null";
+
+        return "SurveyQuestionAnswer{" +
+                "id=" + id +
+                ", created=" + created +
+                ", changed=" + changed +
+                ", surveySession=" + surveySessionId +
+                ", surveyPage=" + surveyPageId +
+                ", surveyQuestion=" + surveyQuestionId +
+                ", answerVariant=" + answerVariantId +
+                ", text='" + text + '\'' +
+                ", storedFile=" + storedFileId +
+                ", selectedMatrixRow=" + selectedMatrixRow +
+                ", selectedMatrixColumn=" + selectedMatrixColumn +
+                '}';
     }
 }

@@ -6,6 +6,7 @@ import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.filestorage.model.StoredFile;
+import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.dto.admin.*;
 import com.gracelogic.platform.survey.dto.user.*;
 import com.gracelogic.platform.survey.exception.*;
@@ -16,6 +17,8 @@ import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +34,10 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Autowired
     private DictionaryService ds;
+
+    @Autowired
+    @Qualifier("surveyMessageSource")
+    private ResourceBundleMessageSource messageSource;
 
     private enum LogicTriggerCheckItem {
         PAGE,
@@ -66,43 +73,164 @@ public class SurveyServiceImpl implements SurveyService {
         return hashMap;
     }
 
-    public String exportResults(UUID surveyId) throws ObjectNotFoundException {
+    public String exportResults(UUID surveyId) throws ObjectNotFoundException, InternalErrorException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
         if (survey == null) throw new ObjectNotFoundException();
-        String results = "question_answer_id;question_id;question_text;answer_variant_id;answer_variant_text;answer_text;matrix_row_name;matrix_column_name\n";
 
         Map<String, Object> params = new HashMap<>();
         params.put("surveyId", surveyId);
-        List<SurveyQuestionAnswer> listAnswers = idObjectService.getList(SurveyQuestionAnswer.class,
-                "left join el.surveySession ss", "ss.previewSession = false and ss.ended != null and ss.survey.id = :surveyId ",
+
+        // at first get suitable sessions
+        List<SurveySession> sessionsList = idObjectService.getList(SurveySession.class, null,
+                "el.previewSession = false and el.ended != null and el.survey.id = :surveyId ",
                 params, null, null, null, null);
 
-        if (listAnswers.size() == 0) return results;
+        if (sessionsList.size() == 0) return "";
 
-        Set<UUID> questionIds = new HashSet<>();
-        for (SurveyQuestionAnswer answer : listAnswers) {
-            questionIds.add(answer.getQuestion().getId());
-        }
-        params.clear();
-        params.put("questionIds", questionIds);
-
-        HashMap<UUID, SurveyQuestion> questionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, null, "el.id in (:questionIds) ",
-                params, null, null, null, null));
-        HashMap<UUID, SurveyAnswerVariant> answerVariantHashMap = asUUIDHashMap(idObjectService.getList(SurveyAnswerVariant.class,
-                null, "el.surveyQuestion.id in (:questionIds) ",
-                params, null, null, null, null));
+        HashMap<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> answersBySessionAndQuestion = new HashMap<>();
         params.clear();
 
-        for (SurveyQuestionAnswer answer : listAnswers) {
-            SurveyQuestion question = questionsHashMap.get(answer.getSurveyQuestion().getId());
-            results += String.format("%s;%s;%s;%s;%s;%s;%s;%s\n", answer.getId(), answer.getSurveyQuestion().getId(),
-                    question.getText(), answer.getAnswerVariant() != null ? answer.getAnswerVariant().getId() : "",
-                    answer.getAnswerVariant() != null ? answerVariantHashMap.get(answer.getAnswerVariant().getId()).getText() : "", answer.getText() != null ? answer.getText() : "",
-                    answer.getSelectedMatrixRow() != null ? question.getMatrixRows()[answer.getSelectedMatrixRow()] : "",
-                    answer.getSelectedMatrixColumn() != null ? question.getMatrixColumns()[answer.getSelectedMatrixColumn()] : "");
+        HashSet<UUID> sessionIds = new HashSet<>();
+        for (SurveySession session : sessionsList) sessionIds.add(session.getId());
+        params.put("surveySessionIds", sessionIds);
+
+        List<SurveyQuestionAnswer> answersList = idObjectService.getList(SurveyQuestionAnswer.class, null,
+                "el.surveySession.id in (:surveySessionIds)", params, null, null, null, null);
+
+        if (answersList.size() == 0) return "";
+
+        params.clear();
+        params.put("surveyId", surveyId);
+        // get all questions by this survey
+        HashMap<UUID, SurveyQuestion> surveyQuestions = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, "left join el.surveyPage sp",
+                "sp.survey.id = :surveyId", params, null, null, null, null));
+
+        HashSet<UUID> answerVariantIds = new HashSet<>();
+        for (SurveyQuestionAnswer answer : answersList) {
+            if (answer.getAnswerVariant() != null)
+                answerVariantIds.add(answer.getAnswerVariant().getId());
+        }
+        params.clear();
+        params.put("answerVariantIds", answerVariantIds);
+        HashMap<UUID, SurveyAnswerVariant> surveyAnswerVariants = asUUIDHashMap(idObjectService.getList(SurveyAnswerVariant.class, null,
+                "el.id in (:answerVariantIds)", params, null, null, null, null));
+
+        for (SurveyQuestionAnswer answer : answersList) {
+            // if no such session
+            if (!answersBySessionAndQuestion.containsKey(answer.getSurveySession().getId())) {
+
+                HashMap<UUID, List<SurveyQuestionAnswer>> answersByQuestion = new HashMap<>();
+                List<SurveyQuestionAnswer> questionAnswers = new ArrayList<>();
+                questionAnswers.add(answer);
+
+                answersByQuestion.put(answer.getQuestion().getId(), questionAnswers);
+                answersBySessionAndQuestion.put(answer.getSurveySession().getId(), answersByQuestion);
+                continue;
+            }
+
+            // if has session, but don't have such question
+            if (!answersBySessionAndQuestion.get(answer.getSurveySession().getId()).containsKey(answer.getQuestion().getId())) {
+                List<SurveyQuestionAnswer> questionAnswers = new ArrayList<>();
+                questionAnswers.add(answer);
+
+                answersBySessionAndQuestion.get(answer.getSurveySession().getId()).put(answer.getQuestion().getId(), questionAnswers);
+                continue;
+            }
+
+            answersBySessionAndQuestion.get(answer.getSurveySession().getId()).get(answer.getQuestion().getId()).add(answer);
         }
 
-        return results;
+        char separator = ';';
+        boolean isFirst = true;
+        StringBuilder pattern = new StringBuilder();
+        StringBuilder resultsBuilder = new StringBuilder();
+        for (Map.Entry<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> entry : answersBySessionAndQuestion.entrySet()) {
+
+            HashMap<SurveyQuestion, String> answersAsString = new HashMap<>();
+            for (Map.Entry<UUID, List<SurveyQuestionAnswer>> questionAnswers : entry.getValue().entrySet()) {
+                SurveyQuestion surveyQuestion = surveyQuestions.get(questionAnswers.getKey());
+                List<SurveyQuestionAnswer> answers = questionAnswers.getValue();
+
+                // text values
+                if (surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.TEXT_SINGLE_LINE.getValue()) ||
+                        surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.TEXT_MULTILINE.getValue()) ||
+                        surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.RATING_SCALE.getValue())) {
+                    answersAsString.put(surveyQuestion, answers.get(0).getText());
+                    continue;
+                }
+
+                // single answer variant values
+                if (surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.RADIOBUTTON.getValue()) ||
+                        surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.COMBOBOX.getValue())) {
+                    SurveyQuestionAnswer questionAnswer = answers.get(0);
+
+                    if (questionAnswer.getAnswerVariant() == null) {
+                        // should never happen, but anyway
+                        throw new InternalErrorException("Question answer is not valid, please contact app developer. Survey answer:\n"
+                                + questionAnswer.toString() + "\nSurvey question:\n" + surveyQuestion.toString());
+                    }
+
+                    SurveyAnswerVariant answerVariant = surveyAnswerVariants.get(questionAnswer.getAnswerVariant().getId());
+
+                    String text = answerVariant.getCustomVariant() ? questionAnswer.getText() : answerVariant.getText();
+                    answersAsString.put(surveyQuestion, text);
+                    continue;
+                }
+
+                // multiple answer variant values
+                if (surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.CHECKBOX.getValue()) ||
+                        surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.LISTBOX.getValue())) {
+                    StringBuilder multiple = new StringBuilder().append("\"");
+
+                    for (SurveyQuestionAnswer answer : answers) {
+                        if (answer.getAnswerVariant() == null) {
+                            throw new InternalErrorException("Question answer is not valid, please contact app developer. Survey answer:\n"
+                                    + answer.toString() + "\nSurvey question:\n" + surveyQuestion.toString());
+                        }
+
+                        SurveyAnswerVariant answerVariant = surveyAnswerVariants.get(answer.getAnswerVariant().getId());
+                        String text = answer.getText() != null ? answer.getText() : answerVariant.getText();
+                        multiple.append(text).append(separator);
+                    }
+                    multiple.deleteCharAt(multiple.length()-1).append('\"');
+                    answersAsString.put(surveyQuestion, multiple.toString());
+                }
+
+                // matrixes
+                if (surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue()) ||
+                    surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.getValue())) {
+                    StringBuilder multiple = new StringBuilder().append("\"");
+
+                    for (SurveyQuestionAnswer answer : answers) {
+                        SurveyAnswerVariant answerVariant = answer.getAnswerVariant() != null ? surveyAnswerVariants.get(answer.getAnswerVariant().getId()) : null;
+                        String columnString = surveyQuestion.getMatrixColumns()[answer.getSelectedMatrixColumn()];
+                        if (answerVariant != null) {
+                            String customText = answer.getText();
+                            multiple.append(customText).append(separator).append(columnString).append(separator);
+                        } else {
+                            String rowText = surveyQuestion.getMatrixRows()[answer.getSelectedMatrixRow()];
+                            multiple.append(rowText).append(separator).append(columnString).append(separator);
+                        }
+                    }
+                    multiple.deleteCharAt(multiple.length()-1).append('\"');
+                    answersAsString.put(surveyQuestion, multiple.toString());
+                }
+            }
+
+            StringBuilder singleResult = new StringBuilder();
+            for (Map.Entry<UUID, SurveyQuestion> questionEntry : surveyQuestions.entrySet()) {
+                SurveyQuestion question = questionEntry.getValue();
+                if (isFirst) pattern.append(question.getText()).append(';');
+                singleResult.append(answersAsString.containsKey(question) ? answersAsString.get(question) + ';' : ';');
+            }
+
+            singleResult.deleteCharAt(singleResult.length()-1).append('\n');
+            resultsBuilder.append(singleResult);
+            isFirst = false;
+        }
+        pattern.deleteCharAt(pattern.length()-1).append('\n');
+
+        return pattern.append(resultsBuilder).toString();
     }
 
     @Override
@@ -263,20 +391,26 @@ public class SurveyServiceImpl implements SurveyService {
 
         // 2. Getting the logic. For the web, select only HIDE_QUESTION / SHOW_QUESTION
         params.clear();
-        cause = "el.surveyPage.pageIndex = :pageIndex AND el.surveyLogicActionType.id in (:logicActionTypeIds) ";
-        params.put("pageIndex", pageIndex);
+        cause = "el.surveyPage.id = :surveyPageId AND el.surveyLogicActionType.id in (:logicActionTypeIds) ";
         Set<UUID> logicActionTypeIds = new HashSet<>();
         logicActionTypeIds.add(DataConstants.LogicActionTypes.HIDE_QUESTION.getValue());
         logicActionTypeIds.add(DataConstants.LogicActionTypes.SHOW_QUESTION.getValue());
+        params.put("surveyPageId", surveyPage.getId());
         params.put("logicActionTypeIds", logicActionTypeIds);
         List<SurveyLogicTrigger> logicTriggers = idObjectService.getList(SurveyLogicTrigger.class,
                 null, cause, params, null, null, null);
 
-        List<SurveyLogicTriggerDTO> logicTriggersDTO = new LinkedList<>();
+        HashMap<SurveyAnswerVariant, List<SurveyLogicTriggerDTO>> triggersForAnswers = new HashMap<>();
         for (SurveyLogicTrigger trigger : logicTriggers) {
-            logicTriggersDTO.add(SurveyLogicTriggerDTO.prepare(trigger));
+            if (!triggersForAnswers.containsKey(trigger.getAnswerVariant())) {
+                List<SurveyLogicTriggerDTO> list = new LinkedList<>();
+                list.add(SurveyLogicTriggerDTO.prepare(trigger));
+                triggersForAnswers.put(trigger.getAnswerVariant(), list);
+                continue;
+            }
+
+            triggersForAnswers.get(trigger.getAnswerVariant()).add(SurveyLogicTriggerDTO.prepare(trigger));
         }
-        dto.setLogicTriggers(logicTriggersDTO);
 
         Set<UUID> questionIds = new HashSet<>();
         for (SurveyQuestion question : questions) {
@@ -299,9 +433,15 @@ public class SurveyServiceImpl implements SurveyService {
                 if (answersList != null) {
                     answerVariantsDTO = new LinkedList<>();
                     for (SurveyAnswerVariant answerVariant : answersList) {
-                        answerVariantsDTO.add(SurveyAnswerVariantDTO.prepare(answerVariant));
+                        SurveyAnswerVariantDTO answerVariantDTO = SurveyAnswerVariantDTO.prepare(answerVariant);
+                        // add web logic triggers if exists
+                        if (triggersForAnswers.containsKey(answerVariant)) {
+                            answerVariantDTO.setWebLogicTriggers(triggersForAnswers.get(answerVariant));
+                        }
+                        answerVariantsDTO.add(answerVariantDTO);
                     }
                 }
+
                 SurveyQuestionDTO surveyQuestionDTO = SurveyQuestionDTO.prepare(question);
                 surveyQuestionDTO.setAnswerVariants(answerVariantsDTO);
                 surveyQuestionDTOs.add(surveyQuestionDTO);
@@ -374,60 +514,101 @@ public class SurveyServiceImpl implements SurveyService {
                     }
                 }
             }
-        }
 
-        for (SurveyPageDTO surveyPageDTO : surveyDTO.getPages()) {
-            surveyPageDTO.setSurveyId(survey.getId());
-            SurveyPage surveyPage = saveSurveyPage(surveyPageDTO);
+            HashMap<SurveyLogicTriggerDTO, SurveyLogicTrigger> targetQuestionTriggers = new HashMap<>();
 
-            // page layer: here we can update existing logic triggers OR add new PAGE LOGIC TRIGGER
-            for (SurveyLogicTriggerDTO logicTriggerDTO : surveyPageDTO.getLogicTriggers()) {
-                logicTriggerDTO.setSurveyPageId(surveyPage.getId());
+            for (SurveyPageDTO surveyPageDTO : surveyDTO.getPages()) {
+                surveyPageDTO.setSurveyId(survey.getId());
+                SurveyPage surveyPage = saveSurveyPage(surveyPageDTO);
 
-                if (logicTriggerDTO.getId() == null && (logicTriggerDTO.getAnswerVariantId() != null ||
-                        logicTriggerDTO.getSurveyQuestionId() != null ||
-                        logicTriggerDTO.getTargetQuestionId() != null)) {
-                    throw new BadDTOException("Logic trigger on page " + surveyPage.getPageIndex() + " contains incompatible fields. " +
-                            "If you're trying to create new logic trigger for question or answer variant, put this model to corresponding DTO.");
-                }
-                saveSurveyLogicTrigger(logicTriggerDTO);
-            }
-
-            for (SurveyQuestionDTO surveyQuestionDTO : surveyPageDTO.getQuestions()) {
-                surveyQuestionDTO.setSurveyPageId(surveyPage.getId());
-                SurveyQuestion surveyQuestion = saveSurveyQuestion(surveyQuestionDTO);
-
-                // question layer: NEW QUESTION LOGIC TRIGGERS ONLY
-                for (SurveyLogicTriggerDTO logicTriggerDTO : surveyQuestionDTO.getLogicTriggersToAdd()) {
-                    logicTriggerDTO.setSurveyQuestionId(surveyQuestion.getId());
+                // page layer: here we can update existing logic triggers or add new page logic trigger
+                for (SurveyLogicTriggerDTO logicTriggerDTO : surveyPageDTO.getLogicTriggers()) {
                     logicTriggerDTO.setSurveyPageId(surveyPage.getId());
-                    if (logicTriggerDTO.getId() != null) {
-                        throw new BadDTOException("Logic trigger for question " + surveyQuestion.getText() + " already contains id. " +
-                                "If you're trying to update logic trigger, put this model to SurveyPageDTO.logicTriggers.");
+
+                    if (logicTriggerDTO.getId() == null && (logicTriggerDTO.getAnswerVariantId() != null ||
+                            logicTriggerDTO.getSurveyQuestionId() != null ||
+                            logicTriggerDTO.getTargetQuestionId() != null)) {
+                        throw new BadDTOException("Logic trigger on page " + surveyPage.getPageIndex() + " contains incompatible fields. " +
+                                "If you're trying to create new logic trigger for question or answer variant, put this model to corresponding DTO.");
                     }
-                    if (logicTriggerDTO.getAnswerVariantId() != null) {
-                        throw new BadDTOException("Logic trigger for question " + surveyQuestion.getText() + " contains incompatible fields." +
-                                "If you're trying to create new logic trigger for answer variant, put this model to corresponding DTO.");
-                    }
-                    saveSurveyLogicTrigger(logicTriggerDTO);
+
+                    SurveyLogicTrigger trigger = saveSurveyLogicTrigger(logicTriggerDTO);
+
+                    // if there is target question pointer and no target question specified
+                    if (logicTriggerDTO.getTargetQuestionIndex() != null)
+                        targetQuestionTriggers.put(logicTriggerDTO, trigger);
                 }
 
-                for (SurveyAnswerVariantDTO answerVariantDTO : surveyQuestionDTO.getAnswerVariants()) {
-                    answerVariantDTO.setSurveyQuestionId(surveyQuestion.getId());
-                    SurveyAnswerVariant variant = saveSurveyAnswerVariant(answerVariantDTO);
+                HashSet<Integer> questionIndexes = new HashSet<>();
+                for (SurveyQuestionDTO surveyQuestionDTO : surveyPageDTO.getQuestions()) {
+                    surveyQuestionDTO.setSurveyPageId(surveyPage.getId());
+                    SurveyQuestion surveyQuestion = saveSurveyQuestion(surveyQuestionDTO);
 
-                    // answer layer: NEW ANSWER VARIANT LOGIC TRIGGERS ONLY
-                    for (SurveyLogicTriggerDTO logicTriggerDTO : answerVariantDTO.getLogicTriggersToAdd()) {
+                    // make sure there is no duplicate indexes
+                    if (questionIndexes.contains(surveyQuestion.getQuestionIndex()))
+                        throw new BadDTOException(messageSource.getMessage("survey.BAD_DTO_DUPLICATED_QUESTION_INDEXES",
+                                null, LocaleHolder.getLocale()) + " " + surveyQuestion.getQuestionIndex());
+                    questionIndexes.add(surveyQuestion.getQuestionIndex());
+
+                    // question layer: NEW QUESTION LOGIC TRIGGERS ONLY
+                    for (SurveyLogicTriggerDTO logicTriggerDTO : surveyQuestionDTO.getLogicTriggersToAdd()) {
                         logicTriggerDTO.setSurveyQuestionId(surveyQuestion.getId());
                         logicTriggerDTO.setSurveyPageId(surveyPage.getId());
-                        logicTriggerDTO.setAnswerVariantId(variant.getId());
 
                         if (logicTriggerDTO.getId() != null) {
-                            throw new BadDTOException("Logic trigger for answer variant " + variant.getText() + " already contains id. " +
+                            throw new BadDTOException("Logic trigger for question " + surveyQuestion.getText() + " already contains id. " +
                                     "If you're trying to update logic trigger, put this model to SurveyPageDTO.logicTriggers.");
                         }
-                        saveSurveyLogicTrigger(logicTriggerDTO);
+                        if (logicTriggerDTO.getAnswerVariantId() != null) {
+                            throw new BadDTOException("Logic trigger for question " + surveyQuestion.getText() + " contains incompatible fields." +
+                                    "If you're trying to create new logic trigger for answer variant, put this model to corresponding DTO.");
+                        }
+
+                        SurveyLogicTrigger trigger = saveSurveyLogicTrigger(logicTriggerDTO);
+                        if (logicTriggerDTO.getTargetQuestionIndex() != null)
+                            targetQuestionTriggers.put(logicTriggerDTO, trigger);
                     }
+
+                    for (SurveyAnswerVariantDTO answerVariantDTO : surveyQuestionDTO.getAnswerVariants()) {
+                        answerVariantDTO.setSurveyQuestionId(surveyQuestion.getId());
+                        SurveyAnswerVariant variant = saveSurveyAnswerVariant(answerVariantDTO);
+
+                        // answer layer: NEW ANSWER VARIANT LOGIC TRIGGERS ONLY
+                        for (SurveyLogicTriggerDTO logicTriggerDTO : answerVariantDTO.getLogicTriggersToAdd()) {
+                            logicTriggerDTO.setSurveyQuestionId(surveyQuestion.getId());
+                            logicTriggerDTO.setSurveyPageId(surveyPage.getId());
+                            logicTriggerDTO.setAnswerVariantId(variant.getId());
+
+                            if (logicTriggerDTO.getId() != null) {
+                                throw new BadDTOException("Logic trigger for answer variant " + variant.getText() + " already contains id. " +
+                                        "If you're trying to update logic trigger, put this model to SurveyPageDTO.logicTriggers.");
+                            }
+
+                            SurveyLogicTrigger trigger = saveSurveyLogicTrigger(logicTriggerDTO);
+                            if (logicTriggerDTO.getTargetQuestionIndex() != null)
+                                targetQuestionTriggers.put(logicTriggerDTO, trigger);
+
+                        }
+                    }
+                }
+            }
+
+            // if have some target questions in logic triggers
+            if (!targetQuestionTriggers.isEmpty()) {
+                // check all created logic triggers on target question existence case
+                for (Map.Entry<SurveyLogicTriggerDTO, SurveyLogicTrigger> entry : targetQuestionTriggers.entrySet()) {
+                    SurveyLogicTriggerDTO dto = entry.getKey();
+                    SurveyLogicTrigger created = entry.getValue();
+
+                    params.clear();
+                    params.put("questionIndex", dto.getTargetQuestionIndex());
+                    params.put("pageId", created.getSurveyPage().getId());
+                    List<SurveyQuestion> possibleSurveyQuestions = idObjectService.getList(SurveyQuestion.class, null,
+                            "el.questionIndex = :questionIndex and el.surveyPage.id = :pageId",
+                            params, null, null, null, 1);
+                    if (possibleSurveyQuestions.size() == 0) throw new BadDTOException("Logic trigger: no such question for specified index " + dto.getTargetQuestionIndex());
+
+                    created.setTargetQuestion(possibleSurveyQuestions.get(0));
                 }
             }
         }
@@ -470,6 +651,16 @@ public class SurveyServiceImpl implements SurveyService {
         if (surveySession == null) {
             throw new ObjectNotFoundException();
         }
+
+        Survey survey = idObjectService.getObjectById(Survey.class, surveySession.getSurvey().getId());
+        if (survey == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        if (!survey.isReturnAllowed()) {
+            throw new ForbiddenException();
+        }
+
         if (surveySession.getEnded() != null || // session already ended
                 (surveySession.getExpirationDate() != null && surveySession.getExpirationDate().before(new Date())) || // hit time limit
                 (surveySession.getPageVisitHistory() == null || surveySession.getPageVisitHistory().length <= 1)) { // trying to go back to nothing
@@ -602,29 +793,39 @@ public class SurveyServiceImpl implements SurveyService {
                         "sv.id=:surveyId and  sp.pageIndex=:lastVisitedPageIndex",
                         params, null, null, null);
 
-        Set<UUID> answeredQuestions = new HashSet<>();
+        Set<UUID> completelyAnsweredQuestions = new HashSet<>();
         Set<UUID> selectedAnswers = new HashSet<>();
 
-        // question id, answer
-        HashMap<UUID, List<SurveyQuestionAnswer>> matrixAnswers = new HashMap<>();
+        HashMap<UUID, List<SurveyQuestionAnswer>> questionAnswers = new HashMap<>();
+        Set<UUID> matrixQuestionIds = new HashSet<>();
 
         // save received answers
         for (Map.Entry<UUID, List<AnswerDTO>> entry : dto.getAnswers().entrySet()) {
             for (AnswerDTO answerDTO : entry.getValue()) {
                 SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
                 SurveyAnswerVariant answerVariant = null;
+
+                boolean isAnswerVariantSpecifyRequired =
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.LISTBOX.getValue()) ||
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.CHECKBOX.getValue()) ||
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.RADIOBUTTON.getValue()) ||
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.COMBOBOX.getValue());
+
                 if (answerDTO.getAnswerVariantId() != null)
                     answerVariant = surveyAnswersHashMap.get(answerDTO.getAnswerVariantId());
+                else {
+                    if (isAnswerVariantSpecifyRequired) throw new ForbiddenException("Answer variant not specified");
+                }
 
                 // if user selected custom variant and didn't answered in text field of required question
-                if (answerVariant != null && question.getRequired() &&
-                        answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() &&
+                if (answerVariant != null && question.getRequired() && answerVariant.getCustomVariant() &&
                         StringUtils.isBlank(answerDTO.getText())) {
                     throw new UnansweredOtherOptionException("Custom text field of question is required", question.getText());
                 }
 
+                // if user selected custom variant but not clarifyed it
                 if (survey.getClarifyCustomAnswer() &&
-                        answerVariant != null && answerVariant.getCustomVariant() != null && answerVariant.getCustomVariant() &&
+                        answerVariant != null && answerVariant.getCustomVariant() &&
                         StringUtils.isBlank(answerDTO.getText())) {
                     throw new UnansweredOtherOptionException("Custom text field of question is required", question.getText());
                 }
@@ -636,14 +837,14 @@ public class SurveyServiceImpl implements SurveyService {
                 if (question.getRequired() && isTextFieldRequired && StringUtils.isBlank(answerDTO.getText())) {
                     throw new UnansweredException("Text field of question is required", question.getText());
                 }
-
                 boolean isMatrixQuestion = question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.getValue()) ||
                         question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue());
 
                 if (isMatrixQuestion && (answerDTO.getSelectedMatrixColumn() == null || answerDTO.getSelectedMatrixRow() == null)) {
-                    throw new UnansweredException("You're answering to matrix question without specified row index or column index", question.getText());
+                    throw new ForbiddenException("You're answering to matrix question without specified row index or column index");
                 }
 
+                // check out of bounds
                 if (isMatrixQuestion) {
                     int maxRows = question.getMatrixRows().length;
                     if (answerVariantsByQuestion.get(question) != null) { // if matrix has custom variant
@@ -662,6 +863,10 @@ public class SurveyServiceImpl implements SurveyService {
                         throw new ForbiddenException("You're answering to matrix row that don't exist. Expected 0-" +
                                 (question.getMatrixColumns().length-1) + ", but received " + answerDTO.getSelectedMatrixColumn());
                     }
+
+                    // custom matrix variant is always last row now. If it not specified then this is non-valid answer
+                    boolean answeringToCustomVariant = answerDTO.getSelectedMatrixRow() == maxRows-1;
+                    if (answeringToCustomVariant && answerVariant == null) throw new ForbiddenException("Custom answer variant not specified");
                 }
 
                 SurveyQuestionAnswer surveyQuestionAnswer = new SurveyQuestionAnswer(surveySession,
@@ -672,20 +877,19 @@ public class SurveyServiceImpl implements SurveyService {
 
                 surveyQuestionAnswer.setSelectedMatrixRow(answerDTO.getSelectedMatrixRow());
                 surveyQuestionAnswer.setSelectedMatrixColumn(answerDTO.getSelectedMatrixColumn());
-                idObjectService.save(surveyQuestionAnswer);
-                // matrix question requirements will be checked later
+
+                List<SurveyQuestionAnswer> list = questionAnswers.get(question.getId());
+                if (list == null) {
+                    list = new LinkedList<>();
+                    questionAnswers.put(question.getId(), list);
+                }
+                list.add(surveyQuestionAnswer);
+
                 if (!isMatrixQuestion) {
-                    answeredQuestions.add(question.getId());
-                } else {
-                    // put answer to matrixAnswers if matrix marked as required
-                    if (question.getRequired()) {
-                        List<SurveyQuestionAnswer> list = matrixAnswers.get(question.getId());
-                        if (list == null) {
-                            list = new ArrayList<>();
-                            matrixAnswers.put(question.getId(), list);
-                        }
-                        list.add(surveyQuestionAnswer);
-                    }
+                    completelyAnsweredQuestions.add(question.getId());
+                } else if (isMatrixQuestion && question.getRequired()) {
+                    // matrix question requirements will be checked later
+                    matrixQuestionIds.add(question.getId());
                 }
 
                 if (answerVariant != null)
@@ -694,8 +898,8 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         // check all rows of required matrix question
-        for (Map.Entry<UUID, List<SurveyQuestionAnswer>> entry : matrixAnswers.entrySet()) {
-            SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
+        for (UUID questionId : matrixQuestionIds) {
+            SurveyQuestion question = surveyQuestionsHashMap.get(questionId);
             HashSet<Integer> rowsTotal = new HashSet<>();
             for (int i = 0; i < question.getMatrixRows().length; i++) {
                 rowsTotal.add(i);
@@ -706,17 +910,17 @@ public class SurveyServiceImpl implements SurveyService {
             }
 
             HashSet<Integer> rowIndexesAnswered = new HashSet<>();
-            for (SurveyQuestionAnswer answer : entry.getValue()) {
+            for (SurveyQuestionAnswer answer : questionAnswers.get(questionId)) {
                 rowIndexesAnswered.add(answer.getSelectedMatrixRow());
             }
 
             if (rowIndexesAnswered.equals(rowsTotal)) {
-                answeredQuestions.add(entry.getKey());
+                completelyAnsweredQuestions.add(questionId);
             }
         }
 
         for (Map.Entry<UUID, SurveyQuestion> entry : surveyQuestionsHashMap.entrySet()) {
-            if (entry.getValue().getRequired() && !answeredQuestions.contains(entry.getKey()))
+            if (entry.getValue().getRequired() && !completelyAnsweredQuestions.contains(entry.getKey()))
                 throw new UnansweredException("Unanswered", entry.getValue().getText());
         }
 
@@ -733,13 +937,13 @@ public class SurveyServiceImpl implements SurveyService {
                     triggered = true;
                     break;
                 case QUESTION:
-                    boolean answeredTrigger = trigger.isInteractionRequired() && answeredQuestions.contains(trigger.getSurveyQuestion().getId());
-                    boolean unansweredTrigger = !trigger.isInteractionRequired() && !answeredQuestions.contains(trigger.getSurveyQuestion().getId());
+                    boolean answeredTrigger = trigger.isInteractionRequired() && completelyAnsweredQuestions.contains(trigger.getSurveyQuestion().getId());
+                    boolean unansweredTrigger = !trigger.isInteractionRequired() && !completelyAnsweredQuestions.contains(trigger.getSurveyQuestion().getId());
                     triggered = answeredTrigger || unansweredTrigger;
                     break;
                 case ANSWER:
-                    boolean selectedTrigger = trigger.isInteractionRequired() && selectedAnswers.contains(trigger.getSurveyQuestion().getId());
-                    boolean unselectedTrigger = !trigger.isInteractionRequired() && !selectedAnswers.contains(trigger.getSurveyQuestion().getId());
+                    boolean selectedTrigger = trigger.isInteractionRequired() && selectedAnswers.contains(trigger.getAnswerVariant().getId());
+                    boolean unselectedTrigger = !trigger.isInteractionRequired() && !selectedAnswers.contains(trigger.getAnswerVariant().getId());
                     triggered = selectedTrigger || unselectedTrigger;
                     break;
             }
@@ -760,6 +964,18 @@ public class SurveyServiceImpl implements SurveyService {
                 if (!finishSurvey) {
                     finishSurvey = trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.END_SURVEY.getValue());
                 }
+
+                // answers is not needed because question is hidden
+                if (trigger.getSurveyLogicActionType().getId().equals(DataConstants.LogicActionTypes.HIDE_QUESTION.getValue())) {
+                    questionAnswers.remove(trigger.getTargetQuestion().getId());
+                }
+            }
+        }
+
+        // finally, save answers
+        for (List<SurveyQuestionAnswer> answers : questionAnswers.values()) {
+            for (SurveyQuestionAnswer answer : answers) {
+                idObjectService.save(answer);
             }
         }
 
@@ -1119,6 +1335,8 @@ public class SurveyServiceImpl implements SurveyService {
         } else {
             entity = new SurveyQuestion();
         }
+
+        if (dto.getSurveyQuestionTypeId() == null) throw new BadDTOException("No question type specified");
 
         SurveyQuestionType surveyQuestionType = ds.get(SurveyQuestionType.class, dto.getSurveyQuestionTypeId());
         if (surveyQuestionType.getId().equals(DataConstants.QuestionTypes.RATING_SCALE.getValue())) {
@@ -1548,6 +1766,18 @@ public class SurveyServiceImpl implements SurveyService {
             }
         } else {
             entity = new SurveyAnswerVariantCatalog();
+        }
+        Map<String, Object> params = new HashMap<>();
+        if (dto.getItemsToDelete() != null && dto.getItemsToDelete().size() > 0) {
+            params.put("itemIds", dto.getItemsToDelete());
+            idObjectService.delete(SurveyAnswerVariantCatalogItem.class, "el.id in (:itemIds)", params);
+        }
+        params.clear();
+
+        if (dto.getItems() != null && dto.getItems().size() > 0) {
+            for (SurveyAnswerVariantCatalogItemDTO itemDTO : dto.getItems()) {
+                saveSurveyAnswerVariantCatalogItem(itemDTO);
+            }
         }
 
         entity.setName(dto.getName());
