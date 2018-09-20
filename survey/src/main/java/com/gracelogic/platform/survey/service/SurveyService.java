@@ -11,6 +11,7 @@ import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface SurveyService {
@@ -34,7 +35,7 @@ public interface SurveyService {
 
     SurveyInteractionDTO continueSurvey(UUID surveySessionId) throws ObjectNotFoundException, ForbiddenException;
 
-    EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<SurveyDTO> getSurveysPaged(String name, Boolean getExpired, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     Survey saveEntireSurvey(SurveyDTO surveyDTO, AuthorizedUser user)
             throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException, BadDTOException;
@@ -63,7 +64,8 @@ public interface SurveyService {
 
     void deleteSurveyPage(UUID id) throws LogicDependencyException, ResultDependencyException;
 
-    EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, String text, boolean withVariants, Integer count, Integer page,
+    EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, Set<UUID> questionTypes,
+                                                                  String text, boolean withVariants, Integer count, Integer page,
                                                                   Integer start, String sortField, String sortDir);
 
     SurveyQuestion saveSurveyQuestion(SurveyQuestionDTO dto) throws ObjectNotFoundException, BadDTOException;

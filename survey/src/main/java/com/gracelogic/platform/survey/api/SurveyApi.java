@@ -183,13 +183,15 @@ public class SurveyApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getSurveys(@RequestParam(value = "name", required = false) String name,
+                                     @RequestParam(value = "getExpired", required = false) Boolean getExpired,
                                      @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                      @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                      @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                      @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
 
-        EntityListResponse<SurveyDTO> properties = surveyService.getSurveysPaged(name, count, null, start, sortField, sortDir);
+        EntityListResponse<SurveyDTO> properties = surveyService.getSurveysPaged(name, getExpired,
+                count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<SurveyDTO>>(properties, HttpStatus.OK);
     }
 

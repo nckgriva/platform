@@ -1018,7 +1018,7 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<SurveyDTO> getSurveysPaged(String name, Boolean getExpired, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
@@ -1026,6 +1026,11 @@ public class SurveyServiceImpl implements SurveyService {
         if (!StringUtils.isEmpty(name)) {
             params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
             cause += "and lower(el.name) like :name ";
+        }
+
+        if (getExpired != null && getExpired) {
+            params.put("dateNow", new Date());
+            cause += "and el.expirationDate < :dateNow ";
         }
 
         int totalCount = idObjectService.getCount(Survey.class, null, countFetches, cause, params);
@@ -1267,7 +1272,9 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, String text, boolean withVariants, Integer count, Integer page,
+    public EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId,
+                                                                         Set<UUID> questionTypes, String text,
+                                                                         boolean withVariants, Integer count, Integer page,
                                                                          Integer start, String sortField, String sortDir) {
         String countFetches = "left join el.surveyPage sp ";
         String fetches = "left join el.surveyPage sp ";
@@ -1287,6 +1294,11 @@ public class SurveyServiceImpl implements SurveyService {
         if (!StringUtils.isEmpty(text)) {
             params.put("text", "%%" + StringUtils.lowerCase(text) + "%%");
             cause += "and lower(el.text) like :text ";
+        }
+
+        if (questionTypes != null && questionTypes.size() > 0) {
+            params.put("questionTypes", questionTypes);
+            cause += "and el.surveyQuestionType.id in (:questionTypes) ";
         }
 
         int totalCount = idObjectService.getCount(SurveyQuestion.class, null, countFetches, cause, params);
