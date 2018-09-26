@@ -101,9 +101,13 @@ public class SurveyServiceImpl implements SurveyService {
 
         params.clear();
         params.put("surveyId", surveyId);
+
+        List<SurveyQuestion> sortedQuestions = idObjectService.getList(SurveyQuestion.class,
+                "left join el.surveyPage sp",
+                "sp.survey.id = :surveyId", params, "el.questionIndex, sp.pageIndex ASC", null, null);
+
         // get all questions by this survey
-        HashMap<UUID, SurveyQuestion> surveyQuestions = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, "left join el.surveyPage sp",
-                "sp.survey.id = :surveyId", params, null, null, null, null));
+        HashMap<UUID, SurveyQuestion> surveyQuestions = asUUIDHashMap(sortedQuestions);
 
         HashSet<UUID> answerVariantIds = new HashSet<>();
         for (SurveyQuestionAnswer answer : answersList) {
@@ -218,8 +222,7 @@ public class SurveyServiceImpl implements SurveyService {
             }
 
             StringBuilder singleResult = new StringBuilder();
-            for (Map.Entry<UUID, SurveyQuestion> questionEntry : surveyQuestions.entrySet()) {
-                SurveyQuestion question = questionEntry.getValue();
+            for (SurveyQuestion question : sortedQuestions) {
                 if (isFirst) pattern.append(question.getText()).append(';');
                 singleResult.append(answersAsString.containsKey(question) ? answersAsString.get(question) + ';' : ';');
             }
