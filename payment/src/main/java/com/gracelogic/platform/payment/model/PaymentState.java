@@ -33,6 +33,9 @@ public class PaymentState extends IdObject<UUID> implements Dictionary {
     @Column(name = "DESCRIPTION", nullable = true)
     private String description;
 
+    @Column(name = SORT_ORDER, nullable = true)
+    private Integer sortOrder;
+
     @Override
     public UUID getId() {
         return id;
@@ -86,6 +89,10 @@ public class PaymentState extends IdObject<UUID> implements Dictionary {
 
     @Override
     public Integer getSortOrder() {
-        return 0;
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 }

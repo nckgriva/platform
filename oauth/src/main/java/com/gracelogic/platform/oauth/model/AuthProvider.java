@@ -35,6 +35,9 @@ public class AuthProvider extends IdObject<UUID> implements Dictionary {
     @Column(name = "FULL_NAME", nullable = true)
     private String fullName;
 
+    @Column(name = SORT_ORDER, nullable = true)
+    private Integer sortOrder;
+
     @Override
     public UUID getId() {
         return id;
@@ -88,6 +91,10 @@ public class AuthProvider extends IdObject<UUID> implements Dictionary {
 
     @Override
     public Integer getSortOrder() {
-        return 0;
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 }

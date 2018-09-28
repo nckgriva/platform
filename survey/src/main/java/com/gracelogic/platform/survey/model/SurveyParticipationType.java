@@ -30,6 +30,9 @@ public class SurveyParticipationType extends IdObject<UUID> implements Dictionar
     @Column(name = NAME, nullable = false)
     private String name;
 
+    @Column(name = SORT_ORDER, nullable = true)
+    private Integer sortOrder;
+
     @Override
     public UUID getId() {
         return id;
@@ -75,6 +78,10 @@ public class SurveyParticipationType extends IdObject<UUID> implements Dictionar
 
     @Override
     public Integer getSortOrder() {
-        return 0;
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 }
