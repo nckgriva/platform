@@ -25,6 +25,10 @@
             <artifactId>platform-web</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>expiringmap</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <resources>
