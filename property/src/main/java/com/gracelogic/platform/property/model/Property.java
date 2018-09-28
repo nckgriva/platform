@@ -32,9 +32,6 @@ public class Property extends IdObject<UUID> {
     @Column(name = "VALUE", nullable = true, length = 4000)
     private String value;
 
-    @Column(name = "LIFETIME", nullable = true)
-    private Long lifetime;
-
     @Column(name = "IS_VISIBLE", nullable = true)
     private Boolean visible;
 
@@ -82,14 +79,6 @@ public class Property extends IdObject<UUID> {
 
     public void setValue(String value) {
         this.value = value;
-    }
-
-    public Long getLifetime() {
-        return lifetime;
-    }
-
-    public void setLifetime(Long lifetime) {
-        this.lifetime = lifetime;
     }
 
     public Boolean getVisible() {return visible;}

@@ -2,7 +2,6 @@ package com.gracelogic.platform.dictionary.service;
 
 import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.db.service.IdObjectService;
-import com.gracelogic.platform.dictionary.model.Dictionary;
 import net.jodah.expiringmap.ExpiringMap;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class DictionaryServiceImpl implements DictionaryService {
-    private static Set<Class<? extends Dictionary>> dictionaryClasses;
-
     private static Logger logger = Logger.getLogger(DictionaryServiceImpl.class);
 
     @Autowired
