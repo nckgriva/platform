@@ -31,7 +31,7 @@ public class Currency extends IdObject<UUID> implements Dictionary {
     @Column(name = NAME, nullable = false)
     private String name;
 
-    @Column(name = "CODE", nullable = false)
+    @Column(name = CODE, nullable = false)
     private String code;
 
     @Column(name = SORT_ORDER, nullable = true)
