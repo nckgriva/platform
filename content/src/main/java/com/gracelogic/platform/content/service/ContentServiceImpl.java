@@ -236,7 +236,14 @@ public class ContentServiceImpl implements ContentService {
         element.setFields(JsonUtils.mapToJson(dto.getFields()));
         element.setExternalId(dto.getExternalId());
 
-        return idObjectService.save(element);
+        element = idObjectService.save(element);
+
+        if (StringUtils.isEmpty(element.getExternalId())) {
+            element.setExternalId(element.getId().toString());
+            element = idObjectService.save(element);
+        }
+
+        return element;
     }
 
     @Override
