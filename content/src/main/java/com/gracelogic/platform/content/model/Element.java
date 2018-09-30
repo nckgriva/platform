@@ -53,6 +53,9 @@ public class Element extends IdObject<UUID> {
     @Column(columnDefinition = "json", nullable = true)
     private String fields;
 
+    @Column(name = "EXTERNAL_ID", nullable = true, unique = true)
+    private String externalId;
+
     @Override
     public UUID getId() {
         return id;
@@ -145,5 +148,13 @@ public class Element extends IdObject<UUID> {
 
     public void setElementDt(Date elementDt) {
         this.elementDt = elementDt;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 }

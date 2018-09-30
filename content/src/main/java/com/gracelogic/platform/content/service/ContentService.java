@@ -14,7 +14,7 @@ public interface ContentService {
 
     SectionDTO getSection(UUID id) throws ObjectNotFoundException;
 
-    EntityListResponse<ElementDTO> getElementsPaged(String name, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<ElementDTO> getElementsPaged(String query, Collection<String> queryFields, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     Element saveElement(ElementDTO dto) throws ObjectNotFoundException;
 
@@ -25,4 +25,6 @@ public interface ContentService {
     SectionPatternDTO getSectionPatternBySection(UUID sectionId) throws ObjectNotFoundException;
 
     ElementDTO getElement(UUID id, boolean includeSectionPattern) throws ObjectNotFoundException;
+
+    ElementDTO getElementByExternalId(String externalId, boolean includeSectionPattern) throws ObjectNotFoundException;
 }

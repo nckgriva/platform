@@ -159,7 +159,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public EntityListResponse<ElementDTO> getElementsPaged(String name, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<ElementDTO> getElementsPaged(String query, Collection<String> queryFields, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         if (!StringUtils.isEmpty(sortField)) {
             //Т.к. в данном методе запрос используется нативный и требуется сохранить единообразие - транслируем название jpa полей в нативные sql
             if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
@@ -197,11 +197,13 @@ public class ContentServiceImpl implements ContentService {
             }
         }
 
-        int totalCount = contentDao.getElementsCount(name, sectionIds, active, validOnDate, fields);
+
+
+        int totalCount = contentDao.getElementsCount(query, queryFields, sectionIds, active, validOnDate, fields);
 
         EntityListResponse<ElementDTO> entityListResponse = new EntityListResponse<ElementDTO>(totalCount, count, page, start);
 
-        List<Element> items = contentDao.getElements(name, sectionIds, active, validOnDate, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
+        List<Element> items = contentDao.getElements(query, queryFields, sectionIds, active, validOnDate, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (Element e : items) {
             ElementDTO el = ElementDTO.prepare(e);
             entityListResponse.addData(el);
@@ -232,6 +234,7 @@ public class ContentServiceImpl implements ContentService {
         element.setElementDt(dto.getElementDt());
         element.setSection(idObjectService.getObjectById(Section.class, dto.getSectionId()));
         element.setFields(JsonUtils.mapToJson(dto.getFields()));
+        element.setExternalId(dto.getExternalId());
 
         return idObjectService.save(element);
     }
@@ -277,6 +280,24 @@ public class ContentServiceImpl implements ContentService {
             throw new ObjectNotFoundException();
         }
 
+        ElementDTO dto = ElementDTO.prepare(element);
+        if (includeSectionPattern) {
+            dto.setSectionPattern(getSectionPattern(element.getSection().getSectionPattern().getId()));
+        }
+        return dto;
+    }
+
+    @Override
+    public ElementDTO getElementByExternalId(String externalId, boolean includeSectionPattern) throws ObjectNotFoundException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("externalId", externalId);
+
+        List<Element> elements = idObjectService.getList(Element.class, includeSectionPattern ? "left join fetch el.section" : null, "el.externalId=:externalId", params, null, null, 1);
+        if (elements.isEmpty()) {
+            throw new ObjectNotFoundException();
+        }
+
+        Element element = elements.iterator().next();
         ElementDTO dto = ElementDTO.prepare(element);
         if (includeSectionPattern) {
             dto.setSectionPattern(getSectionPattern(element.getSection().getSectionPattern().getId()));

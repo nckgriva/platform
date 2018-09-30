@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class DictionaryServiceImpl implements DictionaryService {
@@ -62,7 +61,7 @@ public class DictionaryServiceImpl implements DictionaryService {
     }
 
     private Map<DictionaryKey, IdObject> cache = ExpiringMap.builder()
-            .expiration(30, TimeUnit.SECONDS)
+//            .expiration(30, TimeUnit.SECONDS)
             .entryLoader(key -> idObjectService.getObjectById(((DictionaryKey) key).getClazz(), ((DictionaryKey) key).getId()))
             .build();
 

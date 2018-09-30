@@ -15,7 +15,7 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
     private static Logger logger = Logger.getLogger(ContentDaoImpl.class);
 
     @Override
-    public Integer getElementsCount(String name, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields) {
+    public Integer getElementsCount(String query, Collection<String> queryFields, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields) {
         BigInteger count = null;
         StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_element where 1=1 ");
 
@@ -37,19 +37,24 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
                 queryStr.append(String.format("and fields ->> '%s' = '%s' ", key, fields.get(key)));
             }
         }
-        if (name != null && !StringUtils.isEmpty(name)) {
-            queryStr.append("and lower(name) like :name ");
-            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+        if (query != null && !StringUtils.isEmpty(query)) {
+            queryStr.append("and lower(name) like :query ");
+            if (queryFields != null && !queryFields.isEmpty()) {
+                for (String key : queryFields) {
+                    queryStr.append(String.format("and lower(fields ->> '%s') like :query ", key));
+                }
+            }
+            params.put("query", "%%" + StringUtils.lowerCase(query) + "%%");
         }
 
         try {
-            Query query = getEntityManager().createNativeQuery(queryStr.toString());
+            Query q = getEntityManager().createNativeQuery(queryStr.toString());
 
             for (String key : params.keySet()) {
-                query.setParameter(key, params.get(key));
+                q.setParameter(key, params.get(key));
             }
 
-            count = (BigInteger) query.getSingleResult();
+            count = (BigInteger) q.getSingleResult();
         } catch (Exception e) {
             logger.error("Failed to get elements count", e);
         }
@@ -58,7 +63,7 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
     }
 
     @Override
-    public List<Element> getElements(String name, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
+    public List<Element> getElements(String query, Collection<String> queryFields, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
         List<Element> elements = Collections.emptyList();
         StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_element where 1=1 ");
 
@@ -80,22 +85,26 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
                 queryStr.append(String.format("and fields ->> '%s' = '%s' ", key, fields.get(key)));
             }
         }
-        if (name != null && !StringUtils.isEmpty(name)) {
-            queryStr.append("and lower(name) like :name ");
-            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+        if (query != null && !StringUtils.isEmpty(query)) {
+            queryStr.append("and lower(name) like :query ");
+            if (queryFields != null && !queryFields.isEmpty()) {
+                for (String key : queryFields) {
+                    queryStr.append(String.format("and lower(fields ->> '%s') like :query ", key));
+                }
+            }
+            params.put("query", "%%" + StringUtils.lowerCase(query) + "%%");
         }
-
         appendSortClause(queryStr, sortField, sortDir);
         appendPaginationClause(queryStr, params, recordsOnPage, startRecord);
 
         try {
-            Query query = getEntityManager().createNativeQuery(queryStr.toString(), Element.class);
+            Query q = getEntityManager().createNativeQuery(queryStr.toString(), Element.class);
 
             for (String key : params.keySet()) {
-                query.setParameter(key, params.get(key));
+                q.setParameter(key, params.get(key));
             }
 
-            elements = query.getResultList();
+            elements = q.getResultList();
 
         } catch (Exception e) {
             logger.error("Failed to get elements", e);
