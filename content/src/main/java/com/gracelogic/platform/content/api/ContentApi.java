@@ -115,9 +115,9 @@ public class ContentApi extends AbstractAuthorizedController {
             }
         }
 
-        List<String> queryFields = new LinkedList<>();
+        List<String> queryFields = Collections.emptyList();
         if (!StringUtils.isEmpty(sQueryFields)) {
-            queryFields.addAll(Arrays.asList(sQueryFields.split(",")));
+            queryFields = Arrays.asList(sQueryFields.split(","));
         }
 
         EntityListResponse<ElementDTO> elements = contentService.getElementsPaged(query, queryFields, sectionIds, active, validOnDate, null, length, page, start, sortField, sortDir);
