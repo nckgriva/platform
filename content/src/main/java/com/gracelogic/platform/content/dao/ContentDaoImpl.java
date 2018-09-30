@@ -100,7 +100,6 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
         appendPaginationClause(queryStr, params, recordsOnPage, startRecord);
 
         try {
-            System.out.println("q: " + queryStr.toString());
             Query q = getEntityManager().createNativeQuery(queryStr.toString(), Element.class);
 
             for (String key : params.keySet()) {
