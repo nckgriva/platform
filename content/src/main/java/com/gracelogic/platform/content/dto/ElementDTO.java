@@ -27,6 +27,7 @@ public class ElementDTO extends IdObjectDTO {
     private Date endDt;
     private Date elementDt;
     private Map<String, String> fields = new HashMap<>();
+    private String externalId;
 
     private SectionPatternDTO sectionPattern;
 
@@ -110,6 +111,14 @@ public class ElementDTO extends IdObjectDTO {
         this.sectionPattern = sectionPattern;
     }
 
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
     public Map<String, String> getFieldsLocalized() {
         Map<String, String> fieldsLocalized = null;
         if (fields != null) {
@@ -132,6 +141,7 @@ public class ElementDTO extends IdObjectDTO {
         dto.setStartDt(element.getStartDt());
         dto.setEndDt(element.getEndDt());
         dto.setElementDt(element.getElementDt());
+        dto.setExternalId(element.getExternalId());
 
         if (element.getSection() != null) {
             dto.setSectionId(element.getSection().getId());
