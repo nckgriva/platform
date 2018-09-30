@@ -38,12 +38,13 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
             }
         }
         if (query != null && !StringUtils.isEmpty(query)) {
-            queryStr.append("and lower(name) like :query ");
+            queryStr.append("and ( lower(name) like :query ");
             if (queryFields != null && !queryFields.isEmpty()) {
                 for (String key : queryFields) {
-                    queryStr.append(String.format("and lower(fields ->> '%s') like :query ", key));
+                    queryStr.append(String.format("or lower(fields ->> '%s') like :query ", key));
                 }
             }
+            queryStr.append(") ");
             params.put("query", "%%" + StringUtils.lowerCase(query) + "%%");
         }
 
@@ -86,12 +87,13 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
             }
         }
         if (query != null && !StringUtils.isEmpty(query)) {
-            queryStr.append("and lower(name) like :query ");
+            queryStr.append("and ( lower(name) like :query ");
             if (queryFields != null && !queryFields.isEmpty()) {
                 for (String key : queryFields) {
-                    queryStr.append(String.format("and lower(fields ->> '%s') like :query ", key));
+                    queryStr.append(String.format("or lower(fields ->> '%s') like :query ", key));
                 }
             }
+            queryStr.append(") ");
             params.put("query", "%%" + StringUtils.lowerCase(query) + "%%");
         }
         appendSortClause(queryStr, sortField, sortDir);
