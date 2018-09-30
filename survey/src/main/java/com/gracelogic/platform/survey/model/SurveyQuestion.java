@@ -79,11 +79,11 @@ public class SurveyQuestion extends IdObject<UUID> {
     private String attachmentExtensions;
 
     @Type(type = "string-array")
-    @Column(name = "MATRIX_ROWS", nullable = true)
+    @Column(name = "MATRIX_ROWS", nullable = true, length = 4000)
     private String[] matrixRows;
 
     @Type(type = "string-array")
-    @Column(name = "MATRIX_COLUMNS", nullable = true)
+    @Column(name = "MATRIX_COLUMNS", nullable = true, length = 4000)
     private String[] matrixColumns;
 
     @Override
