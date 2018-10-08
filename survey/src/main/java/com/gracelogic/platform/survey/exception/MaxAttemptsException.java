@@ -1,15 +1,15 @@
 package com.gracelogic.platform.survey.exception;
 
-public class MaxAttemptsHitException extends Exception {
+public class MaxAttemptsException extends Exception {
 
     private String message;
 
-    public MaxAttemptsHitException(String message) {
+    public MaxAttemptsException(String message) {
         super(message);
         this.message = message;
     }
 
-    public MaxAttemptsHitException() {
+    public MaxAttemptsException() {
         super("");
         message = null;
     }

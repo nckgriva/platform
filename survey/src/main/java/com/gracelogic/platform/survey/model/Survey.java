@@ -22,6 +22,9 @@ public class Survey extends IdObject<UUID> {
     @org.hibernate.annotations.Type(type = "pg-uuid")
     private UUID id;
 
+    @Column(name = "EXTERNAL_ID", nullable = true, unique = true)
+    private String externalId;
+
     @Column(name = CREATED, nullable = false)
     private Date created;
 
@@ -89,6 +92,14 @@ public class Survey extends IdObject<UUID> {
     @Override
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 
     @Override

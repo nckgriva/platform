@@ -20,7 +20,6 @@ import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
 import io.swagger.annotations.*;
-import org.apache.commons.io.IOUtils;
 import org.hibernate.PropertyValueException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,10 +30,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -125,6 +122,26 @@ public class SurveyApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
+            value = "getInitialSurveyInfoByExternalId",
+            notes = "Sends initial survey information to user. This method does not begin the survey.",
+            response = SurveyIntroductionDTO.class
+    )
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/info_ext")
+    @ResponseBody
+    public ResponseEntity getInitialSurveyInfoByExternalId(@PathVariable(value = "id") String externalSurveyId) {
+        try {
+            SurveyIntroductionDTO dto = surveyService.getSurveyIntroductionByExternalId(externalSurveyId);
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        } catch (ObjectNotFoundException notFoundException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SURVEY",
+                    messageSource.getMessage("survey.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ForbiddenException forbiddenException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
+                    messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
             value = "startSurvey",
             notes = "Starts survey and sends SurveyInteractionDTO with first page back to user",
             response = SurveyInteractionDTO.class
@@ -145,7 +162,34 @@ public class SurveyApi extends AbstractAuthorizedController {
         } catch (ObjectNotFoundException notFoundException) {
             return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SURVEY",
                     messageSource.getMessage("survey.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        } catch (MaxAttemptsHitException maxAttemptsException) {
+        } catch (MaxAttemptsException maxAttemptsException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.MAX_ATTEMPTS_HIT",
+                    messageSource.getMessage("survey.MAX_ATTEMPTS_HIT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
+            value = "startSurveyByExternalId",
+            notes = "Starts survey and sends SurveyInteractionDTO with first page back to user",
+            response = SurveyInteractionDTO.class
+    )
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/start_ext")
+    @ResponseBody
+    public ResponseEntity startSurveyByExternalId(HttpServletRequest request,
+                                      @PathVariable(value = "id") String externalId) {
+        try {
+            SurveyInteractionDTO dto = surveyService.startSurveyByExternalId(externalId, getUser(), ServletUtils.getRemoteAddress(request));
+            return new ResponseEntity<SurveyInteractionDTO>(dto, HttpStatus.OK);
+        } catch (RespondentLimitException respondentLimitException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.RESPONDENT_LIMIT",
+                    messageSource.getMessage("survey.RESPONDENT_LIMIT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ForbiddenException forbiddenException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.FORBIDDEN",
+                    messageSource.getMessage("survey.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ObjectNotFoundException notFoundException) {
+            return new ResponseEntity<>(new ErrorResponse("survey.NO_SUCH_SURVEY",
+                    messageSource.getMessage("survey.NO_SUCH_SURVEY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (MaxAttemptsException maxAttemptsException) {
             return new ResponseEntity<>(new ErrorResponse("survey.MAX_ATTEMPTS_HIT",
                     messageSource.getMessage("survey.MAX_ATTEMPTS_HIT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
@@ -163,6 +207,25 @@ public class SurveyApi extends AbstractAuthorizedController {
                                       @PathVariable(value = "id") UUID surveyId) {
         try {
             SurveyInteractionDTO dto = surveyService.startSurveyPreview(surveyId, getUser(), ServletUtils.getRemoteAddress(request));
+            return new ResponseEntity<SurveyInteractionDTO>(dto, HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
+                    LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
+            value = "startSurveyPreviewByExternalId",
+            notes = "Starts survey preview. This method is only available to users which have SURVEY:SHOW grant.",
+            response = SurveyInteractionDTO.class
+    )
+    @PreAuthorize("hasAuthority('SURVEY:SHOW')")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/start_preview_ext")
+    @ResponseBody
+    public ResponseEntity startSurveyPreviewByExternalId(HttpServletRequest request,
+                                             @PathVariable(value = "id") String externalSurveyId) {
+        try {
+            SurveyInteractionDTO dto = surveyService.startSurveyPreviewByExternalId(externalSurveyId, getUser(), ServletUtils.getRemoteAddress(request));
             return new ResponseEntity<SurveyInteractionDTO>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
@@ -219,9 +282,32 @@ public class SurveyApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
+            value = "getSurveyByExternalId",
+            notes = "Get survey by external id",
+            response = SurveyDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @PreAuthorize("hasAuthority('SURVEY:SHOW')")
+    @RequestMapping(method = RequestMethod.GET, value = "/ext/{id}")
+    @ResponseBody
+    public ResponseEntity getSurveyByExternalId(@PathVariable(value = "id") String id,
+                                    @RequestParam(value = "entireSurvey", required = false) Boolean entireSurvey) {
+        try {
+            SurveyDTO dto = surveyService.getSurveyByExternalId(id, entireSurvey != null ? entireSurvey : false);
+            return new ResponseEntity<SurveyDTO>(dto, HttpStatus.OK);
+        } catch (ObjectNotFoundException ex) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
+                    LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
             value = "saveSurvey",
             notes = "Save survey",
-            response = IDResponse.class
+            response = SurveyDTO.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -239,7 +325,8 @@ public class SurveyApi extends AbstractAuthorizedController {
             } else {
                 survey = surveyService.saveEntireSurvey(surveyDTO, getUser());
             }
-            return new ResponseEntity<IDResponse>(new IDResponse(survey.getId()), HttpStatus.OK);
+
+            return new ResponseEntity<>(SurveyDTO.prepare(survey), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ResultDependencyException resultDependency) {

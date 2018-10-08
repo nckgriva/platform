@@ -56,36 +56,88 @@ public class SurveyServiceImpl implements SurveyService {
         return hashMap;
     }
 
-    private static HashMap<SurveyQuestion, List<SurveyAnswerVariant>> asListAnswerVariantHashMap(List<SurveyAnswerVariant> list) {
-        HashMap<SurveyQuestion, List<SurveyAnswerVariant>> hashMap = new HashMap<>();
+    private static HashMap<UUID, List<SurveyAnswerVariant>> asListAnswerVariantHashMap(List<SurveyAnswerVariant> list) {
+        HashMap<UUID, List<SurveyAnswerVariant>> hashMap = new HashMap<>();
 
         for (SurveyAnswerVariant variant : list) {
-            List<SurveyAnswerVariant> variantList = hashMap.get(variant.getSurveyQuestion());
+            List<SurveyAnswerVariant> variantList = hashMap.get(variant.getSurveyQuestion().getId());
             if (variantList != null) {
                 variantList.add(variant);
                 continue;
             }
             variantList = new LinkedList<>();
             variantList.add(variant);
-            hashMap.put(variant.getSurveyQuestion(), variantList);
+            hashMap.put(variant.getSurveyQuestion().getId(), variantList);
         }
 
         return hashMap;
+    }
+
+    @Override
+    public String exportCatalogItems(UUID catalogId) throws ObjectNotFoundException {
+        if (idObjectService.getObjectById(SurveyAnswerVariantCatalog.class, catalogId) == null)
+            throw new ObjectNotFoundException();
+
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("catalogId", catalogId);
+        List<SurveyAnswerVariantCatalogItem> items = idObjectService.getList(SurveyAnswerVariantCatalogItem.class,
+                null, "el.catalog.id = :catalogId",
+                params, null, null, null);
+        StringBuilder result = new StringBuilder();
+        for (SurveyAnswerVariantCatalogItem item : items) {
+            result.append(item.getText()).append(';');
+        }
+        result.deleteCharAt(result.length()-1);
+
+        return result.toString();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void importCatalogItems(ImportCatalogItemsDTO dto)
+            throws ObjectNotFoundException {
+
+        if (idObjectService.getObjectById(SurveyAnswerVariantCatalog.class, dto.getCatalogId()) == null)
+            throw new ObjectNotFoundException();
+
+        String[] splitted = dto.getItems().split(";");
+
+        for (String str : splitted) {
+            SurveyAnswerVariantCatalogItemDTO newItem = new SurveyAnswerVariantCatalogItemDTO();
+            newItem.setCatalogId(dto.getCatalogId());
+            newItem.setText(str);
+            saveSurveyAnswerVariantCatalogItem(newItem);
+        }
     }
 
     public String exportResults(UUID surveyId) throws ObjectNotFoundException, InternalErrorException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
         if (survey == null) throw new ObjectNotFoundException();
 
+        char separator = ';';
+        StringBuilder pattern = new StringBuilder();
+
         Map<String, Object> params = new HashMap<>();
         params.put("surveyId", surveyId);
 
-        // at first get suitable sessions
+        // get all questions by this survey
+        List<SurveyQuestion> sortedQuestions = idObjectService.getList(SurveyQuestion.class,
+                "left join el.surveyPage sp",
+                "sp.survey.id = :surveyId", params, "el.questionIndex, sp.pageIndex ASC", null, null);
+
+        HashMap<UUID, SurveyQuestion> surveyQuestions = asUUIDHashMap(sortedQuestions);
+
+        for (SurveyQuestion question : sortedQuestions) {
+            pattern.append(question.getText()).append(separator);
+        }
+        pattern.deleteCharAt(pattern.length()-1).append('\n');
+
+        // get suitable sessions
         List<SurveySession> sessionsList = idObjectService.getList(SurveySession.class, null,
                 "el.previewSession = false and el.ended != null and el.survey.id = :surveyId ",
                 params, null, null, null, null);
 
-        if (sessionsList.size() == 0) return "";
+        if (sessionsList.size() == 0) return pattern.toString();
 
         HashMap<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> answersBySessionAndQuestion = new HashMap<>();
         params.clear();
@@ -97,17 +149,7 @@ public class SurveyServiceImpl implements SurveyService {
         List<SurveyQuestionAnswer> answersList = idObjectService.getList(SurveyQuestionAnswer.class, null,
                 "el.surveySession.id in (:surveySessionIds)", params, null, null, null, null);
 
-        if (answersList.size() == 0) return "";
-
-        params.clear();
-        params.put("surveyId", surveyId);
-
-        List<SurveyQuestion> sortedQuestions = idObjectService.getList(SurveyQuestion.class,
-                "left join el.surveyPage sp",
-                "sp.survey.id = :surveyId", params, "el.questionIndex, sp.pageIndex ASC", null, null);
-
-        // get all questions by this survey
-        HashMap<UUID, SurveyQuestion> surveyQuestions = asUUIDHashMap(sortedQuestions);
+        if (answersList.size() == 0) return pattern.toString();
 
         HashSet<UUID> answerVariantIds = new HashSet<>();
         for (SurveyQuestionAnswer answer : answersList) {
@@ -144,9 +186,6 @@ public class SurveyServiceImpl implements SurveyService {
             answersBySessionAndQuestion.get(answer.getSurveySession().getId()).get(answer.getQuestion().getId()).add(answer);
         }
 
-        char separator = ';';
-        boolean isFirst = true;
-        StringBuilder pattern = new StringBuilder();
         StringBuilder resultsBuilder = new StringBuilder();
         for (Map.Entry<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> entry : answersBySessionAndQuestion.entrySet()) {
 
@@ -223,34 +262,49 @@ public class SurveyServiceImpl implements SurveyService {
 
             StringBuilder singleResult = new StringBuilder();
             for (SurveyQuestion question : sortedQuestions) {
-                if (isFirst) pattern.append(question.getText()).append(';');
-                singleResult.append(answersAsString.containsKey(question) ? answersAsString.get(question) + ';' : ';');
+                singleResult.append(answersAsString.containsKey(question) ? answersAsString.get(question) + separator : separator);
             }
 
             singleResult.deleteCharAt(singleResult.length()-1).append('\n');
             resultsBuilder.append(singleResult);
-            isFirst = false;
         }
-        pattern.deleteCharAt(pattern.length()-1).append('\n');
 
         return pattern.append(resultsBuilder).toString();
     }
 
-    @Override
-    public SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId)
+    private SurveyIntroductionDTO getSurveyIntroduction(Survey survey)
             throws ObjectNotFoundException, ForbiddenException {
-        Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
         if (survey == null) throw new ObjectNotFoundException();
         if (!survey.isActive()) throw new ForbiddenException();
 
         return new SurveyIntroductionDTO(survey);
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyInteractionDTO startSurveyPreview(UUID surveyId, AuthorizedUser user, String ipAddress)
-            throws ObjectNotFoundException{
+    public SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId)
+            throws ObjectNotFoundException, ForbiddenException {
         Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
+        return getSurveyIntroduction(survey);
+    }
+
+    @Override
+    public SurveyIntroductionDTO getSurveyIntroductionByExternalId(String externalId)
+            throws ObjectNotFoundException, ForbiddenException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("externalId", externalId);
+
+        List<Survey> surveys = idObjectService.getList(Survey.class, null, "el.externalId = :externalId",
+                params, null, null, null);
+
+        if (surveys.isEmpty()) {
+            throw new ObjectNotFoundException();
+        }
+
+        return getSurveyIntroduction(surveys.iterator().next());
+    }
+
+    private SurveyInteractionDTO startSurveyPreview(Survey survey, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException {
         if (survey == null) {
             throw new ObjectNotFoundException();
         }
@@ -285,13 +339,31 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String ipAddress)
-            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsHitException {
+    public SurveyInteractionDTO startSurveyPreview(UUID surveyId, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException {
+        return startSurveyPreview(idObjectService.getObjectById(Survey.class, surveyId), user, ipAddress);
+    }
 
-        Survey survey = idObjectService.getObjectById(Survey.class, surveyId);
-        if (survey == null) {
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public SurveyInteractionDTO startSurveyPreviewByExternalId(String externalSurveyId, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("externalId", externalSurveyId);
+
+        List<Survey> surveys = idObjectService.getList(Survey.class, null, "el.externalId = :externalId",
+                params, null, null, null);
+
+        if (surveys.isEmpty()) {
             throw new ObjectNotFoundException();
         }
+
+        return startSurveyPreview(surveys.iterator().next(), user, ipAddress);
+    }
+
+    private SurveyInteractionDTO startSurvey(Survey survey, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsException {
+        if (survey == null) throw new ObjectNotFoundException();
 
         Date now = new Date();
 
@@ -327,7 +399,7 @@ public class SurveyServiceImpl implements SurveyService {
             Integer passesFromThisIP = idObjectService.checkExist(SurveySession.class, null, cause, params, survey.getMaxAttempts() + 1);
 
             if (passesFromThisIP >= survey.getMaxAttempts()) {
-                throw new MaxAttemptsHitException();
+                throw new MaxAttemptsException();
             }
         }
 
@@ -368,6 +440,30 @@ public class SurveyServiceImpl implements SurveyService {
         surveyInteractionDTO.setSurveySessionId(surveySession.getId());
         surveyInteractionDTO.setSurveyPage(getSurveyPage(surveySession, 0));
         return surveyInteractionDTO;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsException {
+        return startSurvey(idObjectService.getObjectById(Survey.class, surveyId), user, ipAddress);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public SurveyInteractionDTO startSurveyByExternalId(String externalId, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("externalId", externalId);
+
+        List<Survey> surveys = idObjectService.getList(Survey.class, null, "el.externalId = :externalId",
+                params, null, null, null);
+
+        if (surveys.isEmpty()) {
+            throw new ObjectNotFoundException();
+        }
+
+        return startSurvey(surveys.iterator().next(), user, ipAddress);
     }
 
     private SurveyPageDTO getSurveyPage(SurveySession surveySession, int pageIndex) throws ObjectNotFoundException {
@@ -426,13 +522,13 @@ public class SurveyServiceImpl implements SurveyService {
             cause = "el.surveyQuestion.id in (:questionIds) ";
             params.put("questionIds", questionIds);
 
-            HashMap<SurveyQuestion, List<SurveyAnswerVariant>> answerVariants = asListAnswerVariantHashMap(idObjectService.getList(SurveyAnswerVariant.class, null,
+            HashMap<UUID, List<SurveyAnswerVariant>> answerVariants = asListAnswerVariantHashMap(idObjectService.getList(SurveyAnswerVariant.class, null,
                     cause, params, "el.sortOrder", "ASC", null, null));
 
             List<SurveyQuestionDTO> surveyQuestionDTOs = new LinkedList<>();
             for (SurveyQuestion question : questions) {
                 List<SurveyAnswerVariantDTO> answerVariantsDTO = null;
-                List<SurveyAnswerVariant> answersList = answerVariants.get(question);
+                List<SurveyAnswerVariant> answersList = answerVariants.get(question.getId());
                 if (answersList != null) {
                     answerVariantsDTO = new LinkedList<>();
                     for (SurveyAnswerVariant answerVariant : answersList) {
@@ -776,7 +872,7 @@ public class SurveyServiceImpl implements SurveyService {
         // 2. Getting all answer variants
         // Stored by survey answer id
         HashMap<UUID, SurveyAnswerVariant> surveyAnswersHashMap = new HashMap<>();
-        HashMap<SurveyQuestion, List<SurveyAnswerVariant>> answerVariantsByQuestion = new HashMap<>();
+        HashMap<UUID, List<SurveyAnswerVariant>> answerVariantsByQuestion = new HashMap<>();
         if (dto.containsNonTextAnswers()) {
             params.clear();
             params.put("questionIds", surveyQuestionsHashMap.keySet());
@@ -850,7 +946,7 @@ public class SurveyServiceImpl implements SurveyService {
                 // check out of bounds
                 if (isMatrixQuestion) {
                     int maxRows = question.getMatrixRows().length;
-                    if (answerVariantsByQuestion.get(question) != null) { // if matrix has custom variant
+                    if (answerVariantsByQuestion.get(question.getId()) != null) { // if matrix has custom variant
                         maxRows++;
                     }
 
@@ -908,7 +1004,7 @@ public class SurveyServiceImpl implements SurveyService {
                 rowsTotal.add(i);
             }
 
-            if (answerVariantsByQuestion.get(question) != null) { // if matrix has custom variant
+            if (answerVariantsByQuestion.get(question.getId()) != null) { // if matrix has custom variant
                 rowsTotal.add(question.getMatrixRows().length); // add it as last row
             }
 
@@ -1079,21 +1175,27 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setMaxAttempts(dto.getMaxAttempts());
         entity.setSurveyParticipationType(ds.get(SurveyParticipationType.class, dto.getParticipationTypeId()));
         entity.setOwner(idObjectService.getObjectById(User.class, user.getId()));
-        return idObjectService.save(entity);
+        entity.setExternalId(dto.getExternalId());
+
+        entity = idObjectService.save(entity);
+
+        if (StringUtils.isEmpty(dto.getExternalId())) {
+            entity.setExternalId(entity.getId().toString());
+            entity = idObjectService.save(entity);
+        }
+
+        return entity;
     }
 
-
-    @Override
-    public SurveyDTO getSurvey(UUID surveyId, boolean entire) throws ObjectNotFoundException {
-        Survey entity = idObjectService.getObjectById(Survey.class, surveyId);
-        if (entity == null) {
+    private SurveyDTO getSurvey(Survey survey, boolean entire) throws ObjectNotFoundException {
+        if (survey == null) {
             throw new ObjectNotFoundException();
         }
 
-        SurveyDTO surveyDTO = SurveyDTO.prepare(entity);
+        SurveyDTO surveyDTO = SurveyDTO.prepare(survey);
         if (entire) {
             Map<String, Object> params = new HashMap<>();
-            params.put("surveyId", surveyId);
+            params.put("surveyId", survey.getId());
             List<SurveyPage> surveyPages = idObjectService.getList(SurveyPage.class, null, "el.survey.id = :surveyId", params,
                     "el.pageIndex ASC", null, null);
 
@@ -1149,6 +1251,26 @@ public class SurveyServiceImpl implements SurveyService {
             }
         }
         return surveyDTO;
+    }
+
+    @Override
+    public SurveyDTO getSurvey(UUID surveyId, boolean entire) throws ObjectNotFoundException {
+        return getSurvey(idObjectService.getObjectById(Survey.class, surveyId), entire);
+    }
+
+    @Override
+    public SurveyDTO getSurveyByExternalId(String externalId, boolean entire) throws ObjectNotFoundException {
+        Map<String, Object> params = new HashMap<>();
+        params.put("externalId", externalId);
+
+        List<Survey> surveys = idObjectService.getList(Survey.class, null, "el.externalId = :externalId",
+                params, null, null, null);
+
+        if (surveys.isEmpty()) {
+            throw new ObjectNotFoundException();
+        }
+
+        return getSurvey(surveys.iterator().next(), entire);
     }
 
     @Override

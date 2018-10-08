@@ -11,6 +11,7 @@ import org.hibernate.annotations.TypeDefs;
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -233,6 +234,20 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setScaleStepValue(Integer scaleStepValue) {
         this.scaleStepValue = scaleStepValue;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SurveyQuestion that = (SurveyQuestion) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), id);
     }
 
     @Override

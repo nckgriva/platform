@@ -18,12 +18,25 @@ public interface SurveyService {
 
     String exportResults(UUID surveyId) throws ObjectNotFoundException, InternalErrorException;
 
+    String exportCatalogItems(UUID catalogId) throws ObjectNotFoundException;
+
+    void importCatalogItems(ImportCatalogItemsDTO dto) throws ObjectNotFoundException;
+
     SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId) throws ObjectNotFoundException, ForbiddenException;
 
+    SurveyIntroductionDTO getSurveyIntroductionByExternalId(String externalId)
+            throws ObjectNotFoundException, ForbiddenException;
+
     SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String ipAddress)
-            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsHitException;
+            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsException;
+
+    SurveyInteractionDTO startSurveyByExternalId(String externalId, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsException;
 
     SurveyInteractionDTO startSurveyPreview(UUID surveyId, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException;
+
+    SurveyInteractionDTO startSurveyPreviewByExternalId(String externalSurveyId, AuthorizedUser user, String ipAddress)
             throws ObjectNotFoundException;
 
     SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto)
@@ -43,6 +56,8 @@ public interface SurveyService {
     Survey saveSurvey(SurveyDTO dto, AuthorizedUser user) throws ObjectNotFoundException;
 
     SurveyDTO getSurvey(UUID surveyId, boolean entire) throws ObjectNotFoundException;
+
+    SurveyDTO getSurveyByExternalId(String externalId, boolean entire) throws ObjectNotFoundException;
 
     void deleteSurvey(UUID id) throws LogicDependencyException, ResultDependencyException;
 

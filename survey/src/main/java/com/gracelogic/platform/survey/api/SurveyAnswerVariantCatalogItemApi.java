@@ -41,7 +41,7 @@ public class SurveyAnswerVariantCatalogItemApi {
     private ResourceBundleMessageSource dbMessageSource;
 
     @ApiOperation(
-            value = "getSurveyAnswerVariantCatalogItems",
+            value = "getCatalogItems",
             notes = "Get list of survey answer variant catalog items",
             response = EntityListResponse.class
     )
@@ -52,19 +52,19 @@ public class SurveyAnswerVariantCatalogItemApi {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getSurveyAnswerVariantCatalogItems(@RequestParam(value = "catalogId", required = false) UUID catalogId,
-                                                         @RequestParam(value = "text", required = false) String text,
-                                                         @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                                         @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                                         @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                                         @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+    public ResponseEntity getCatalogItems(@RequestParam(value = "catalogId", required = false) UUID catalogId,
+                                          @RequestParam(value = "text", required = false) String text,
+                                          @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                          @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                          @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                          @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
         EntityListResponse<SurveyAnswerVariantCatalogItemDTO> properties = surveyService.getSurveyAnswerVariantCatalogItemsPaged(catalogId, text, count, null, start, sortField, sortDir);
         return new ResponseEntity<>(properties, HttpStatus.OK);
     }
 
     @ApiOperation(
-            value = "getSurveyAnswerVariant",
-            notes = "Get survey answer variant",
+            value = "getCatalogItem",
+            notes = "Get survey answer variant catalog item",
             response = SurveyAnswerVariantCatalogItemDTO.class
     )
     @ApiResponses({
@@ -74,7 +74,7 @@ public class SurveyAnswerVariantCatalogItemApi {
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
-    public ResponseEntity getSurveyAnswerVariantCatalogItem(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity getCatalogItem(@PathVariable(value = "id") UUID id) {
         try {
             SurveyAnswerVariantCatalogItemDTO dto = surveyService.getSurveyAnswerVariantCatalogItem(id);
             return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -85,7 +85,7 @@ public class SurveyAnswerVariantCatalogItemApi {
     }
 
     @ApiOperation(
-            value = "saveSurveyAnswerVariantCatalogItem",
+            value = "saveCatalogItem",
             notes = "Save survey answer variant CatalogItem",
             response = IDResponse.class
     )
@@ -96,18 +96,17 @@ public class SurveyAnswerVariantCatalogItemApi {
     @PreAuthorize("hasAuthority('SURVEY:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
-    public ResponseEntity saveSurveyAnswerVariantCatalogItem(@RequestBody SurveyAnswerVariantCatalogItemDTO dto) {
+    public ResponseEntity saveCatalogItem(@RequestBody SurveyAnswerVariantCatalogItemDTO dto) {
         try {
             SurveyAnswerVariantCatalogItem surveyAnswerVariantCatalogItem = surveyService.saveSurveyAnswerVariantCatalogItem(dto);
             return new ResponseEntity<IDResponse>(new IDResponse(surveyAnswerVariantCatalogItem.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @ApiOperation(
-            value = "deleteSurveyAnswerVariantCatalogItem",
+            value = "deleteCatalogItem",
             notes = "Delete survey answer variant CatalogItem",
             response = EmptyResponse.class
     )
@@ -118,7 +117,7 @@ public class SurveyAnswerVariantCatalogItemApi {
     @PreAuthorize("hasAuthority('SURVEY:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
-    public ResponseEntity deleteSurveyAnswerVariantCatalogItem(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity deleteCatalogItem(@PathVariable(value = "id") UUID id) {
         try {
             surveyService.deleteSurveyAnswerVariantCatalogItem(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
