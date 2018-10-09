@@ -57,6 +57,11 @@ public class Survey extends IdObject<UUID> {
      */
     @Column(name = "IS_CLARIFY_CUSTOM_ANSWER", nullable = false)
     private Boolean clarifyCustomAnswer;
+    /**
+     * When answering to matrix question with custom answer variant, respondent can skip its selection even if this is required question
+     */
+    @Column(name = "IS_CAN_IGNORE_CUSTOM_ANSWER", nullable = false)
+    private Boolean canIgnoreCustomAnswer;
 
     @Column(name = "INTRODUCTION", nullable = true, length = 4000)
     private String introduction;
@@ -196,6 +201,14 @@ public class Survey extends IdObject<UUID> {
 
     public Integer getMaxRespondents() {
         return maxRespondents;
+    }
+
+    public Boolean getCanIgnoreCustomAnswer() {
+        return canIgnoreCustomAnswer;
+    }
+
+    public void setCanIgnoreCustomAnswer(Boolean canIgnoreCustomAnswer) {
+        this.canIgnoreCustomAnswer = canIgnoreCustomAnswer;
     }
 
     public void setMaxRespondents(Integer maxRespondents) {

@@ -55,6 +55,10 @@ public class SurveyQuestion extends IdObject<UUID> {
     @JoinColumn(name = "SURVEY_QUESTION_TYPE_ID", nullable = false)
     private SurveyQuestionType surveyQuestionType;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "CATALOG_ID", nullable = true)
+    private SurveyAnswerVariantCatalog catalog;
+
     @Column(name = "IS_REQUIRED", nullable = false)
     private Boolean required;
 
@@ -147,6 +151,14 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setSurveyQuestionType(SurveyQuestionType surveyQuestionType) {
         this.surveyQuestionType = surveyQuestionType;
+    }
+
+    public SurveyAnswerVariantCatalog getCatalog() {
+        return catalog;
+    }
+
+    public void setCatalog(SurveyAnswerVariantCatalog catalog) {
+        this.catalog = catalog;
     }
 
     public Boolean getRequired() {

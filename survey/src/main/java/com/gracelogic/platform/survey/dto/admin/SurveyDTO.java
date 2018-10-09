@@ -7,6 +7,7 @@ import java.util.*;
 
 public class SurveyDTO extends IdObjectDTO {
     private String externalId;
+    private Boolean canIgnoreCustomAnswer;
     private Boolean active;
     private String name;
     private Date startDate;
@@ -50,7 +51,16 @@ public class SurveyDTO extends IdObjectDTO {
         dto.setMaxAttempts(model.getMaxAttempts());
         dto.setLink(model.getLink());
         dto.setClarifyCustomAnswer(model.getClarifyCustomAnswer());
+        dto.setCanIgnoreCustomAnswer(model.getCanIgnoreCustomAnswer());
         return dto;
+    }
+
+    public Boolean getCanIgnoreCustomAnswer() {
+        return canIgnoreCustomAnswer;
+    }
+
+    public void setCanIgnoreCustomAnswer(Boolean canIgnoreCustomAnswer) {
+        this.canIgnoreCustomAnswer = canIgnoreCustomAnswer;
     }
 
     public String getExternalId() {

@@ -7,6 +7,7 @@ import java.util.*;
 
 public class SurveyQuestionDTO extends IdObjectDTO {
     private UUID surveyPageId;
+    private UUID catalogId;
     private Integer questionIndex;
     private String text;
     private String description;
@@ -54,6 +55,9 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         dto.setScaleMaxValueLabel(model.getScaleMaxValueLabel());
         dto.setScaleMinValueLabel(model.getScaleMinValueLabel());
         dto.setScaleStepValue(model.getScaleStepValue());
+        if (model.getCatalog() != null) {
+            dto.setCatalogId(model.getCatalog().getId());
+        }
         return dto;
     }
 
@@ -95,6 +99,14 @@ public class SurveyQuestionDTO extends IdObjectDTO {
 
     public void setSurveyQuestionTypeId(UUID surveyQuestionTypeId) {
         this.surveyQuestionTypeId = surveyQuestionTypeId;
+    }
+
+    public UUID getCatalogId() {
+        return catalogId;
+    }
+
+    public void setCatalogId(UUID catalogId) {
+        this.catalogId = catalogId;
     }
 
     public Boolean getRequired() {
