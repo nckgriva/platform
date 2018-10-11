@@ -106,13 +106,11 @@ public class SurveyAnswerVariantCatalogApi {
             String date = new SimpleDateFormat("dd_MM_yyyy").format(new Date());
             String fileName = "catalog_export_" + date + ".csv";
 
-            response.setContentType("text/csv");
+            response.setContentType("text/csv; charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
             response.addHeader("Content-Disposition", String.format("attachment;filename=%s", fileName));
-            byte[] bytes = results.getBytes("UTF-8");
-            response.getOutputStream().write(bytes);
-            response.setContentLength(bytes.length);
-            response.getOutputStream().flush();
+            response.getWriter().print(results);
+
             response.flushBuffer();
         } catch (Exception exception) {
             try {

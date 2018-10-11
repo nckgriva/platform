@@ -66,12 +66,11 @@ public class SurveyApi extends AbstractAuthorizedController {
             String date = new SimpleDateFormat("dd_MM_yyyy").format(new Date());
             String fileName = "survey_export_" + date + ".csv";
 
-            response.setContentType("text/csv");
+            response.setContentType("text/csv; charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
             response.addHeader("Content-Disposition", String.format("attachment;filename=%s", fileName));
-
             response.getWriter().print(results);
-            response.getWriter().flush();
+
             response.flushBuffer();
         } catch (Exception exception) {
             try {
