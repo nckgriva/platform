@@ -85,7 +85,7 @@ public class SurveyServiceImpl implements SurveyService {
                 params, null, null, null);
         StringBuilder result = new StringBuilder();
         for (SurveyAnswerVariantCatalogItem item : items) {
-            result.append(item.getText()).append(';');
+            result.append(item.getText()).append('\n');
         }
         result.deleteCharAt(result.length()-1);
 
@@ -100,9 +100,7 @@ public class SurveyServiceImpl implements SurveyService {
         if (idObjectService.getObjectById(SurveyAnswerVariantCatalog.class, dto.getCatalogId()) == null)
             throw new ObjectNotFoundException();
 
-        String[] splitted = dto.getItems().split(";");
-
-        for (String str : splitted) {
+        for (String str : dto.getItems()) {
             SurveyAnswerVariantCatalogItemDTO newItem = new SurveyAnswerVariantCatalogItemDTO();
             newItem.setCatalogId(dto.getCatalogId());
             newItem.setText(str);

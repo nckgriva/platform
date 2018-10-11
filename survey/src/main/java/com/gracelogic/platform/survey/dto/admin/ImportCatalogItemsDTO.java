@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class ImportCatalogItemsDTO {
     private UUID catalogId;
-    private String items;
+    private String[] items;
 
     public UUID getCatalogId() {
         return catalogId;
@@ -14,11 +14,11 @@ public class ImportCatalogItemsDTO {
         this.catalogId = catalogId;
     }
 
-    public String getItems() {
+    public String[] getItems() {
         return items;
     }
 
-    public void setItems(String items) {
+    public void setItems(String[] items) {
         this.items = items;
     }
 }
