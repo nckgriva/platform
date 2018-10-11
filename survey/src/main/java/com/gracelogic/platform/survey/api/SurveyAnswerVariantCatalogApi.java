@@ -109,9 +109,10 @@ public class SurveyAnswerVariantCatalogApi {
             response.setContentType("text/csv");
             response.setCharacterEncoding("UTF-8");
             response.addHeader("Content-Disposition", String.format("attachment;filename=%s", fileName));
-
-            response.getWriter().print(results);
-            response.getWriter().flush();
+            byte[] bytes = results.getBytes("UTF-8");
+            response.getOutputStream().write(bytes);
+            response.setContentLength(bytes.length);
+            response.getOutputStream().flush();
             response.flushBuffer();
         } catch (Exception exception) {
             try {
