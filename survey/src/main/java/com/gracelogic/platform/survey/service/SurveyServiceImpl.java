@@ -101,6 +101,7 @@ public class SurveyServiceImpl implements SurveyService {
             throw new ObjectNotFoundException();
 
         for (String str : dto.getItems()) {
+            if (StringUtils.isBlank(str)) continue;
             SurveyAnswerVariantCatalogItemDTO newItem = new SurveyAnswerVariantCatalogItemDTO();
             newItem.setCatalogId(dto.getCatalogId());
             newItem.setText(str);
