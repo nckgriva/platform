@@ -15,24 +15,24 @@ public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
     @Override
     public Integer getFeedbacksCount(UUID feedbackTypeId, Date startDate, Date endDate, Map<String, String> fields) {
         BigInteger count = null;
-        StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_feedback where 1=1 ");
+        StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_feedback el where 1=1 ");
 
         Map<String, Object> params = new HashMap<String, Object>();
         if (feedbackTypeId != null) {
-            queryStr.append("and feedback_type_id = :feedbackTypeId ");
+            queryStr.append("and el.feedback_type_id = :feedbackTypeId ");
             params.put("feedbackTypeId", feedbackTypeId);
         }
         if (startDate != null) {
-            queryStr.append("and created_dt >= :startDate ");
+            queryStr.append("and el.created_dt >= :startDate ");
             params.put("startDate", startDate);
         }
         if (endDate != null) {
-            queryStr.append("and created_dt <= :endDate ");
+            queryStr.append("and el.created_dt <= :endDate ");
             params.put("endDate", endDate);
         }
         if (fields != null && !fields.isEmpty()) {
             for (String key : fields.keySet()) {
-                queryStr.append(String.format("and fields ->> '%s' = '%s' ", key, fields.get(key)));
+                queryStr.append(String.format("and el.fields ->> '%s' ~ '%s' ", key, fields.get(key)));
             }
         }
 
@@ -54,29 +54,29 @@ public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
     @Override
     public List<Feedback> getFeedbacks(UUID feedbackTypeId, Date startDate, Date endDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
         List<Feedback> feedbacks = Collections.emptyList();
-        StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_feedback where 1=1 ");
+        StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_feedback el where 1=1 ");
 
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         if (feedbackTypeId != null) {
-            queryStr.append("and feedback_type_id = :feedbackTypeId ");
+            queryStr.append("and el.feedback_type_id = :feedbackTypeId ");
             params.put("feedbackTypeId", feedbackTypeId);
         }
         if (startDate != null) {
-            queryStr.append("and created_dt >= :startDate ");
+            queryStr.append("and el.created_dt >= :startDate ");
             params.put("startDate", startDate);
         }
         if (endDate != null) {
-            queryStr.append("and created_dt <= :endDate ");
+            queryStr.append("and el.created_dt <= :endDate ");
             params.put("endDate", endDate);
         }
         if (fields != null && !fields.isEmpty()) {
             for (String key : fields.keySet()) {
-                queryStr.append(String.format("and fields ->> '%s' = '%s' ", key, fields.get(key)));
+                queryStr.append(String.format("and el.fields ->> '%s' ~ '%s' ", key, fields.get(key)));
             }
         }
 
-        appendPaginationClause(queryStr, params, recordsOnPage, startRecord);
         appendSortClause(queryStr, sortField, sortDir);
+        appendPaginationClause(queryStr, params, recordsOnPage, startRecord);
 
         try {
             Query query = getEntityManager().createNativeQuery(queryStr.toString(), Feedback.class);

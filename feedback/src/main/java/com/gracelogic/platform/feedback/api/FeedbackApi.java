@@ -16,7 +16,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -40,7 +44,7 @@ public class FeedbackApi extends AbstractAuthorizedController {
     }
 
     @PreAuthorize("hasAuthority('FEEDBACK:SHOW')")
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity feedbacks(@RequestParam(value = "feedbackTypeId", required = false) UUID feedbackTypeId,
                                     @RequestParam(value = "startDate", required = false) String sStartDate,
@@ -48,7 +52,8 @@ public class FeedbackApi extends AbstractAuthorizedController {
                                     @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                     @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
                                     @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                    @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                    @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                    @RequestParam Map<String, String> allRequestParams) {
 
         Date startDate = null;
         Date endDate = null;
@@ -63,7 +68,24 @@ public class FeedbackApi extends AbstractAuthorizedController {
         } catch (Exception ignored) {
         }
 
-        EntityListResponse<FeedbackDTO> feedbacks = feedbackService.getFeedbacksPaged(feedbackTypeId, startDate, endDate, null, length, null, start, sortField, sortDir);
+        Map<String, String> fields = new HashMap<String, String>();
+        if (allRequestParams != null) {
+            for (String paramName : allRequestParams.keySet()) {
+                if (StringUtils.startsWithIgnoreCase(paramName, "fields.")) {
+                    String value = null;
+                    try {
+                        value = URLDecoder.decode(allRequestParams.get(paramName), "UTF-8");
+                    } catch (UnsupportedEncodingException ignored) {
+                    }
+
+                    if (!StringUtils.isEmpty(value)) {
+                        fields.put(paramName.substring("fields.".length()), value);
+                    }
+                }
+            }
+        }
+
+        EntityListResponse<FeedbackDTO> feedbacks = feedbackService.getFeedbacksPaged(feedbackTypeId, startDate, endDate, fields, length, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<FeedbackDTO>>(feedbacks, HttpStatus.OK);
     }
 }
