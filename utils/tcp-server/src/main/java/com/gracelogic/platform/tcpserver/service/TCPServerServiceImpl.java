@@ -44,6 +44,12 @@ public class TCPServerServiceImpl extends Thread implements TCPServerService {
     @PreDestroy
     public void stopService() {
         running = false;
+        if (listenSocket != null && !listenSocket.isClosed()) {
+            try {
+                listenSocket.close();
+            }
+            catch (Exception ignored) {}
+        }
     }
 
     @Override
