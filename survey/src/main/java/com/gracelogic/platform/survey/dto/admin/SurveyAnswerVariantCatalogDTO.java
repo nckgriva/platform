@@ -9,6 +9,8 @@ import java.util.UUID;
 
 public class SurveyAnswerVariantCatalogDTO extends IdObjectDTO {
     private String name;
+    private Boolean external;
+    private String suggestionProcessorName;
 
     private List<SurveyAnswerVariantCatalogItemDTO> items;
     private Set<UUID> itemsToDelete;
@@ -17,6 +19,8 @@ public class SurveyAnswerVariantCatalogDTO extends IdObjectDTO {
         SurveyAnswerVariantCatalogDTO dto = new SurveyAnswerVariantCatalogDTO();
         IdObjectDTO.prepare(dto, model);
         dto.setName(model.getName());
+        dto.setExternal(model.isExternal());
+        dto.setSuggestionProcessorName(model.getSuggestionProcessorName());
         return dto;
     }
 
@@ -40,7 +44,23 @@ public class SurveyAnswerVariantCatalogDTO extends IdObjectDTO {
         return itemsToDelete;
     }
 
-    public void setItemsToDelete(Set<UUID> itemsToDelete) {
+    private void setItemsToDelete(Set<UUID> itemsToDelete) {
         this.itemsToDelete = itemsToDelete;
+    }
+
+    public Boolean isExternal() {
+        return external;
+    }
+
+    public void setExternal(Boolean external) {
+        this.external = external;
+    }
+
+    public String getSuggestionProcessorName() {
+        return suggestionProcessorName;
+    }
+
+    public void setSuggestionProcessorName(String suggestionProcessorName) {
+        this.suggestionProcessorName = suggestionProcessorName;
     }
 }

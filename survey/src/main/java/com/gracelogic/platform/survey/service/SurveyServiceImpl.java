@@ -863,7 +863,7 @@ public class SurveyServiceImpl implements SurveyService {
         params.clear();
         params.put("lastVisitedPageIndex", lastVisitedPageIndex);
         params.put("surveyId", surveySession.getSurvey().getId());
-        HashMap<UUID, SurveyQuestion> surveyQuestionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, "left join el.surveyPage sp left join sp.survey sv",
+        HashMap<UUID, SurveyQuestion> surveyQuestionsHashMap = asUUIDHashMap(idObjectService.getList(SurveyQuestion.class, "left join el.surveyPage sp left join sp.survey sv left join el.catalog cat",
                 "sv.id=:surveyId and sp.pageIndex=:lastVisitedPageIndex",
                 params, "el.questionIndex", "ASC", null, null));
 
@@ -902,11 +902,15 @@ public class SurveyServiceImpl implements SurveyService {
                 SurveyQuestion question = surveyQuestionsHashMap.get(entry.getKey());
                 SurveyAnswerVariant answerVariant = null;
 
+                // if question is using external catalog then we have no answer variants in our database
+                // it means we can allow answers with no answer variant specified (i.e only with text field)
+                boolean usingExternalCatalog = question.getCatalog() != null && question.getCatalog().isExternal();
+
                 boolean isAnswerVariantSpecifyRequired =
-                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.LISTBOX.getValue()) ||
+                        !usingExternalCatalog && (question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.LISTBOX.getValue()) ||
                         question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.CHECKBOX.getValue()) ||
                         question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.RADIOBUTTON.getValue()) ||
-                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.COMBOBOX.getValue());
+                        question.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.COMBOBOX.getValue()));
 
                 if (answerDTO.getAnswerVariantId() != null)
                     answerVariant = surveyAnswersHashMap.get(answerDTO.getAnswerVariantId());
@@ -1921,6 +1925,8 @@ public class SurveyServiceImpl implements SurveyService {
         }
 
         entity.setName(dto.getName());
+        entity.setExternal(dto.isExternal());
+        entity.setSuggestionProcessorName(dto.getSuggestionProcessorName());
 
         return idObjectService.save(entity);
     }

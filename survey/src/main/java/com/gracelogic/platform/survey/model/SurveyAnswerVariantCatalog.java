@@ -29,6 +29,12 @@ public class SurveyAnswerVariantCatalog extends IdObject<UUID> {
     @Column(name = "NAME", nullable = false)
     private String name;
 
+    @Column(name = "IS_EXTERNAL", nullable = false)
+    private Boolean external;
+
+    @Column(name = "SUGGESTION_PROCESSOR_NAME", nullable = true)
+    private String suggestionProcessorName;
+
     public UUID getId() {
         return id;
     }
@@ -59,5 +65,21 @@ public class SurveyAnswerVariantCatalog extends IdObject<UUID> {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Boolean isExternal() {
+        return external;
+    }
+
+    public void setExternal(Boolean external) {
+        this.external = external;
+    }
+
+    public String getSuggestionProcessorName() {
+        return suggestionProcessorName;
+    }
+
+    public void setSuggestionProcessorName(String suggestionProcessorName) {
+        this.suggestionProcessorName = suggestionProcessorName;
     }
 }
