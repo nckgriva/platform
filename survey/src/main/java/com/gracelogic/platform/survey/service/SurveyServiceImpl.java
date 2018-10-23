@@ -484,7 +484,7 @@ public class SurveyServiceImpl implements SurveyService {
         cause = "el.surveyPage.id=:surveyPageId ";
         params.put("surveyPageId", surveyPage.getId());
 
-        List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, null,
+        List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, "left join fetch el.catalog",
                 cause, params, "el.questionIndex", "ASC", null, null);
 
         // 2. Getting the logic. For the web, select only HIDE_QUESTION / SHOW_QUESTION
@@ -1211,7 +1211,7 @@ public class SurveyServiceImpl implements SurveyService {
             if (!pagesDTO.isEmpty()) {
                 params.clear();
                 params.put("pageIds", pagesDTO.keySet());
-                List<SurveyQuestion> surveyQuestions = idObjectService.getList(SurveyQuestion.class, null, "el.surveyPage.id in (:pageIds)", params,
+                List<SurveyQuestion> surveyQuestions = idObjectService.getList(SurveyQuestion.class, "left join fetch el.catalog", "el.surveyPage.id in (:pageIds)", params,
                         "el.questionIndex ASC", null, null);
 
                 List<SurveyLogicTrigger> logicTriggers = idObjectService.getList(SurveyLogicTrigger.class, null, "el.surveyPage.id in (:pageIds)", params,
@@ -1406,7 +1406,7 @@ public class SurveyServiceImpl implements SurveyService {
                                                                          boolean withVariants, Integer count, Integer page,
                                                                          Integer start, String sortField, String sortDir) {
         String countFetches = "left join el.surveyPage sp ";
-        String fetches = "left join el.surveyPage sp ";
+        String fetches = "left join el.surveyPage sp left join fetch el.catalog";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
 
@@ -1528,7 +1528,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Override
     public SurveyQuestionDTO getSurveyQuestion(UUID surveyQuestionId) throws ObjectNotFoundException {
-        SurveyQuestion entity = idObjectService.getObjectById(SurveyQuestion.class, surveyQuestionId);
+        SurveyQuestion entity = idObjectService.getObjectById(SurveyQuestion.class, "left join fetch el.catalog", surveyQuestionId);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -1927,6 +1927,9 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setName(dto.getName());
         entity.setExternal(dto.isExternal());
         entity.setSuggestionProcessorName(dto.getSuggestionProcessorName());
+        if (dto.getSuggestionProcessorName() == null) {
+            entity.setSuggestionProcessorName("basicVariantSuggestionProcessor"); // TODO: to cmn_property?
+        }
 
         SurveyAnswerVariantCatalog catalog = idObjectService.save(entity);
 
