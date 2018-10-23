@@ -62,7 +62,7 @@ public class SurveyAnswerVariantCatalogApi {
                                       @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                       @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                       @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
-        EntityListResponse<SurveyAnswerVariantCatalogDTO> properties = surveyService.getSurveyAnswerVariantCatalogsPaged(name, count, null, start, sortField, sortDir);
+        EntityListResponse<SurveyAnswerVariantCatalogDTO> properties = surveyService.getCatalogsPaged(name, count, null, start, sortField, sortDir);
         return new ResponseEntity<>(properties, HttpStatus.OK);
     }
 
@@ -80,7 +80,7 @@ public class SurveyAnswerVariantCatalogApi {
     @ResponseBody
     public ResponseEntity getCatalog(@PathVariable(value = "id") UUID id) {
         try {
-            SurveyAnswerVariantCatalogDTO dto = surveyService.getSurveyAnswerVariantCatalog(id);
+            SurveyAnswerVariantCatalogDTO dto = surveyService.getCatalog(id);
             return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null,
@@ -156,7 +156,7 @@ public class SurveyAnswerVariantCatalogApi {
     @ResponseBody
     public ResponseEntity saveCatalog(@RequestBody SurveyAnswerVariantCatalogDTO dto) {
         try {
-            SurveyAnswerVariantCatalog surveyAnswerVariantCatalog = surveyService.saveSurveyAnswerVariantCatalog(dto);
+            SurveyAnswerVariantCatalog surveyAnswerVariantCatalog = surveyService.saveCatalog(dto);
             return new ResponseEntity<IDResponse>(new IDResponse(surveyAnswerVariantCatalog.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -177,7 +177,7 @@ public class SurveyAnswerVariantCatalogApi {
     @ResponseBody
     public ResponseEntity deleteCatalog(@PathVariable(value = "id") UUID id) {
         try {
-            surveyService.deleteSurveyAnswerVariantCatalog(id);
+            surveyService.deleteCatalog(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);

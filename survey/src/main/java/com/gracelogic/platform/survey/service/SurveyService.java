@@ -116,21 +116,21 @@ public interface SurveyService {
 
     void deleteSurveyQuestionAnswer(UUID id);
 
-    EntityListResponse<SurveyAnswerVariantCatalogDTO> getSurveyAnswerVariantCatalogsPaged(String name, Integer count, Integer page,
-                                                                                          Integer start, String sortField, String sortDir);
+    EntityListResponse<SurveyAnswerVariantCatalogDTO> getCatalogsPaged(String name, Integer count, Integer page,
+                                                                       Integer start, String sortField, String sortDir);
 
-    SurveyAnswerVariantCatalogDTO getSurveyAnswerVariantCatalog(UUID id) throws ObjectNotFoundException;
+    SurveyAnswerVariantCatalogDTO getCatalog(UUID id) throws ObjectNotFoundException;
 
-    SurveyAnswerVariantCatalog saveSurveyAnswerVariantCatalog(SurveyAnswerVariantCatalogDTO dto) throws ObjectNotFoundException;
+    SurveyAnswerVariantCatalog saveCatalog(SurveyAnswerVariantCatalogDTO dto) throws ObjectNotFoundException;
 
-    void deleteSurveyAnswerVariantCatalog(UUID id);
+    void deleteCatalog(UUID id);
 
-    EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getSurveyAnswerVariantCatalogItemsPaged(UUID catalogId, String text, Integer count, Integer page,
-                                                                                                  Integer start, String sortField, String sortDir);
+    EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getCatalogItemsPaged(UUID catalogId, String text, Integer count, Integer page,
+                                                                               Integer start, String sortField, String sortDir);
 
-    SurveyAnswerVariantCatalogItemDTO getSurveyAnswerVariantCatalogItem(UUID id) throws ObjectNotFoundException;
+    SurveyAnswerVariantCatalogItemDTO getCatalogItem(UUID id) throws ObjectNotFoundException;
 
-    SurveyAnswerVariantCatalogItem saveSurveyAnswerVariantCatalogItem(SurveyAnswerVariantCatalogItemDTO dto) throws ObjectNotFoundException;
+    SurveyAnswerVariantCatalogItem saveCatalogItem(SurveyAnswerVariantCatalogItemDTO dto) throws ObjectNotFoundException;
 
-    void deleteSurveyAnswerVariantCatalogItem(UUID id);
+    void deleteCatalogItem(UUID id);
 }

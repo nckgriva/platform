@@ -105,7 +105,7 @@ public class SurveyServiceImpl implements SurveyService {
             SurveyAnswerVariantCatalogItemDTO newItem = new SurveyAnswerVariantCatalogItemDTO();
             newItem.setCatalogId(dto.getCatalogId());
             newItem.setText(str);
-            saveSurveyAnswerVariantCatalogItem(newItem);
+            saveCatalogItem(newItem);
         }
     }
 
@@ -1865,8 +1865,8 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyAnswerVariantCatalogDTO> getSurveyAnswerVariantCatalogsPaged(String name, Integer count, Integer page,
-                                                                                                 Integer start, String sortField, String sortDir) {
+    public EntityListResponse<SurveyAnswerVariantCatalogDTO> getCatalogsPaged(String name, Integer count, Integer page,
+                                                                              Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
 
@@ -1891,7 +1891,7 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public SurveyAnswerVariantCatalogDTO getSurveyAnswerVariantCatalog(UUID id) throws ObjectNotFoundException {
+    public SurveyAnswerVariantCatalogDTO getCatalog(UUID id) throws ObjectNotFoundException {
         SurveyAnswerVariantCatalog entity = idObjectService.getObjectById(SurveyAnswerVariantCatalog.class, id);
         if (entity == null) {
             throw new ObjectNotFoundException();
@@ -1901,7 +1901,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyAnswerVariantCatalog saveSurveyAnswerVariantCatalog(SurveyAnswerVariantCatalogDTO dto) throws ObjectNotFoundException {
+    public SurveyAnswerVariantCatalog saveCatalog(SurveyAnswerVariantCatalogDTO dto) throws ObjectNotFoundException {
         SurveyAnswerVariantCatalog entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(SurveyAnswerVariantCatalog.class, dto.getId());
@@ -1920,7 +1920,7 @@ public class SurveyServiceImpl implements SurveyService {
 
         if (dto.getItems() != null && dto.getItems().size() > 0) {
             for (SurveyAnswerVariantCatalogItemDTO itemDTO : dto.getItems()) {
-                saveSurveyAnswerVariantCatalogItem(itemDTO);
+                saveCatalogItem(itemDTO);
             }
         }
 
@@ -1928,12 +1928,21 @@ public class SurveyServiceImpl implements SurveyService {
         entity.setExternal(dto.isExternal());
         entity.setSuggestionProcessorName(dto.getSuggestionProcessorName());
 
-        return idObjectService.save(entity);
+        SurveyAnswerVariantCatalog catalog = idObjectService.save(entity);
+
+        // if it's external catalog now and still have items - delete them
+        if (catalog.isExternal()) {
+            params.clear();
+            params.put("id", catalog.getId());
+            idObjectService.delete(SurveyAnswerVariantCatalogItem.class, "el.catalog.id = :id", params);
+        }
+
+        return catalog;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteSurveyAnswerVariantCatalog(UUID id) {
+    public void deleteCatalog(UUID id) {
         Map<String, Object> params = new HashMap<>();
         params.put("catalogId", id);
         idObjectService.delete(SurveyAnswerVariantCatalogItem.class, "el.catalog.id=:catalogId", params);
@@ -1942,8 +1951,8 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getSurveyAnswerVariantCatalogItemsPaged(UUID catalogId, String text, Integer count, Integer page,
-                                                                                                         Integer start, String sortField, String sortDir) {
+    public EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getCatalogItemsPaged(UUID catalogId, String text, Integer count, Integer page,
+                                                                                      Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
 
@@ -1973,7 +1982,7 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public SurveyAnswerVariantCatalogItemDTO getSurveyAnswerVariantCatalogItem(UUID id) throws ObjectNotFoundException {
+    public SurveyAnswerVariantCatalogItemDTO getCatalogItem(UUID id) throws ObjectNotFoundException {
         SurveyAnswerVariantCatalogItem entity = idObjectService.getObjectById(SurveyAnswerVariantCatalogItem.class, id);
         if (entity == null) {
             throw new ObjectNotFoundException();
@@ -1983,7 +1992,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public SurveyAnswerVariantCatalogItem saveSurveyAnswerVariantCatalogItem(SurveyAnswerVariantCatalogItemDTO dto) throws ObjectNotFoundException {
+    public SurveyAnswerVariantCatalogItem saveCatalogItem(SurveyAnswerVariantCatalogItemDTO dto) throws ObjectNotFoundException {
         SurveyAnswerVariantCatalogItem entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(SurveyAnswerVariantCatalogItem.class, dto.getId());
@@ -2005,7 +2014,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteSurveyAnswerVariantCatalogItem(UUID id) {
+    public void deleteCatalogItem(UUID id) {
         idObjectService.delete(SurveyAnswerVariantCatalogItem.class, id);
     }
 }
