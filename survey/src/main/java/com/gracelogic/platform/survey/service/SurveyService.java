@@ -59,7 +59,7 @@ public interface SurveyService {
 
     SurveyDTO getSurveyByExternalId(String externalId, boolean entire) throws ObjectNotFoundException;
 
-    void deleteSurvey(UUID id) throws LogicDependencyException, ResultDependencyException;
+    void deleteSurvey(UUID id, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException;
 
     EntityListResponse<SurveyAnswerVariantDTO> getSurveyAnswerVariantsPaged(UUID surveyQuestionId, String description, Integer count, Integer page,
                                                                             Integer start, String sortField, String sortDir);
@@ -68,7 +68,7 @@ public interface SurveyService {
 
     SurveyAnswerVariantDTO getSurveyAnswerVariant(UUID id) throws ObjectNotFoundException;
 
-    void deleteSurveyAnswerVariant(UUID id, boolean deleteLogic) throws LogicDependencyException, ResultDependencyException;
+    void deleteSurveyAnswerVariant(UUID id, boolean deleteLogic, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException;
 
     EntityListResponse<SurveyPageDTO> getSurveyPagesPaged(UUID surveyId, String description, Integer count, Integer page,
                                                           Integer start, String sortField, String sortDir);
@@ -77,7 +77,7 @@ public interface SurveyService {
 
     SurveyPageDTO getSurveyPage(UUID id) throws ObjectNotFoundException;
 
-    void deleteSurveyPage(UUID id) throws LogicDependencyException, ResultDependencyException;
+    void deleteSurveyPage(UUID id, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException;
 
     EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, Set<UUID> questionTypes,
                                                                   String text, boolean withVariants, Integer count, Integer page,
@@ -87,7 +87,7 @@ public interface SurveyService {
 
     SurveyQuestionDTO getSurveyQuestion(UUID surveyQuestionId) throws ObjectNotFoundException;
 
-    void deleteSurveyQuestion(UUID id, boolean deleteLogic) throws LogicDependencyException, ResultDependencyException;
+    void deleteSurveyQuestion(UUID id, boolean deleteLogic, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException;
 
     EntityListResponse<SurveyLogicTriggerDTO> getSurveyLogicTriggersPaged(UUID surveyQuestionId, UUID surveyPageId, UUID surveyAnswerVariantId, Integer count, Integer page,
                                                                           Integer start, String sortField, String sortDir);

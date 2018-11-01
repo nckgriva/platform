@@ -152,11 +152,12 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('SURVEY:DELETE')")
-    @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/delete")
     @ResponseBody
-    public ResponseEntity deleteSurveyQuestion(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity deleteSurveyQuestion(@PathVariable(value = "id") UUID id,
+                                               @RequestParam(value = "deleteAnswers", required = false) Boolean deleteAnswers) {
         try {
-            surveyService.deleteSurveyQuestion(id, false);
+            surveyService.deleteSurveyQuestion(id, false, deleteAnswers != null ? deleteAnswers : false);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (ResultDependencyException resultDependency) {
             return new ResponseEntity<>(new ErrorResponse("survey.RESULT_DEPENDENCY",
