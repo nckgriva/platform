@@ -18,8 +18,6 @@ public class PropertyDTO extends IdObjectDTO {
 
     private String value;
 
-    private Long lifetime;
-
     private Boolean visible;
 
     @Override
@@ -68,14 +66,6 @@ public class PropertyDTO extends IdObjectDTO {
         this.value = value;
     }
 
-    public Long getLifetime() {
-        return lifetime;
-    }
-
-    public void setLifetime(Long lifetime) {
-        this.lifetime = lifetime;
-    }
-
     public Boolean getVisible() {return visible;}
 
     public void setVisible(Boolean visible) {this.visible = visible;}
@@ -86,7 +76,6 @@ public class PropertyDTO extends IdObjectDTO {
 
         propertyDTO.setName(property.getName());
         propertyDTO.setValue(property.getValue());
-        propertyDTO.setLifetime(property.getLifetime());
         propertyDTO.setVisible(property.getVisible());
 
         return propertyDTO;

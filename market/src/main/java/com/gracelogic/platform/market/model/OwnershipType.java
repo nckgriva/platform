@@ -30,6 +30,9 @@ public class OwnershipType extends IdObject<UUID> implements Dictionary {
     @Column(name = NAME, nullable = false)
     private String name;
 
+    @Column(name = SORT_ORDER, nullable = true)
+    private Integer sortOrder;
+
     @Override
     public UUID getId() {
         return id;
@@ -66,7 +69,7 @@ public class OwnershipType extends IdObject<UUID> implements Dictionary {
 
     @Override
     public Integer getSortOrder() {
-        return 0;
+        return sortOrder;
     }
 
     @Override
@@ -78,4 +81,7 @@ public class OwnershipType extends IdObject<UUID> implements Dictionary {
         this.name = name;
     }
 
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
 }

@@ -7,6 +7,7 @@ import java.util.*;
 
 public class SurveyQuestionDTO extends IdObjectDTO {
     private UUID surveyPageId;
+    private UUID catalogId;
     private Integer questionIndex;
     private String text;
     private String description;
@@ -32,6 +33,8 @@ public class SurveyQuestionDTO extends IdObjectDTO {
     // CLIENT->SERVER
     private Set<UUID> answersToDelete = new HashSet<>();
 
+    // SERVER->CLIENT
+    private String suggestionProcessorName;
 
     public static SurveyQuestionDTO prepare(SurveyQuestion model) {
         SurveyQuestionDTO dto = new SurveyQuestionDTO();
@@ -50,11 +53,22 @@ public class SurveyQuestionDTO extends IdObjectDTO {
         dto.setAttachmentExtensions(model.getAttachmentExtensions());
         dto.setMatrixColumns(model.getMatrixColumns());
         dto.setMatrixRows(model.getMatrixRows());
-
+        dto.setSuggestionProcessorName(model.getCatalog() != null ? model.getCatalog().getSuggestionProcessorName() : null);
         dto.setScaleMaxValueLabel(model.getScaleMaxValueLabel());
         dto.setScaleMinValueLabel(model.getScaleMinValueLabel());
         dto.setScaleStepValue(model.getScaleStepValue());
+        if (model.getCatalog() != null) {
+            dto.setCatalogId(model.getCatalog().getId());
+        }
         return dto;
+    }
+
+    public String getSuggestionProcessorName() {
+        return suggestionProcessorName;
+    }
+
+    public void setSuggestionProcessorName(String suggestionProcessorName) {
+        this.suggestionProcessorName = suggestionProcessorName;
     }
 
     public UUID getSurveyPageId() {
@@ -95,6 +109,14 @@ public class SurveyQuestionDTO extends IdObjectDTO {
 
     public void setSurveyQuestionTypeId(UUID surveyQuestionTypeId) {
         this.surveyQuestionTypeId = surveyQuestionTypeId;
+    }
+
+    public UUID getCatalogId() {
+        return catalogId;
+    }
+
+    public void setCatalogId(UUID catalogId) {
+        this.catalogId = catalogId;
     }
 
     public Boolean getRequired() {

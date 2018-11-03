@@ -22,6 +22,9 @@ public class Survey extends IdObject<UUID> {
     @org.hibernate.annotations.Type(type = "pg-uuid")
     private UUID id;
 
+    @Column(name = "EXTERNAL_ID", nullable = true, unique = true)
+    private String externalId;
+
     @Column(name = CREATED, nullable = false)
     private Date created;
 
@@ -54,6 +57,11 @@ public class Survey extends IdObject<UUID> {
      */
     @Column(name = "IS_CLARIFY_CUSTOM_ANSWER", nullable = false)
     private Boolean clarifyCustomAnswer;
+    /**
+     * When answering to matrix question with custom answer variant, respondent can skip its selection even if this is required question
+     */
+    @Column(name = "IS_CAN_IGNORE_CUSTOM_ANSWER", nullable = false)
+    private Boolean canIgnoreCustomAnswer;
 
     @Column(name = "INTRODUCTION", nullable = true, length = 4000)
     private String introduction;
@@ -89,6 +97,14 @@ public class Survey extends IdObject<UUID> {
     @Override
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 
     @Override
@@ -185,6 +201,14 @@ public class Survey extends IdObject<UUID> {
 
     public Integer getMaxRespondents() {
         return maxRespondents;
+    }
+
+    public Boolean getCanIgnoreCustomAnswer() {
+        return canIgnoreCustomAnswer;
+    }
+
+    public void setCanIgnoreCustomAnswer(Boolean canIgnoreCustomAnswer) {
+        this.canIgnoreCustomAnswer = canIgnoreCustomAnswer;
     }
 
     public void setMaxRespondents(Integer maxRespondents) {

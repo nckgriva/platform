@@ -11,18 +11,32 @@ import com.gracelogic.platform.survey.model.*;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface SurveyService {
 
     String exportResults(UUID surveyId) throws ObjectNotFoundException, InternalErrorException;
 
+    String exportCatalogItems(UUID catalogId) throws ObjectNotFoundException;
+
+    void importCatalogItems(ImportCatalogItemsDTO dto) throws ObjectNotFoundException;
+
     SurveyIntroductionDTO getSurveyIntroduction(UUID surveyId) throws ObjectNotFoundException, ForbiddenException;
 
+    SurveyIntroductionDTO getSurveyIntroductionByExternalId(String externalId)
+            throws ObjectNotFoundException, ForbiddenException;
+
     SurveyInteractionDTO startSurvey(UUID surveyId, AuthorizedUser user, String ipAddress)
-            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsHitException;
+            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsException;
+
+    SurveyInteractionDTO startSurveyByExternalId(String externalId, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException, RespondentLimitException, ForbiddenException, MaxAttemptsException;
 
     SurveyInteractionDTO startSurveyPreview(UUID surveyId, AuthorizedUser user, String ipAddress)
+            throws ObjectNotFoundException;
+
+    SurveyInteractionDTO startSurveyPreviewByExternalId(String externalSurveyId, AuthorizedUser user, String ipAddress)
             throws ObjectNotFoundException;
 
     SurveyInteractionDTO saveAnswersAndContinue(UUID surveySessionId, PageAnswersDTO dto)
@@ -34,7 +48,7 @@ public interface SurveyService {
 
     SurveyInteractionDTO continueSurvey(UUID surveySessionId) throws ObjectNotFoundException, ForbiddenException;
 
-    EntityListResponse<SurveyDTO> getSurveysPaged(String name, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<SurveyDTO> getSurveysPaged(String name, Boolean getExpired, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     Survey saveEntireSurvey(SurveyDTO surveyDTO, AuthorizedUser user)
             throws ObjectNotFoundException, LogicDependencyException, ResultDependencyException, BadDTOException;
@@ -43,7 +57,9 @@ public interface SurveyService {
 
     SurveyDTO getSurvey(UUID surveyId, boolean entire) throws ObjectNotFoundException;
 
-    void deleteSurvey(UUID id) throws LogicDependencyException, ResultDependencyException;
+    SurveyDTO getSurveyByExternalId(String externalId, boolean entire) throws ObjectNotFoundException;
+
+    void deleteSurvey(UUID id, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException;
 
     EntityListResponse<SurveyAnswerVariantDTO> getSurveyAnswerVariantsPaged(UUID surveyQuestionId, String description, Integer count, Integer page,
                                                                             Integer start, String sortField, String sortDir);
@@ -52,7 +68,7 @@ public interface SurveyService {
 
     SurveyAnswerVariantDTO getSurveyAnswerVariant(UUID id) throws ObjectNotFoundException;
 
-    void deleteSurveyAnswerVariant(UUID id, boolean deleteLogic) throws LogicDependencyException, ResultDependencyException;
+    void deleteSurveyAnswerVariant(UUID id, boolean deleteLogic, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException;
 
     EntityListResponse<SurveyPageDTO> getSurveyPagesPaged(UUID surveyId, String description, Integer count, Integer page,
                                                           Integer start, String sortField, String sortDir);
@@ -61,16 +77,17 @@ public interface SurveyService {
 
     SurveyPageDTO getSurveyPage(UUID id) throws ObjectNotFoundException;
 
-    void deleteSurveyPage(UUID id) throws LogicDependencyException, ResultDependencyException;
+    void deleteSurveyPage(UUID id, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException;
 
-    EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, String text, boolean withVariants, Integer count, Integer page,
+    EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId, Set<UUID> questionTypes,
+                                                                  String text, boolean withVariants, Integer count, Integer page,
                                                                   Integer start, String sortField, String sortDir);
 
     SurveyQuestion saveSurveyQuestion(SurveyQuestionDTO dto) throws ObjectNotFoundException, BadDTOException;
 
     SurveyQuestionDTO getSurveyQuestion(UUID surveyQuestionId) throws ObjectNotFoundException;
 
-    void deleteSurveyQuestion(UUID id, boolean deleteLogic) throws LogicDependencyException, ResultDependencyException;
+    void deleteSurveyQuestion(UUID id, boolean deleteLogic, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException;
 
     EntityListResponse<SurveyLogicTriggerDTO> getSurveyLogicTriggersPaged(UUID surveyQuestionId, UUID surveyPageId, UUID surveyAnswerVariantId, Integer count, Integer page,
                                                                           Integer start, String sortField, String sortDir);
@@ -99,21 +116,21 @@ public interface SurveyService {
 
     void deleteSurveyQuestionAnswer(UUID id);
 
-    EntityListResponse<SurveyAnswerVariantCatalogDTO> getSurveyAnswerVariantCatalogsPaged(String name, Integer count, Integer page,
-                                                                                          Integer start, String sortField, String sortDir);
+    EntityListResponse<SurveyAnswerVariantCatalogDTO> getCatalogsPaged(String name, Integer count, Integer page,
+                                                                       Integer start, String sortField, String sortDir);
 
-    SurveyAnswerVariantCatalogDTO getSurveyAnswerVariantCatalog(UUID id) throws ObjectNotFoundException;
+    SurveyAnswerVariantCatalogDTO getCatalog(UUID id) throws ObjectNotFoundException;
 
-    SurveyAnswerVariantCatalog saveSurveyAnswerVariantCatalog(SurveyAnswerVariantCatalogDTO dto) throws ObjectNotFoundException;
+    SurveyAnswerVariantCatalog saveCatalog(SurveyAnswerVariantCatalogDTO dto) throws ObjectNotFoundException;
 
-    void deleteSurveyAnswerVariantCatalog(UUID id);
+    void deleteCatalog(UUID id);
 
-    EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getSurveyAnswerVariantCatalogItemsPaged(UUID catalogId, String text, Integer count, Integer page,
-                                                                                                  Integer start, String sortField, String sortDir);
+    EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getCatalogItemsPaged(UUID catalogId, String text, Integer count, Integer page,
+                                                                               Integer start, String sortField, String sortDir);
 
-    SurveyAnswerVariantCatalogItemDTO getSurveyAnswerVariantCatalogItem(UUID id) throws ObjectNotFoundException;
+    SurveyAnswerVariantCatalogItemDTO getCatalogItem(UUID id) throws ObjectNotFoundException;
 
-    SurveyAnswerVariantCatalogItem saveSurveyAnswerVariantCatalogItem(SurveyAnswerVariantCatalogItemDTO dto) throws ObjectNotFoundException;
+    SurveyAnswerVariantCatalogItem saveCatalogItem(SurveyAnswerVariantCatalogItemDTO dto) throws ObjectNotFoundException;
 
-    void deleteSurveyAnswerVariantCatalogItem(UUID id);
+    void deleteCatalogItem(UUID id);
 }

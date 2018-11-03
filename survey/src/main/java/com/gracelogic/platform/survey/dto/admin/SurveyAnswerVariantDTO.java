@@ -36,7 +36,7 @@ public class SurveyAnswerVariantDTO extends IdObjectDTO {
         dto.setText(model.getText());
         dto.setSortOrder(model.getSortOrder());
         dto.setDefaultVariant(model.getDefaultVariant());
-        dto.setCustomVariant(model.getCustomVariant());
+        dto.setCustomVariant(model.isCustomVariant());
         dto.setWeight(model.getWeight());
         return dto;
     }

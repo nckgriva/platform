@@ -5,6 +5,7 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.Path;
+import com.gracelogic.platform.survey.dto.admin.GetSurveyQuestionsRequest;
 import com.gracelogic.platform.survey.dto.admin.SurveyQuestionDTO;
 import com.gracelogic.platform.survey.exception.BadDTOException;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
@@ -64,8 +65,36 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
                                              @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
 
-        EntityListResponse<SurveyQuestionDTO> properties = surveyService.getSurveyQuestionsPaged(surveyId, surveyPageId, text, withVariants, count, null, start, sortField, sortDir);
+        EntityListResponse<SurveyQuestionDTO> properties = surveyService.getSurveyQuestionsPaged(surveyId, surveyPageId, null, text, withVariants, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<SurveyQuestionDTO>>(properties, HttpStatus.OK);
+    }
+
+    @ApiOperation(
+            value = "getSurveyQuestions",
+            notes = "Get list of survey questions",
+            response = EntityListResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
+    @PreAuthorize("hasAuthority('SURVEY:SHOW')")
+    @RequestMapping(method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity getSurveyQuestions(@RequestBody GetSurveyQuestionsRequest request) {
+
+        if (request.getWithVariants() == null) request.setWithVariants(false);
+        if (request.getStart() == null) request.setStart(0);
+        if (request.getCount() == null) request.setStart(10);
+        if (request.getSortField() == null) request.setSortField("el.created");
+        if (request.getSortDir() == null) request.setSortDir("desc");
+
+        EntityListResponse<SurveyQuestionDTO> properties =
+                surveyService.getSurveyQuestionsPaged(request.getSurveyId(), request.getSurveyPageId(),
+                        request.getSurveyQuestionTypes(),
+                        request.getText(), request.getWithVariants(), request.getCount(), null,
+                        request.getStart(), request.getSortField(), request.getSortDir());
+        return new ResponseEntity<>(properties, HttpStatus.OK);
     }
 
     @ApiOperation(
@@ -123,11 +152,12 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('SURVEY:DELETE')")
-    @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/delete")
     @ResponseBody
-    public ResponseEntity deleteSurveyQuestion(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity deleteSurveyQuestion(@PathVariable(value = "id") UUID id,
+                                               @RequestParam(value = "deleteAnswers", required = false) Boolean deleteAnswers) {
         try {
-            surveyService.deleteSurveyQuestion(id, false);
+            surveyService.deleteSurveyQuestion(id, false, deleteAnswers != null ? deleteAnswers : false);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (ResultDependencyException resultDependency) {
             return new ResponseEntity<>(new ErrorResponse("survey.RESULT_DEPENDENCY",

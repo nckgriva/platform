@@ -4,71 +4,34 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.property.dto.PropertyDTO;
-import com.gracelogic.platform.property.dto.PropertyModel;
 import com.gracelogic.platform.property.model.Property;
+import net.jodah.expiringmap.ExpiringMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class PropertyServiceImpl implements PropertyService {
     @Autowired
     private IdObjectService idObjectService;
 
-    private Map<String, PropertyModel> properties = new HashMap<String, PropertyModel>();
-
-    @PostConstruct
-    public void init() {
-        List<Property> propertyList = idObjectService.getList(Property.class);
-        for (Property property : propertyList) {
-            properties.put(property.getName(), PropertyModel.prepare(property));
-        }
-    }
+    private Map<String, String> cache = ExpiringMap.builder()
+            .expiration(30, TimeUnit.SECONDS)
+            .entryLoader(key -> getPropertyValueByName((String) key))
+            .build();
 
     @Override
     public String getPropertyValue(String propertyName) {
-        if (properties.containsKey(propertyName)) {
-            PropertyModel propertyModel = properties.get(propertyName);
-            if (propertyModel.getLifetime() == null) {
-                return propertyModel.getValue();
-            }
-            else {
-                if (propertyModel.getBuildTime() == null || System.currentTimeMillis() - propertyModel.getBuildTime() > propertyModel.getLifetime()) {
-                    propertyModel = reloadProperty(propertyName);
-                }
-                return propertyModel.getValue();
-            }
-        } else {
-            PropertyModel propertyModel = reloadProperty(propertyName);
-            return propertyModel != null ? propertyModel.getValue() : null;
-        }
+        return cache.get(propertyName);
     }
 
-    public PropertyModel reloadProperty(String propertyName) {
-        PropertyModel propertyModel = null;
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("propertyName", propertyName);
-        List<Property> props = idObjectService.getList(Property.class, null, "el.name=:propertyName", params, null, null, null, 1);
-
-        Property property = null;
-        if (props != null && !props.isEmpty()) {
-            property = props.iterator().next();
-        }
-        if (property != null) {
-            propertyModel = PropertyModel.prepare(property);
-            properties.put(property.getName(), propertyModel);
-        }
-
-        return propertyModel;
-    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -85,12 +48,9 @@ public class PropertyServiceImpl implements PropertyService {
 
         entity.setName(dto.getName());
         entity.setValue(dto.getValue());
-        entity.setLifetime(dto.getLifetime());
         entity.setVisible(dto.getVisible());
 
-        Property property = idObjectService.save(entity);
-        reloadProperty(property.getName());
-        return property;
+        return idObjectService.save(entity);
     }
 
     @Override
@@ -130,6 +90,17 @@ public class PropertyServiceImpl implements PropertyService {
         }
         PropertyDTO dto = PropertyDTO.prepare(entity);
         return dto;
+    }
+
+    private String getPropertyValueByName(String name) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", name);
+
+        List<Property> properties = idObjectService.getList(Property.class, null, "el.name=:name", params, null, null, 1);
+        if (!properties.isEmpty()) {
+            return properties.iterator().next().getValue();
+        }
+        return null;
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -6,6 +6,8 @@ import com.gracelogic.platform.survey.model.Survey;
 import java.util.*;
 
 public class SurveyDTO extends IdObjectDTO {
+    private String externalId;
+    private Boolean canIgnoreCustomAnswer;
     private Boolean active;
     private String name;
     private Date startDate;
@@ -32,6 +34,7 @@ public class SurveyDTO extends IdObjectDTO {
     public static SurveyDTO prepare(Survey model) {
         SurveyDTO dto = new SurveyDTO();
         IdObjectDTO.prepare(dto, model);
+        dto.setExternalId(model.getExternalId());
         dto.setActive(model.isActive());
         dto.setName(model.getName());
         dto.setStartDate(model.getStartDate());
@@ -48,7 +51,24 @@ public class SurveyDTO extends IdObjectDTO {
         dto.setMaxAttempts(model.getMaxAttempts());
         dto.setLink(model.getLink());
         dto.setClarifyCustomAnswer(model.getClarifyCustomAnswer());
+        dto.setCanIgnoreCustomAnswer(model.getCanIgnoreCustomAnswer());
         return dto;
+    }
+
+    public Boolean getCanIgnoreCustomAnswer() {
+        return canIgnoreCustomAnswer;
+    }
+
+    public void setCanIgnoreCustomAnswer(Boolean canIgnoreCustomAnswer) {
+        this.canIgnoreCustomAnswer = canIgnoreCustomAnswer;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
     }
 
     public Boolean getActive() {

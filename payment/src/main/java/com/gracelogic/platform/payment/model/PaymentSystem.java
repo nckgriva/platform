@@ -59,6 +59,9 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
     @Column(name = "IS_RECURRING_AVAILABLE", nullable = false)
     private Boolean recurringAvailable;
 
+    @Column(name = SORT_ORDER, nullable = true)
+    private Integer sortOrder;
+
 
     @Override
     public UUID getId() {
@@ -95,7 +98,11 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
 
     @Override
     public Integer getSortOrder() {
-        return 0;
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     @Override

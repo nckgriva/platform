@@ -38,6 +38,9 @@ public class Role extends IdObject<UUID> implements Dictionary {
     @Column(name = CODE, nullable = false)
     private String code;
 
+    @Column(name = SORT_ORDER, nullable = true)
+    private Integer sortOrder;
+
     @OneToMany(mappedBy = "role", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
     private Set<RoleGrant> roleGrants = new HashSet<RoleGrant>();
 
@@ -93,7 +96,7 @@ public class Role extends IdObject<UUID> implements Dictionary {
 
     @Override
     public Integer getSortOrder() {
-        return 0;
+        return sortOrder;
     }
 
 
@@ -107,5 +110,9 @@ public class Role extends IdObject<UUID> implements Dictionary {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 }

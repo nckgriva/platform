@@ -33,6 +33,9 @@ public class Grant extends IdObject<UUID> implements Dictionary {
     @Column(name = CODE, nullable = false)
     private String code;
 
+    @Column(name = SORT_ORDER, nullable = true)
+    private Integer sortOrder;
+
     @Override
     public UUID getId() {
         return id;
@@ -70,7 +73,7 @@ public class Grant extends IdObject<UUID> implements Dictionary {
 
     @Override
     public Integer getSortOrder() {
-        return 0;
+        return sortOrder;
     }
 
     public void setName(String name) {
@@ -84,5 +87,9 @@ public class Grant extends IdObject<UUID> implements Dictionary {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 }

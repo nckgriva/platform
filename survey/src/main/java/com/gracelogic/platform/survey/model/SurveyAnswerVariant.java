@@ -107,7 +107,7 @@ public class SurveyAnswerVariant extends IdObject<UUID> {
         this.defaultVariant = defaultVariant;
     }
 
-    public Boolean getCustomVariant() {
+    public Boolean isCustomVariant() {
         return customVariant;
     }
 

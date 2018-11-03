@@ -11,6 +11,7 @@ import org.hibernate.annotations.TypeDefs;
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -54,6 +55,10 @@ public class SurveyQuestion extends IdObject<UUID> {
     @JoinColumn(name = "SURVEY_QUESTION_TYPE_ID", nullable = false)
     private SurveyQuestionType surveyQuestionType;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "CATALOG_ID", nullable = true)
+    private SurveyAnswerVariantCatalog catalog;
+
     @Column(name = "IS_REQUIRED", nullable = false)
     private Boolean required;
 
@@ -79,11 +84,11 @@ public class SurveyQuestion extends IdObject<UUID> {
     private String attachmentExtensions;
 
     @Type(type = "string-array")
-    @Column(name = "MATRIX_ROWS", nullable = true)
+    @Column(name = "MATRIX_ROWS", nullable = true, length = 4000)
     private String[] matrixRows;
 
     @Type(type = "string-array")
-    @Column(name = "MATRIX_COLUMNS", nullable = true)
+    @Column(name = "MATRIX_COLUMNS", nullable = true, length = 4000)
     private String[] matrixColumns;
 
     @Override
@@ -146,6 +151,14 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setSurveyQuestionType(SurveyQuestionType surveyQuestionType) {
         this.surveyQuestionType = surveyQuestionType;
+    }
+
+    public SurveyAnswerVariantCatalog getCatalog() {
+        return catalog;
+    }
+
+    public void setCatalog(SurveyAnswerVariantCatalog catalog) {
+        this.catalog = catalog;
     }
 
     public Boolean getRequired() {
@@ -233,6 +246,20 @@ public class SurveyQuestion extends IdObject<UUID> {
 
     public void setScaleStepValue(Integer scaleStepValue) {
         this.scaleStepValue = scaleStepValue;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SurveyQuestion that = (SurveyQuestion) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), id);
     }
 
     @Override

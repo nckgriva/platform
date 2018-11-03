@@ -28,8 +28,11 @@ public class TaskExecuteMethod extends IdObject<UUID> implements Dictionary {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = NAME, nullable = false)
     private String name;
+
+    @Column(name = SORT_ORDER, nullable = true)
+    private Integer sortOrder;
 
     @Override
     public UUID getId() {
@@ -76,6 +79,10 @@ public class TaskExecuteMethod extends IdObject<UUID> implements Dictionary {
 
     @Override
     public Integer getSortOrder() {
-        return 0;
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 }
