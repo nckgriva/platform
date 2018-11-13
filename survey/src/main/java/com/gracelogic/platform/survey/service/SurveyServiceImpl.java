@@ -571,7 +571,7 @@ public class SurveyServiceImpl implements SurveyService {
             List<SurveyPage> pages = idObjectService.getList(SurveyPage.class, null, "el.id in (:ids)", params,
                     null, null, null, null);
             for (SurveyPage page : pages)
-                deleteSurveyPage(page.getId());
+                deleteSurveyPage(page.getId(), false);
             params.clear();
         }
 
@@ -595,7 +595,7 @@ public class SurveyServiceImpl implements SurveyService {
                     List<SurveyQuestion> questions = idObjectService.getList(SurveyQuestion.class, null, "el.id in (:ids)", params,
                             null, null, null, null);
                     for (SurveyQuestion question : questions)
-                        deleteSurveyQuestion(question.getId(), true);
+                        deleteSurveyQuestion(question.getId(), true, false);
 
                     params.clear();
                 }
@@ -607,7 +607,7 @@ public class SurveyServiceImpl implements SurveyService {
                         List<SurveyAnswerVariant> answers = idObjectService.getList(SurveyAnswerVariant.class, null, "el.id in (:ids)", params,
                                 null, null, null, null);
                         for (SurveyAnswerVariant a : answers)
-                            deleteSurveyAnswerVariant(a.getId(), true);
+                            deleteSurveyAnswerVariant(a.getId(), true, false);
 
                         params.clear();
                     }
@@ -1742,14 +1742,18 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteSurvey(UUID id) throws LogicDependencyException, ResultDependencyException {
+    public void deleteSurvey(UUID id, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException {
         Map<String, Object> params = new HashMap<>();
         params.put("surveyId", id);
         List<SurveyPage> pages = idObjectService.getList(SurveyPage.class, null,
                 "el.survey.id=:surveyId", params, null, null, null);
 
         for (SurveyPage page : pages) {
-            deleteSurveyPage(page.getId());
+            deleteSurveyPage(page.getId(), deleteAnswers);
+        }
+
+        if (deleteAnswers) {
+            idObjectService.delete(SurveySession.class, "el.survey.id = :surveyId", params);
         }
 
         idObjectService.delete(Survey.class, id);
@@ -1757,7 +1761,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteSurveyPage(UUID id) throws LogicDependencyException, ResultDependencyException {
+    public void deleteSurveyPage(UUID id, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException {
         Map<String, Object> params = new HashMap<>();
         params.put("surveyPageId", id);
 
@@ -1765,7 +1769,8 @@ public class SurveyServiceImpl implements SurveyService {
                 "el.surveyPage.id=:surveyPageId", params, null, null, null);
 
         for (SurveyQuestion question : surveyQuestions) {
-            deleteSurveyQuestion(question.getId(), true); // если удаляется целая страница - подразумевается, что удаляется вся логика вместе с ней
+            // если удаляется целая страница - подразумевается, что удаляется вся логика вместе с ней
+            deleteSurveyQuestion(question.getId(), true, deleteAnswers);
         }
 
         idObjectService.delete(SurveyPage.class, id);
@@ -1773,15 +1778,20 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteSurveyQuestion(UUID id, boolean deleteLogic) throws LogicDependencyException, ResultDependencyException {
+    public void deleteSurveyQuestion(UUID id, boolean deleteLogic, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException {
         Map<String, Object> params = new HashMap<>();
         params.put("questionId", id);
 
-        boolean isQuestionAnswered = idObjectService.checkExist(SurveyQuestionAnswer.class, null, "el.question.id=:questionId",
-                params, 1) > 0;
+        if (!deleteAnswers) {
+            boolean isQuestionAnswered = idObjectService.checkExist(SurveyQuestionAnswer.class, null, "el.question.id=:questionId",
+                    params, 1) > 0;
 
-        if (isQuestionAnswered) {
-            throw new ResultDependencyException("Question is answered");
+            if (isQuestionAnswered) {
+                throw new ResultDependencyException("Question is answered");
+            }
+        } else {
+            // delete all answers
+            idObjectService.delete(SurveyQuestionAnswer.class, "el.surveyQuestion.id=:questionId", params);
         }
 
         if (!deleteLogic) {
@@ -1805,7 +1815,7 @@ public class SurveyServiceImpl implements SurveyService {
                 "el.surveyQuestion.id=:questionId", params, null, null, null);
 
         for (SurveyAnswerVariant var : answerVariants) {
-            deleteSurveyAnswerVariant(var.getId(), deleteLogic);
+            deleteSurveyAnswerVariant(var.getId(), deleteLogic, deleteAnswers);
         }
 
         idObjectService.delete(SurveyQuestion.class, id);
@@ -1813,14 +1823,16 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteSurveyAnswerVariant(UUID id, boolean deleteLogic) throws LogicDependencyException, ResultDependencyException {
+    public void deleteSurveyAnswerVariant(UUID id, boolean deleteLogic, boolean deleteAnswers) throws LogicDependencyException, ResultDependencyException {
         Map<String, Object> params = new HashMap<>();
         params.put("answerVariantId", id);
 
-        boolean isAnswered = idObjectService.checkExist(SurveyQuestionAnswer.class, null, "el.answerVariant.id=:answerVariantId",
-                params, 1) > 0;
-        if (isAnswered) {
-            throw new ResultDependencyException("Selected as answer");
+        if (!deleteAnswers) {
+            boolean isAnswered = idObjectService.checkExist(SurveyQuestionAnswer.class, null, "el.answerVariant.id=:answerVariantId",
+                    params, 1) > 0;
+            if (isAnswered) {
+                throw new ResultDependencyException("Selected as answer");
+            }
         }
 
         if (!deleteLogic) {
