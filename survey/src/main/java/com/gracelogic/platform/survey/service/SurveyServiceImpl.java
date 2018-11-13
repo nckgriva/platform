@@ -261,7 +261,8 @@ public class SurveyServiceImpl implements SurveyService {
 
             StringBuilder singleResult = new StringBuilder();
             for (SurveyQuestion question : sortedQuestions) {
-                singleResult.append(answersAsString.containsKey(question) ? answersAsString.get(question) + separator : separator);
+                singleResult.append(answersAsString.containsKey(question) ?
+                        answersAsString.get(question).replace("\n", " ") + separator : separator);
             }
 
             singleResult.deleteCharAt(singleResult.length()-1).append('\n');
