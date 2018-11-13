@@ -156,9 +156,14 @@ public class SurveyServiceImpl implements SurveyService {
                 answerVariantIds.add(answer.getAnswerVariant().getId());
         }
         params.clear();
-        params.put("answerVariantIds", answerVariantIds);
-        HashMap<UUID, SurveyAnswerVariant> surveyAnswerVariants = asUUIDHashMap(idObjectService.getList(SurveyAnswerVariant.class, null,
-                "el.id in (:answerVariantIds)", params, null, null, null, null));
+
+        HashMap<UUID, SurveyAnswerVariant> surveyAnswerVariants = new HashMap<>();
+        if (answerVariantIds.size() != 0) {
+            params.put("answerVariantIds", answerVariantIds);
+            surveyAnswerVariants = asUUIDHashMap(idObjectService.getList(SurveyAnswerVariant.class, null,
+                    "el.id in (:answerVariantIds)", params, null, null, null, null));
+            params.clear();
+        }
 
         for (SurveyQuestionAnswer answer : answersList) {
             // if no such session
