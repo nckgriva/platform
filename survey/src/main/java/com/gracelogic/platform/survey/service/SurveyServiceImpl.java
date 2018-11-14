@@ -266,11 +266,10 @@ public class SurveyServiceImpl implements SurveyService {
 
             StringBuilder singleResult = new StringBuilder();
             for (SurveyQuestion question : sortedQuestions) {
-                boolean alreadyStartsWithComma = answersAsString.get(question).startsWith("\"");
-                singleResult.append(answersAsString.containsKey(question) ?
-                        (!alreadyStartsWithComma ? "\"" : "") +
-                                answersAsString.get(question).replace("\n", " ").replace("\r", " ")
-                                + (!alreadyStartsWithComma ? "\"" : "") + separator : separator);
+                String cell = answersAsString.containsKey(question) ?
+                                answersAsString.get(question).replace("\n", " ").replace("\r", " ") : "";
+                boolean alreadyStartsWithComma = cell.startsWith("\"");
+                singleResult.append(!alreadyStartsWithComma ? "\"" : "").append(cell).append(!alreadyStartsWithComma ? "\"" : "").append(separator);
             }
 
             singleResult.deleteCharAt(singleResult.length()-1).append('\n');
