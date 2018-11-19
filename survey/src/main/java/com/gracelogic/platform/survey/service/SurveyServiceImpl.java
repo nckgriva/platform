@@ -134,11 +134,13 @@ public class SurveyServiceImpl implements SurveyService {
         // get suitable sessions
         List<SurveySession> sessionsList = idObjectService.getList(SurveySession.class, null,
                 "el.previewSession = false and el.ended != null and el.survey.id = :surveyId ",
-                params, null, null, null, null);
+                params, "el.changed", null, null, null);
+
+        HashMap<UUID, SurveySession> surveySessionHashMap = asUUIDHashMap(sessionsList);
 
         if (sessionsList.size() == 0) return pattern.toString();
 
-        HashMap<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> answersBySessionAndQuestion = new HashMap<>();
+
         params.clear();
 
         HashSet<UUID> sessionIds = new HashSet<>();
@@ -165,33 +167,42 @@ public class SurveyServiceImpl implements SurveyService {
             params.clear();
         }
 
+        TreeMap<SurveySession, HashMap<UUID, List<SurveyQuestionAnswer>>> answersBySessionAndQuestion = new TreeMap<>(new Comparator<SurveySession>() {
+            @Override
+            public int compare(SurveySession o1, SurveySession o2) {
+                return o1.getCreated().compareTo(o2.getCreated());
+            }
+        });
+
+        //HashMap<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> answersBySessionAndQuestion = new HashMap<>();
         for (SurveyQuestionAnswer answer : answersList) {
             // if no such session
-            if (!answersBySessionAndQuestion.containsKey(answer.getSurveySession().getId())) {
+            if (!answersBySessionAndQuestion.containsKey(surveySessionHashMap.get(answer.getSurveySession().getId()))) {
 
                 HashMap<UUID, List<SurveyQuestionAnswer>> answersByQuestion = new HashMap<>();
                 List<SurveyQuestionAnswer> questionAnswers = new ArrayList<>();
                 questionAnswers.add(answer);
 
                 answersByQuestion.put(answer.getQuestion().getId(), questionAnswers);
-                answersBySessionAndQuestion.put(answer.getSurveySession().getId(), answersByQuestion);
+                answersBySessionAndQuestion.put(surveySessionHashMap.get(answer.getSurveySession().getId()), answersByQuestion);
                 continue;
             }
 
             // if has session, but don't have such question
-            if (!answersBySessionAndQuestion.get(answer.getSurveySession().getId()).containsKey(answer.getQuestion().getId())) {
+            if (!answersBySessionAndQuestion.get(
+                    surveySessionHashMap.get(answer.getSurveySession().getId())).containsKey(answer.getQuestion().getId())) {
                 List<SurveyQuestionAnswer> questionAnswers = new ArrayList<>();
                 questionAnswers.add(answer);
 
-                answersBySessionAndQuestion.get(answer.getSurveySession().getId()).put(answer.getQuestion().getId(), questionAnswers);
+                answersBySessionAndQuestion.get(surveySessionHashMap.get(answer.getSurveySession().getId())).put(answer.getQuestion().getId(), questionAnswers);
                 continue;
             }
 
-            answersBySessionAndQuestion.get(answer.getSurveySession().getId()).get(answer.getQuestion().getId()).add(answer);
+            answersBySessionAndQuestion.get(surveySessionHashMap.get(answer.getSurveySession().getId())).get(answer.getQuestion().getId()).add(answer);
         }
 
         StringBuilder resultsBuilder = new StringBuilder();
-        for (Map.Entry<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> entry : answersBySessionAndQuestion.entrySet()) {
+        for (Map.Entry<SurveySession, HashMap<UUID, List<SurveyQuestionAnswer>>> entry : answersBySessionAndQuestion.entrySet()) {
 
             HashMap<SurveyQuestion, String> answersAsString = new HashMap<>();
             for (Map.Entry<UUID, List<SurveyQuestionAnswer>> questionAnswers : entry.getValue().entrySet()) {
