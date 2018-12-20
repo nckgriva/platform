@@ -134,11 +134,13 @@ public class SurveyServiceImpl implements SurveyService {
         // get suitable sessions
         List<SurveySession> sessionsList = idObjectService.getList(SurveySession.class, null,
                 "el.previewSession = false and el.ended != null and el.survey.id = :surveyId ",
-                params, null, null, null, null);
+                params, "el.changed", null, null, null);
+
+        HashMap<UUID, SurveySession> surveySessionHashMap = asUUIDHashMap(sessionsList);
 
         if (sessionsList.size() == 0) return pattern.toString();
 
-        HashMap<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> answersBySessionAndQuestion = new HashMap<>();
+
         params.clear();
 
         HashSet<UUID> sessionIds = new HashSet<>();
@@ -156,37 +158,51 @@ public class SurveyServiceImpl implements SurveyService {
                 answerVariantIds.add(answer.getAnswerVariant().getId());
         }
         params.clear();
-        params.put("answerVariantIds", answerVariantIds);
-        HashMap<UUID, SurveyAnswerVariant> surveyAnswerVariants = asUUIDHashMap(idObjectService.getList(SurveyAnswerVariant.class, null,
-                "el.id in (:answerVariantIds)", params, null, null, null, null));
 
+        HashMap<UUID, SurveyAnswerVariant> surveyAnswerVariants = new HashMap<>();
+        if (answerVariantIds.size() != 0) {
+            params.put("answerVariantIds", answerVariantIds);
+            surveyAnswerVariants = asUUIDHashMap(idObjectService.getList(SurveyAnswerVariant.class, null,
+                    "el.id in (:answerVariantIds)", params, null, null, null, null));
+            params.clear();
+        }
+
+        TreeMap<SurveySession, HashMap<UUID, List<SurveyQuestionAnswer>>> answersBySessionAndQuestion = new TreeMap<>(new Comparator<SurveySession>() {
+            @Override
+            public int compare(SurveySession o1, SurveySession o2) {
+                return o1.getCreated().compareTo(o2.getCreated());
+            }
+        });
+
+        //HashMap<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> answersBySessionAndQuestion = new HashMap<>();
         for (SurveyQuestionAnswer answer : answersList) {
             // if no such session
-            if (!answersBySessionAndQuestion.containsKey(answer.getSurveySession().getId())) {
+            if (!answersBySessionAndQuestion.containsKey(surveySessionHashMap.get(answer.getSurveySession().getId()))) {
 
                 HashMap<UUID, List<SurveyQuestionAnswer>> answersByQuestion = new HashMap<>();
                 List<SurveyQuestionAnswer> questionAnswers = new ArrayList<>();
                 questionAnswers.add(answer);
 
                 answersByQuestion.put(answer.getQuestion().getId(), questionAnswers);
-                answersBySessionAndQuestion.put(answer.getSurveySession().getId(), answersByQuestion);
+                answersBySessionAndQuestion.put(surveySessionHashMap.get(answer.getSurveySession().getId()), answersByQuestion);
                 continue;
             }
 
             // if has session, but don't have such question
-            if (!answersBySessionAndQuestion.get(answer.getSurveySession().getId()).containsKey(answer.getQuestion().getId())) {
+            if (!answersBySessionAndQuestion.get(
+                    surveySessionHashMap.get(answer.getSurveySession().getId())).containsKey(answer.getQuestion().getId())) {
                 List<SurveyQuestionAnswer> questionAnswers = new ArrayList<>();
                 questionAnswers.add(answer);
 
-                answersBySessionAndQuestion.get(answer.getSurveySession().getId()).put(answer.getQuestion().getId(), questionAnswers);
+                answersBySessionAndQuestion.get(surveySessionHashMap.get(answer.getSurveySession().getId())).put(answer.getQuestion().getId(), questionAnswers);
                 continue;
             }
 
-            answersBySessionAndQuestion.get(answer.getSurveySession().getId()).get(answer.getQuestion().getId()).add(answer);
+            answersBySessionAndQuestion.get(surveySessionHashMap.get(answer.getSurveySession().getId())).get(answer.getQuestion().getId()).add(answer);
         }
 
         StringBuilder resultsBuilder = new StringBuilder();
-        for (Map.Entry<UUID, HashMap<UUID, List<SurveyQuestionAnswer>>> entry : answersBySessionAndQuestion.entrySet()) {
+        for (Map.Entry<SurveySession, HashMap<UUID, List<SurveyQuestionAnswer>>> entry : answersBySessionAndQuestion.entrySet()) {
 
             HashMap<SurveyQuestion, String> answersAsString = new HashMap<>();
             for (Map.Entry<UUID, List<SurveyQuestionAnswer>> questionAnswers : entry.getValue().entrySet()) {
@@ -238,7 +254,7 @@ public class SurveyServiceImpl implements SurveyService {
                     answersAsString.put(surveyQuestion, multiple.toString());
                 }
 
-                // matrixes
+                // matrices
                 if (surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_RADIOBUTTON.getValue()) ||
                     surveyQuestion.getSurveyQuestionType().getId().equals(DataConstants.QuestionTypes.MATRIX_CHECKBOX.getValue())) {
                     StringBuilder multiple = new StringBuilder().append("\"");
@@ -261,7 +277,10 @@ public class SurveyServiceImpl implements SurveyService {
 
             StringBuilder singleResult = new StringBuilder();
             for (SurveyQuestion question : sortedQuestions) {
-                singleResult.append(answersAsString.containsKey(question) ? answersAsString.get(question) + separator : separator);
+                String cell = answersAsString.containsKey(question) ?
+                                answersAsString.get(question).replace("\n", " ").replace("\r", " ") : "";
+                boolean alreadyStartsWithComma = cell.startsWith("\"");
+                singleResult.append(!alreadyStartsWithComma ? "\"" : "").append(cell).append(!alreadyStartsWithComma ? "\"" : "").append(separator);
             }
 
             singleResult.deleteCharAt(singleResult.length()-1).append('\n');
@@ -941,8 +960,10 @@ public class SurveyServiceImpl implements SurveyService {
                 // check out of bounds
                 if (isMatrixQuestion) {
                     int maxRows = question.getMatrixRows().length;
+                    boolean hasCustomVariant = false;
                     if (answerVariantsByQuestion.get(question.getId()) != null) { // if matrix has custom variant
                         maxRows++;
+                        hasCustomVariant = true;
                     }
 
                     boolean rowIndexCheck = answerDTO.getSelectedMatrixRow() >= 0 && answerDTO.getSelectedMatrixRow() < maxRows;
@@ -959,7 +980,7 @@ public class SurveyServiceImpl implements SurveyService {
                     }
 
                     // custom matrix variant is always last row now. If it not specified then this is non-valid answer
-                    boolean answeringToCustomVariant = answerDTO.getSelectedMatrixRow() == maxRows-1;
+                    boolean answeringToCustomVariant = hasCustomVariant && answerDTO.getSelectedMatrixRow() == maxRows-1;
                     if (answeringToCustomVariant && answerVariant == null)
                         throw new ForbiddenException("Custom answer variant id is not specified");
                 }
