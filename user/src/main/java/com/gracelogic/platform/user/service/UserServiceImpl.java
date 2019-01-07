@@ -329,7 +329,7 @@ public class UserServiceImpl implements UserService {
                 if (isActualCodeAvailable) {
                     authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), true);
                 }
-                if (!StringUtils.isEmpty(user.getPhone()) && user.getPhoneVerified()) {
+                if (!StringUtils.isEmpty(user.getPhone()) && user.getPhoneVerified() && StringUtils.equalsIgnoreCase(loginType, "phone")) {
                     try {
                         LoadedTemplate template = templateService.load("sms_repair_code");
                         templateParams.put("code", authCode.getCode());
@@ -339,7 +339,7 @@ public class UserServiceImpl implements UserService {
                         logger.error(e);
                         throw new SendingException(e.getMessage());
                     }
-                } else if (!StringUtils.isEmpty(user.getEmail()) && user.getEmailVerified()) {
+                } else if (!StringUtils.isEmpty(user.getEmail()) && user.getEmailVerified() && StringUtils.equalsIgnoreCase(loginType, "email")) {
                     try {
                         LoadedTemplate template = templateService.load("email_repair_code");
                         templateParams.put("code", authCode.getCode());
