@@ -26,9 +26,9 @@ public class LocaleFilter extends AbstractAuthorizedController implements Filter
             if (user != null && !StringUtils.isEmpty(user.getLocale())) {
                 locale = user.getLocale();
             }
-            else if (httpRequest.getSession() != null) {
+            else if (httpRequest.getSession(false) != null) {
                 try {
-                    locale = (String) httpRequest.getSession().getAttribute(SESSION_ATTRIBUTE_LOCALE);
+                    locale = (String) httpRequest.getSession(false).getAttribute(SESSION_ATTRIBUTE_LOCALE);
                 }
                 catch (Exception ignored) {}
             }
