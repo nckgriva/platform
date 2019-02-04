@@ -81,6 +81,8 @@ public class UserApi extends AbstractAuthorizedController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
+        request.getSession(true);
+
         ObjectMapper objectMapper = new ObjectMapper();
 
         Exception exception = null;
