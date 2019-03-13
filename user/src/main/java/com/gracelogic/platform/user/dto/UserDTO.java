@@ -28,6 +28,7 @@ public class UserDTO extends IdObjectDTO implements Serializable {
     private Set<UUID> roles = new HashSet<>();
     private String formattedUserName;
     private String locale;
+    private String password;
 
     public String getEmail() {
         return email;
@@ -101,6 +102,13 @@ public class UserDTO extends IdObjectDTO implements Serializable {
         this.formattedUserName = formattedUserName;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public String getLocale() {
         return locale;
