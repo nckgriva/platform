@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class LocaleFilter extends AbstractAuthorizedController implements Filter {
@@ -23,12 +24,13 @@ public class LocaleFilter extends AbstractAuthorizedController implements Filter
             String locale = null;
 
             AuthorizedUser user = getUser();
+            HttpSession session = httpRequest.getSession(false);
             if (user != null && !StringUtils.isEmpty(user.getLocale())) {
                 locale = user.getLocale();
             }
-            else if (httpRequest.getSession() != null) {
+            else if (session != null) {
                 try {
-                    locale = (String) httpRequest.getSession().getAttribute(SESSION_ATTRIBUTE_LOCALE);
+                    locale = (String) session.getAttribute(SESSION_ATTRIBUTE_LOCALE);
                 }
                 catch (Exception ignored) {}
             }

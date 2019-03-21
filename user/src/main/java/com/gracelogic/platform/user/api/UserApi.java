@@ -81,6 +81,8 @@ public class UserApi extends AbstractAuthorizedController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
+        request.getSession(true);
+
         ObjectMapper objectMapper = new ObjectMapper();
 
         Exception exception = null;
@@ -352,11 +354,11 @@ public class UserApi extends AbstractAuthorizedController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity register(@ApiParam(name = "userRegistrationDTO", value = "userRegistrationDTO")
+    public ResponseEntity register(@ApiParam(name = "userDTO", value = "userDTO")
                                    @RequestBody
-                                           UserRegistrationDTO userRegistrationDTO) {
+                                           UserDTO userDTO) {
         try {
-            User user = lifecycleService.register(userRegistrationDTO, false);
+            User user = lifecycleService.register(userDTO, false);
             return new ResponseEntity<>(new IDResponse(user.getId()), HttpStatus.OK);
         } catch (PhoneOrEmailIsNecessaryException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.PHONE_OR_EMAIL_IS_NECESSARY", messageSource.getMessage("register.PHONE_OR_EMAIL_IS_NECESSARY", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);

@@ -11,8 +11,8 @@ public abstract class AbstractLifecycleService implements UserLifecycleService {
     protected abstract UserService getUserService();
 
     @Override
-    public User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException, CustomLocalizedException {
-        return getUserService().register(userRegistrationDTO, trust);
+    public User register(UserDTO userDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException, CustomLocalizedException {
+        return getUserService().register(userDTO, trust);
     }
 
     @Override

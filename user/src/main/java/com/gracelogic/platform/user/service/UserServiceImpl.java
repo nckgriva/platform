@@ -329,7 +329,7 @@ public class UserServiceImpl implements UserService {
                 if (isActualCodeAvailable) {
                     authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), true);
                 }
-                if (!StringUtils.isEmpty(user.getPhone()) && user.getPhoneVerified()) {
+                if (!StringUtils.isEmpty(user.getPhone()) && user.getPhoneVerified() && StringUtils.equalsIgnoreCase(loginType, "phone")) {
                     try {
                         LoadedTemplate template = templateService.load("sms_repair_code");
                         templateParams.put("code", authCode.getCode());
@@ -339,7 +339,7 @@ public class UserServiceImpl implements UserService {
                         logger.error(e);
                         throw new SendingException(e.getMessage());
                     }
-                } else if (!StringUtils.isEmpty(user.getEmail()) && user.getEmailVerified()) {
+                } else if (!StringUtils.isEmpty(user.getEmail()) && user.getEmailVerified() && StringUtils.equalsIgnoreCase(loginType, "email")) {
                     try {
                         LoadedTemplate template = templateService.load("email_repair_code");
                         templateParams.put("code", authCode.getCode());
@@ -502,15 +502,15 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException {
+    public User register(UserDTO userDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException {
         String userApproveMethod = propertyService.getPropertyValue("user:approve_method");
 
         if (!trust) {
-            if (!checkPassword(userRegistrationDTO.getPassword())) {
+            if (!checkPassword(userDTO.getPassword())) {
                 throw new InvalidPasswordException();
             }
 
-            if (StringUtils.isEmpty(userRegistrationDTO.getEmail()) && StringUtils.isEmpty(userRegistrationDTO.getPhone())) {
+            if (StringUtils.isEmpty(userDTO.getEmail()) && StringUtils.isEmpty(userDTO.getPhone())) {
                 throw new PhoneOrEmailIsNecessaryException();
             }
         }
@@ -522,12 +522,12 @@ public class UserServiceImpl implements UserService {
         user.setApproved(false);
         user.setBlocked(false);
 
-        if (!StringUtils.isEmpty(userRegistrationDTO.getPhone())) {
-            if (!checkPhone(userRegistrationDTO.getPhone(), false)) {
+        if (!StringUtils.isEmpty(userDTO.getPhone())) {
+            if (!checkPhone(userDTO.getPhone(), false)) {
                 throw new InvalidPhoneException();
             }
 
-            User anotherUser = userDao.getUserByField("phone", userRegistrationDTO.getPhone());
+            User anotherUser = userDao.getUserByField("phone", userDTO.getPhone());
             if (anotherUser != null) {
                 if (!anotherUser.getApproved()) {
                     lifecycleService.delete(anotherUser);
@@ -538,18 +538,18 @@ public class UserServiceImpl implements UserService {
                 }
             }
 
-            user.setPhone(StringUtils.trim(userRegistrationDTO.getPhone()));
+            user.setPhone(StringUtils.trim(userDTO.getPhone()));
             if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
                 user.setPhoneVerified(true);
             }
         }
 
-        if (!StringUtils.isEmpty(userRegistrationDTO.getEmail())) {
-            if (!checkEmail(userRegistrationDTO.getEmail(), false)) {
+        if (!StringUtils.isEmpty(userDTO.getEmail())) {
+            if (!checkEmail(userDTO.getEmail(), false)) {
                 throw new InvalidEmailException();
             }
 
-            User anotherUser = userDao.getUserByField("email", userRegistrationDTO.getEmail());
+            User anotherUser = userDao.getUserByField("email", userDTO.getEmail());
             if (anotherUser != null) {
                 if (!anotherUser.getApproved()) {
                     lifecycleService.delete(anotherUser);
@@ -560,17 +560,17 @@ public class UserServiceImpl implements UserService {
                 }
             }
 
-            user.setEmail(StringUtils.trim(StringUtils.lowerCase(userRegistrationDTO.getEmail())));
+            user.setEmail(StringUtils.trim(StringUtils.lowerCase(userDTO.getEmail())));
             if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
                 user.setEmailVerified(true);
             }
         }
 
-        user.setFields(JsonUtils.mapToJson(userRegistrationDTO.getFields()));
+        user.setFields(JsonUtils.mapToJson(userDTO.getFields()));
 
         if (!trust) {
             user.setSalt(UserServiceImpl.generatePasswordSalt());
-            user.setPassword(DigestUtils.shaHex(userRegistrationDTO.getPassword().concat(user.getSalt())));
+            user.setPassword(DigestUtils.shaHex(userDTO.getPassword().concat(user.getSalt())));
         }
 
         if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
@@ -653,38 +653,43 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User saveUser(UserDTO user, boolean mergeRoles, AuthorizedUser executor) throws ObjectNotFoundException {
-        if (user.getId() == null) {
+    public User saveUser(UserDTO userDTO, boolean mergeRoles, AuthorizedUser executor) throws ObjectNotFoundException {
+        if (userDTO.getId() == null) {
             throw new ObjectNotFoundException();
         }
-        User u = idObjectService.getObjectById(User.class, user.getId());
-        if (u == null) {
+        User user = idObjectService.getObjectById(User.class, userDTO.getId());
+        if (user == null) {
             throw new ObjectNotFoundException();
         }
 
-        u.setFields(JsonUtils.mapToJson(user.getFields()));
-        u.setApproved(user.getApproved());
-        u.setLocale(user.getLocale());
+        user.setFields(JsonUtils.mapToJson(userDTO.getFields()));
+        user.setApproved(userDTO.getApproved());
+        user.setLocale(userDTO.getLocale());
 
 
-        if (!u.getBlocked() && user.getBlocked()) {
-            u.setBlockedByUser(idObjectService.getObjectById(User.class, executor.getId()));
-            u.setBlockedDt(new Date());
+        if (!user.getBlocked() && userDTO.getBlocked()) {
+            user.setBlockedByUser(idObjectService.getObjectById(User.class, executor.getId()));
+            user.setBlockedDt(new Date());
         }
 
-        u.setBlocked(user.getBlocked());
-        if (!u.getBlocked()) {
-            u.setBlockedDt(null);
-            u.setBlockedByUser(null);
+        user.setBlocked(userDTO.getBlocked());
+        if (!user.getBlocked()) {
+            user.setBlockedDt(null);
+            user.setBlockedByUser(null);
         }
 
-        u = idObjectService.save(u);
+        if (!StringUtils.isEmpty(userDTO.getPassword())) {
+            user.setSalt(UserServiceImpl.generatePasswordSalt());
+            user.setPassword(DigestUtils.shaHex(userDTO.getPassword().concat(user.getSalt())));
+        }
+
+        user = idObjectService.save(user);
 
         if (mergeRoles) {
-            mergeUserRoles(u.getId(), user.getRoles());
+            mergeUserRoles(user.getId(), userDTO.getRoles());
         }
 
-        return u;
+        return user;
     }
 
     @Override

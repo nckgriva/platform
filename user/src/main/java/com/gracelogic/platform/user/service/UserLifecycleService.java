@@ -10,7 +10,7 @@ import com.gracelogic.platform.user.model.User;
 import javax.servlet.http.HttpSession;
 
 public interface UserLifecycleService {
-    User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException, CustomLocalizedException;
+    User register(UserDTO userDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException, CustomLocalizedException;
 
     void delete(User user);
 

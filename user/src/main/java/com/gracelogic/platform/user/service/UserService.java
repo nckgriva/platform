@@ -43,7 +43,7 @@ public interface UserService {
 
     boolean isActualCodeAvailable(UUID userId, UUID codeTypeId);
 
-    User register(UserRegistrationDTO userRegistrationDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException;
+    User register(UserDTO userDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException;
 
     void deleteUser(User user);
 
