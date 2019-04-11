@@ -9,6 +9,7 @@ import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
 import com.gracelogic.platform.oauth.service.OAuthUtils;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -26,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Map;
 
 @Service("esia")
@@ -57,7 +57,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
         }
 
 
-        Map response = OAuthUtils.getQueryReturnJson(String.format("%s?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s", ACCESS_TOKEN_ENDPOINT, CLIENT_ID, CLIENT_SECRET, code, sRedirectUri));
+        Map response = getQueryWithAuthenticationReturnJson(String.format("%s?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s", ACCESS_TOKEN_ENDPOINT, CLIENT_ID, CLIENT_SECRET, code, sRedirectUri), "Basic " + new String(Base64.encodeBase64(new String(CLIENT_ID + ":" + CLIENT_SECRET).getBytes())));
 
         if (response == null) {
             return null;
@@ -67,7 +67,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
         OAuthDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
         OAuthDTO.setUserId(response.get("urn:esia:sbj_id") != null ? String.valueOf(response.get("urn:esia:sbj_id")) : null);
 
-        response = getQueryWithTokenReturnJson(String.format("%s/%s", API_ENDPOINT, OAuthDTO.getUserId()), OAuthDTO.getAccessToken());
+        response = getQueryWithAuthenticationReturnJson(String.format("%s/%s", API_ENDPOINT, OAuthDTO.getUserId()), "Bearer " + OAuthDTO.getAccessToken());
 
         OAuthDTO.setLastName(response.get("name") != null ? (String) response.get("name") : null);
 
@@ -96,14 +96,14 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
         return sRedirectUri;
     }
 
-    private static Map<Object, Object> getQueryWithTokenReturnJson(String url, String token) {
+    private static Map<Object, Object> getQueryWithAuthenticationReturnJson(String url, String authentication) {
         logger.info("Request to: " + url);
 
         CloseableHttpClient httpClient = HttpClients.custom().build();
 
         HttpGet method = new HttpGet(url);
 
-        method.addHeader("Authorization", "Bearer " + token);
+        method.addHeader("Authorization", authentication);
 
         method.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES);
         method.getParams().setParameter("http.protocol.single-cookie-header", true);
