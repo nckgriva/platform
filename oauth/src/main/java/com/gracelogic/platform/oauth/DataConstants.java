@@ -11,7 +11,8 @@ public class DataConstants {
         FACEBOOK(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74")),
         TWITTER(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e75")),
         GOOGLE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e76")),
-        LINKEDIN(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e77"));
+        LINKEDIN(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e77")),
+        ESIA(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e78"));
 
         private UUID value;
 

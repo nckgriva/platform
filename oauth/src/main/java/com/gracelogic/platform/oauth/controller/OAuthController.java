@@ -54,6 +54,10 @@ public class OAuthController extends AbstractAuthorizedController {
     @Autowired
     private OAuthServiceProvider linkedin;
 
+    @Qualifier("esia")
+    @Autowired
+    private OAuthServiceProvider esia;
+
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -161,6 +165,19 @@ public class OAuthController extends AbstractAuthorizedController {
                 user = linkedin.processAuthorization(code, requestUri);
             } catch (Exception e) {
                 logger.error("Failed to process user via linkedin", e);
+            }
+        } else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.ESIA.name())) {
+            try {
+                String additionalParameters = null;
+                if (fwd != null) {
+                    additionalParameters = "?fwd=" + fwd;
+                }
+                String requestUri = esia.buildRedirectUri(additionalParameters);
+                logger.info("REQUEST_URI: " + requestUri);
+
+                user = esia.processAuthorization(code, requestUri);
+            } catch (Exception e) {
+                logger.error("Failed to process user via esia", e);
             }
         } else {
             try {
