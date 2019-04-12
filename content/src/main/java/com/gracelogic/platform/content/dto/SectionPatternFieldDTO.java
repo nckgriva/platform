@@ -11,6 +11,7 @@ public class SectionPatternFieldDTO extends IdObjectDTO {
     private Boolean nullable;
     private UUID sectionPatternId;
     private UUID elementFieldTypeId;
+    private String dictionaryServiceName;
 
     public String getCode() {
         return code;
@@ -52,6 +53,14 @@ public class SectionPatternFieldDTO extends IdObjectDTO {
         this.elementFieldTypeId = elementFieldTypeId;
     }
 
+    public String getDictionaryServiceName() {
+        return dictionaryServiceName;
+    }
+
+    public void setDictionaryServiceName(String dictionaryServiceName) {
+        this.dictionaryServiceName = dictionaryServiceName;
+    }
+
     public static SectionPatternFieldDTO prepare(SectionPatternField field) {
         SectionPatternFieldDTO dto = new SectionPatternFieldDTO();
         IdObjectDTO.prepare(dto, field);
@@ -65,6 +74,7 @@ public class SectionPatternFieldDTO extends IdObjectDTO {
         if (field.getElementFieldType() != null) {
             dto.setElementFieldTypeId(field.getElementFieldType().getId());
         }
+        dto.setDictionaryServiceName(field.getDictionaryServiceName());
 
         return dto;
     }

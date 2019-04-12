@@ -36,6 +36,9 @@ public class SectionPatternField extends IdObject<UUID> {
     @Column(name = "NULLABLE", nullable = false)
     private Boolean nullable;
 
+    @Column(name = "DICTIONARY_SERVICE_NAME", nullable = true, length = 400)
+    private String dictionaryServiceName;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "SECTION_PATTERN_ID", nullable = false)
     private SectionPattern sectionPattern;
@@ -112,5 +115,13 @@ public class SectionPatternField extends IdObject<UUID> {
 
     public void setElementFieldType(ElementFieldType elementFieldType) {
         this.elementFieldType = elementFieldType;
+    }
+
+    public String getDictionaryServiceName() {
+        return dictionaryServiceName;
+    }
+
+    public void setDictionaryServiceName(String dictionaryServiceName) {
+        this.dictionaryServiceName = dictionaryServiceName;
     }
 }
