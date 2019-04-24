@@ -32,7 +32,7 @@ public class Feedback extends IdObject<UUID> {
     @JoinColumn(name = "FEEDBACK_TYPE_ID", nullable = false)
     private FeedbackType feedbackType;
 
-    @Type(type = "stringJsonObject")
+//    @Type(type = "stringJsonObject")
     @Column(columnDefinition = "json", nullable = true)
     private String fields;
 

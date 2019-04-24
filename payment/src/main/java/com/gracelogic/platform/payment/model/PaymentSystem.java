@@ -52,7 +52,7 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
     @Column(name = "PAYMENT_EXECUTOR_CLASS", nullable = true)
     private String paymentExecutorClass;
 
-    @Type(type = "stringJsonObject")
+//    @Type(type = "stringJsonObject")
     @Column(columnDefinition = "json", nullable = true)
     private String fields;
 
