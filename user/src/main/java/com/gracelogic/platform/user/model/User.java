@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "USER")
-//@TypeDefs({@TypeDef(name= "stringJsonObject", typeClass = StringJsonUserType.class)})
+@TypeDefs({@TypeDef(name= "stringJsonObject", typeClass = StringJsonUserType.class)})
 public class User extends IdObject<UUID> {
     @Id
     @Column(name = ID)
@@ -76,7 +76,7 @@ public class User extends IdObject<UUID> {
     @Column(name = "LAST_VISIT_IP", nullable = true)
     private String lastVisitIP;
 
-//    @Type(type = "stringJsonObject")
+    @Type(type = "stringJsonObject")
     @Column(columnDefinition = "json", nullable = true)
     private String fields;
 

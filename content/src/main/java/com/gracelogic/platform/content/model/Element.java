@@ -49,7 +49,7 @@ public class Element extends IdObject<UUID> {
     @Column(name = "SORT_ORDER", nullable = true)
     private Integer sortOrder;
 
-//    @Type(type = "stringJsonObject")
+    @Type(type = "stringJsonObject")
     @Column(columnDefinition = "json", nullable = true)
     private String fields;
 
