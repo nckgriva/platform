@@ -68,6 +68,10 @@ public class DictionaryServiceImpl implements DictionaryService {
 
     @Override
     public <T extends IdObject> T get(Class<T> clazz, Object id) {
+        if (id == null) {
+            return null;
+        }
+
         return (T) cache.get(new DictionaryKey(clazz, id));
     }
 
