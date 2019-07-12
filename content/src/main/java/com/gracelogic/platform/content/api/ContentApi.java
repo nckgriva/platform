@@ -25,6 +25,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 @Controller
@@ -97,7 +99,25 @@ public class ContentApi extends AbstractAuthorizedController {
                                       @ApiParam(name = "page", value = "page") @RequestParam(value = "page", required = false) Integer page,
                                       @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
                                       @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                      @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                      @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                      @ApiParam(name = "fields", value = "fields") @RequestParam Map<String, String> allRequestParams) {
+
+        Map<String, String> fields = new HashMap<String, String>();
+        if (allRequestParams != null) {
+            for (String paramName : allRequestParams.keySet()) {
+                if (StringUtils.startsWithIgnoreCase(paramName, "fields.")) {
+                    String value = null;
+                    try {
+                        value = URLDecoder.decode(allRequestParams.get(paramName), "UTF-8");
+                    } catch (UnsupportedEncodingException ignored) {
+                    }
+
+                    if (!StringUtils.isEmpty(value)) {
+                        fields.put(paramName.substring("fields.".length()), value);
+                    }
+                }
+            }
+        }
 
         Date validOnDate = null;
 
@@ -120,7 +140,8 @@ public class ContentApi extends AbstractAuthorizedController {
             queryFields = Arrays.asList(sQueryFields.split(","));
         }
 
-        EntityListResponse<ElementDTO> elements = contentService.getElementsPaged(query, queryFields, sectionIds, active, validOnDate, null, length, page, start, sortField, sortDir);
+        EntityListResponse<ElementDTO> elements = contentService.getElementsPaged(query, queryFields, sectionIds, active, validOnDate,
+                fields, length, page, start, sortField, sortDir);
 
         return new ResponseEntity<EntityListResponse<ElementDTO>>(elements, HttpStatus.OK);
     }
