@@ -12,7 +12,7 @@
     <properties>
         <uiScope>compile</uiScope>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>4.3.17.RELEASE</spring.version>
+        <spring.version>4.3.18.RELEASE</spring.version>
         <spring-security.version>3.1.0.RELEASE</spring-security.version>
     </properties>
 
