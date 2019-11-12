@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service("taskService")
@@ -141,6 +142,21 @@ public class TaskServiceImpl implements TaskService {
             } catch (Exception e) {
                 logger.error(String.format("Failed to schedule task %s", task.getId()), e);
             }
+        }
+    }
+
+    @PostConstruct
+    public void init() {
+        //Reset all hover tasks
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("inProgressState", DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
+
+        List<TaskExecutionLog> logs = idObjectService.getList(TaskExecutionLog.class, null, "el.state=:inProgressState", params, "el.created", "ASC", null, null);
+        for (TaskExecutionLog log : logs) {
+            try {
+                resetTaskExecution(log.getId());
+            }
+            catch (ObjectNotFoundException ignored) {}
         }
     }
 
