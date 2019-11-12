@@ -148,10 +148,11 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void resetAllTasks() {
+        //TODO: Optimize select
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("inProgressState", DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
 
-        List<TaskExecutionLog> logs = idObjectService.getList(TaskExecutionLog.class, null, "el.state=:inProgressState", params, "el.created", "ASC", null, null);
+        List<TaskExecutionLog> logs = idObjectService.getList(TaskExecutionLog.class, null, "el.state.id=:inProgressState", params, "el.created", "ASC", null, null);
         for (TaskExecutionLog log : logs) {
             try {
                 resetTaskExecution(log.getId());
