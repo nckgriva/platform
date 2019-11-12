@@ -145,9 +145,9 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
-    @PostConstruct
-    public void init() {
-        //Reset all hover tasks
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void resetAllTasks() {
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("inProgressState", DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
 

@@ -34,4 +34,6 @@ public interface TaskService {
                                                                       boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     void resetTaskExecution(UUID telId) throws ObjectNotFoundException;
+
+    void resetAllTasks();
 }

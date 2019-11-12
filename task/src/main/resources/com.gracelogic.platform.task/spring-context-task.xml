@@ -3,14 +3,15 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
-    <bean id="taskJob" class="com.gracelogic.platform.task.service.TaskJob"/>
+    <bean id="taskJob" init-method="init" class="com.gracelogic.platform.task.service.TaskJob"/>
 
     <task:scheduler id="taskScheduler"/>
     <task:scheduled-tasks scheduler="taskScheduler">
         <task:scheduled
                 ref="taskJob"
                 method="run"
-                fixed-delay="10000"/>
+                fixed-delay="10000"
+                initial-delay="10000"/>
     </task:scheduled-tasks>
 
 </beans>

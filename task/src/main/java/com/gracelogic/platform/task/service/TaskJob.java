@@ -6,6 +6,10 @@ public class TaskJob {
     @Autowired
     private TaskService taskService;
 
+    public void init() {
+        taskService.resetAllTasks();
+    }
+
     public void run() {
         taskService.scheduleCronTasks();
 
