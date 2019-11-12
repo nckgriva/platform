@@ -169,7 +169,7 @@ public class TaskServiceImpl implements TaskService {
             throw new ObjectNotFoundException();
         }
 
-        if (entity.getState().getId() == DataConstants.TaskExecutionStates.CREATED.getValue() || entity.getState().getId() == DataConstants.TaskExecutionStates.IN_PROGRESS.getValue()) {
+        if (entity.getState().getId().equals(DataConstants.TaskExecutionStates.CREATED.getValue()) || entity.getState().getId().equals(DataConstants.TaskExecutionStates.IN_PROGRESS.getValue())) {
             entity.setState(ds.get(TaskExecuteState.class, DataConstants.TaskExecutionStates.FAIL.getValue()));
             idObjectService.save(entity);
         }
