@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service("taskService")
@@ -146,13 +147,29 @@ public class TaskServiceImpl implements TaskService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
+    public void resetAllTasks() {
+        //TODO: Optimize select
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("inProgressState", DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
+
+        List<TaskExecutionLog> logs = idObjectService.getList(TaskExecutionLog.class, null, "el.state.id=:inProgressState", params, "el.created", "ASC", null, null);
+        for (TaskExecutionLog log : logs) {
+            try {
+                resetTaskExecution(log.getId());
+            }
+            catch (ObjectNotFoundException ignored) {}
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public void resetTaskExecution(UUID taskExecutionLogId) throws ObjectNotFoundException {
         TaskExecutionLog entity = idObjectService.getObjectById(TaskExecutionLog.class, taskExecutionLogId);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
 
-        if (entity.getState().getId() == DataConstants.TaskExecutionStates.CREATED.getValue() || entity.getState().getId() == DataConstants.TaskExecutionStates.IN_PROGRESS.getValue()) {
+        if (entity.getState().getId().equals(DataConstants.TaskExecutionStates.CREATED.getValue()) || entity.getState().getId().equals(DataConstants.TaskExecutionStates.IN_PROGRESS.getValue())) {
             entity.setState(ds.get(TaskExecuteState.class, DataConstants.TaskExecutionStates.FAIL.getValue()));
             idObjectService.save(entity);
         }
