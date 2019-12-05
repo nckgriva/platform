@@ -5,6 +5,7 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.task.DataConstants;
+import com.gracelogic.platform.task.dao.TaskDao;
 import com.gracelogic.platform.task.dto.TaskDTO;
 import com.gracelogic.platform.task.dto.TaskExecutionLogDTO;
 import com.gracelogic.platform.task.model.Task;
@@ -35,6 +36,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private TaskDao taskDao;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -148,17 +152,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void resetAllTasks() {
-        //TODO: Optimize select
-        HashMap<String, Object> params = new HashMap<String, Object>();
-        params.put("inProgressState", DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
-
-        List<TaskExecutionLog> logs = idObjectService.getList(TaskExecutionLog.class, null, "el.state.id=:inProgressState", params, "el.created", "ASC", null, null);
-        for (TaskExecutionLog log : logs) {
-            try {
-                resetTaskExecution(log.getId());
-            }
-            catch (ObjectNotFoundException ignored) {}
-        }
+        taskDao.resetAllTasks();
     }
 
     @Transactional(rollbackFor = Exception.class)
