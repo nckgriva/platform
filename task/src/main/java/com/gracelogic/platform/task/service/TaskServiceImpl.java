@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service("taskService")
@@ -46,10 +45,6 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void executeTask(Task task, String parameter, UUID method) {
-//        if (checkTaskExist(task.getId(), parameter)) {
-//            logger.debug("Task already exist - skip it");
-//            return;
-//        }
         TaskExecutionLog execution = new TaskExecutionLog();
         execution.setTask(task);
         execution.setMethod(ds.get(TaskExecuteMethod.class, method));
@@ -65,21 +60,6 @@ public class TaskServiceImpl implements TaskService {
         params.put("parameter", parameter);
         params.put("stateId", DataConstants.TaskExecutionStates.CREATED.getValue());
         return idObjectService.checkExist(TaskExecutionLog.class, null, "el.task.id=:taskId and el.parameter=:parameter and el.state.id=:stateId", params, 1) > 0;
-    }
-
-//    protected void executeTaskInOtherTransaction(UUID taskId, String parameter, UUID method) {
-//        TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
-//        taskService.executeTask(taskId, parameter, method);
-//    }
-
-    protected void setTaskExecutionStateInOtherTransaction(UUID taskExecutionId, UUID stateId) {
-        TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
-        taskService.setTaskExecutionState(taskExecutionId, stateId);
-    }
-
-    protected void updateLastExecutionDateInOtherTransaction(UUID taskId) {
-        TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
-        taskService.updateLastExecutionDate(taskId);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -112,7 +92,6 @@ public class TaskServiceImpl implements TaskService {
             TaskExecutor executor = applicationContext.getBean(execution.getTask().getServiceName(), TaskExecutor.class);
             executor.execute(execution.getParameter());
 
-            //Получить класс исполнителя и вызвать у него execute с параметрами
             taskService.setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.COMPLETED.getValue());
         } catch (Exception e) {
             logger.error(String.format("Failed to complete task: %s", execution.getTask().getServiceName()), e);
