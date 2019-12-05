@@ -79,13 +79,13 @@ public class TaskServiceImpl implements TaskService {
         taskService.updateLastExecutionDate(taskId);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void updateLastExecutionDate(UUID taskId) {
         idObjectService.updateFieldValue(Task.class, taskId, "lastExecutionDate", new Date());
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void setTaskExecutionState(UUID taskExecutionId, UUID stateId) {
         idObjectService.updateFieldValue(TaskExecutionLog.class, taskExecutionId, "state.id", stateId);

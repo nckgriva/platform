@@ -7,7 +7,7 @@ public class TaskJob {
     private TaskService taskService;
 
     public void init() {
-        taskService.resetAllTasks();
+        //taskService.resetAllTasks();
     }
 
     public void run() {
