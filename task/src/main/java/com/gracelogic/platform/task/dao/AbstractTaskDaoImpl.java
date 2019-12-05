@@ -13,7 +13,12 @@ public abstract class AbstractTaskDaoImpl extends BaseDao implements TaskDao {
         Query query = getEntityManager().createQuery("UPDATE TaskExecutionLog l SET l.state.id = :failState where l.state.id = :inProgressState");
         query.setParameter("inProgressState", DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
         query.setParameter("failState", DataConstants.TaskExecutionStates.FAIL.getValue());
-        query.executeUpdate();
-    }
 
+        try {
+            query.executeUpdate();
+        }
+        catch (Exception e) {
+            logger.error("Failed to reset tasks", e);
+        }
+    }
 }
