@@ -40,6 +40,9 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private TaskDao taskDao;
 
+    @Autowired
+    private TaskService taskService;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void executeTask(Task task, String parameter, UUID method) {
@@ -103,22 +106,20 @@ public class TaskServiceImpl implements TaskService {
 
         TaskExecutionLog execution = executions.iterator().next();
 
-        setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
+        taskService.setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
 
         try {
             TaskExecutor executor = applicationContext.getBean(execution.getTask().getServiceName(), TaskExecutor.class);
             executor.execute(execution.getParameter());
 
             //Получить класс исполнителя и вызвать у него execute с параметрами
-            setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.COMPLETED.getValue());
+            taskService.setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.COMPLETED.getValue());
         } catch (Exception e) {
             logger.error(String.format("Failed to complete task: %s", execution.getTask().getServiceName()), e);
-            setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.FAIL.getValue());
+            taskService.setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.FAIL.getValue());
         }
 
-        updateLastExecutionDateInOtherTransaction(execution.getTask().getId());
-
-        idObjectService.save(execution);
+        taskService.updateLastExecutionDate(execution.getTask().getId());
     }
 
     @Transactional(rollbackFor = Exception.class)
