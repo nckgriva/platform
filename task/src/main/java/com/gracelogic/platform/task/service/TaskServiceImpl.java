@@ -62,13 +62,13 @@ public class TaskServiceImpl implements TaskService {
         return idObjectService.checkExist(TaskExecutionLog.class, null, "el.task.id=:taskId and el.parameter=:parameter and el.state.id=:stateId", params, 1) > 0;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateLastExecutionDate(UUID taskId) {
         idObjectService.updateFieldValue(Task.class, taskId, "lastExecutionDate", new Date());
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void setTaskExecutionState(UUID taskExecutionId, UUID stateId) {
         idObjectService.updateFieldValue(TaskExecutionLog.class, taskExecutionId, "state.id", stateId);
