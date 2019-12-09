@@ -74,6 +74,8 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
 
             userRegistrationDTO.getFields().put(UserDTO.FIELD_NAME, !StringUtils.isEmpty(OAuthDTO.getFirstName()) ? OAuthDTO.getFirstName() : null);
             userRegistrationDTO.getFields().put(UserDTO.FIELD_SURNAME, !StringUtils.isEmpty(OAuthDTO.getLastName()) ? OAuthDTO.getLastName() : null);
+            userRegistrationDTO.getFields().put(UserDTO.FIELD_ORG, !StringUtils.isEmpty(OAuthDTO.getOrg()) ? OAuthDTO.getOrg() : null);
+
 
             logger.info("Oauth registration: " + userRegistrationDTO.toString());
 

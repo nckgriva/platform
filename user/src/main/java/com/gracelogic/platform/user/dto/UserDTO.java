@@ -17,6 +17,7 @@ public class UserDTO extends IdObjectDTO implements Serializable {
     private static String USER_NAME_FORMAT = "{{name}} {{surname}}";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_SURNAME = "surname";
+    public static final String FIELD_ORG = "org";
 
     private String email;
     private String phone;
