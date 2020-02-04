@@ -1,14 +1,23 @@
-package com.gracelogic.platform.feedback.dao;
+package com.gracelogic.platform.feedback.dao.postgres;
 
+import com.gracelogic.platform.db.condition.OnPostgreSQLConditional;
+import com.gracelogic.platform.feedback.dao.AbstractFeedbackDaoImpl;
 import com.gracelogic.platform.feedback.model.Feedback;
 import org.apache.log4j.Logger;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Query;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Repository
+@Conditional(OnPostgreSQLConditional.class)
 public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
     private static Logger logger = Logger.getLogger(FeedbackDaoImpl.class);
 
@@ -76,10 +85,10 @@ public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
         }
 
         appendSortClause(queryStr, sortField, sortDir);
-        appendPaginationClause(queryStr, params, recordsOnPage, startRecord);
 
         try {
             Query query = getEntityManager().createNativeQuery(queryStr.toString(), Feedback.class);
+            appendPaginationClause(query, params, recordsOnPage, startRecord);
 
             for (String key : params.keySet()) {
                 query.setParameter(key, params.get(key));

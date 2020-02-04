@@ -8,7 +8,19 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.*;
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,14 +28,14 @@ import java.util.UUID;
 
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "USER")
-@TypeDefs({@TypeDef(name= "stringJsonObject", typeClass = StringJsonUserType.class)})
+@TypeDefs({@TypeDef(name = "stringJsonObject", typeClass = StringJsonUserType.class)})
 public class User extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @Access(AccessType.PROPERTY)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "pg-uuid")
+    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     private UUID id;
 
     @Column(name = CREATED, nullable = false)

@@ -83,13 +83,11 @@ public abstract class BaseDao {
         }
     }
 
-    protected void appendPaginationClause(StringBuilder queryStr, Map<String, Object> params, Integer recordsOnPage, Integer startRecord) {
+    protected void appendPaginationClause(Query query, Map<String, Object> params, Integer recordsOnPage, Integer startRecord) {
         if (recordsOnPage != null) {
-            queryStr.append("limit :recordsOnPage ");
-            params.put("recordsOnPage", recordsOnPage);
+            query.setMaxResults(recordsOnPage);
             if (startRecord != null) {
-                queryStr.append("offset :startRecord ");
-                params.put("startRecord", startRecord);
+                query.setFirstResult(startRecord);
             }
         }
     }

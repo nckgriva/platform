@@ -4,13 +4,36 @@ import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.usertype.UserType;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Properties;
 
 public class StringJsonUserType implements UserType {
+
+    private static int TYPE;
+
+    static {
+        Properties properties = new Properties();
+        try {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            properties.load(loader.getResourceAsStream("/db.properties"));
+        } catch (IOException e) {
+            throw new RuntimeException("Could not load properties!", e);
+        }
+
+        String dialect = properties.getProperty("dialect");
+        if (dialect.equals("postgres")) {
+            TYPE = Types.OTHER;
+        } else if (dialect.equals("mssql")) {
+            TYPE = Types.VARCHAR;
+        } else {
+            throw new UnsupportedOperationException("Unsupported database!");
+        }
+    }
 
     /**
      * Return the SQL type codes for the columns mapped by this type. The
@@ -21,7 +44,7 @@ public class StringJsonUserType implements UserType {
      */
     @Override
     public int[] sqlTypes() {
-        return new int[] { Types.JAVA_OBJECT};
+        return new int[]{Types.JAVA_OBJECT};
     }
 
     /**
@@ -45,12 +68,12 @@ public class StringJsonUserType implements UserType {
     @Override
     public boolean equals(Object x, Object y) throws HibernateException {
 
-        if( x== null){
+        if (x == null) {
 
-            return y== null;
+            return y == null;
         }
 
-        return x.equals( y);
+        return x.equals(y);
     }
 
     /**
@@ -71,12 +94,11 @@ public class StringJsonUserType implements UserType {
      * @param session
      * @param owner   the containing entity  @return Object
      * @throws org.hibernate.HibernateException
-     *
      * @throws java.sql.SQLException
      */
     @Override
     public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object owner) throws HibernateException, SQLException {
-        if(rs.getString(names[0]) == null){
+        if (rs.getString(names[0]) == null) {
             return null;
         }
         return rs.getString(names[0]);
@@ -92,17 +114,16 @@ public class StringJsonUserType implements UserType {
      * @param index   statement parameter index
      * @param session
      * @throws org.hibernate.HibernateException
-     *
      * @throws java.sql.SQLException
      */
     @Override
     public void nullSafeSet(PreparedStatement st, Object value, int index, SessionImplementor session) throws HibernateException, SQLException {
         if (value == null) {
-            st.setNull(index, Types.OTHER);
+            st.setNull(index, TYPE);
             return;
         }
 
-        st.setObject(index, value, Types.OTHER);
+        st.setObject(index, value, TYPE);
     }
 
     /**
@@ -138,11 +159,10 @@ public class StringJsonUserType implements UserType {
      * @param value the object to be cached
      * @return a cachable representation of the object
      * @throws org.hibernate.HibernateException
-     *
      */
     @Override
     public Serializable disassemble(Object value) throws HibernateException {
-        return (String)this.deepCopy( value);
+        return (String) this.deepCopy(value);
     }
 
     /**
@@ -153,11 +173,10 @@ public class StringJsonUserType implements UserType {
      * @param owner  the owner of the cached object
      * @return a reconstructed object from the cachable representation
      * @throws org.hibernate.HibernateException
-     *
      */
     @Override
     public Object assemble(Serializable cached, Object owner) throws HibernateException {
-        return this.deepCopy( cached);
+        return this.deepCopy(cached);
     }
 
     /**

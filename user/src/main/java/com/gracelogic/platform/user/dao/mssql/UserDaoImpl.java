@@ -1,24 +1,27 @@
-package com.gracelogic.platform.user.dao;
+package com.gracelogic.platform.user.dao.mssql;
 
+import com.gracelogic.platform.db.condition.OnMSSQLServerConditional;
+import com.gracelogic.platform.user.dao.AbstractUserDaoImpl;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Query;
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Repository
+@Conditional(OnMSSQLServerConditional.class)
 public class UserDaoImpl extends AbstractUserDaoImpl {
     private static Logger logger = Logger.getLogger(UserDaoImpl.class);
 
     @Override
     public Integer getUsersCount(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields) {
-        BigInteger count = null;
+        Integer count = null;
         StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_user el where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
@@ -40,10 +43,11 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
         }
         if (fields != null && !fields.isEmpty()) {
             for (String key : fields.keySet()) {
-                queryStr.append(String.format("and el.fields ->> '%s' = '%s' ", key, fields.get(key)));
+                String param = "param_" + key;
+                queryStr.append(String.format("and JSON_VALUE(el.fields, '$.%s') like :%s ", key, param));
+                params.put(param, "%%" + fields.get(key) + "%%");
             }
         }
-
         try {
             Query query = getEntityManager().createNativeQuery(queryStr.toString());
 
@@ -51,7 +55,7 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
                 query.setParameter(key, params.get(key));
             }
 
-            count = (BigInteger) query.getSingleResult();
+            count = (Integer) query.getSingleResult();
         } catch (Exception e) {
             logger.error("Failed to get users count", e);
         }
@@ -83,15 +87,18 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
         }
         if (fields != null && !fields.isEmpty()) {
             for (String key : fields.keySet()) {
-                queryStr.append(String.format("and el.fields ->> '%s' = '%s' ", key, fields.get(key)));
+                String param = "param_" + key;
+                queryStr.append(String.format("and JSON_VALUE(el.fields, '$.%s') like :%s ", key, param));
+                params.put(param, "%%" + fields.get(key) + "%%");
             }
         }
 
         appendSortClause(queryStr, sortField, sortDir);
-        appendPaginationClause(queryStr, params, recordsOnPage, startRecord);
 
         try {
             Query query = getEntityManager().createNativeQuery(queryStr.toString(), User.class);
+
+            appendPaginationClause(query, params, recordsOnPage, startRecord);
 
             for (String key : params.keySet()) {
                 query.setParameter(key, params.get(key));
@@ -118,7 +125,7 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
                 "    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_dt desc) AS r, " +
                 "    t.* " +
                 "  FROM " +
-                "    {h-schema}cmn_user_session t where t.is_valid = true) x " +
+                "    {h-schema}cmn_user_session t where t.is_valid = 1) x " +
                 "WHERE " +
                 "  x.r <= 1";
 
