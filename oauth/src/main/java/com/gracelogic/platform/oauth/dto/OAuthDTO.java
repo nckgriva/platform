@@ -7,6 +7,7 @@ public class OAuthDTO {
     private String phone;
     private String lastName;
     private String firstName;
+    private String org;
 
     public String getAccessToken() {
         return accessToken;
@@ -54,5 +55,13 @@ public class OAuthDTO {
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
+    }
+
+    public String getOrg() {
+        return org;
+    }
+
+    public void setOrg(String org) {
+        this.org = org;
     }
 }

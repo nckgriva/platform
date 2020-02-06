@@ -6,7 +6,6 @@ import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.OAuthDTO;
 import com.gracelogic.platform.oauth.service.AbstractOauthProvider;
 import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
-import com.gracelogic.platform.oauth.service.OAuthUtils;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.codec.binary.Base64;
@@ -72,6 +71,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
         response = getQueryWithAuthenticationReturnJson(String.format("%s/%s", API_ENDPOINT, OAuthDTO.getUserId()), "Bearer " + OAuthDTO.getAccessToken());
 
         OAuthDTO.setLastName(response.get("name") != null ? (String) response.get("name") : null);
+        OAuthDTO.setOrg(response.get("org") != null ? (String) response.get("org") : null);
 
         return processAuthorization(DataConstants.OAuthProviders.ESIA.getValue(), code, OAuthDTO);
     }

@@ -5,6 +5,7 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.task.DataConstants;
+import com.gracelogic.platform.task.dao.TaskDao;
 import com.gracelogic.platform.task.dto.TaskDTO;
 import com.gracelogic.platform.task.dto.TaskExecutionLogDTO;
 import com.gracelogic.platform.task.model.Task;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service("taskService")
@@ -36,13 +36,15 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private TaskDao taskDao;
+
+    @Autowired
+    private TaskService taskService;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void executeTask(Task task, String parameter, UUID method) {
-//        if (checkTaskExist(task.getId(), parameter)) {
-//            logger.debug("Task already exist - skip it");
-//            return;
-//        }
         TaskExecutionLog execution = new TaskExecutionLog();
         execution.setTask(task);
         execution.setMethod(ds.get(TaskExecuteMethod.class, method));
@@ -60,28 +62,13 @@ public class TaskServiceImpl implements TaskService {
         return idObjectService.checkExist(TaskExecutionLog.class, null, "el.task.id=:taskId and el.parameter=:parameter and el.state.id=:stateId", params, 1) > 0;
     }
 
-//    protected void executeTaskInOtherTransaction(UUID taskId, String parameter, UUID method) {
-//        TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
-//        taskService.executeTask(taskId, parameter, method);
-//    }
-
-    protected void setTaskExecutionStateInOtherTransaction(UUID taskExecutionId, UUID stateId) {
-        TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
-        taskService.setTaskExecutionState(taskExecutionId, stateId);
-    }
-
-    protected void updateLastExecutionDateInOtherTransaction(UUID taskId) {
-        TaskService taskService = applicationContext.getBean("taskService", TaskService.class);
-        taskService.updateLastExecutionDate(taskId);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateLastExecutionDate(UUID taskId) {
         idObjectService.updateFieldValue(Task.class, taskId, "lastExecutionDate", new Date());
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void setTaskExecutionState(UUID taskExecutionId, UUID stateId) {
         idObjectService.updateFieldValue(TaskExecutionLog.class, taskExecutionId, "state.id", stateId);
@@ -99,22 +86,19 @@ public class TaskServiceImpl implements TaskService {
 
         TaskExecutionLog execution = executions.iterator().next();
 
-        setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
+        taskService.setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
 
         try {
             TaskExecutor executor = applicationContext.getBean(execution.getTask().getServiceName(), TaskExecutor.class);
             executor.execute(execution.getParameter());
 
-            //Получить класс исполнителя и вызвать у него execute с параметрами
-            setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.COMPLETED.getValue());
+            taskService.setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.COMPLETED.getValue());
         } catch (Exception e) {
             logger.error(String.format("Failed to complete task: %s", execution.getTask().getServiceName()), e);
-            setTaskExecutionStateInOtherTransaction(execution.getId(), DataConstants.TaskExecutionStates.FAIL.getValue());
+            taskService.setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.FAIL.getValue());
         }
 
-        updateLastExecutionDateInOtherTransaction(execution.getTask().getId());
-
-        idObjectService.save(execution);
+        taskService.updateLastExecutionDate(execution.getTask().getId());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -148,17 +132,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void resetAllTasks() {
-        //TODO: Optimize select
-        HashMap<String, Object> params = new HashMap<String, Object>();
-        params.put("inProgressState", DataConstants.TaskExecutionStates.IN_PROGRESS.getValue());
-
-        List<TaskExecutionLog> logs = idObjectService.getList(TaskExecutionLog.class, null, "el.state.id=:inProgressState", params, "el.created", "ASC", null, null);
-        for (TaskExecutionLog log : logs) {
-            try {
-                resetTaskExecution(log.getId());
-            }
-            catch (ObjectNotFoundException ignored) {}
-        }
+        taskDao.resetAllTasks();
     }
 
     @Transactional(rollbackFor = Exception.class)
