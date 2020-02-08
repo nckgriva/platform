@@ -17,8 +17,6 @@ public class TransactionType extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "pg-uuid")
     @Access(AccessType.PROPERTY)
     private UUID id;
 

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.gracelogic.platform</groupId>
     <artifactId>platform-parent</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <packaging>pom</packaging>
     <name>parent</name>
 
@@ -425,6 +425,33 @@
                     </plugins>
                 </pluginManagement>
             </build>
+        </profile>
+        <profile>
+            <id>postgres</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>!profile.mssql</name>
+                </property>
+            </activation>
+            <properties>
+                <database>postgres</database>
+                <generatorStrategy>uuid2</generatorStrategy>
+                <idType>pg-uuid</idType>
+            </properties>
+        </profile>
+        <profile>
+            <id>mssql</id>
+            <activation>
+                <property>
+                    <name>!profile.postgres</name>
+                </property>
+            </activation>
+            <properties>
+                <database>mssql</database>
+                <generatorStrategy>guid</generatorStrategy>
+                <idType>uuid-char</idType>
+            </properties>
         </profile>
 
     </profiles>

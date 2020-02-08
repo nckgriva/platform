@@ -381,9 +381,9 @@ public class UserServiceImpl implements UserService {
     public UserSetting getUserSetting(UUID userId, String key) {
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
-        params.put("key", key);
+        params.put("key_setting", key);
 
-        List<UserSetting> userSettings = idObjectService.getList(UserSetting.class, null, "el.user.id=:userId and el.key=:key", params, null, null, null, 1);
+        List<UserSetting> userSettings = idObjectService.getList(UserSetting.class, null, "el.user.id=:userId and el.key=:key_setting", params, null, null, null, 1);
         if (!userSettings.isEmpty()) {
             return userSettings.iterator().next();
         }
@@ -395,10 +395,10 @@ public class UserServiceImpl implements UserService {
     public void updateUserSetting(UUID userId, String key, String value) {
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
-        params.put("key", key);
+        params.put("key_setting", key);
 
         UserSetting userSetting;
-        List<UserSetting> userSettings = idObjectService.getList(UserSetting.class, null, "el.user.id=:userId and el.key=:key", params, null, null, null, 1);
+        List<UserSetting> userSettings = idObjectService.getList(UserSetting.class, null, "el.user.id=:userId and el.key=:key_setting", params, null, null, null, 1);
         if (!userSettings.isEmpty()) {
             userSetting = userSettings.iterator().next();
         } else {

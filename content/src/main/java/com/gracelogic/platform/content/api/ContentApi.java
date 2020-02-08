@@ -29,7 +29,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
 
-@Controller
+@RestController
 @RequestMapping(value = Path.API_CONTENT)
 @Api(value = Path.API_CONTENT, tags = {"Content API"},
         authorizations = @Authorization(value = "MybasicAuth"))
@@ -44,19 +44,19 @@ public class ContentApi extends AbstractAuthorizedController {
     @ApiOperation(
             value = "getSections",
             notes = "Get list of sections in a hierarchical form",
-            response = List.class
+            responseContainer = "List",
+            response = SectionDTO.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/section", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity getSections(@ApiParam(name = "parentId", value = "parentId") @RequestParam(value = "parentId", required = false) UUID parentId,
+    public ResponseEntity<List<SectionDTO>> getSections(@ApiParam(name = "parentId", value = "parentId") @RequestParam(value = "parentId", required = false) UUID parentId,
                                       @ApiParam(name = "onlyActive", value = "onlyActive") @RequestParam(value = "onlyActive", required = false, defaultValue = "true") Boolean onlyActive) {
         List<SectionDTO> sectionDTOs = contentService.getSectionsHierarchically(parentId, onlyActive);
 
-        return new ResponseEntity<List<SectionDTO>>(sectionDTOs, HttpStatus.OK);
+        return ResponseEntity.ok(sectionDTOs);
     }
 
     @ApiOperation(
@@ -69,13 +69,12 @@ public class ContentApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.GET, value = "/section/{id}")
-    @ResponseBody
     public ResponseEntity getSection(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
         try {
             SectionDTO sectionDTO = contentService.getSection(id);
-            return new ResponseEntity<SectionDTO>(sectionDTO, HttpStatus.OK);
+            return ResponseEntity.ok(sectionDTO);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())));
         }
     }
 
@@ -89,8 +88,7 @@ public class ContentApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/element", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity getElements(@ApiParam(name = "query", value = "query") @RequestParam(value = "query", required = false) String query,
+    public ResponseEntity<EntityListResponse<ElementDTO>> getElements(@ApiParam(name = "query", value = "query") @RequestParam(value = "query", required = false) String query,
                                       @ApiParam(name = "queryFields", value = "queryFields") @RequestParam(value = "queryFields", required = false) String sQueryFields,
                                       @ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
                                       @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false) Boolean active,
@@ -102,7 +100,7 @@ public class ContentApi extends AbstractAuthorizedController {
                                       @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
                                       @ApiParam(name = "fields", value = "fields") @RequestParam Map<String, String> allRequestParams) {
 
-        Map<String, String> fields = new HashMap<String, String>();
+        Map<String, String> fields = new HashMap<>();
         if (allRequestParams != null) {
             for (String paramName : allRequestParams.keySet()) {
                 if (StringUtils.startsWithIgnoreCase(paramName, "fields.")) {
@@ -143,7 +141,7 @@ public class ContentApi extends AbstractAuthorizedController {
         EntityListResponse<ElementDTO> elements = contentService.getElementsPaged(query, queryFields, sectionIds, active, validOnDate,
                 fields, length, page, start, sortField, sortDir);
 
-        return new ResponseEntity<EntityListResponse<ElementDTO>>(elements, HttpStatus.OK);
+        return ResponseEntity.ok(elements);
     }
 
     @ApiOperation(
@@ -156,14 +154,13 @@ public class ContentApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.GET, value = "/element/{id}")
-    @ResponseBody
     public ResponseEntity getElement(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id,
                                      @ApiParam(name = "includeSectionPattern", value = "includeSectionPattern") @RequestParam(value = "includeSectionPattern", required = false, defaultValue = "false") Boolean includeSectionPattern) {
         try {
             ElementDTO elementDTO = contentService.getElement(id, includeSectionPattern);
-            return new ResponseEntity<ElementDTO>(elementDTO, HttpStatus.OK);
+            return ResponseEntity.ok(elementDTO);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())));
         }
     }
 
@@ -177,14 +174,13 @@ public class ContentApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.GET, value = "/element/by-external-id/{externalId}")
-    @ResponseBody
     public ResponseEntity getElementByExternalId(@ApiParam(name = "externalId", value = "externalId") @PathVariable(value = "externalId") String externalId,
                                                  @ApiParam(name = "includeSectionPattern", value = "includeSectionPattern") @RequestParam(value = "includeSectionPattern", required = false, defaultValue = "false") Boolean includeSectionPattern) {
         try {
             ElementDTO elementDTO = contentService.getElementByExternalId(externalId, includeSectionPattern);
-            return new ResponseEntity<ElementDTO>(elementDTO, HttpStatus.OK);
+            return ResponseEntity.ok(elementDTO);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())));
         }
     }
 
@@ -198,13 +194,12 @@ public class ContentApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.GET, value = "/pattern/{id}")
-    @ResponseBody
     public ResponseEntity getSectionPattern(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
         try {
             SectionPatternDTO sectionPatternDTO = contentService.getSectionPattern(id);
-            return new ResponseEntity<SectionPatternDTO>(sectionPatternDTO, HttpStatus.OK);
+            return ResponseEntity.ok(sectionPatternDTO);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.PATTERN_NOT_FOUND", messageSource.getMessage("content.PATTERN_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new ErrorResponse("content.PATTERN_NOT_FOUND", messageSource.getMessage("content.PATTERN_NOT_FOUND", null, LocaleHolder.getLocale())));
         }
     }
 
@@ -218,13 +213,12 @@ public class ContentApi extends AbstractAuthorizedController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.GET, value = "/section/{id}/pattern")
-    @ResponseBody
     public ResponseEntity getSectionPatternBySection(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
         try {
             SectionPatternDTO sectionPatternDTO = contentService.getSectionPatternBySection(id);
-            return new ResponseEntity<SectionPatternDTO>(sectionPatternDTO, HttpStatus.OK);
+            return ResponseEntity.ok(sectionPatternDTO);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.PATTERN_NOT_FOUND", messageSource.getMessage("content.PATTERN_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new ErrorResponse("content.PATTERN_NOT_FOUND", messageSource.getMessage("content.PATTERN_NOT_FOUND", null, LocaleHolder.getLocale())));
         }
     }
 
@@ -239,13 +233,12 @@ public class ContentApi extends AbstractAuthorizedController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('ELEMENT:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/element/save")
-    @ResponseBody
     public ResponseEntity saveElement(@ApiParam(name = "elementDTO", value = "elementDTO") @RequestBody ElementDTO elementDTO) {
         try {
             Element element = contentService.saveElement(elementDTO);
-            return new ResponseEntity<IDResponse>(new IDResponse(element.getId()), HttpStatus.OK);
+            return ResponseEntity.ok(new IDResponse(element.getId()));
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new ErrorResponse("content.ELEMENT_NOT_FOUND", messageSource.getMessage("content.ELEMENT_NOT_FOUND", null, LocaleHolder.getLocale())));
         }
     }
 
@@ -260,16 +253,12 @@ public class ContentApi extends AbstractAuthorizedController {
             @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('ELEMENT:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/element/{id}/delete")
-    @ResponseBody
     public ResponseEntity deleteElement(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
         try {
             contentService.deleteElement(id);
-            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+            return ResponseEntity.ok(EmptyResponse.getInstance());
         } catch (Exception e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("content.FAILED_TO_DELETE_ELEMENT", messageSource.getMessage("content.FAILED_TO_DELETE_ELEMENT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body(new ErrorResponse("content.FAILED_TO_DELETE_ELEMENT", messageSource.getMessage("content.FAILED_TO_DELETE_ELEMENT", null, LocaleHolder.getLocale())));
         }
-
     }
-
-
 }

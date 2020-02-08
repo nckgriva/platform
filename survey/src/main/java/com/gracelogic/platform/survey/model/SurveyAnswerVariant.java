@@ -16,7 +16,7 @@ public class SurveyAnswerVariant extends IdObject<UUID> {
     @Access(AccessType.PROPERTY)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "pg-uuid")
+    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     private UUID id;
 
     @Column(name = CREATED, nullable = false)

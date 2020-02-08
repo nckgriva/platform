@@ -1,16 +1,26 @@
-package com.gracelogic.platform.content.dao;
+package com.gracelogic.platform.content.dao.postgres;
 
+import com.gracelogic.platform.content.dao.AbstractContentDaoImpl;
 import com.gracelogic.platform.content.model.Element;
+import com.gracelogic.platform.db.condition.OnPostgreSQLConditional;
 import com.gracelogic.platform.db.service.IdObjectServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Query;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Repository
+@Conditional(OnPostgreSQLConditional.class)
 public class ContentDaoImpl extends AbstractContentDaoImpl {
     private static Logger logger = Logger.getLogger(ContentDaoImpl.class);
 
@@ -97,10 +107,10 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
             params.put("query", "%%" + StringUtils.lowerCase(query) + "%%");
         }
         appendSortClause(queryStr, sortField, sortDir);
-        appendPaginationClause(queryStr, params, recordsOnPage, startRecord);
 
         try {
             Query q = getEntityManager().createNativeQuery(queryStr.toString(), Element.class);
+            appendPaginationClause(q, params, recordsOnPage, startRecord);
 
             for (String key : params.keySet()) {
                 q.setParameter(key, params.get(key));
