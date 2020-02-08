@@ -45,12 +45,6 @@ public class User extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = "PASSWORD", nullable = true)
-    private String password;
-
-    @Column(name = "SALT", nullable = true)
-    private String salt;
-
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<UserRole> userRoles = new HashSet<UserRole>();
 
@@ -119,23 +113,6 @@ public class User extends IdObject<UUID> {
     @Override
     public void setChanged(Date changed) {
         this.changed = changed;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-
-    public String getSalt() {
-        return salt;
-    }
-
-    public void setSalt(String salt) {
-        this.salt = salt;
     }
 
     public String getAllowedAddresses() {

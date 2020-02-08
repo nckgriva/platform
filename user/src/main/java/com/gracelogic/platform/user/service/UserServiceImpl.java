@@ -79,10 +79,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public User getUserByField(String fieldName, Object fieldValue) {
-        return userDao.getUserByField(fieldName, fieldValue);
-    }
+//    @Override
+//    public User getUserByField(String fieldName, Object fieldValue) {
+//        return userDao.getUserByField(fieldName, fieldValue);
+//    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -1023,7 +1023,7 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
-    private UUID resolveIdentifierTypeId(String identifierValue) throws InvalidIdentifierException {
+    public UUID resolveIdentifierTypeId(String identifierValue) throws InvalidIdentifierException {
         //TODO: optimize this get list request
         List<IdentifierType> identifierTypes = idObjectService.getList(IdentifierType.class, null, null, null, "el.resolvePriority ASC", null, null);
         for (IdentifierType identifierType : identifierTypes) {
@@ -1033,5 +1033,75 @@ public class UserServiceImpl implements UserService {
         }
 
         throw new InvalidIdentifierException();
+    }
+
+    @Override
+    public Identifier findIdentifier(UUID identifierTypeId, String value, boolean enrich) {
+        return userDao.findIdentifier(identifierTypeId, value, enrich);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Identifier processSignIn(UUID identifierTypeId, String identifierValue, String password, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
+        if (identifierTypeId == null) {
+            identifierTypeId = resolveIdentifierTypeId(identifierValue);
+        }
+
+        Identifier identifier = findIdentifier(identifierTypeId, identifierValue, true);
+        if (identifier != null && identifier.getUser() != null && identifier.getVerified()) {
+            IdentifierType identifierType = ds.get(IdentifierType.class, identifier.getIdentifierType().getId());
+            if (!identifierType.getLoginAllowed()) {
+                throw new InvalidIdentifierException();
+            }
+
+            User user = identifier.getUser();
+            if (!user.getApproved()) {
+                throw new UserNotApprovedException();
+            }
+            if (user.getBlocked() != null && user.getBlocked()) {
+                throw new UserBlockedException();
+            }
+            if (!StringUtils.isEmpty(user.getAllowedAddresses())) {
+                StringTokenizer stringTokenizer = new StringTokenizer(user.getAllowedAddresses(), " ,");
+                boolean inRange = false;
+                while (stringTokenizer.hasMoreTokens()) {
+                    String token = stringTokenizer.nextToken();
+                    if (new SubnetUtils(token).getInfo().isInRange(remoteAddress)) {
+                        inRange = true;
+                        break;
+                    }
+                }
+                if (!inRange) {
+                    throw new NotAllowedIPException();
+                }
+            }
+            long currentTimeMillis = System.currentTimeMillis();
+            Date endDate = new Date(currentTimeMillis);
+            Date startDate = new Date(currentTimeMillis - ps.getPropertyValueAsInteger("user:block_period"));
+            Map<String, Object> params = new HashMap<>();
+            params.put("identifierId", identifier.getId());
+            params.put("startDate", startDate);
+            params.put("endDate", endDate);
+            Integer attemptsToBlock = ps.getPropertyValueAsInteger("user:attempts_to_block");
+            Integer checkIncorrectLoginAttempts = idObjectService.checkExist(IncorrectLoginAttempt.class, null, "el.identifier.id=:identifierId and el.created >= :startDate and el.created <= :endDate", params, attemptsToBlock);
+
+            if (checkIncorrectLoginAttempts < attemptsToBlock) {
+                Passphrase passphrase = getActualPassphrase(user, DataConstants.PassphraseTypes.USER_PASSWORD.getValue(), user.getId(), true);
+                if (isPassphraseValueValid(passphrase, password)) {
+                    user.setLastVisitDt(new Date());
+                    user.setLastVisitIP(remoteAddress);
+                    user = idObjectService.save(user);
+                    return identifier;
+                } else {
+                    IncorrectLoginAttempt incorrectLoginAttempt = new IncorrectLoginAttempt();
+                    incorrectLoginAttempt.setIdentifier(identifier);
+                    idObjectService.save(incorrectLoginAttempt);
+                }
+            } else {
+                throw new TooManyAttemptsException();
+            }
+
+        }
+        return null;
     }
 }

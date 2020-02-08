@@ -49,6 +49,7 @@ public class PropertyServiceImpl implements PropertyService {
         entity.setName(dto.getName());
         entity.setValue(dto.getValue());
         entity.setVisible(dto.getVisible());
+        entity.setDescription(dto.getDescription());
 
         return idObjectService.save(entity);
     }

@@ -13,7 +13,7 @@ import javax.servlet.http.HttpSession;
 import java.util.*;
 
 public interface UserService {
-    User getUserByField(String fieldName, Object fieldValue);
+//    User getUserByField(String fieldName, Object fieldValue);
 
     User login(Object login, String loginField, String password, String remoteAddress, boolean trust);
 
@@ -75,4 +75,10 @@ public interface UserService {
     String translateUserSortFieldToNative(String sortFieldInJPAFormat);
 
     void changeLocale(HttpServletRequest request, AuthorizedUser authorizedUser, String locale) throws IllegalArgumentException;
+
+    boolean isIdentifierValid(UUID identifierTypeId, String identifierValue);
+
+    UUID resolveIdentifierTypeId(String identifierValue) throws InvalidIdentifierException;
+
+    Identifier findIdentifier(UUID identifierTypeId, String value, boolean enrich);
 }

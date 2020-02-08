@@ -17,31 +17,31 @@ public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
     private static Logger logger = Logger.getLogger(AbstractUserDaoImpl.class);
 
 
-    @Override
-    public User getUserByField(String fieldName, Object fieldValue) {
-        if (StringUtils.equalsIgnoreCase(fieldName, IdObject.ID) && fieldValue != null && fieldValue instanceof String) {
-            try {
-                fieldValue = UUID.fromString((String) fieldValue);
-            }
-            catch (Exception ignored) {}
-        }
-
-        User user = null;
-        String query = String.format("select user from User user " +
-                "left join fetch user.userRoles ur " +
-                "left join fetch ur.role rl " +
-                "left join fetch rl.roleGrants rg " +
-                "left join fetch rg.grant gr " +
-                "where user.%s = :fieldValue", fieldName);
-        try {
-            user = getEntityManager().createQuery(query, User.class)
-                    .setParameter("fieldValue", fieldValue)
-                    .getSingleResult();
-        } catch (Exception e) {
-            logger.debug(String.format("Failed to get user by field: %s", fieldName), e);
-        }
-        return user;
-    }
+//    @Override
+//    public User getUserByField(String fieldName, Object fieldValue) {
+//        if (StringUtils.equalsIgnoreCase(fieldName, IdObject.ID) && fieldValue != null && fieldValue instanceof String) {
+//            try {
+//                fieldValue = UUID.fromString((String) fieldValue);
+//            }
+//            catch (Exception ignored) {}
+//        }
+//
+//        User user = null;
+//        String query = String.format("select user from User user " +
+//                "left join fetch user.userRoles ur " +
+//                "left join fetch ur.role rl " +
+//                "left join fetch rl.roleGrants rg " +
+//                "left join fetch rg.grant gr " +
+//                "where user.%s = :fieldValue", fieldName);
+//        try {
+//            user = getEntityManager().createQuery(query, User.class)
+//                    .setParameter("fieldValue", fieldValue)
+//                    .getSingleResult();
+//        } catch (Exception e) {
+//            logger.debug(String.format("Failed to get user by field: %s", fieldName), e);
+//        }
+//        return user;
+//    }
 
     @Override
     public Identifier findIdentifier(UUID identifierTypeId, String identifierValue, boolean enrich) {

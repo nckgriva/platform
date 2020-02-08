@@ -35,6 +35,9 @@ public class Property extends IdObject<UUID> {
     @Column(name = "IS_VISIBLE", nullable = true)
     private Boolean visible;
 
+    @Column(name = "DESCRIPTION", nullable = true, length = 4000)
+    private String description;
+
     @Override
     public UUID getId() {
         return id;
@@ -84,4 +87,12 @@ public class Property extends IdObject<UUID> {
     public Boolean getVisible() {return visible;}
 
     public void setVisible(Boolean visible) {this.visible = visible;}
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

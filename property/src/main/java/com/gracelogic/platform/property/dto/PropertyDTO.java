@@ -20,6 +20,8 @@ public class PropertyDTO extends IdObjectDTO {
 
     private Boolean visible;
 
+    private String description;
+
     @Override
     public UUID getId() {
         return id;
@@ -70,6 +72,14 @@ public class PropertyDTO extends IdObjectDTO {
 
     public void setVisible(Boolean visible) {this.visible = visible;}
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public static PropertyDTO prepare(Property property) {
         PropertyDTO propertyDTO = new PropertyDTO();
         IdObjectDTO.prepare(propertyDTO, property);
@@ -77,6 +87,7 @@ public class PropertyDTO extends IdObjectDTO {
         propertyDTO.setName(property.getName());
         propertyDTO.setValue(property.getValue());
         propertyDTO.setVisible(property.getVisible());
+        propertyDTO.setDescription(property.getDescription());
 
         return propertyDTO;
     }
