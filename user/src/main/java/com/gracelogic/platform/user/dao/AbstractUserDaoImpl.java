@@ -3,7 +3,7 @@ package com.gracelogic.platform.user.dao;
 import com.gracelogic.platform.db.dao.BaseDao;
 import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.user.model.AuthCode;
-import com.gracelogic.platform.user.model.IncorrectLoginAttempt;
+import com.gracelogic.platform.user.model.Identifier;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.service.DataConstants;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +41,31 @@ public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
             logger.debug(String.format("Failed to get user by field: %s", fieldName), e);
         }
         return user;
+    }
+
+    @Override
+    public Identifier findIdentifier(UUID identifierTypeId, String identifierValue, boolean enrich) {
+        String query = "select identifier from Identifier user " +
+                (enrich ?
+                        ("left join fetch el.user user " +
+                        "left join fetch user.userRoles ur " +
+                        "left join fetch ur.role rl " +
+                        "left join fetch rl.roleGrants rg " +
+                        "left join fetch rg.grant gr") :
+
+                        ("left join fetch el.user")
+                ) + "where el.identifierTypeId=:identifierTypeId and el.value=:value";
+
+        logger.info(query);
+
+        try {
+            return (Identifier) getEntityManager().createNativeQuery(query, Identifier.class)
+                    .setParameter("identifierTypeId", identifierTypeId)
+                    .setParameter("value", identifierValue).getSingleResult();
+        } catch (Exception e) {
+            logger.debug(String.format("Failed to get identifier by value: %s", identifierValue), e);
+        }
+        return null;
     }
 
     @Override

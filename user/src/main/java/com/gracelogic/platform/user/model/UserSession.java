@@ -54,6 +54,10 @@ public class UserSession extends IdObject<UUID> {
     @Column(name = "USER_AGENT", nullable = true, length = 1024)
     private String userAgent;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "IDENTIFIER_ID", nullable = true)
+    private Identifier identifier;
+
     @Override
     public UUID getId() {
         return id;
@@ -154,5 +158,13 @@ public class UserSession extends IdObject<UUID> {
 
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
     }
 }

@@ -30,6 +30,10 @@ public class IncorrectLoginAttempt extends IdObject<UUID> {
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "IDENTIFIER_ID", nullable = false)
+    private Identifier identifier;
+
     @Override
     public UUID getId() {
         return id;
@@ -66,5 +70,13 @@ public class IncorrectLoginAttempt extends IdObject<UUID> {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
     }
 }

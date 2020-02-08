@@ -51,18 +51,6 @@ public class User extends IdObject<UUID> {
     @Column(name = "SALT", nullable = true)
     private String salt;
 
-    @Column(name = "EMAIL", nullable = true, unique = true)
-    private String email;
-
-    @Column(name = "PHONE", nullable = true, unique = true)
-    private String phone;
-
-    @Column(name = "IS_PHONE_VERIFIED", nullable = false)
-    private Boolean phoneVerified;
-
-    @Column(name = "IS_EMAIL_VERIFIED", nullable = false)
-    private Boolean emailVerified;
-
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<UserRole> userRoles = new HashSet<UserRole>();
 
@@ -141,13 +129,6 @@ public class User extends IdObject<UUID> {
         this.password = password;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public String getSalt() {
         return salt;
@@ -165,36 +146,12 @@ public class User extends IdObject<UUID> {
         this.allowedAddresses = allowedAddresses;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
     public Boolean getApproved() {
         return approved;
     }
 
     public void setApproved(Boolean approved) {
         this.approved = approved;
-    }
-
-    public Boolean getPhoneVerified() {
-        return phoneVerified;
-    }
-
-    public void setPhoneVerified(Boolean phoneVerified) {
-        this.phoneVerified = phoneVerified;
-    }
-
-    public Boolean getEmailVerified() {
-        return emailVerified;
-    }
-
-    public void setEmailVerified(Boolean emailVerified) {
-        this.emailVerified = emailVerified;
     }
 
     public Boolean getBlocked() {

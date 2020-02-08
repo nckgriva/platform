@@ -1004,4 +1004,34 @@ public class UserServiceImpl implements UserService {
             LocaleHolder.setLocale(l);
         }
     }
+
+    @Override
+    public boolean isIdentifierValid(UUID identifierTypeId, String identifierValue) {
+
+        if (StringUtils.isEmpty(identifierValue)) {
+            return false;
+        } else {
+            IdentifierType identifierType = ds.get(IdentifierType.class, identifierTypeId);
+            if (!StringUtils.isEmpty(identifierType.getValidationRegex())) {
+                Pattern p = Pattern.compile(identifierType.getValidationRegex());
+                Matcher m = p.matcher(identifierValue);
+                if (!m.matches()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private UUID resolveIdentifierTypeId(String identifierValue) throws InvalidIdentifierException {
+        //TODO: optimize this get list request
+        List<IdentifierType> identifierTypes = idObjectService.getList(IdentifierType.class, null, null, null, "el.resolvePriority ASC", null, null);
+        for (IdentifierType identifierType : identifierTypes) {
+            if (isIdentifierValid(identifierType.getId(), identifierValue)) {
+                return identifierType.getId();
+            }
+        }
+
+        throw new InvalidIdentifierException();
+    }
 }
