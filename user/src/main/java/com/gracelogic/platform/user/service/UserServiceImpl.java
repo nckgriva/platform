@@ -21,6 +21,7 @@ import com.gracelogic.platform.user.security.AuthenticationToken;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.util.SubnetUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -1041,6 +1042,46 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean isPassphraseValueValid(Passphrase passphrase, String value) {
+        if (passphrase == null) {
+            return false;
+        }
+
+        PassphraseType passphraseType = ds.get(PassphraseType.class, passphrase.getPassphraseType().getId());
+        if (passphraseType.getPassphraseEncryption().getId().equals(DataConstants.PassphraseEncryptors.OPEN.getValue())) {
+            return StringUtils.equals(passphrase.getValue(), value);
+        } else if (passphraseType.getPassphraseEncryption().getId().equals(DataConstants.PassphraseEncryptors.SHA1_WITH_SALT.getValue())) {
+            return StringUtils.equals(DigestUtils.shaHex(value.concat(passphrase.getSalt())), passphrase.getValue());
+        }
+        return false;
+    }
+
+    @Override
+    public Passphrase getActualPassphrase(User user, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveExpiredPassphrase) {
+        PassphraseType passphraseType = ds.get(PassphraseType.class, passphraseTypeId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("passphraseTypeId", passphraseType.getId());
+        params.put("referenceObjectId", referenceObjectId);
+        params.put("userId", user.getId());
+        params.put("passphraseStateId", DataConstants.PassphraseStates.ACTUAL.getValue());
+        List<Passphrase> passphrases = idObjectService.getList(Passphrase.class, null, "el.user.id=:userId and el.passphraseType.id=:passphraseTypeId and el.referenceObjectId=:referenceObjectId", params, "el.created DESC", null, 1);
+        Passphrase passphrase = null;
+        if (!passphrases.isEmpty()) {
+            passphrase = passphrases.iterator().next();
+            if (archiveExpiredPassphrase && passphraseType.getLifetime() != null && passphraseType.getLifetime() > 0) {
+                if (passphrase.getCreated().getTime() + passphraseType.getLifetime() > System.currentTimeMillis()) {
+                    passphrase.setPassphraseState(ds.get(PassphraseState.class, DataConstants.PassphraseStates.ARCHIVE.getValue()));
+                    idObjectService.save(passphrase);
+                    passphrase = null;
+                }
+            }
+        }
+
+        return passphrase;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Identifier processSignIn(UUID identifierTypeId, String identifierValue, String password, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
         if (identifierTypeId == null) {
@@ -1077,12 +1118,12 @@ public class UserServiceImpl implements UserService {
             }
             long currentTimeMillis = System.currentTimeMillis();
             Date endDate = new Date(currentTimeMillis);
-            Date startDate = new Date(currentTimeMillis - ps.getPropertyValueAsInteger("user:block_period"));
+            Date startDate = new Date(currentTimeMillis - propertyService.getPropertyValueAsInteger("user:block_period"));
             Map<String, Object> params = new HashMap<>();
             params.put("identifierId", identifier.getId());
             params.put("startDate", startDate);
             params.put("endDate", endDate);
-            Integer attemptsToBlock = ps.getPropertyValueAsInteger("user:attempts_to_block");
+            Integer attemptsToBlock = propertyService.getPropertyValueAsInteger("user:attempts_to_block");
             Integer checkIncorrectLoginAttempts = idObjectService.checkExist(IncorrectLoginAttempt.class, null, "el.identifier.id=:identifierId and el.created >= :startDate and el.created <= :endDate", params, attemptsToBlock);
 
             if (checkIncorrectLoginAttempts < attemptsToBlock) {

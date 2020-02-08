@@ -80,5 +80,9 @@ public interface UserService {
 
     UUID resolveIdentifierTypeId(String identifierValue) throws InvalidIdentifierException;
 
+    boolean isPassphraseValueValid(Passphrase passphrase, String value);
+
+    Passphrase getActualPassphrase(User user, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveExpiredPassphrase);
+
     Identifier findIdentifier(UUID identifierTypeId, String value, boolean enrich);
 }
