@@ -9,8 +9,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "IDENTIFIER", uniqueConstraints =
-        {@UniqueConstraint(columnNames = {"VALUE", "IDENTIFIER_TYPE_ID"})})
+@Table(name = JPAProperties.TABLE_PREFIX + "IDENTIFIER")
 public class Identifier extends IdObject<UUID> {
     @Id
     @Column(name = ID)
