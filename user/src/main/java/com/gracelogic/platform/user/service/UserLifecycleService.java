@@ -4,7 +4,6 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.dto.SignUpDTO;
 import com.gracelogic.platform.user.dto.UserDTO;
-import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.User;
 
