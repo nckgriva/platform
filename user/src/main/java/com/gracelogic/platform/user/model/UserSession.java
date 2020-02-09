@@ -45,9 +45,6 @@ public class UserSession extends IdObject<UUID> {
     @Column(name = "AUTH_IP", nullable = true)
     private String authIp;
 
-    @Column(name = "LOGIN_TYPE", nullable = true)
-    private String loginType;
-
     @Column(name = "IS_VALID", nullable = true)
     private Boolean valid;
 
@@ -134,14 +131,6 @@ public class UserSession extends IdObject<UUID> {
 
     public void setAuthIp(String authIp) {
         this.authIp = authIp;
-    }
-
-    public String getLoginType() {
-        return loginType;
-    }
-
-    public void setLoginType(String loginType) {
-        this.loginType = loginType;
     }
 
     public Boolean getValid() {

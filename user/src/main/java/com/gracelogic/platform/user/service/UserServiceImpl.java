@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
                 Map<String, Object> params = new HashMap<>();
                 params.put("sessionId", session.getId());
 
-                List<UserSession> userSessions = idObjectService.getList(UserSession.class, null, "el.sessionId=:sessionId", params, null, null, null, 1);
+                List<UserSession> userSessions = idObjectService.getList(UserSession.class, null, "el.sessionId=:sessionId", params, "el.created DESC", null, 1);
                 if (userSessions != null && !userSessions.isEmpty()) {
                     userSession = userSessions.iterator().next();
                 }
@@ -126,14 +126,15 @@ public class UserServiceImpl implements UserService {
                 if (userSession == null) {
                     userSession = new UserSession();
                     userSession.setSessionId(session.getId());
-                    userSession.setUser(idObjectService.setIfModified(User.class, userSession.getUser(), authorizedUser.getId()));
+                    userSession.setUser(idObjectService.getObjectById(User.class, authorizedUser.getId()));
                     userSession.setAuthIp(authentication.getRemoteAddress());
-                    userSession.setLoginType(authentication.getLoginType());
+                    if (authorizedUser.getSignInIdentifier() != null) {
+                        userSession.setIdentifier(idObjectService.getObjectById(Identifier.class, authorizedUser.getSignInIdentifier().getId()));
+                    }
                     userSession.setUserAgent(userAgent);
                 }
                 userSession.setSessionCreatedDt(new Date(session.getCreationTime()));
                 userSession.setLastAccessDt(new Date(session.getLastAccessedTime()));
-                //userSession.setThisAccessedTime(session.getLastAccessedTime());
                 userSession.setMaxInactiveInterval((long) session.getMaxInactiveInterval());
                 userSession.setValid(!isDestroying);
 
@@ -474,25 +475,24 @@ public class UserServiceImpl implements UserService {
         }
         return sortFieldInJPAFormat;
     }
+
     @Override
-    public EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<UserDTO> getUsersPaged(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         sortField = translateUserSortFieldToNative(sortField);
 
-        int totalCount = userDao.getUsersCount(phone, email, approved, blocked, fields);
+        int totalCount = userDao.getUsersCount(identifierValue, approved, blocked, fields);
 
         EntityListResponse<UserDTO> entityListResponse = new EntityListResponse<UserDTO>(totalCount, count, page, start);
-
-
-        List<User> items = userDao.getUsers(phone, email, approved, blocked, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
+        List<User> items = userDao.getUsers(identifierValue, approved, blocked, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
         List<UserRole> userRoles = Collections.emptyList();
-        if (fetchRoles) {
+        if (!items.isEmpty() && fetchRoles) {
             Set<UUID> userIds = new HashSet<>();
             for (User u : items) {
                 userIds.add(u.getId());
             }
             Map<String, Object> params = new HashMap<>();
             params.put("userIds", userIds);
-            userRoles = idObjectService.getList(UserRole.class, null, "el.user.id in (:userIds)", params, null, null, null, null);
+            userRoles = idObjectService.getList(UserRole.class, null, "el.user.id in (:userIds)", params, null, null, null);
         }
 
         for (User e : items) {
@@ -709,7 +709,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isIdentifierValid(UUID identifierTypeId, String identifierValue) {
-
         if (StringUtils.isEmpty(identifierValue)) {
             return false;
         } else {
@@ -803,8 +802,8 @@ public class UserServiceImpl implements UserService {
         Identifier identifier = findIdentifier(identifierTypeId, identifierValue, true);
         if (identifier != null && identifier.getUser() != null && identifier.getVerified()) {
             IdentifierType identifierType = ds.get(IdentifierType.class, identifier.getIdentifierType().getId());
-            if (!identifierType.getLoginAllowed()) {
-                throw new InvalidIdentifierException();
+            if (!identifierType.getSignInAllowed()) {
+                throw new InvalidIdentifierException("Sign in is not allowed");
             }
 
             User user = identifier.getUser();
@@ -875,7 +874,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (archiveOtherPassphrases) {
-            archivePassphrases(user.getId(), passphraseTypeId, referenceObjectId);
+            archiveActualPassphrases(user.getId(), passphraseTypeId, referenceObjectId);
         }
 
         return createPassphrase(user, passphraseType, value, referenceObjectId);
@@ -883,12 +882,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void archivePassphrases(UUID userId, UUID passphraseTypeId, UUID referenceObjectId) {
+    public void archiveActualPassphrases(UUID userId, UUID passphraseTypeId, UUID referenceObjectId) {
         Map<String, Object> params = new HashMap<>();
         params.put("referenceObjectId", referenceObjectId);
         params.put("passphraseTypeId", passphraseTypeId);
         params.put("userId", userId);
-        List<Passphrase> passphrases = idObjectService.getList(Passphrase.class, null, "el.passphraseType.id=:passphraseTypeId and el.referenceObjectId=:referenceObjectId", params, "el.created DESC", null, null);
+        params.put("passphraseStateId", DataConstants.PassphraseStates.ACTUAL.getValue());
+        List<Passphrase> passphrases = idObjectService.getList(Passphrase.class, null, "el.passphraseType.id=:passphraseTypeId and el.referenceObjectId=:referenceObjectId and el.passphraseState.id=:passphraseStateId", params, "el.created DESC", null, null);
         PassphraseState archiveState = ds.get(PassphraseState.class, DataConstants.PassphraseStates.ARCHIVE.getValue());
         for (Passphrase passphrase : passphrases) {
             passphrase.setPassphraseState(archiveState);
@@ -959,5 +959,26 @@ public class UserServiceImpl implements UserService {
     private static String generateCryptographicSalt() {
         Random random = new Random(System.currentTimeMillis());
         return DigestUtils.md5Hex(String.valueOf(random.nextLong()));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean processIdentifierVerificationViaVerificationCode(UUID identifierId, String verificationCode) {
+        Identifier identifier = idObjectService.getObjectById(Identifier.class, identifierId);
+        if (identifier == null || identifier.getVerified()) {
+            return true;
+        }
+
+        Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifierId, false);
+        if (isPassphraseValueValid(passphrase, verificationCode)) {
+            identifier.setVerified(true);
+            idObjectService.save(identifier);
+
+            passphrase.setPassphraseState(ds.get(PassphraseState.class, DataConstants.PassphraseStates.ARCHIVE.getValue()));
+            idObjectService.save(passphrase);
+
+            return true;
+        }
+        return false;
     }
 }

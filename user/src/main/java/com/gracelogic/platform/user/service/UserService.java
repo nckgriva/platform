@@ -33,8 +33,7 @@ public interface UserService {
 
     void mergeUserRoles(UUID userId, Collection<UUID> activeRoles);
 
-    EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields,
-                                              boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<UserDTO> getUsersPaged(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     UserDTO getUser(UUID userId, boolean fetchRoles) throws ObjectNotFoundException;
 
@@ -64,7 +63,7 @@ public interface UserService {
 
     List<Identifier> createIdentifiers(List<IdentifierDTO> identifierDTOs, User user, boolean throwExceptionIfAlreadyAttached) throws InvalidIdentifierException;
 
-    void archivePassphrases(UUID userId, UUID passphraseTypeId, UUID referenceObjectId);
+    void archiveActualPassphrases(UUID userId, UUID passphraseTypeId, UUID referenceObjectId);
 
     Passphrase updatePassphrase(User user, String value, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveOtherPassphrases) throws InvalidPassphraseException;
 
@@ -77,5 +76,7 @@ public interface UserService {
     User processSignUp(SignUpDTO signUpDTO) throws InvalidIdentifierException, InvalidPassphraseException;
 
     void sendVerificationCodeForPasswordChanging(UUID identifierTypeId, String identifierValue, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException, SendingException;
+
+    boolean processIdentifierVerificationViaVerificationCode(UUID identifierId, String verificationCode);
 
 }

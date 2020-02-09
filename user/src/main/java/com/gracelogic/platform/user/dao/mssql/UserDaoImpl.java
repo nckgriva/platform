@@ -20,18 +20,15 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
     private static Logger logger = Logger.getLogger(UserDaoImpl.class);
 
     @Override
-    public Integer getUsersCount(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields) {
+    public Integer getUsersCount(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields) {
         Integer count = null;
-        StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_user el where 1=1 ");
+        StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_user el " +
+                "inner join {h-schema}cmn_identifier iden on el.id = iden.user_id where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
-        if (!StringUtils.isEmpty(phone)) {
-            queryStr.append("and el.phone = :phone ");
-            params.put("phone", phone);
-        }
-        if (!StringUtils.isEmpty(email)) {
-            queryStr.append("and el.email = :email ");
-            params.put("email", email);
+        if (!StringUtils.isEmpty(identifierValue)) {
+            queryStr.append("and iden.value = :identifierValue ");
+            params.put("identifierValue", identifierValue);
         }
         if (approved != null) {
             queryStr.append("and el.is_approved = :approved ");
@@ -64,18 +61,17 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
     }
 
     @Override
-    public List<User> getUsers(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
+    //public List<User> getUsers(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
+    public List<User> getUsers(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
+
         List<User> users = Collections.emptyList();
-        StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_user el where 1=1 ");
+        StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_user el " +
+                "inner join {h-schema}cmn_identifier iden on el.id = iden.user_id where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
-        if (!StringUtils.isEmpty(phone)) {
-            queryStr.append("and el.phone = :phone ");
-            params.put("phone", phone);
-        }
-        if (!StringUtils.isEmpty(email)) {
-            queryStr.append("and el.email = :email ");
-            params.put("email", email);
+        if (!StringUtils.isEmpty(identifierValue)) {
+            queryStr.append("and iden.value = :identifierValue ");
+            params.put("identifierValue", identifierValue);
         }
         if (approved != null) {
             queryStr.append("and el.is_approved = :approved ");

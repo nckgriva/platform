@@ -4,16 +4,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class AuthenticationToken extends UsernamePasswordAuthenticationToken {
     private String remoteAddress = null;
-    private String loginType = null;
+    private UUID identifierTypeId = null;
     private boolean trust = false;  //for oauth
 
-    public AuthenticationToken(Object principal, Object credentials, String remoteAddress, String loginType, boolean trust) {
+    public AuthenticationToken(Object principal, Object credentials, String remoteAddress, UUID identifierTypeId, boolean trust) {
         super(principal, credentials);
         this.remoteAddress = remoteAddress;
-        this.loginType = loginType;
+        this.identifierTypeId = identifierTypeId;
         this.trust = trust;
     }
 
@@ -21,10 +22,10 @@ public class AuthenticationToken extends UsernamePasswordAuthenticationToken {
         super(principal, credentials);
     }
 
-    public AuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities, String remoteAddress, String loginType, boolean trust) {
+    public AuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities, String remoteAddress, UUID identifierTypeId, boolean trust) {
         super(principal, credentials, authorities);
         this.remoteAddress = remoteAddress;
-        this.loginType = loginType;
+        this.identifierTypeId = identifierTypeId;
         this.trust = trust;
     }
 
@@ -36,12 +37,12 @@ public class AuthenticationToken extends UsernamePasswordAuthenticationToken {
         this.remoteAddress = remoteAddress;
     }
 
-    public String getLoginType() {
-        return loginType;
+    public UUID getIdentifierTypeId() {
+        return identifierTypeId;
     }
 
-    public void setLoginType(String loginType) {
-        this.loginType = loginType;
+    public void setIdentifierTypeId(UUID identifierTypeId) {
+        this.identifierTypeId = identifierTypeId;
     }
 
     public boolean isTrust() {

@@ -33,8 +33,8 @@ public class IdentifierType extends IdObject<UUID> implements Dictionary {
     @Column(name = SORT_ORDER, nullable = true)
     private Integer sortOrder;
 
-    @Column(name = "IS_LOGIN_ALLOWED", nullable = false)
-    private Boolean loginAllowed;
+    @Column(name = "IS_SIGN_IN_ALLOWED", nullable = false)
+    private Boolean signInAllowed;
 
     @Column(name = "IS_AUTOMATIC_VERIFICATION", nullable = false)
     private Boolean automaticVerification;
@@ -83,12 +83,12 @@ public class IdentifierType extends IdObject<UUID> implements Dictionary {
         this.name = name;
     }
 
-    public Boolean getLoginAllowed() {
-        return loginAllowed;
+    public Boolean getSignInAllowed() {
+        return signInAllowed;
     }
 
-    public void setLoginAllowed(Boolean loginAllowed) {
-        this.loginAllowed = loginAllowed;
+    public void setSignInAllowed(Boolean signInAllowed) {
+        this.signInAllowed = signInAllowed;
     }
 
     public Integer getMaxIncorrectLoginAttempts() {

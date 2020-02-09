@@ -1,10 +1,8 @@
 package com.gracelogic.platform.user.security;
 
 import com.gracelogic.platform.user.dto.AuthorizedUser;
-import com.gracelogic.platform.user.model.Grant;
-import com.gracelogic.platform.user.model.RoleGrant;
-import com.gracelogic.platform.user.model.User;
-import com.gracelogic.platform.user.model.UserRole;
+import com.gracelogic.platform.user.dto.IdentifierDTO;
+import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -26,13 +24,14 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
     @Override
     public org.springframework.security.core.Authentication authenticate(org.springframework.security.core.Authentication authentication) throws AuthenticationException {
         if (authentication instanceof AuthenticationToken) {
-            User user = userService.login(authentication.getPrincipal(), ((AuthenticationToken) authentication).getLoginType(), (String) authentication.getCredentials(), ((AuthenticationToken) authentication).getRemoteAddress(), ((AuthenticationToken) authentication).isTrust());
-            if (user != null) {
+            Identifier identifier = userService.processSignIn(((AuthenticationToken) authentication).getIdentifierTypeId(), (String) authentication.getPrincipal(), (String) authentication.getCredentials(), ((AuthenticationToken) authentication).getRemoteAddress());
+            if (identifier != null) {
+                User user = identifier.getUser();
                 AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
+                authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(identifier));
 
                 Set<Grant> grants = new HashSet<Grant>();
                 for (UserRole userRole : user.getUserRoles()) {
-                    authorizedUser.getRoles().add(userRole.getRole().getId());
                     for (RoleGrant roleGrant : userRole.getRole().getRoleGrants()) {
                         grants.add(roleGrant.getGrant());
                     }
@@ -44,12 +43,12 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
 
                     authorizedUser.getGrants().add(grant.getCode());
                 }
-                authentication = new AuthenticationToken(authentication.getPrincipal(), authentication.getCredentials(), authorities, ((AuthenticationToken) authentication).getRemoteAddress(), ((AuthenticationToken) authentication).getLoginType(), ((AuthenticationToken) authentication).isTrust());
+                authentication = new AuthenticationToken(authentication.getPrincipal(), authentication.getCredentials(), authorities, ((AuthenticationToken) authentication).getRemoteAddress(), ((AuthenticationToken) authentication).getIdentifierTypeId(), false);
 
                 ((UsernamePasswordAuthenticationToken) authentication).setDetails(authorizedUser);
             }
             else {
-                throw new BadCredentialsException("Invalid login or password.");
+                throw new BadCredentialsException("Invalid identifier or password.");
             }
         }
         return authentication;
