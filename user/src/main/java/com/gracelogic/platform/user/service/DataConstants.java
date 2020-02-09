@@ -60,16 +60,13 @@ public class DataConstants {
         }
     }
 
-    public enum UserApproveMethod {
+    public enum UserApproveMethods {
         AUTO("AUTO"),
-        MANUAL("MANUAL"),
-        EMAIL_CONFIRMATION("EMAIL_CONFIRMATION"),
-        PHONE_CONFIRMATION("PHONE_CONFIRMATION"),
-        EMAIL_AND_PHONE_CONFIRMATION("EMAIL_AND_PHONE_CONFIRMATION");
+        MANUAL("MANUAL");
 
         private String value;
 
-        UserApproveMethod(String value) {
+        UserApproveMethods(String value) {
             this.value = value;
         }
 
@@ -77,4 +74,4 @@ public class DataConstants {
             return value;
         }
     }
-    }
+}
