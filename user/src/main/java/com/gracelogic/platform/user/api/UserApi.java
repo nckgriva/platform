@@ -73,7 +73,7 @@ public class UserApi extends AbstractAuthorizedController {
         } catch (InvalidPassphraseException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PASSWORD", messageSource.getMessage("register.INVALID_PASSWORD", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidIdentifierException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_IDENTIFIER", messageSource.getMessage("register.INVALID_PHONE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }  catch (CustomLocalizedException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }

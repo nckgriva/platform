@@ -902,15 +902,15 @@ public class UserServiceImpl implements UserService {
         List<Identifier> attachedIdentifiers = new LinkedList<>();
 
         for (IdentifierDTO identifierDTO : identifierDTOs) {
-            if (isIdentifierValid(identifierDTO.getIdentifierTypeId(), identifierDTO.getValue())) {
-                throw new InvalidIdentifierException();
+            if (!isIdentifierValid(identifierDTO.getIdentifierTypeId(), identifierDTO.getValue())) {
+                throw new InvalidIdentifierException(identifierDTO.getValue());
             }
 
             Map<String, Object> params = new HashMap<>();
             params.put("value", identifierDTO.getValue());
             params.put("identifierTypeId", identifierDTO.getIdentifierTypeId());
 
-            List<Identifier> identifiers = idObjectService.getList(Identifier.class, null, "el.value=:value and el.identifierTypeId=:identifierTypeId", params, null, null, 1);
+            List<Identifier> identifiers = idObjectService.getList(Identifier.class, null, "el.value=:value and el.identifierType.id=:identifierTypeId", params, null, null, 1);
             Identifier identifier = null;
             if (!identifiers.isEmpty()) {
                 identifier = identifiers.iterator().next();
@@ -930,7 +930,7 @@ public class UserServiceImpl implements UserService {
 
             IdentifierType identifierType = ds.get(IdentifierType.class, identifierDTO.getIdentifierTypeId());
             identifier.setUser(user);
-            identifier.setPrimary(identifierDTO.getPrimary());
+            identifier.setPrimary(identifierDTO.getPrimary() != null ? identifierDTO.getPrimary() : false);
             identifier.setValue(identifierDTO.getValue());
             identifier.setIdentifierType(identifierType);
             identifier.setVerified(identifierType.getAutomaticVerification());
