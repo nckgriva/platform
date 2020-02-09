@@ -72,7 +72,7 @@ public class AuthApi extends AbstractAuthorizedController {
             @ApiResponse(code = 422, message = "Not activated"),
             @ApiResponse(code = 510, message = "Not allowed IP"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
-    @RequestMapping(value = "/signIn", method = RequestMethod.POST)
+    @RequestMapping(value = "/sign-in", method = RequestMethod.POST)
     public void login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
         ObjectMapper objectMapper = new ObjectMapper();
 

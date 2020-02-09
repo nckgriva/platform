@@ -39,8 +39,8 @@ public class IdentifierType extends IdObject<UUID> implements Dictionary {
     @Column(name = "IS_AUTOMATIC_VERIFICATION", nullable = false)
     private Boolean automaticVerification;
 
-    @Column(name = "MAX_INCORRECT_LOGIN_ATTEMPTS", nullable = true)
-    private Integer maxIncorrectLoginAttempts;
+    @Column(name = "MAX_INCORRECT_AUTH_ATTEMPTS", nullable = true)
+    private Integer maxIncorrectAuthAttempts;
 
     @Column(name = "VALIDATION_REGEX", nullable = true)
     private String validationRegex;
@@ -91,12 +91,12 @@ public class IdentifierType extends IdObject<UUID> implements Dictionary {
         this.signInAllowed = signInAllowed;
     }
 
-    public Integer getMaxIncorrectLoginAttempts() {
-        return maxIncorrectLoginAttempts;
+    public Integer getMaxIncorrectAuthAttempts() {
+        return maxIncorrectAuthAttempts;
     }
 
-    public void setMaxIncorrectLoginAttempts(Integer maxIncorrectLoginAttempts) {
-        this.maxIncorrectLoginAttempts = maxIncorrectLoginAttempts;
+    public void setMaxIncorrectAuthAttempts(Integer maxIncorrectAuthAttempts) {
+        this.maxIncorrectAuthAttempts = maxIncorrectAuthAttempts;
     }
 
     public String getValidationRegex() {

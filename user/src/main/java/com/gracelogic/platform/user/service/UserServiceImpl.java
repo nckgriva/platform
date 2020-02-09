@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService {
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
 
-        idObjectService.delete(IncorrectLoginAttempt.class, "el.identifier.user.id=:userId", params);
+        idObjectService.delete(IncorrectAuthAttempt.class, "el.identifier.user.id=:userId", params);
     }
 
     private static String generatePasswordSalt() {
@@ -303,7 +303,7 @@ public class UserServiceImpl implements UserService {
             idObjectService.save(identifier);
         }
 
-        idObjectService.delete(IncorrectLoginAttempt.class, "el.identifier.user.id=:userId", params);
+        idObjectService.delete(IncorrectAuthAttempt.class, "el.identifier.user.id=:userId", params);
         idObjectService.delete(Passphrase.class, "el.user.id=:userId", params);
         idObjectService.delete(UserSession.class, "el.user.id=:userId", params);
         idObjectService.delete(UserRole.class, "el.user.id=:userId", params);
@@ -835,7 +835,7 @@ public class UserServiceImpl implements UserService {
             params.put("startDate", startDate);
             params.put("endDate", endDate);
             Integer attemptsToBlock = propertyService.getPropertyValueAsInteger("user:attempts_to_block");
-            Integer checkIncorrectLoginAttempts = idObjectService.checkExist(IncorrectLoginAttempt.class, null, "el.identifier.id=:identifierId and el.created >= :startDate and el.created <= :endDate", params, attemptsToBlock);
+            Integer checkIncorrectLoginAttempts = idObjectService.checkExist(IncorrectAuthAttempt.class, null, "el.identifier.id=:identifierId and el.created >= :startDate and el.created <= :endDate", params, attemptsToBlock);
 
             if (checkIncorrectLoginAttempts < attemptsToBlock) {
                 Passphrase passphrase = getActualPassphrase(user, DataConstants.PassphraseTypes.USER_PASSWORD.getValue(), user.getId(), true);
@@ -845,9 +845,9 @@ public class UserServiceImpl implements UserService {
                     user = idObjectService.save(user);
                     return identifier;
                 } else {
-                    IncorrectLoginAttempt incorrectLoginAttempt = new IncorrectLoginAttempt();
-                    incorrectLoginAttempt.setIdentifier(identifier);
-                    idObjectService.save(incorrectLoginAttempt);
+                    IncorrectAuthAttempt incorrectAuthAttempt = new IncorrectAuthAttempt();
+                    incorrectAuthAttempt.setIdentifier(identifier);
+                    idObjectService.save(incorrectAuthAttempt);
                 }
             } else {
                 throw new TooManyAttemptsException();

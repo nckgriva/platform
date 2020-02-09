@@ -9,8 +9,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "INCORRECT_LOGIN_ATTEMPT")
-public class IncorrectLoginAttempt extends IdObject<UUID> {
+@Table(name = JPAProperties.TABLE_PREFIX + "INCORRECT_AUTH_ATTEMPT")
+public class IncorrectAuthAttempt extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
