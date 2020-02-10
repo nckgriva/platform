@@ -15,7 +15,7 @@ public class Property extends IdObject<UUID> {
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "pg-uuid")
+    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     @Access(AccessType.PROPERTY)
     private UUID id;
 
@@ -34,6 +34,9 @@ public class Property extends IdObject<UUID> {
 
     @Column(name = "IS_VISIBLE", nullable = true)
     private Boolean visible;
+
+    @Column(name = "DESCRIPTION", nullable = true, length = 4000)
+    private String description;
 
     @Override
     public UUID getId() {
@@ -84,4 +87,12 @@ public class Property extends IdObject<UUID> {
     public Boolean getVisible() {return visible;}
 
     public void setVisible(Boolean visible) {this.visible = visible;}
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

@@ -9,15 +9,13 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "USER_SETTING",
-        uniqueConstraints = @UniqueConstraint(columnNames={"USER_ID", "KEY"})
-)
+@Table(name = JPAProperties.TABLE_PREFIX + "USER_SETTING")
 public class UserSetting extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "pg-uuid")
+    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     @Access(AccessType.PROPERTY)
     private UUID id;
 
@@ -32,7 +30,7 @@ public class UserSetting extends IdObject<UUID> {
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
-    @Column(name = "KEY", nullable = false)
+    @Column(name = "\"KEY\"", nullable = false)
     private String key;
 
     @Column(name = "VALUE", nullable = true, length = 4000)

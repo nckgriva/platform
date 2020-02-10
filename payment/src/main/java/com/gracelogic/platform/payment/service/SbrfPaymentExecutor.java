@@ -87,7 +87,8 @@ public class SbrfPaymentExecutor implements PaymentExecutor {
             }
 
             if (result != null) {
-                String phone = !StringUtils.isEmpty(result.getUser().getPhone()) ? "7XXXXXX" + result.getUser().getPhone().substring(result.getUser().getPhone().length() - 4) : "";
+                //String phone = !StringUtils.isEmpty(result.getUser().getPhone()) ? "7XXXXXX" + result.getUser().getPhone().substring(result.getUser().getPhone().length() - 4) : "";
+                String phone = ""; //Убрано в связи с переходом на platform 1.2
                 resp = String.format(RESPONSE_TEMPLATE, String.format("<CODE>0</CODE><MESSAGE>OK</MESSAGE><AC-COUNT_BALANCE>%s</AC-COUNT_BALANCE><PHONE>%s</PHONE>", result.getBalance(), phone));
             } else {
                 resp = String.format(RESPONSE_TEMPLATE, "<CODE>3</CODE><MESSAGE>NOT FOUND</MESSAGE>");

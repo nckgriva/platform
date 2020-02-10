@@ -2,17 +2,19 @@ package com.gracelogic.platform.user.dto;
 
 import com.gracelogic.platform.web.dto.PlatformRequest;
 
-public class AuthRequestDTO extends PlatformRequest {
-    private String login;
-    private String password;
-    private String loginType;
+import java.util.UUID;
 
-    public String getLogin() {
-        return login;
+public class AuthRequestDTO extends PlatformRequest {
+    private String identifierValue;
+    private String password;
+    private UUID identifierTypeId;
+
+    public String getIdentifierValue() {
+        return identifierValue;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
+    public void setIdentifierValue(String identifierValue) {
+        this.identifierValue = identifierValue;
     }
 
     public String getPassword() {
@@ -23,16 +25,16 @@ public class AuthRequestDTO extends PlatformRequest {
         this.password = password;
     }
 
-    public AuthRequestDTO(String login) {
-        this.login = login;
+    public AuthRequestDTO(String identifierValue) {
+        this.identifierValue = identifierValue;
     }
 
-    public String getLoginType() {
-        return loginType;
+    public UUID getIdentifierTypeId() {
+        return identifierTypeId;
     }
 
-    public void setLoginType(String loginType) {
-        this.loginType = loginType;
+    public void setIdentifierTypeId(UUID identifierTypeId) {
+        this.identifierTypeId = identifierTypeId;
     }
 
     public AuthRequestDTO() {
@@ -41,9 +43,9 @@ public class AuthRequestDTO extends PlatformRequest {
     @Override
     public String toString() {
         return "AuthRequestDTO{" +
-                "login='" + login + '\'' +
+                "identifierValue='" + identifierValue + '\'' +
                 ", password='" + password + '\'' +
-                ", loginType='" + loginType + '\'' +
+                ", identifierTypeId=" + identifierTypeId +
                 '}';
     }
 }

@@ -19,10 +19,6 @@ public class UserDTO extends IdObjectDTO implements Serializable {
     public static final String FIELD_SURNAME = "surname";
     public static final String FIELD_ORG = "org";
 
-    private String email;
-    private String phone;
-    private Boolean emailVerified;
-    private Boolean phoneVerified;
     private Boolean approved;
     private Boolean blocked;
     private Map<String, String> fields = new HashMap<>();
@@ -30,22 +26,7 @@ public class UserDTO extends IdObjectDTO implements Serializable {
     private String formattedUserName;
     private String locale;
     private String password;
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    private List<IdentifierDTO> identifiers = new LinkedList<>();
 
     public Boolean getApproved() {
         return approved;
@@ -61,22 +42,6 @@ public class UserDTO extends IdObjectDTO implements Serializable {
 
     public void setBlocked(Boolean blocked) {
         this.blocked = blocked;
-    }
-
-    public Boolean getEmailVerified() {
-        return emailVerified;
-    }
-
-    public void setEmailVerified(Boolean emailVerified) {
-        this.emailVerified = emailVerified;
-    }
-
-    public Boolean getPhoneVerified() {
-        return phoneVerified;
-    }
-
-    public void setPhoneVerified(Boolean phoneVerified) {
-        this.phoneVerified = phoneVerified;
     }
 
     public Map<String, String> getFields() {
@@ -118,16 +83,20 @@ public class UserDTO extends IdObjectDTO implements Serializable {
     public void setLocale(String locale) {
         this.locale = locale;
     }
+    public List<IdentifierDTO> getIdentifiers() {
+        return identifiers;
+    }
+
+    public void setIdentifiers(List<IdentifierDTO> identifiers) {
+        this.identifiers = identifiers;
+    }
+
 
     public static UserDTO prepare(User user, UserDTO userDTO) {
         IdObjectDTO.prepare(userDTO, user);
 
         userDTO.setApproved(user.getApproved());
-        userDTO.setPhone(user.getPhone());
-        userDTO.setEmail(user.getEmail());
         userDTO.setBlocked(user.getBlocked());
-        userDTO.setEmailVerified(user.getEmailVerified());
-        userDTO.setPhoneVerified(user.getPhoneVerified());
         userDTO.setFormattedUserName(formatUserName(user));
         userDTO.setLocale(user.getLocale());
 
@@ -146,8 +115,6 @@ public class UserDTO extends IdObjectDTO implements Serializable {
 
     public static String formatUserName(User user) {
         Map<String, String> fields = JsonUtils.jsonToMap(user.getFields());
-        fields.put("email", user.getEmail());
-        fields.put("phone", user.getPhone());
 
         String result = null;
         try {

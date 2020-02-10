@@ -1,88 +1,29 @@
 package com.gracelogic.platform.user.dao;
 
 import com.gracelogic.platform.db.dao.BaseDao;
-import com.gracelogic.platform.db.model.IdObject;
-import com.gracelogic.platform.user.model.AuthCode;
-import com.gracelogic.platform.user.model.IncorrectLoginAttempt;
-import com.gracelogic.platform.user.model.User;
-import com.gracelogic.platform.user.service.DataConstants;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.util.CollectionUtils;
+import com.gracelogic.platform.user.model.Identifier;import org.apache.log4j.Logger;
 
-import javax.persistence.TypedQuery;
 import java.util.*;
 
 public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
     private static Logger logger = Logger.getLogger(AbstractUserDaoImpl.class);
 
-
     @Override
-    public User getUserByField(String fieldName, Object fieldValue) {
-        if (StringUtils.equalsIgnoreCase(fieldName, IdObject.ID) && fieldValue != null && fieldValue instanceof String) {
-            try {
-                fieldValue = UUID.fromString((String) fieldValue);
-            }
-            catch (Exception ignored) {}
-        }
+    public Identifier findIdentifier(UUID identifierTypeId, String identifierValue, boolean enrich) {
+        //TODO: сделать оптимальнее
+        String query = "select el from Identifier el " +
+                (enrich ? "left join fetch el.user user " : " ") +
+                "where el.identifierType.id=:identifierTypeId and el.value=:val";
 
-        User user = null;
-        String query = String.format("select user from User user " +
-                "left join fetch user.userRoles ur " +
-                "left join fetch ur.role rl " +
-                "left join fetch rl.roleGrants rg " +
-                "left join fetch rg.grant gr " +
-                "where user.%s = :fieldValue", fieldName);
+        logger.info(query);
+
         try {
-            user = getEntityManager().createQuery(query, User.class)
-                    .setParameter("fieldValue", fieldValue)
-                    .getSingleResult();
+            return (Identifier) getEntityManager().createQuery(query, Identifier.class)
+                    .setParameter("identifierTypeId", identifierTypeId)
+                    .setParameter("val", identifierValue).getSingleResult();
         } catch (Exception e) {
-            logger.debug(String.format("Failed to get user by field: %s", fieldName), e);
+            logger.debug(String.format("Failed to get identifier by value: %s", identifierValue), e);
         }
-        return user;
+        return null;
     }
-
-    @Override
-    public void invalidateActualAuthCodes(UUID userId, UUID codeTypeId) {
-        String sql = "update AuthCode set authCodeState.id = :deletedLiveStateId where user.id = :userId and authCodeType.id = :codeTypeId and authCodeState.id = :activeStateId";
-        try {
-            getEntityManager().createQuery(sql)
-                    .setParameter("deletedLiveStateId", DataConstants.AuthCodeStates.DELETED.getValue())
-                    .setParameter("userId", userId)
-                    .setParameter("codeTypeId", codeTypeId)
-                    .setParameter("activeStateId", DataConstants.AuthCodeStates.NEW.getValue())
-                    .executeUpdate();
-        }
-        catch (Exception e) {
-            logger.error("Failed to invalidate actual auth codes", e);
-        }
-    }
-
-    @Override
-    public List<AuthCode> findAuthCodes(UUID userId, Collection<UUID> codeTypeIds, Collection<UUID> codeStateIds) {
-        List<AuthCode> result = Collections.emptyList();
-        String query = "select code from AuthCode code where code.user.id = :userId";
-        if (!CollectionUtils.isEmpty(codeTypeIds)) {
-            query += " and code.authCodeType.id in (:codeTypeIds)";
-        }
-        if (!CollectionUtils.isEmpty(codeStateIds)) {
-            query += " and code.authCodeState.id in (:codeStateIds)";
-        }
-        try {
-            TypedQuery<AuthCode> q = getEntityManager().createQuery(query, AuthCode.class);
-            q.setParameter("userId", userId);
-            if (!CollectionUtils.isEmpty(codeTypeIds)) {
-                q.setParameter("codeTypeIds", codeTypeIds);
-            }
-            if (!CollectionUtils.isEmpty(codeStateIds)) {
-                q.setParameter("codeStateIds", codeStateIds);
-            }
-            result = q.getResultList();
-        } catch (Exception e) {
-            logger.error("Failed to find auth codes", e);
-        }
-        return result;
-    }
-
 }

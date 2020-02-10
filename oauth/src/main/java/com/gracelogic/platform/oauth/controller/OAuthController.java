@@ -198,7 +198,7 @@ public class OAuthController extends AbstractAuthorizedController {
         AuthenticationToken authentication = null;
         try {
             authentication = (AuthenticationToken) authenticationManager.authenticate(
-                    new AuthenticationToken(user.getId(), null, ServletUtils.getRemoteAddress(request), "id", true)
+                    new AuthenticationToken(user.getId(), null, ServletUtils.getRemoteAddress(request), com.gracelogic.platform.user.service.DataConstants.IdentifierTypes.USER_ID.getValue(), true)
             );
         } catch (Exception e) {
             exception = e;

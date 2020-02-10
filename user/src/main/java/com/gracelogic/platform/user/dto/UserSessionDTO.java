@@ -26,7 +26,7 @@ public class UserSessionDTO extends IdObjectDTO {
 
     private String authIp;
 
-    private String loginType;
+    private UUID identifierId;
 
     private Boolean valid;
 
@@ -92,12 +92,12 @@ public class UserSessionDTO extends IdObjectDTO {
         this.authIp = authIp;
     }
 
-    public String getLoginType() {
-        return loginType;
+    public UUID getIdentifierId() {
+        return identifierId;
     }
 
-    public void setLoginType(String loginType) {
-        this.loginType = loginType;
+    public void setIdentifierId(UUID identifierId) {
+        this.identifierId = identifierId;
     }
 
     public Boolean getValid() {
@@ -125,7 +125,9 @@ public class UserSessionDTO extends IdObjectDTO {
         dto.setMaxInactiveInterval(model.getMaxInactiveInterval());
         dto.setLastAccessDt(model.getLastAccessDt());
         dto.setAuthIp(model.getAuthIp());
-        dto.setLoginType(model.getLoginType());
+        if (model.getIdentifier() != null) {
+            dto.setIdentifierId(model.getIdentifier().getId());
+        }
         dto.setValid(model.getValid());
         dto.setUserAgent(model.getUserAgent());
 
