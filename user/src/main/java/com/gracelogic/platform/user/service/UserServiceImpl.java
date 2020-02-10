@@ -171,7 +171,7 @@ public class UserServiceImpl implements UserService {
             }
 
             long currentTimeMills = System.currentTimeMillis();
-            Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifier.getId(), true);
+            Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifier.getUser().getId(), DataConstants.PassphraseTypes.CHANGE_PASSWORD_VERIFICATION_CODE.getValue(), true);
             if (passphrase.getCreated().getTime() > currentTimeMills || (currentTimeMills - passphrase.getCreated().getTime() > propertyService.getPropertyValueAsLong("user:action_delay"))) {
                 if (identifierTypeId.equals(DataConstants.IdentifierTypes.PHONE.getValue())) {
                     try {
@@ -210,9 +210,29 @@ public class UserServiceImpl implements UserService {
 
         Identifier identifier = findIdentifier(identifierTypeId, identifierValue, false);
         if (identifier != null && identifier.getVerified() && identifier.getUser() != null && identifier.getUser().getApproved()) {
-            Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifier.getId(), false);
+            Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifier.getUser().getId(), DataConstants.PassphraseTypes.CHANGE_PASSWORD_VERIFICATION_CODE.getValue(), false);
             if (isPassphraseValueValid(passphrase, verificationCode)) {
                 changeUserPassword(identifier.getUser().getId(), newPassword);
+            } else {
+                throw new InvalidPassphraseException();
+            }
+        } else {
+            throw new ObjectNotFoundException();
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void verifyIdentifier(UUID identifierTypeId, String identifierValue, String verificationCode) throws ObjectNotFoundException, InvalidPassphraseException {
+        if (identifierTypeId == null) {
+            identifierTypeId = resolveIdentifierTypeId(identifierValue);
+        }
+
+        Identifier identifier = findIdentifier(identifierTypeId, identifierValue, false);
+        if (identifier != null && !identifier.getVerified()) {
+            Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifier.getId(), DataConstants.PassphraseTypes.IDENTIFIER_VERIFICATION_CODE.getValue(), false);
+            if (isPassphraseValueValid(passphrase, verificationCode)) {
+                identifier.setVerified(true);
+                idObjectService.save(identifier);
             } else {
                 throw new InvalidPassphraseException();
             }
@@ -262,7 +282,6 @@ public class UserServiceImpl implements UserService {
         int rage = 999999;
         return 100000 + random.nextInt(rage - 100000);
     }
-
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -319,7 +338,7 @@ public class UserServiceImpl implements UserService {
             return;
         }
 
-        Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifierId, true);
+        Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifierId, DataConstants.PassphraseTypes.IDENTIFIER_VERIFICATION_CODE.getValue(), true);
         if (templateParams == null) {
             templateParams = new HashMap<>();
         }
@@ -758,10 +777,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Passphrase getActualVerificationCode(User user, UUID referenceObjectId, boolean createNewIfNotExist) {
-        Passphrase passphrase = getActualPassphrase(user, DataConstants.PassphraseTypes.VERIFICATION_CODE.getValue(), referenceObjectId, true);
+    public Passphrase getActualVerificationCode(User user, UUID referenceObjectId, UUID passphraseTypeId, boolean createNewIfNotExist) {
+        Passphrase passphrase = getActualPassphrase(user, passphraseTypeId, referenceObjectId, true);
         if (passphrase == null && createNewIfNotExist) {
-            passphrase = createPassphrase(user, ds.get(PassphraseType.class, DataConstants.PassphraseTypes.VERIFICATION_CODE.getValue()), String.valueOf(generateCode()), referenceObjectId);
+            passphrase = createPassphrase(user, ds.get(PassphraseType.class, passphraseTypeId), String.valueOf(generateCode()), referenceObjectId);
         }
 
         return passphrase;
@@ -970,7 +989,7 @@ public class UserServiceImpl implements UserService {
             return true;
         }
 
-        Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifierId, false);
+        Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifierId, DataConstants.PassphraseTypes.IDENTIFIER_VERIFICATION_CODE.getValue(), false);
         if (isPassphraseValueValid(passphrase, verificationCode)) {
             identifier.setVerified(true);
             idObjectService.save(identifier);

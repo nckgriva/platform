@@ -71,7 +71,7 @@ public interface UserService {
 
     void sendIdentifierVerificationCode(UUID identifierId, Map<String, String> templateParams) throws SendingException;
 
-    Passphrase getActualVerificationCode(User user, UUID referenceObjectId, boolean createNewIfNotExist);
+    Passphrase getActualVerificationCode(User user, UUID referenceObjectId, UUID passphraseTypeId, boolean createNewIfNotExist);
 
     User processSignUp(SignUpDTO signUpDTO) throws InvalidIdentifierException, InvalidPassphraseException;
 

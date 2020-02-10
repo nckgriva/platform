@@ -19,7 +19,8 @@ public class DataConstants {
 
     public enum PassphraseTypes {
         USER_PASSWORD(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
-        VERIFICATION_CODE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72"));
+        CHANGE_PASSWORD_VERIFICATION_CODE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
+        IDENTIFIER_VERIFICATION_CODE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73"));
         private UUID value;
 
         PassphraseTypes(UUID value) {
