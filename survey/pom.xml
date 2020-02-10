@@ -6,19 +6,19 @@
 
     <artifactId>platform-survey</artifactId>
     <name>survey</name>
-    <version>1.1</version>
+    <version>1.2</version>
     <packaging>jar</packaging>
     <parent>
         <groupId>com.gracelogic.platform</groupId>
         <artifactId>platform-parent</artifactId>
-        <version>1.1</version>
+        <version>1.2</version>
         <relativePath>../parent</relativePath>
     </parent>
     <dependencies>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-db</artifactId>
-            <version>1.1</version>
+            <version>1.2</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.vladmihalcea/hibernate-types-52 -->
         <dependency>
@@ -29,12 +29,12 @@
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-web</artifactId>
-            <version>1.1</version>
+            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-user</artifactId>
-            <version>1.1</version>
+            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-file-storage</artifactId>
-            <version>1.1</version>
+            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>org.reflections</groupId>

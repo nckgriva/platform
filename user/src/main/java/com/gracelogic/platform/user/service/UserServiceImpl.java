@@ -21,6 +21,7 @@ import com.gracelogic.platform.user.security.AuthenticationToken;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.util.SubnetUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,81 +80,16 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public User getUserByField(String fieldName, Object fieldValue) {
-        return userDao.getUserByField(fieldName, fieldValue);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public User login(Object login, String loginField, String password, String remoteAddress, boolean trust) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotActivatedException {
-        User user = userDao.getUserByField(loginField, login);
-//        logger.info("USER: " + user != null ? user.getId().toString() : "NULL");
-        if (user != null) {
-            boolean loginTypeVerified = false;
-            if (trust) {
-                loginTypeVerified = true;
-            } else {
-                if (loginField.equalsIgnoreCase("email")) {
-                    loginTypeVerified = user.getEmailVerified();
-                } else if (loginField.equalsIgnoreCase("phone")) {
-                    loginTypeVerified = user.getPhoneVerified();
-                }
-            }
-
-            if (!user.getApproved()) {
-                throw new UserNotActivatedException("UserNotActivatedException");
-            }
-            if (user.getBlocked() != null && user.getBlocked()) {
-                throw new UserBlockedException("UserBlockedException");
-            }
-            if (user.getAllowedAddresses() != null && !user.getAllowedAddresses().contains(remoteAddress)) {
-                throw new NotAllowedIPException("NotAllowedIPException");
-            }
-
-            if (user.getApproved() && loginTypeVerified &&
-                    (user.getAllowedAddresses() == null || user.getAllowedAddresses().contains(remoteAddress))) {
-
-                Long currentTimeMillis = System.currentTimeMillis();
-                Date endDate = new Date(currentTimeMillis);
-                Date startDate = new Date(currentTimeMillis - propertyService.getPropertyValueAsInteger("user:block_period"));
-                Map<String, Object> params = new HashMap<>();
-                params.put("userId", user.getId());
-                params.put("startDate", startDate);
-                params.put("endDate", endDate);
-                Integer checkIncorrectLoginAttempts = idObjectService.checkExist(IncorrectLoginAttempt.class, null, "el.user.id=:userId and el.created >= :startDate and el.created <= :endDate", params, propertyService.getPropertyValueAsInteger("user:attempts_to_block"));
-
-                if (checkIncorrectLoginAttempts < propertyService.getPropertyValueAsInteger("user:attempts_to_block")) {
-                    if (trust || user.getPassword() != null && user.getPassword().equals(DigestUtils.shaHex(password.concat(user.getSalt())))) {
-                        user.setLastVisitDt(new Date());
-                        user.setLastVisitIP(remoteAddress);
-                        user = idObjectService.save(user);
-                        return user;
-                    } else {
-                        IncorrectLoginAttempt incorrectLoginAttempt = new IncorrectLoginAttempt();
-                        incorrectLoginAttempt.setUser(user);
-                        idObjectService.save(incorrectLoginAttempt);
-                    }
-                } else {
-                    throw new TooManyAttemptsException("TooManyAttemptsException");
-                }
-            }
-        }
-        return null;
-    }
-
     @Transactional
     @Override
     public void changeUserPassword(UUID userId, String newPassword) {
         User user = idObjectService.getObjectById(User.class, userId);
-        user.setSalt(UserServiceImpl.generatePasswordSalt());
-        user.setPassword(DigestUtils.shaHex(newPassword.concat(user.getSalt())));
-        idObjectService.save(user);
+        updatePassphrase(user, newPassword, DataConstants.PassphraseTypes.USER_PASSWORD.getValue(), userId, true);
 
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
 
-        idObjectService.delete(IncorrectLoginAttempt.class, "el.user.id=:userId", params);
+        idObjectService.delete(IncorrectAuthAttempt.class, "el.user.id=:userId", params);
     }
 
     private static String generatePasswordSalt() {
@@ -161,102 +97,10 @@ public class UserServiceImpl implements UserService {
         return DigestUtils.md5Hex(String.valueOf(random.nextLong()));
     }
 
-    @Override
-    public boolean checkPhone(String value, boolean checkAvailability) {
-        if (!StringUtils.isEmpty(value) && value.length() > 0) {
-            //^7\\d{10}$
-            Pattern p = Pattern.compile(propertyService.getPropertyValue("user:phone_validation_exp"));
-            Matcher m = p.matcher(value);
-            boolean result = m.matches();
-            if (checkAvailability) {
-                Map<String, Object> params = new HashMap<>();
-                params.put("phone", value);
-
-                return result && idObjectService.checkExist(User.class, null, "el.phone=:phone and el.phoneVerified=true", params, 1) == 0;
-            }
-            return result;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean checkEmail(String value, boolean checkAvailability) {
-        if (!StringUtils.isEmpty(value) && value.length() > 0) {
-            //^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$
-            Pattern p = Pattern.compile(propertyService.getPropertyValue("user:email_validation_exp"));
-            Matcher m = p.matcher(value);
-            boolean result = m.matches();
-            if (checkAvailability) {
-                Map<String, Object> params = new HashMap<>();
-                params.put("email", value);
-
-                return result && idObjectService.checkExist(User.class, null, "el.email=:email and el.emailVerified=true", params, 1) == 0;
-            }
-            return result;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean checkPassword(String value) {
-        boolean result = false;
-        if (!StringUtils.isEmpty(value) && value.length() > 0) {
-            //.+
-            Pattern p = Pattern.compile(propertyService.getPropertyValue("user:password_validation_exp"));
-            Matcher m = p.matcher(value);
-            result = m.matches();
-        }
-        return result;
-    }
-
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public boolean verifyLogin(UUID userId, String loginType, String code) {
-        String userApproveMethod = propertyService.getPropertyValue("user:approve_method");
-
-        User user = idObjectService.getObjectById(User.class, userId);
-        if (user != null) {
-            if (loginType.equalsIgnoreCase("phone") && !user.getPhoneVerified()) {
-                AuthCode phoneCode = getActualCode(userId, DataConstants.AuthCodeTypes.PHONE_VERIFY.getValue(), false);
-
-                if (phoneCode.getCode().equalsIgnoreCase(code)) {
-                    user.setPhoneVerified(true);
-                    if (StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.PHONE_CONFIRMATION.getValue())) {
-                        user.setApproved(true);
-                    } else if (StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.EMAIL_AND_PHONE_CONFIRMATION.getValue()) && user.getEmailVerified()) {
-                        user.setApproved(true);
-                    }
-
-
-                    idObjectService.save(user);
-
-                    invalidateCodes(userId, DataConstants.AuthCodeTypes.PHONE_VERIFY.getValue());
-                    return true;
-                }
-            } else if (loginType.equalsIgnoreCase("email") && !user.getEmailVerified()) {
-                AuthCode emailCode = getActualCode(userId, DataConstants.AuthCodeTypes.EMAIL_VERIFY.getValue(), false);
-                if (emailCode.getCode().equalsIgnoreCase(code)) {
-                    user.setEmailVerified(true);
-                    if (StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.EMAIL_CONFIRMATION.getValue())) {
-                        user.setApproved(true);
-                    } else if (StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.EMAIL_AND_PHONE_CONFIRMATION.getValue()) && user.getPhoneVerified()) {
-                        user.setApproved(true);
-                    }
-                    idObjectService.save(user);
-
-                    invalidateCodes(userId, DataConstants.AuthCodeTypes.EMAIL_VERIFY.getValue());
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public UserSession updateSessionInfo(HttpSession session, AuthenticationToken authenticationToken, String userAgent, boolean isDestroying) {
-        if (!StringUtils.isEmpty(session.getId())) {
+        if (session != null && !StringUtils.isEmpty(session.getId())) {
             AuthenticationToken authentication = null;
             try {
                 authentication = (AuthenticationToken) ((org.springframework.security.core.context.SecurityContextImpl) session.getAttribute("SPRING_SECURITY_CONTEXT")).getAuthentication();
@@ -274,7 +118,7 @@ public class UserServiceImpl implements UserService {
                 Map<String, Object> params = new HashMap<>();
                 params.put("sessionId", session.getId());
 
-                List<UserSession> userSessions = idObjectService.getList(UserSession.class, null, "el.sessionId=:sessionId", params, null, null, null, 1);
+                List<UserSession> userSessions = idObjectService.getList(UserSession.class, null, "el.sessionId=:sessionId", params, "el.created DESC", null, 1);
                 if (userSessions != null && !userSessions.isEmpty()) {
                     userSession = userSessions.iterator().next();
                 }
@@ -282,14 +126,15 @@ public class UserServiceImpl implements UserService {
                 if (userSession == null) {
                     userSession = new UserSession();
                     userSession.setSessionId(session.getId());
-                    userSession.setUser(idObjectService.setIfModified(User.class, userSession.getUser(), authorizedUser.getId()));
+                    userSession.setUser(idObjectService.getObjectById(User.class, authorizedUser.getId()));
                     userSession.setAuthIp(authentication.getRemoteAddress());
-                    userSession.setLoginType(authentication.getLoginType());
+                    if (authorizedUser.getSignInIdentifier() != null) {
+                        userSession.setIdentifier(idObjectService.getObjectById(Identifier.class, authorizedUser.getSignInIdentifier().getId()));
+                    }
                     userSession.setUserAgent(userAgent);
                 }
                 userSession.setSessionCreatedDt(new Date(session.getCreationTime()));
                 userSession.setLastAccessDt(new Date(session.getLastAccessedTime()));
-                //userSession.setThisAccessedTime(session.getLastAccessedTime());
                 userSession.setMaxInactiveInterval((long) session.getMaxInactiveInterval());
                 userSession.setValid(!isDestroying);
 
@@ -304,47 +149,46 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
-
-    @Transactional(rollbackFor = Exception.class)
     @Override
-    public void sendRepairCode(String login, String loginType, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException, SendingException {
-        User user = userDao.getUserByField(loginType, login);
+    @Transactional(rollbackFor = Exception.class)
+    public void sendVerificationCodeForPasswordChanging(UUID identifierTypeId, String identifierValue, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException, SendingException {
+        if (identifierTypeId == null) {
+            identifierTypeId = resolveIdentifierTypeId(identifierValue);
+        }
 
-        if (user != null && user.getApproved()) {
+        Identifier identifier = findIdentifier(identifierTypeId, identifierValue, false);
+        if (identifier != null && identifier.getVerified() && identifier.getUser() != null && identifier.getUser().getApproved()) {
             if (templateParams == null) {
                 templateParams = new HashMap<>();
             }
-            templateParams.put("userId", user.getId().toString());
-            templateParams.put("loginType", loginType);
-            templateParams.put("login", login);
+            templateParams.put("userId", identifier.getUser().getId().toString());
+            templateParams.put("identifierTypeId", identifierTypeId.toString());
+            templateParams.put("identifier", identifierValue);
             templateParams.put("baseUrl", propertyService.getPropertyValue("web:base_url"));
-            Map<String, String> fields = JsonUtils.jsonToMap(user.getFields());
+            Map<String, String> fields = JsonUtils.jsonToMap(identifier.getUser().getFields());
             for (String key : fields.keySet()) {
                 templateParams.put(key, fields.get(key));
             }
 
-            boolean isActualCodeAvailable = isActualCodeAvailable(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue());
-            AuthCode authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), false);
-            if ((System.currentTimeMillis() - authCode.getCreated().getTime() > Long.parseLong(propertyService.getPropertyValue("user:action_delay"))) || !isActualCodeAvailable) {
-                if (isActualCodeAvailable) {
-                    authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), true);
-                }
-                if (!StringUtils.isEmpty(user.getPhone()) && user.getPhoneVerified() && StringUtils.equalsIgnoreCase(loginType, "phone")) {
+            long currentTimeMills = System.currentTimeMillis();
+            Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifier.getUser().getId(), DataConstants.PassphraseTypes.CHANGE_PASSWORD_VERIFICATION_CODE.getValue(), true);
+            if (passphrase.getCreated().getTime() > currentTimeMills || (currentTimeMills - passphrase.getCreated().getTime() > propertyService.getPropertyValueAsLong("user:action_delay"))) {
+                if (identifierTypeId.equals(DataConstants.IdentifierTypes.PHONE.getValue())) {
                     try {
                         LoadedTemplate template = templateService.load("sms_repair_code");
-                        templateParams.put("code", authCode.getCode());
+                        templateParams.put("verificationCode", passphrase.getValue());
 
-                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:sms_from"), user.getPhone(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.SMS);
+                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:sms_from"), identifierValue, template.getSubject(), templateService.apply(template, templateParams)), SendingType.SMS);
                     } catch (IOException e) {
                         logger.error(e);
                         throw new SendingException(e.getMessage());
                     }
-                } else if (!StringUtils.isEmpty(user.getEmail()) && user.getEmailVerified() && StringUtils.equalsIgnoreCase(loginType, "email")) {
+                } else if (identifierTypeId.equals(DataConstants.IdentifierTypes.EMAIL.getValue())) {
                     try {
                         LoadedTemplate template = templateService.load("email_repair_code");
-                        templateParams.put("code", authCode.getCode());
+                        templateParams.put("verificationCode", passphrase.getValue());
 
-                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"), user.getEmail(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.EMAIL);
+                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"), identifierValue, template.getSubject(), templateService.apply(template, templateParams)), SendingType.EMAIL);
                     } catch (IOException e) {
                         logger.error(e);
                         throw new SendingException(e.getMessage());
@@ -358,19 +202,41 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
-    public void changePassword(String login, String loginType, String code, String newPassword) throws ObjectNotFoundException, IncorrectAuthCodeException {
-        User user = userDao.getUserByField(loginType, login);
+    @Transactional(rollbackFor = Exception.class)
+    public void changePasswordViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode, String newPassword) throws ObjectNotFoundException, InvalidPassphraseException {
+        if (identifierTypeId == null) {
+            identifierTypeId = resolveIdentifierTypeId(identifierValue);
+        }
 
-        if (user != null && isActualCodeAvailable(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue())) {
-            AuthCode authCode = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue(), false);
-            invalidateCodes(user.getId(), DataConstants.AuthCodeTypes.PASSWORD_REPAIR.getValue());
-
-            if (code != null && authCode.getCode().equalsIgnoreCase(code) && !StringUtils.isEmpty(newPassword)) {
-                changeUserPassword(user.getId(), newPassword);
+        Identifier identifier = findIdentifier(identifierTypeId, identifierValue, false);
+        if (identifier != null && identifier.getVerified() && identifier.getUser() != null && identifier.getUser().getApproved()) {
+            Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifier.getUser().getId(), DataConstants.PassphraseTypes.CHANGE_PASSWORD_VERIFICATION_CODE.getValue(), false);
+            if (isPassphraseValueValid(passphrase, verificationCode)) {
+                changeUserPassword(identifier.getUser().getId(), newPassword);
             } else {
-                throw new IncorrectAuthCodeException();
+                throw new InvalidPassphraseException();
+            }
+        } else {
+            throw new ObjectNotFoundException();
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void verifyIdentifierViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode) throws ObjectNotFoundException, InvalidPassphraseException {
+        if (identifierTypeId == null) {
+            identifierTypeId = resolveIdentifierTypeId(identifierValue);
+        }
+
+        Identifier identifier = findIdentifier(identifierTypeId, identifierValue, false);
+        if (identifier != null && !identifier.getVerified()) {
+            Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifier.getId(), DataConstants.PassphraseTypes.IDENTIFIER_VERIFICATION_CODE.getValue(), false);
+            if (isPassphraseValueValid(passphrase, verificationCode)) {
+                identifier.setVerified(true);
+                idObjectService.save(identifier);
+            } else {
+                throw new InvalidPassphraseException();
             }
         } else {
             throw new ObjectNotFoundException();
@@ -411,33 +277,7 @@ public class UserServiceImpl implements UserService {
         idObjectService.save(userSetting);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public AuthCode getActualCode(UUID userId, UUID codeTypeId, boolean invalidateImmediately) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("userId", userId);
-        params.put("authCodeType", codeTypeId);
-        params.put("authCodeState", DataConstants.AuthCodeStates.NEW.getValue());
 
-        if (invalidateImmediately) {
-            idObjectService.delete(AuthCode.class, "el.user.id=:userId and el.authCodeType.id=:authCodeType and el.authCodeState.id=:authCodeState", params);
-        }
-
-        AuthCode actualAuthCode;
-        List<AuthCode> authCodes = getActualCodes(userId, codeTypeId);
-        if (authCodes.isEmpty()) {
-            actualAuthCode = createCode(userId, codeTypeId);
-        } else {
-            if (authCodes.size() == 1) {
-                actualAuthCode = authCodes.iterator().next();
-            } else {
-                //Actual codes gt 1
-                idObjectService.delete(AuthCode.class, "el.user.id=:userId and el.authCodeType.id=:authCodeType and el.authCodeState.id=:authCodeState", params);
-                actualAuthCode = createCode(userId, codeTypeId);
-            }
-        }
-        return actualAuthCode;
-    }
 
     private static Integer generateCode() {
         Random random = new Random();
@@ -445,139 +285,30 @@ public class UserServiceImpl implements UserService {
         return 100000 + random.nextInt(rage - 100000);
     }
 
-    private List<AuthCode> getActualCodes(UUID userId, UUID codeTypeId) {
-        return userDao.findAuthCodes(userId, Arrays.asList(codeTypeId), Arrays.asList(DataConstants.AuthCodeStates.NEW.getValue()));
-    }
-
-    private AuthCode createCode(UUID userId, UUID codeTypeId) {
-        AuthCode authCode = null;
-        User user = idObjectService.getObjectById(User.class, userId);
-        if (user != null) {
-            String code = null;
-            for (int i = 0; i < 5; i++) {
-                String tempCode = String.valueOf(generateCode());
-
-                Map<String, Object> params = new HashMap<>();
-                params.put("userId", userId);
-                params.put("authCodeType", codeTypeId);
-                params.put("code", tempCode);
-
-                Integer count = idObjectService.checkExist(AuthCode.class, null, "el.user.id=:userId and el.authCodeType.id=:authCodeType and el.code=:code", params, 1);
-                if (count == 0) {
-                    code = tempCode;
-                    break;
-                }
-            }
-
-            if (code != null) {
-                authCode = new AuthCode();
-                authCode.setUser(user);
-                authCode.setAuthCodeType(ds.get(AuthCodeType.class, codeTypeId));
-                authCode.setAuthCodeState(ds.get(AuthCodeState.class, DataConstants.AuthCodeStates.NEW.getValue()));
-                authCode.setCode(code);
-                authCode = idObjectService.save(authCode);
-            }
-
-        }
-        return authCode;
-    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void invalidateCodes(UUID userId, UUID codeTypeId) {
-        userDao.invalidateActualAuthCodes(userId, codeTypeId);
-
-    }
-
-    @Override
-    public boolean isActualCodeAvailable(UUID userId, UUID codeTypeId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("userId", userId);
-        params.put("authCodeType", codeTypeId);
-        params.put("authCodeState", DataConstants.AuthCodeStates.NEW.getValue());
-
-        Integer count = idObjectService.checkExist(AuthCode.class, null, "el.user.id=:userId and el.authCodeType.id=:authCodeType and el.authCodeState.id=:authCodeState", params, 1);
-        return count > 0;
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public User register(UserDTO userDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException {
+    public User processSignUp(SignUpDTO signUpDTO) throws InvalidIdentifierException, InvalidPassphraseException {
         String userApproveMethod = propertyService.getPropertyValue("user:approve_method");
-
-        if (!trust) {
-            if (!checkPassword(userDTO.getPassword())) {
-                throw new InvalidPasswordException();
-            }
-
-            if (StringUtils.isEmpty(userDTO.getEmail()) && StringUtils.isEmpty(userDTO.getPhone())) {
-                throw new PhoneOrEmailIsNecessaryException();
-            }
-        }
-
+        boolean approved = StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethods.AUTO.getValue());
 
         User user = new User();
-        user.setEmailVerified(false);
-        user.setPhoneVerified(false);
-        user.setApproved(false);
+        user.setApproved(approved);
         user.setBlocked(false);
+        user.setFields(JsonUtils.mapToJson(signUpDTO.getFields()));
+        user = idObjectService.save(user);
 
-        if (!StringUtils.isEmpty(userDTO.getPhone())) {
-            if (!checkPhone(userDTO.getPhone(), false)) {
-                throw new InvalidPhoneException();
-            }
+        //Add identifier for processSignIn by userId
+        IdentifierDTO identifierDTO = new IdentifierDTO();
+        identifierDTO.setValue(user.getId().toString());
+        identifierDTO.setIdentifierTypeId(DataConstants.IdentifierTypes.USER_ID.getValue());
+        signUpDTO.getIdentifiers().add(identifierDTO);
 
-            User anotherUser = userDao.getUserByField("phone", userDTO.getPhone());
-            if (anotherUser != null) {
-                if (!anotherUser.getApproved()) {
-                    lifecycleService.delete(anotherUser);
-                } else if (!anotherUser.getPhoneVerified()) {
-                    idObjectService.updateFieldValue(User.class, anotherUser.getId(), "phone", null);
-                } else {
-                    throw new InvalidPhoneException();
-                }
-            }
 
-            user.setPhone(StringUtils.trim(userDTO.getPhone()));
-            if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
-                user.setPhoneVerified(true);
-            }
-        }
+        createIdentifiers(signUpDTO.getIdentifiers(), user, true);
+        updatePassphrase(user, signUpDTO.getPassword(), DataConstants.PassphraseTypes.USER_PASSWORD.getValue(), user.getId(), false);
 
-        if (!StringUtils.isEmpty(userDTO.getEmail())) {
-            if (!checkEmail(userDTO.getEmail(), false)) {
-                throw new InvalidEmailException();
-            }
-
-            User anotherUser = userDao.getUserByField("email", userDTO.getEmail());
-            if (anotherUser != null) {
-                if (!anotherUser.getApproved()) {
-                    lifecycleService.delete(anotherUser);
-                } else if (!anotherUser.getEmailVerified()) {
-                    idObjectService.updateFieldValue(User.class, anotherUser.getId(), "email", null);
-                } else {
-                    throw new InvalidEmailException();
-                }
-            }
-
-            user.setEmail(StringUtils.trim(StringUtils.lowerCase(userDTO.getEmail())));
-            if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
-                user.setEmailVerified(true);
-            }
-        }
-
-        user.setFields(JsonUtils.mapToJson(userDTO.getFields()));
-
-        if (!trust) {
-            user.setSalt(UserServiceImpl.generatePasswordSalt());
-            user.setPassword(DigestUtils.shaHex(userDTO.getPassword().concat(user.getSalt())));
-        }
-
-        if (trust || StringUtils.equalsIgnoreCase(userApproveMethod, DataConstants.UserApproveMethod.AUTO.getValue())) {
-            user.setApproved(true);
-        }
-
-        return idObjectService.save(user);
+        return user;
     }
 
     @Override
@@ -586,8 +317,15 @@ public class UserServiceImpl implements UserService {
         HashMap<String, Object> params = new HashMap<>();
         params.put("userId", user.getId());
 
-        idObjectService.delete(IncorrectLoginAttempt.class, "el.user.id=:userId", params);
-        idObjectService.delete(AuthCode.class, "el.user.id=:userId", params);
+        List<Identifier> identifiers = idObjectService.getList(Identifier.class, null, "el.user.id=:userId", params, null, null, null);
+        for (Identifier identifier : identifiers) {
+            identifier.setVerified(false);
+            identifier.setUser(null);
+            idObjectService.save(identifier);
+        }
+
+        idObjectService.delete(IncorrectAuthAttempt.class, "el.identifier.user.id=:userId", params);
+        idObjectService.delete(Passphrase.class, "el.user.id=:userId", params);
         idObjectService.delete(UserSession.class, "el.user.id=:userId", params);
         idObjectService.delete(UserRole.class, "el.user.id=:userId", params);
         idObjectService.delete(UserSetting.class, "el.user.id=:userId", params);
@@ -596,44 +334,47 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void sendVerificationCode(User user, String loginType, Map<String, String> templateParams) throws SendingException {
+    public void sendIdentifierVerificationCode(UUID identifierId, Map<String, String> templateParams) throws SendingException {
+        Identifier identifier = idObjectService.getObjectById(Identifier.class, identifierId);
+        if (identifier == null || identifier.getVerified() && identifier.getUser() != null) {
+            return;
+        }
+
+        Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifierId, DataConstants.PassphraseTypes.IDENTIFIER_VERIFICATION_CODE.getValue(), true);
         if (templateParams == null) {
             templateParams = new HashMap<>();
         }
-        templateParams.put("userId", user.getId().toString());
-        templateParams.put("loginType", loginType);
+        templateParams.put("userId", identifier.getUser().getId().toString());
+        templateParams.put("identifierTypeId", identifier.getIdentifierType().getId().toString());
+        templateParams.put("identifierId", identifier.getId().toString());
         templateParams.put("baseUrl", propertyService.getPropertyValue("web:base_url"));
-        Map<String, String> fields = JsonUtils.jsonToMap(user.getFields());
+        Map<String, String> fields = JsonUtils.jsonToMap(identifier.getUser().getFields());
         for (String key : fields.keySet()) {
             templateParams.put(key, fields.get(key));
         }
 
-        if (StringUtils.equalsIgnoreCase(loginType, "phone") && !StringUtils.isEmpty(user.getPhone()) && !user.getPhoneVerified()) {
-            AuthCode code = getActualCode(user.getId(), DataConstants.AuthCodeTypes.PHONE_VERIFY.getValue(), false);
-            if (code != null) {
-                try {
-                    LoadedTemplate template = templateService.load("sms_validation_code");
-                    templateParams.put("code", code.getCode());
+        if (identifier.getIdentifierType().getId().equals(DataConstants.IdentifierTypes.EMAIL.getValue())) {
+            try {
+                LoadedTemplate template = templateService.load("sms_validation_code");
+                templateParams.put("verificationCode", passphrase.getValue());
 
-                    messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:sms_from"), user.getPhone(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.SMS);
-                } catch (IOException e) {
-                    logger.error(e);
-                    throw new SendingException(e.getMessage());
-                }
+                messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:sms_from"), identifier.getValue(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.SMS);
+            } catch (IOException e) {
+                logger.error(e);
+                throw new SendingException(e.getMessage());
             }
-        } else if (StringUtils.equalsIgnoreCase(loginType, "email") && !StringUtils.isEmpty(user.getEmail()) && !user.getEmailVerified()) {
-            AuthCode code = getActualCode(user.getId(), DataConstants.AuthCodeTypes.EMAIL_VERIFY.getValue(), false);
-            if (code != null) {
-                try {
-                    LoadedTemplate template = templateService.load("email_validation_code");
-                    templateParams.put("code", code.getCode());
 
-                    messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"), user.getEmail(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.EMAIL);
-                } catch (IOException e) {
-                    logger.error(e);
-                    throw new SendingException(e.getMessage());
-                }
+        } else if (identifier.getIdentifierType().getId().equals(DataConstants.IdentifierTypes.PHONE.getValue())) {
+            try {
+                LoadedTemplate template = templateService.load("email_validation_code");
+                templateParams.put("verificationCode", passphrase.getValue());
+
+                messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"), identifier.getValue(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.EMAIL);
+            } catch (IOException e) {
+                logger.error(e);
+                throw new SendingException(e.getMessage());
             }
+
         }
     }
 
@@ -676,11 +417,6 @@ public class UserServiceImpl implements UserService {
         if (!user.getBlocked()) {
             user.setBlockedDt(null);
             user.setBlockedByUser(null);
-        }
-
-        if (!StringUtils.isEmpty(userDTO.getPassword())) {
-            user.setSalt(UserServiceImpl.generatePasswordSalt());
-            user.setPassword(DigestUtils.shaHex(userDTO.getPassword().concat(user.getSalt())));
         }
 
         user = idObjectService.save(user);
@@ -740,14 +476,6 @@ public class UserServiceImpl implements UserService {
                 sortFieldInJPAFormat = "el.created_dt";
             } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.changed")) {
                 sortFieldInJPAFormat = "el.changed_dt";
-            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.phone")) {
-                sortFieldInJPAFormat = "el.phone";
-            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.phoneVerified")) {
-                sortFieldInJPAFormat = "el.is_phone_verified";
-            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.email")) {
-                sortFieldInJPAFormat = "el.email";
-            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.emailVerified")) {
-                sortFieldInJPAFormat = "el.is_email_verified";
             } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.approved")) {
                 sortFieldInJPAFormat = "el.is_approved";
             } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.blocked")) {
@@ -762,35 +490,30 @@ public class UserServiceImpl implements UserService {
                 sortFieldInJPAFormat = "el.last_visit_ip";
             } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.allowedAddresses")) {
                 sortFieldInJPAFormat = "el.allowed_addresses";
-            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.password")) {
-                sortFieldInJPAFormat = "el.password";
-            } else if (StringUtils.equalsIgnoreCase(sortFieldInJPAFormat, "el.salt")) {
-                sortFieldInJPAFormat = "el.salt";
             } else if (StringUtils.startsWithIgnoreCase(sortFieldInJPAFormat, "el.fields")) {
                 //Nothing to do
             }
         }
         return sortFieldInJPAFormat;
     }
+
     @Override
-    public EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<UserDTO> getUsersPaged(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         sortField = translateUserSortFieldToNative(sortField);
 
-        int totalCount = userDao.getUsersCount(phone, email, approved, blocked, fields);
+        int totalCount = userDao.getUsersCount(identifierValue, approved, blocked, fields);
 
         EntityListResponse<UserDTO> entityListResponse = new EntityListResponse<UserDTO>(totalCount, count, page, start);
-
-
-        List<User> items = userDao.getUsers(phone, email, approved, blocked, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
+        List<User> items = userDao.getUsers(identifierValue, approved, blocked, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
         List<UserRole> userRoles = Collections.emptyList();
-        if (fetchRoles) {
+        if (!items.isEmpty() && fetchRoles) {
             Set<UUID> userIds = new HashSet<>();
             for (User u : items) {
                 userIds.add(u.getId());
             }
             Map<String, Object> params = new HashMap<>();
             params.put("userIds", userIds);
-            userRoles = idObjectService.getList(UserRole.class, null, "el.user.id in (:userIds)", params, null, null, null, null);
+            userRoles = idObjectService.getList(UserRole.class, null, "el.user.id in (:userIds)", params, null, null, null);
         }
 
         for (User e : items) {
@@ -1003,5 +726,281 @@ public class UserServiceImpl implements UserService {
 
             LocaleHolder.setLocale(l);
         }
+    }
+
+    @Override
+    public boolean isIdentifierValid(UUID identifierTypeId, String identifierValue) {
+        if (StringUtils.isEmpty(identifierValue)) {
+            return false;
+        } else {
+            IdentifierType identifierType = ds.get(IdentifierType.class, identifierTypeId);
+            if (!StringUtils.isEmpty(identifierType.getValidationRegex())) {
+                Pattern p = Pattern.compile(identifierType.getValidationRegex());
+                Matcher m = p.matcher(identifierValue);
+                if (!m.matches()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public UUID resolveIdentifierTypeId(String identifierValue) throws InvalidIdentifierException {
+        //TODO: optimize this get list request
+        List<IdentifierType> identifierTypes = idObjectService.getList(IdentifierType.class, null, null, null, "el.resolvePriority ASC", null, null);
+        for (IdentifierType identifierType : identifierTypes) {
+            if (isIdentifierValid(identifierType.getId(), identifierValue)) {
+                return identifierType.getId();
+            }
+        }
+
+        throw new InvalidIdentifierException();
+    }
+
+    @Override
+    public Identifier findIdentifier(UUID identifierTypeId, String value, boolean enrich) {
+        return userDao.findIdentifier(identifierTypeId, value, enrich);
+    }
+
+    @Override
+    public boolean isPassphraseValueValid(Passphrase passphrase, String value) {
+        if (passphrase == null) {
+            return false;
+        }
+
+        PassphraseType passphraseType = ds.get(PassphraseType.class, passphrase.getPassphraseType().getId());
+        if (passphraseType.getPassphraseEncryption().getId().equals(DataConstants.PassphraseEncryptors.OPEN.getValue())) {
+            return StringUtils.equals(passphrase.getValue(), value);
+        } else if (passphraseType.getPassphraseEncryption().getId().equals(DataConstants.PassphraseEncryptors.SHA1_WITH_SALT.getValue())) {
+            return StringUtils.equals(DigestUtils.shaHex(value.concat(passphrase.getSalt())), passphrase.getValue());
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Passphrase getActualVerificationCode(User user, UUID referenceObjectId, UUID passphraseTypeId, boolean createNewIfNotExist) {
+        Passphrase passphrase = getActualPassphrase(user, passphraseTypeId, referenceObjectId, true);
+        if (passphrase == null && createNewIfNotExist) {
+            passphrase = createPassphrase(user, ds.get(PassphraseType.class, passphraseTypeId), String.valueOf(generateCode()), referenceObjectId);
+        }
+
+        return passphrase;
+    }
+
+    @Override
+    public Passphrase getActualPassphrase(User user, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveExpiredPassphrase) {
+        PassphraseType passphraseType = ds.get(PassphraseType.class, passphraseTypeId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("passphraseTypeId", passphraseType.getId());
+        params.put("referenceObjectId", referenceObjectId);
+        params.put("userId", user.getId());
+        params.put("passphraseStateId", DataConstants.PassphraseStates.ACTUAL.getValue());
+        List<Passphrase> passphrases = idObjectService.getList(Passphrase.class, null, "el.user.id=:userId and el.passphraseType.id=:passphraseTypeId and el.passphraseState.id=:passphraseStateId and el.referenceObjectId=:referenceObjectId", params, "el.created DESC", null, 1);
+        Passphrase passphrase = null;
+        if (!passphrases.isEmpty()) {
+            passphrase = passphrases.iterator().next();
+            if (archiveExpiredPassphrase && passphraseType.getLifetime() != null && passphraseType.getLifetime() > 0) {
+                if ((passphrase.getCreated().getTime() + passphraseType.getLifetime()) < System.currentTimeMillis()) {
+                    passphrase.setPassphraseState(ds.get(PassphraseState.class, DataConstants.PassphraseStates.ARCHIVE.getValue()));
+                    idObjectService.save(passphrase);
+                    passphrase = null;
+                }
+            }
+        }
+
+        return passphrase;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Identifier processSignIn(UUID identifierTypeId, String identifierValue, String password, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
+        if (identifierTypeId == null) {
+            identifierTypeId = resolveIdentifierTypeId(identifierValue);
+        }
+
+        Identifier identifier = findIdentifier(identifierTypeId, identifierValue, true);
+        if (identifier != null && identifier.getUser() != null && identifier.getVerified()) {
+            IdentifierType identifierType = ds.get(IdentifierType.class, identifier.getIdentifierType().getId());
+            if (!identifierType.getSignInAllowed()) {
+                throw new InvalidIdentifierException("Sign in is not allowed");
+            }
+
+            User user = identifier.getUser();
+            if (!user.getApproved()) {
+                throw new UserNotApprovedException();
+            }
+            if (user.getBlocked() != null && user.getBlocked()) {
+                throw new UserBlockedException();
+            }
+            if (!StringUtils.isEmpty(user.getAllowedAddresses())) {
+                StringTokenizer stringTokenizer = new StringTokenizer(user.getAllowedAddresses(), " ,");
+                boolean inRange = false;
+                while (stringTokenizer.hasMoreTokens()) {
+                    String token = stringTokenizer.nextToken();
+                    if (new SubnetUtils(token).getInfo().isInRange(remoteAddress)) {
+                        inRange = true;
+                        break;
+                    }
+                }
+                if (!inRange) {
+                    throw new NotAllowedIPException();
+                }
+            }
+            long currentTimeMillis = System.currentTimeMillis();
+            Date endDate = new Date(currentTimeMillis);
+            Date startDate = new Date(currentTimeMillis - propertyService.getPropertyValueAsInteger("user:block_period"));
+            Map<String, Object> params = new HashMap<>();
+            params.put("identifierId", identifier.getId());
+            params.put("startDate", startDate);
+            params.put("endDate", endDate);
+            Integer attemptsToBlock = identifierType.getMaxIncorrectAuthAttempts();
+            Integer checkIncorrectLoginAttempts = idObjectService.checkExist(IncorrectAuthAttempt.class, null, "el.identifier.id=:identifierId and el.created >= :startDate and el.created <= :endDate", params, attemptsToBlock);
+
+            if (checkIncorrectLoginAttempts < attemptsToBlock) {
+                Passphrase passphrase = getActualPassphrase(user, DataConstants.PassphraseTypes.USER_PASSWORD.getValue(), user.getId(), true);
+                if (isPassphraseValueValid(passphrase, password)) {
+                    user.setLastVisitDt(new Date());
+                    user.setLastVisitIP(remoteAddress);
+                    user = idObjectService.save(user);
+                    return identifier;
+                } else {
+                    IncorrectAuthAttempt incorrectAuthAttempt = new IncorrectAuthAttempt();
+                    incorrectAuthAttempt.setIdentifier(identifier);
+                    incorrectAuthAttempt.setUser(identifier.getUser());
+                    idObjectService.save(incorrectAuthAttempt);
+                }
+            } else {
+                throw new TooManyAttemptsException();
+            }
+
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Passphrase updatePassphrase(User user, String value, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveOtherPassphrases) throws InvalidPassphraseException {
+        PassphraseType passphraseType = ds.get(PassphraseType.class, passphraseTypeId);
+        if (StringUtils.isEmpty(value)) {
+            throw new InvalidPassphraseException();
+        } else {
+            if (!StringUtils.isEmpty(passphraseType.getValidationRegex())) {
+                Pattern p = Pattern.compile(passphraseType.getValidationRegex());
+                Matcher m = p.matcher(value);
+                if (!m.matches()) {
+                    throw new InvalidPassphraseException();
+                }
+            }
+        }
+
+        if (archiveOtherPassphrases) {
+            archiveActualPassphrases(user.getId(), passphraseTypeId, referenceObjectId);
+        }
+
+        return createPassphrase(user, passphraseType, value, referenceObjectId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void archiveActualPassphrases(UUID userId, UUID passphraseTypeId, UUID referenceObjectId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("referenceObjectId", referenceObjectId);
+        params.put("passphraseTypeId", passphraseTypeId);
+        params.put("userId", userId);
+        params.put("passphraseStateId", DataConstants.PassphraseStates.ACTUAL.getValue());
+        List<Passphrase> passphrases = idObjectService.getList(Passphrase.class, null, "el.user.id=:userId and el.passphraseType.id=:passphraseTypeId and el.referenceObjectId=:referenceObjectId and el.passphraseState.id=:passphraseStateId", params, "el.created DESC", null, null);
+        PassphraseState archiveState = ds.get(PassphraseState.class, DataConstants.PassphraseStates.ARCHIVE.getValue());
+        for (Passphrase passphrase : passphrases) {
+            passphrase.setPassphraseState(archiveState);
+            idObjectService.save(passphrase);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<Identifier> createIdentifiers(List<IdentifierDTO> identifierDTOs, User user, boolean throwExceptionIfAlreadyAttached) throws InvalidIdentifierException {
+        List<Identifier> attachedIdentifiers = new LinkedList<>();
+
+        for (IdentifierDTO identifierDTO : identifierDTOs) {
+            if (!isIdentifierValid(identifierDTO.getIdentifierTypeId(), identifierDTO.getValue())) {
+                throw new InvalidIdentifierException(identifierDTO.getValue());
+            }
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("value", identifierDTO.getValue());
+            params.put("identifierTypeId", identifierDTO.getIdentifierTypeId());
+
+            List<Identifier> identifiers = idObjectService.getList(Identifier.class, null, "el.value=:value and el.identifierType.id=:identifierTypeId", params, null, null, 1);
+            Identifier identifier = null;
+            if (!identifiers.isEmpty()) {
+                identifier = identifiers.iterator().next();
+            }
+
+            if (identifier != null && identifier.getVerified() && identifier.getUser() != null && !identifier.getUser().getId().equals(user.getId())) {
+                if (throwExceptionIfAlreadyAttached) {
+                    throw new InvalidIdentifierException();
+                } else {
+                    continue;
+                }
+            }
+
+            if (identifier == null) {
+                identifier = new Identifier();
+            }
+
+            IdentifierType identifierType = ds.get(IdentifierType.class, identifierDTO.getIdentifierTypeId());
+            identifier.setUser(user);
+            identifier.setPrimary(identifierDTO.getPrimary() != null ? identifierDTO.getPrimary() : false);
+            identifier.setValue(identifierDTO.getValue());
+            identifier.setIdentifierType(identifierType);
+            identifier.setVerified(identifierType.getAutomaticVerification());
+
+            identifiers.add(idObjectService.save(identifier));
+        }
+
+        return attachedIdentifiers;
+    }
+
+    private Passphrase createPassphrase(User user, PassphraseType passphraseType, String value, UUID referenceObjectId) {
+        Passphrase passphrase = new Passphrase();
+        passphrase.setUser(user);
+        passphrase.setPassphraseState(ds.get(PassphraseState.class, DataConstants.PassphraseStates.ACTUAL.getValue()));
+        passphrase.setPassphraseType(passphraseType);
+        passphrase.setReferenceObjectId(referenceObjectId);
+        if (passphraseType.getPassphraseEncryption().getId().equals(DataConstants.PassphraseEncryptors.OPEN.getValue())) {
+            passphrase.setValue(value);
+        } else if (passphraseType.getPassphraseEncryption().getId().equals(DataConstants.PassphraseEncryptors.SHA1_WITH_SALT.getValue())) {
+            passphrase.setSalt(UserServiceImpl.generateCryptographicSalt());
+            passphrase.setValue(DigestUtils.shaHex(value.concat(passphrase.getSalt())));
+        }
+        return idObjectService.save(passphrase);
+    }
+
+    private static String generateCryptographicSalt() {
+        Random random = new Random(System.currentTimeMillis());
+        return DigestUtils.md5Hex(String.valueOf(random.nextLong()));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean processIdentifierVerificationViaVerificationCode(UUID identifierId, String verificationCode) {
+        Identifier identifier = idObjectService.getObjectById(Identifier.class, identifierId);
+        if (identifier == null || identifier.getVerified()) {
+            return true;
+        }
+
+        Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifierId, DataConstants.PassphraseTypes.IDENTIFIER_VERIFICATION_CODE.getValue(), false);
+        if (isPassphraseValueValid(passphrase, verificationCode)) {
+            identifier.setVerified(true);
+            idObjectService.save(identifier);
+
+            passphrase.setPassphraseState(ds.get(PassphraseState.class, DataConstants.PassphraseStates.ARCHIVE.getValue()));
+            idObjectService.save(passphrase);
+
+            return true;
+        }
+        return false;
     }
 }

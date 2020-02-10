@@ -9,9 +9,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "AUTH_CODE", uniqueConstraints =
-        {@UniqueConstraint(columnNames = {"AUTH_CODE", "CODE_TYPE_ID", "USER_ID"})})
-public class AuthCode extends IdObject<UUID> {
+@Table(name = JPAProperties.TABLE_PREFIX + "INCORRECT_AUTH_ATTEMPT")
+public class IncorrectAuthAttempt extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
@@ -27,20 +26,13 @@ public class AuthCode extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = "AUTH_CODE", nullable = false)
-    private String code;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "CODE_TYPE_ID", nullable = false)
-    private AuthCodeType authCodeType;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "CODE_STATE_ID", nullable = false)
-    private AuthCodeState authCodeState;
+    @JoinColumn(name = "IDENTIFIER_ID", nullable = false)
+    private Identifier identifier;
 
     @Override
     public UUID getId() {
@@ -53,16 +45,6 @@ public class AuthCode extends IdObject<UUID> {
     }
 
     @Override
-    public Date getChanged() {
-        return changed;
-    }
-
-    @Override
-    public void setChanged(Date changed) {
-        this.changed = changed;
-    }
-
-    @Override
     public Date getCreated() {
         return created;
     }
@@ -72,20 +54,14 @@ public class AuthCode extends IdObject<UUID> {
         this.created = created;
     }
 
-    public String getCode() {
-        return code;
+    @Override
+    public Date getChanged() {
+        return changed;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public AuthCodeType getAuthCodeType() {
-        return authCodeType;
-    }
-
-    public void setAuthCodeType(AuthCodeType authCodeType) {
-        this.authCodeType = authCodeType;
+    @Override
+    public void setChanged(Date changed) {
+        this.changed = changed;
     }
 
     public User getUser() {
@@ -96,11 +72,11 @@ public class AuthCode extends IdObject<UUID> {
         this.user = user;
     }
 
-    public AuthCodeState getAuthCodeState() {
-        return authCodeState;
+    public Identifier getIdentifier() {
+        return identifier;
     }
 
-    public void setAuthCodeState(AuthCodeState authCodeState) {
-        this.authCodeState = authCodeState;
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
     }
 }

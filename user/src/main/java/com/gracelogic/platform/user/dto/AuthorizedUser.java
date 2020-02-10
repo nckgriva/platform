@@ -11,6 +11,7 @@ import java.util.UUID;
 public class AuthorizedUser extends UserDTO implements Serializable {
     private Set<String> grants = new HashSet<>();
     private UUID userSessionId;
+    private IdentifierDTO signInIdentifier;
 
     public Set<String> getGrants() {
         return grants;
@@ -26,6 +27,14 @@ public class AuthorizedUser extends UserDTO implements Serializable {
 
     public void setUserSessionId(UUID userSessionId) {
         this.userSessionId = userSessionId;
+    }
+
+    public IdentifierDTO getSignInIdentifier() {
+        return signInIdentifier;
+    }
+
+    public void setSignInIdentifier(IdentifierDTO signInIdentifier) {
+        this.signInIdentifier = signInIdentifier;
     }
 
     public static AuthorizedUser prepare(User user) {

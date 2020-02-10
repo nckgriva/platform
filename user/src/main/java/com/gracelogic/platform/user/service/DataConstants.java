@@ -3,14 +3,12 @@ package com.gracelogic.platform.user.service;
 import java.util.UUID;
 
 public class DataConstants {
-
-    public enum AuthCodeTypes {
-        PHONE_VERIFY(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
-        EMAIL_VERIFY(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
-        PASSWORD_REPAIR(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73"));
+    public enum PassphraseEncryptors {
+        OPEN(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        SHA1_WITH_SALT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72"));
         private UUID value;
 
-        AuthCodeTypes(UUID value) {
+        PassphraseEncryptors(UUID value) {
             this.value = value;
         }
 
@@ -19,12 +17,13 @@ public class DataConstants {
         }
     }
 
-    public enum AuthCodeStates {
-        NEW(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
-        DELETED(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72"));
+    public enum PassphraseTypes {
+        USER_PASSWORD(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        CHANGE_PASSWORD_VERIFICATION_CODE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
+        IDENTIFIER_VERIFICATION_CODE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73"));
         private UUID value;
 
-        AuthCodeStates(UUID value) {
+        PassphraseTypes(UUID value) {
             this.value = value;
         }
 
@@ -33,48 +32,47 @@ public class DataConstants {
         }
     }
 
-    public enum UserSettingKey {
-        DAILY_RATE("DAILY_RATE");
+    public enum PassphraseStates {
+        ACTUAL(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        ARCHIVE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72"));
+        private UUID value;
 
-        private String value;
-
-        UserSettingKey(String value) {
+        PassphraseStates(UUID value) {
             this.value = value;
         }
 
-        public String getValue() {
+        public UUID getValue() {
             return value;
         }
     }
 
-    public enum UserApproveMethod {
+    public enum IdentifierTypes {
+        USER_ID(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        EMAIL(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
+        PHONE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
+        LOGIN(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74"));
+        private UUID value;
+
+        IdentifierTypes(UUID value) {
+            this.value = value;
+        }
+
+        public UUID getValue() {
+            return value;
+        }
+    }
+
+    public enum UserApproveMethods {
         AUTO("AUTO"),
-        MANUAL("MANUAL"),
-        EMAIL_CONFIRMATION("EMAIL_CONFIRMATION"),
-        PHONE_CONFIRMATION("PHONE_CONFIRMATION"),
-        EMAIL_AND_PHONE_CONFIRMATION("EMAIL_AND_PHONE_CONFIRMATION");
+        MANUAL("MANUAL");
 
         private String value;
 
-        UserApproveMethod(String value) {
+        UserApproveMethods(String value) {
             this.value = value;
         }
 
         public String getValue() {
-            return value;
-        }
-    }
-
-    public enum Forms {
-        USER(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71"));
-
-        private UUID value;
-
-        Forms(UUID value) {
-            this.value = value;
-        }
-
-        public UUID getValue() {
             return value;
         }
     }

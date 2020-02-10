@@ -7,9 +7,11 @@ import com.gracelogic.platform.oauth.dto.OAuthDTO;
 import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.oauth.model.AuthProviderLinkage;
 import com.gracelogic.platform.property.service.PropertyService;
+import com.gracelogic.platform.user.dto.IdentifierDTO;
+import com.gracelogic.platform.user.dto.SignUpDTO;
 import com.gracelogic.platform.user.dto.UserDTO;
-import com.gracelogic.platform.user.dto.UserRegistrationDTO;
 import com.gracelogic.platform.user.model.User;
+import com.gracelogic.platform.user.service.DataConstants;
 import com.gracelogic.platform.user.service.UserLifecycleService;
 import com.gracelogic.platform.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
@@ -54,33 +56,36 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
             User user = null;
 
             //Register new user
-            UserRegistrationDTO userRegistrationDTO = new UserRegistrationDTO();
+            SignUpDTO signUpDTO = new SignUpDTO();
+            //UserRegistrationDTO userRegistrationDTO = new UserRegistrationDTO();
 
             if (!StringUtils.isEmpty(OAuthDTO.getEmail())) {
-                User anotherUser = userService.getUserByField("email", OAuthDTO.getEmail());
-                if (anotherUser != null && anotherUser.getEmailVerified()) {
-                    OAuthDTO.setEmail(null);
-                }
+                IdentifierDTO identifierDTO = new IdentifierDTO();
+                identifierDTO.setValue(OAuthDTO.getEmail());
+                identifierDTO.setIdentifierTypeId(DataConstants.IdentifierTypes.EMAIL.getValue());
+                identifierDTO.setVerified(false);
+                identifierDTO.setPrimary(true);
+                signUpDTO.getIdentifiers().add(identifierDTO);
             }
-            userRegistrationDTO.setEmail(!StringUtils.isEmpty(OAuthDTO.getEmail()) ? OAuthDTO.getEmail() : null);
 
             if (!StringUtils.isEmpty(OAuthDTO.getPhone())) {
-                User anotherUser = userService.getUserByField("phone", OAuthDTO.getPhone());
-                if (anotherUser != null && anotherUser.getPhoneVerified()) {
-                    OAuthDTO.setPhone(null);
-                }
+                IdentifierDTO identifierDTO = new IdentifierDTO();
+                identifierDTO.setValue(OAuthDTO.getPhone());
+                identifierDTO.setIdentifierTypeId(DataConstants.IdentifierTypes.PHONE.getValue());
+                identifierDTO.setVerified(false);
+                identifierDTO.setPrimary(true);
+                signUpDTO.getIdentifiers().add(identifierDTO);
             }
-            userRegistrationDTO.setPhone(!StringUtils.isEmpty(OAuthDTO.getPhone()) ? OAuthDTO.getPhone() : null);
 
-            userRegistrationDTO.getFields().put(UserDTO.FIELD_NAME, !StringUtils.isEmpty(OAuthDTO.getFirstName()) ? OAuthDTO.getFirstName() : null);
-            userRegistrationDTO.getFields().put(UserDTO.FIELD_SURNAME, !StringUtils.isEmpty(OAuthDTO.getLastName()) ? OAuthDTO.getLastName() : null);
-            userRegistrationDTO.getFields().put(UserDTO.FIELD_ORG, !StringUtils.isEmpty(OAuthDTO.getOrg()) ? OAuthDTO.getOrg() : null);
+            signUpDTO.getFields().put(UserDTO.FIELD_NAME, !StringUtils.isEmpty(OAuthDTO.getFirstName()) ? OAuthDTO.getFirstName() : null);
+            signUpDTO.getFields().put(UserDTO.FIELD_SURNAME, !StringUtils.isEmpty(OAuthDTO.getLastName()) ? OAuthDTO.getLastName() : null);
+            signUpDTO.getFields().put(UserDTO.FIELD_ORG, !StringUtils.isEmpty(OAuthDTO.getOrg()) ? OAuthDTO.getOrg() : null);
 
 
-            logger.info("Oauth registration: " + userRegistrationDTO.toString());
+            logger.info("Oauth registration: " + signUpDTO.toString());
 
             try {
-                user = registrationService.register(userRegistrationDTO, true);
+                user = registrationService.signUp(signUpDTO);
             }
             catch (Exception e) {
                 logger.error("Failed to register user via oauth", e);

@@ -29,8 +29,10 @@ public class UUIDCustomType extends AbstractSingleColumnStandardBasicType {
         String dialect = properties.getProperty("dialect");
         if (dialect.equals("postgres")) {
             SQL_DESCRIPTOR = PostgresUUIDType.PostgresUUIDSqlTypeDescriptor.INSTANCE;
+            System.err.println("UUID for: PostgreSQL");
         } else if (dialect.equals("mssql")) {
             SQL_DESCRIPTOR = VarcharTypeDescriptor.INSTANCE;
+            System.err.println("UUID for: MSSQL");
         } else {
             throw new UnsupportedOperationException("Unsupported database!");
         }

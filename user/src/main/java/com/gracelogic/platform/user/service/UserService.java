@@ -13,41 +13,17 @@ import javax.servlet.http.HttpSession;
 import java.util.*;
 
 public interface UserService {
-    User getUserByField(String fieldName, Object fieldValue);
-
-    User login(Object login, String loginField, String password, String remoteAddress, boolean trust);
-
     void changeUserPassword(UUID userId, String newPassword);
-
-    boolean checkPhone(String phone, boolean checkAvailability);
-
-    boolean checkEmail(String email, boolean checkAvailability);
-
-    boolean checkPassword(String value);
-
-    boolean verifyLogin(UUID userId, String loginType, String code);
 
     UserSession updateSessionInfo(HttpSession session, AuthenticationToken authenticationToken, String userAgent, boolean isDestroying);
 
-    void sendRepairCode(String login, String loginType, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException, SendingException;
-
-    void changePassword(String login, String loginType, String code, String newPassword) throws ObjectNotFoundException, IncorrectAuthCodeException;
+    void changePasswordViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode, String newPassword) throws ObjectNotFoundException, InvalidPassphraseException;
 
     UserSetting getUserSetting(UUID userId, String key);
 
     void updateUserSetting(UUID userId, String key, String value);
 
-    AuthCode getActualCode(UUID userId, UUID codeTypeId, boolean invalidateImmediately);
-
-    void invalidateCodes(UUID userId, UUID codeTypeId);
-
-    boolean isActualCodeAvailable(UUID userId, UUID codeTypeId);
-
-    User register(UserDTO userDTO, boolean trust) throws InvalidPasswordException, PhoneOrEmailIsNecessaryException, InvalidEmailException, InvalidPhoneException;
-
     void deleteUser(User user);
-
-    void sendVerificationCode(User user, String loginType, Map<String, String> templateParams) throws SendingException;
 
     void addRoleToUser(User user, Collection<UUID> roleIds);
 
@@ -57,8 +33,7 @@ public interface UserService {
 
     void mergeUserRoles(UUID userId, Collection<UUID> activeRoles);
 
-    EntityListResponse<UserDTO> getUsersPaged(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields,
-                                              boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<UserDTO> getUsersPaged(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     UserDTO getUser(UUID userId, boolean fetchRoles) throws ObjectNotFoundException;
 
@@ -75,4 +50,35 @@ public interface UserService {
     String translateUserSortFieldToNative(String sortFieldInJPAFormat);
 
     void changeLocale(HttpServletRequest request, AuthorizedUser authorizedUser, String locale) throws IllegalArgumentException;
+
+    boolean isIdentifierValid(UUID identifierTypeId, String identifierValue);
+
+    UUID resolveIdentifierTypeId(String identifierValue) throws InvalidIdentifierException;
+
+    boolean isPassphraseValueValid(Passphrase passphrase, String value);
+
+    Passphrase getActualPassphrase(User user, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveExpiredPassphrase);
+
+    Identifier findIdentifier(UUID identifierTypeId, String value, boolean enrich);
+
+    List<Identifier> createIdentifiers(List<IdentifierDTO> identifierDTOs, User user, boolean throwExceptionIfAlreadyAttached) throws InvalidIdentifierException;
+
+    void archiveActualPassphrases(UUID userId, UUID passphraseTypeId, UUID referenceObjectId);
+
+    Passphrase updatePassphrase(User user, String value, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveOtherPassphrases) throws InvalidPassphraseException;
+
+    Identifier processSignIn(UUID identifierTypeId, String identifierValue, String password, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException;
+
+    void sendIdentifierVerificationCode(UUID identifierId, Map<String, String> templateParams) throws SendingException;
+
+    Passphrase getActualVerificationCode(User user, UUID referenceObjectId, UUID passphraseTypeId, boolean createNewIfNotExist);
+
+    User processSignUp(SignUpDTO signUpDTO) throws InvalidIdentifierException, InvalidPassphraseException;
+
+    void sendVerificationCodeForPasswordChanging(UUID identifierTypeId, String identifierValue, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException, SendingException;
+
+    boolean processIdentifierVerificationViaVerificationCode(UUID identifierId, String verificationCode);
+
+    void verifyIdentifierViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode) throws ObjectNotFoundException, InvalidPassphraseException;
+
 }

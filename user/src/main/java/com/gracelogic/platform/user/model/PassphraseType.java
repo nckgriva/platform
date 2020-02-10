@@ -2,7 +2,6 @@ package com.gracelogic.platform.user.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import com.gracelogic.platform.dictionary.model.Dictionary;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -10,8 +9,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "AUTH_CODE_STATE")
-public class AuthCodeState extends IdObject<UUID> implements Dictionary {
+@Table(name = JPAProperties.TABLE_PREFIX + "PASSPHRASE_TYPE")
+public class PassphraseType extends IdObject<UUID> {
     @Id
     @Access(AccessType.PROPERTY)
     @Column(name = ID)
@@ -27,11 +26,18 @@ public class AuthCodeState extends IdObject<UUID> implements Dictionary {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = NAME, nullable = false)
+    @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Column(name = SORT_ORDER, nullable = true)
-    private Integer sortOrder;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PASSPHRASE_ENCRYPTION_ID", nullable = false)
+    private PassphraseEncryption passphraseEncryption;
+
+    @Column(name = "LIFETIME", nullable = true)
+    private Long lifetime;
+
+    @Column(name = "VALIDATION_REGEX", nullable = true)
+    private String validationRegex;
 
     @Override
     public UUID getId() {
@@ -71,17 +77,27 @@ public class AuthCodeState extends IdObject<UUID> implements Dictionary {
         this.name = name;
     }
 
-    @Override
-    public String getCode() {
-        return null;
+    public PassphraseEncryption getPassphraseEncryption() {
+        return passphraseEncryption;
     }
 
-    @Override
-    public Integer getSortOrder() {
-        return sortOrder;
+    public void setPassphraseEncryption(PassphraseEncryption passphraseEncryption) {
+        this.passphraseEncryption = passphraseEncryption;
     }
 
-    public void setSortOrder(Integer sortOrder) {
-        this.sortOrder = sortOrder;
+    public Long getLifetime() {
+        return lifetime;
+    }
+
+    public void setLifetime(Long lifetime) {
+        this.lifetime = lifetime;
+    }
+
+    public String getValidationRegex() {
+        return validationRegex;
+    }
+
+    public void setValidationRegex(String validationRegex) {
+        this.validationRegex = validationRegex;
     }
 }

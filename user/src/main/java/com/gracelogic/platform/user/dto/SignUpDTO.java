@@ -1,6 +1,6 @@
 package com.gracelogic.platform.user.dto;
 
-public class UserRegistrationDTO extends UserDTO {
+public class SignUpDTO extends UserDTO {
     private String password;
 
     public String getPassword() {

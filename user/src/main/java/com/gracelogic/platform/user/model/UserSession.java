@@ -45,14 +45,15 @@ public class UserSession extends IdObject<UUID> {
     @Column(name = "AUTH_IP", nullable = true)
     private String authIp;
 
-    @Column(name = "LOGIN_TYPE", nullable = true)
-    private String loginType;
-
     @Column(name = "IS_VALID", nullable = true)
     private Boolean valid;
 
     @Column(name = "USER_AGENT", nullable = true, length = 1024)
     private String userAgent;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "IDENTIFIER_ID", nullable = true)
+    private Identifier identifier;
 
     @Override
     public UUID getId() {
@@ -132,14 +133,6 @@ public class UserSession extends IdObject<UUID> {
         this.authIp = authIp;
     }
 
-    public String getLoginType() {
-        return loginType;
-    }
-
-    public void setLoginType(String loginType) {
-        this.loginType = loginType;
-    }
-
     public Boolean getValid() {
         return valid;
     }
@@ -154,5 +147,13 @@ public class UserSession extends IdObject<UUID> {
 
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
     }
 }
