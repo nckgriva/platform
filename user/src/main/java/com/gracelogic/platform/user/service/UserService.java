@@ -79,4 +79,6 @@ public interface UserService {
 
     boolean processIdentifierVerificationViaVerificationCode(UUID identifierId, String verificationCode);
 
+    void verifyIdentifierViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode) throws ObjectNotFoundException, InvalidPassphraseException;
+
 }

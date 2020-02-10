@@ -202,6 +202,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void changePasswordViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode, String newPassword) throws ObjectNotFoundException, InvalidPassphraseException {
         if (identifierTypeId == null) {
@@ -221,8 +222,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public void verifyIdentifier(UUID identifierTypeId, String identifierValue, String verificationCode) throws ObjectNotFoundException, InvalidPassphraseException {
+    public void verifyIdentifierViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode) throws ObjectNotFoundException, InvalidPassphraseException {
         if (identifierTypeId == null) {
             identifierTypeId = resolveIdentifierTypeId(identifierValue);
         }
