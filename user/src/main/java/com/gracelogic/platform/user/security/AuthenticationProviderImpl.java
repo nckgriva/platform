@@ -1,5 +1,6 @@
 package com.gracelogic.platform.user.security;
 
+import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.dto.IdentifierDTO;
 import com.gracelogic.platform.user.model.*;
@@ -13,13 +14,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Service(value = "defaultAuthenticationProvider")
 public class AuthenticationProviderImpl implements AuthenticationProvider {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private IdObjectService idObjectService;
 
     @Override
     public org.springframework.security.core.Authentication authenticate(org.springframework.security.core.Authentication authentication) throws AuthenticationException {
@@ -30,11 +33,23 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
                 AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
                 authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(identifier));
 
+                //Load roles & grants
+                Map<String, Object> params = new HashMap<>();
+                params.put("userId", user.getId());
+                List<UserRole> roles = idObjectService.getList(UserRole.class, null, "el.user.id=:userId", params, null, null, null, null);
+                Set<UUID> roleIds = new HashSet<>();
+                for (UserRole ur : roles) {
+                    roleIds.add(ur.getRole().getId());
+                }
+                params = new HashMap<>();
+                params.put("roleIds", roleIds);
+
+                List<RoleGrant> roleGrants = idObjectService.getList(RoleGrant.class, "left join fetch el.grant", "el.role.id in :roleIds", params, null, null, null, null);
+
+                //Set grants
                 Set<Grant> grants = new HashSet<Grant>();
-                for (UserRole userRole : user.getUserRoles()) {
-                    for (RoleGrant roleGrant : userRole.getRole().getRoleGrants()) {
-                        grants.add(roleGrant.getGrant());
-                    }
+                for (RoleGrant roleGrant : roleGrants) {
+                    grants.add(roleGrant.getGrant());
                 }
 
                 Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
@@ -46,8 +61,7 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
                 authentication = new AuthenticationToken(authentication.getPrincipal(), authentication.getCredentials(), authorities, ((AuthenticationToken) authentication).getRemoteAddress(), ((AuthenticationToken) authentication).getIdentifierTypeId(), false);
 
                 ((UsernamePasswordAuthenticationToken) authentication).setDetails(authorizedUser);
-            }
-            else {
+            } else {
                 throw new BadCredentialsException("Invalid identifier or password.");
             }
         }

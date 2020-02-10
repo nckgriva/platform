@@ -776,12 +776,12 @@ public class UserServiceImpl implements UserService {
         params.put("referenceObjectId", referenceObjectId);
         params.put("userId", user.getId());
         params.put("passphraseStateId", DataConstants.PassphraseStates.ACTUAL.getValue());
-        List<Passphrase> passphrases = idObjectService.getList(Passphrase.class, null, "el.user.id=:userId and el.passphraseType.id=:passphraseTypeId and el.referenceObjectId=:referenceObjectId", params, "el.created DESC", null, 1);
+        List<Passphrase> passphrases = idObjectService.getList(Passphrase.class, null, "el.user.id=:userId and el.passphraseType.id=:passphraseTypeId and el.passphraseState.id=:passphraseStateId and el.referenceObjectId=:referenceObjectId", params, "el.created DESC", null, 1);
         Passphrase passphrase = null;
         if (!passphrases.isEmpty()) {
             passphrase = passphrases.iterator().next();
             if (archiveExpiredPassphrase && passphraseType.getLifetime() != null && passphraseType.getLifetime() > 0) {
-                if (passphrase.getCreated().getTime() + passphraseType.getLifetime() > System.currentTimeMillis()) {
+                if ((passphrase.getCreated().getTime() + passphraseType.getLifetime()) < System.currentTimeMillis()) {
                     passphrase.setPassphraseState(ds.get(PassphraseState.class, DataConstants.PassphraseStates.ARCHIVE.getValue()));
                     idObjectService.save(passphrase);
                     passphrase = null;
@@ -834,7 +834,7 @@ public class UserServiceImpl implements UserService {
             params.put("identifierId", identifier.getId());
             params.put("startDate", startDate);
             params.put("endDate", endDate);
-            Integer attemptsToBlock = propertyService.getPropertyValueAsInteger("user:attempts_to_block");
+            Integer attemptsToBlock = identifierType.getMaxIncorrectAuthAttempts();
             Integer checkIncorrectLoginAttempts = idObjectService.checkExist(IncorrectAuthAttempt.class, null, "el.identifier.id=:identifierId and el.created >= :startDate and el.created <= :endDate", params, attemptsToBlock);
 
             if (checkIncorrectLoginAttempts < attemptsToBlock) {
@@ -847,6 +847,7 @@ public class UserServiceImpl implements UserService {
                 } else {
                     IncorrectAuthAttempt incorrectAuthAttempt = new IncorrectAuthAttempt();
                     incorrectAuthAttempt.setIdentifier(identifier);
+                    incorrectAuthAttempt.setUser(identifier.getUser());
                     idObjectService.save(incorrectAuthAttempt);
                 }
             } else {

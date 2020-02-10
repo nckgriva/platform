@@ -10,21 +10,15 @@ public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
 
     @Override
     public Identifier findIdentifier(UUID identifierTypeId, String identifierValue, boolean enrich) {
-        String query = "select identifier from Identifier user " +
-                (enrich ?
-                        ("left join fetch el.user user " +
-                        "left join fetch user.userRoles ur " +
-                        "left join fetch ur.role rl " +
-                        "left join fetch rl.roleGrants rg " +
-                        "left join fetch rg.grant gr ") :
-
-                        ("left join fetch el.user ")
-                ) + "where el.identifierTypeId=:identifierTypeId and el.value=:val";
+        //TODO: сделать оптимальнее
+        String query = "select el from Identifier el " +
+                (enrich ? "left join fetch el.user user " : " ") +
+                "where el.identifierType.id=:identifierTypeId and el.value=:val";
 
         logger.info(query);
 
         try {
-            return (Identifier) getEntityManager().createNativeQuery(query, Identifier.class)
+            return (Identifier) getEntityManager().createQuery(query, Identifier.class)
                     .setParameter("identifierTypeId", identifierTypeId)
                     .setParameter("val", identifierValue).getSingleResult();
         } catch (Exception e) {

@@ -48,7 +48,8 @@ public class DataConstants {
     public enum IdentifierTypes {
         USER_ID(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
         EMAIL(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
-        PHONE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73"));
+        PHONE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
+        LOGIN(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74"));
         private UUID value;
 
         IdentifierTypes(UUID value) {
