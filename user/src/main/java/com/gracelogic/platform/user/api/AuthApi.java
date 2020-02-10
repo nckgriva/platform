@@ -94,7 +94,7 @@ public class AuthApi extends AbstractAuthorizedController {
                     if (authentication.getDetails() instanceof AuthorizedUser) {
                         AuthorizedUser authorizedUser = ((AuthorizedUser) authentication.getDetails());
                         try {
-                            HttpSession session = request.getSession(false);
+                            HttpSession session = request.getSession(true);
                             UserSession userSession = userService.updateSessionInfo(session, authentication, request.getHeader("User-Agent"), false);
                             if (userSession != null) {
                                 authorizedUser.setUserSessionId(userSession.getId());
@@ -162,17 +162,17 @@ public class AuthApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
-            value = "logged",
-            notes = "Checking user processSignIn status",
+            value = "info",
+            notes = "Checking user info",
             response = AuthorizedUser.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
-    @RequestMapping(value = "/logged", method = RequestMethod.POST)
+    @RequestMapping(value = "/info", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity logged() {
+    public ResponseEntity info() {
         if (getUser() != null) {
             return new ResponseEntity<AuthorizedUser>(getUser(), HttpStatus.OK);
         } else {
@@ -219,15 +219,15 @@ public class AuthApi extends AbstractAuthorizedController {
     }
 
     @ApiOperation(
-            value = "logout",
-            notes = "Logout user",
+            value = "signOut",
+            notes = "Sign out user",
             response = ResponseEntity.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
-    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    @RequestMapping(value = "/sign-out", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity logout(HttpServletRequest request) {
         try {

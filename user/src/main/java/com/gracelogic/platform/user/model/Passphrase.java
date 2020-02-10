@@ -30,7 +30,7 @@ public class Passphrase extends IdObject<UUID> {
     @Column(name = "VALUE", nullable = false)
     private String value;
 
-    @Column(name = "SALT", nullable = false)
+    @Column(name = "SALT", nullable = true)
     private String salt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

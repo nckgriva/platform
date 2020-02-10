@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService {
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
 
-        idObjectService.delete(IncorrectAuthAttempt.class, "el.identifier.user.id=:userId", params);
+        idObjectService.delete(IncorrectAuthAttempt.class, "el.user.id=:userId", params);
     }
 
     private static String generatePasswordSalt() {
@@ -100,7 +100,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public UserSession updateSessionInfo(HttpSession session, AuthenticationToken authenticationToken, String userAgent, boolean isDestroying) {
-        if (!StringUtils.isEmpty(session.getId())) {
+        if (session != null && !StringUtils.isEmpty(session.getId())) {
             AuthenticationToken authentication = null;
             try {
                 authentication = (AuthenticationToken) ((org.springframework.security.core.context.SecurityContextImpl) session.getAttribute("SPRING_SECURITY_CONTEXT")).getAuthentication();
@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public void sendVerificationCodeForPasswordChanging(UUID identifierTypeId, String identifierValue, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException, SendingException {
         if (identifierTypeId == null) {
-            resolveIdentifierTypeId(identifierValue);
+            identifierTypeId = resolveIdentifierTypeId(identifierValue);
         }
 
         Identifier identifier = findIdentifier(identifierTypeId, identifierValue, false);
@@ -205,7 +205,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public void changePasswordViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode, String newPassword) throws ObjectNotFoundException, InvalidPassphraseException {
         if (identifierTypeId == null) {
-            resolveIdentifierTypeId(identifierValue);
+            identifierTypeId = resolveIdentifierTypeId(identifierValue);
         }
 
         Identifier identifier = findIdentifier(identifierTypeId, identifierValue, false);
@@ -889,7 +889,7 @@ public class UserServiceImpl implements UserService {
         params.put("passphraseTypeId", passphraseTypeId);
         params.put("userId", userId);
         params.put("passphraseStateId", DataConstants.PassphraseStates.ACTUAL.getValue());
-        List<Passphrase> passphrases = idObjectService.getList(Passphrase.class, null, "el.passphraseType.id=:passphraseTypeId and el.referenceObjectId=:referenceObjectId and el.passphraseState.id=:passphraseStateId", params, "el.created DESC", null, null);
+        List<Passphrase> passphrases = idObjectService.getList(Passphrase.class, null, "el.user.id=:userId and el.passphraseType.id=:passphraseTypeId and el.referenceObjectId=:referenceObjectId and el.passphraseState.id=:passphraseStateId", params, "el.created DESC", null, null);
         PassphraseState archiveState = ds.get(PassphraseState.class, DataConstants.PassphraseStates.ARCHIVE.getValue());
         for (Passphrase passphrase : passphrases) {
             passphrase.setPassphraseState(archiveState);
