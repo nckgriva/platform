@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.UUID;
 
 public class TokenAuthFilter implements Filter {
 
@@ -20,11 +21,9 @@ public class TokenAuthFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
         String token = request.getHeader("token");
-
-        TokenAuthentication tokenAuthentication = new TokenAuthentication(token);
-        if (token == null) {
+        if (token != null) {
+            TokenAuthentication tokenAuthentication = new TokenAuthentication(UUID.fromString(token));
             tokenAuthentication.setAuthenticated(false);
-        } else {
             SecurityContextHolder.getContext().setAuthentication(tokenAuthentication);
         }
         filterChain.doFilter(servletRequest, servletResponse);

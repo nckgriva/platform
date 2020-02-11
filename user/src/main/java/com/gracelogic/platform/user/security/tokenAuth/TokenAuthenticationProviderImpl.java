@@ -27,27 +27,26 @@ public class TokenAuthenticationProviderImpl implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-
         TokenAuthentication tokenAuthentication = (TokenAuthentication)authentication;
-        Map<String, Object> tokenParams = new HashMap<>();
-        tokenParams.put("token", tokenAuthentication.getName());
-        String cause = " el.value = :token ";
         String fetches = " left join fetch el.tokenStatus " +
-                            " left join fetch el.user ";
-        List<Token> tokens = idObjectService.getList(Token.class, fetches, cause, tokenParams, null, null, 1);
-        if (tokens.isEmpty()) {
+                " left join fetch el.user " +
+                " left join fetch el.identifier ";
+
+        Token token = idObjectService.getObjectById(Token.class, fetches, tokenAuthentication.getToken());
+        if (token == null) {
             throw new TokenNotFoundException("Token not found");
         }
 
-        Token token = tokens.get(0);
-
-        if (token.getTokenStatus().getId().equals(DataConstants.TokenTypes.EXPIRED.getValue())) {
+        if (!token.getActive()) {
             throw new TokenExpiredException("Token is expired");
         }
 
+        token.setLastRequest(new Date());
+        idObjectService.save(token);
+
         User user = token.getUser();
         AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
-//        authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(identifier));
+        authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(token.getIdentifier()));
 
         //Load roles & grants
         Map<String, Object> params = new HashMap<>();

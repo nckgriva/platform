@@ -7,6 +7,7 @@ import com.gracelogic.platform.user.dto.AuthRequestDTO;
 import com.gracelogic.platform.user.dto.TokenDTO;
 import com.gracelogic.platform.user.dto.UserDTO;
 import com.gracelogic.platform.user.service.UserService;
+import com.gracelogic.platform.web.ServletUtils;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping(value = Path.API_AUTH_TOKEN)
@@ -41,12 +46,12 @@ public class TokenAuthApi {
             @ApiResponse(code = 510, message = "Not allowed IP"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/sign-in", method = RequestMethod.POST)
-    public ResponseEntity login(AuthRequestDTO authRequestDTO) {
+    public ResponseEntity login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
         try {
-            TokenDTO tokenDTO = userService.login(authRequestDTO);
+            TokenDTO tokenDTO = userService.login(authRequestDTO, ServletUtils.getRemoteAddress(request));
             return new ResponseEntity<TokenDTO>(tokenDTO, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<ErrorResponse>(null);
+            return new ResponseEntity<ErrorResponse>(HttpStatus.BAD_REQUEST);
         }
     }
 

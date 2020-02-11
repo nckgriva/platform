@@ -4,6 +4,7 @@ package com.gracelogic.platform.user.model;
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -28,19 +29,23 @@ public class Token extends IdObject<UUID> {
     @Column(name = CHANGED, nullable = false)
     private Date changed;
 
-    @Column(name = "VALUE")
-    private UUID value;
-
     @ManyToOne
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "TOKEN_STATUS_ID", nullable = false)
-    private TokenStatus tokenStatus;
+    @Column(name = "IS_ACTIVE", nullable = false)
+    private Boolean active;
 
     @Column(name = "LAST_REQUEST_DT", nullable = true)
     private Date lastRequest;
+
+    @ManyToOne
+    @JoinColumn(name = "IDENTIFIER_ID", nullable = false)
+    private Identifier identifier;
+
+    @Type(type = "stringJsonObject")
+    @Column(columnDefinition = "json", nullable = true)
+    private String additionalFields;
 
     @Override
     public UUID getId() {
@@ -72,14 +77,6 @@ public class Token extends IdObject<UUID> {
         this.changed = changed;
     }
 
-    public UUID getValue() {
-        return value;
-    }
-
-    public void setValue(UUID value) {
-        this.value = value;
-    }
-
     public User getUser() {
         return user;
     }
@@ -88,12 +85,12 @@ public class Token extends IdObject<UUID> {
         this.user = user;
     }
 
-    public TokenStatus getTokenStatus() {
-        return tokenStatus;
+    public Boolean getActive() {
+        return active;
     }
 
-    public void setTokenStatus(TokenStatus tokenStatus) {
-        this.tokenStatus = tokenStatus;
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public Date getLastRequest() {
@@ -102,5 +99,21 @@ public class Token extends IdObject<UUID> {
 
     public void setLastRequest(Date lastRequest) {
         this.lastRequest = lastRequest;
+    }
+
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
+    }
+
+    public String getAdditionalFields() {
+        return additionalFields;
+    }
+
+    public void setAdditionalFields(String additionalFields) {
+        this.additionalFields = additionalFields;
     }
 }

@@ -1006,36 +1006,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public TokenDTO login(AuthRequestDTO authRequestDTO) {
-        Identifier identifier = processSignIn(authRequestDTO.getIdentifierTypeId(), authRequestDTO.getIdentifierValue(), authRequestDTO.getPassword(), null);
+    public TokenDTO login(AuthRequestDTO authRequestDTO, String remoteAddress) {
+        Identifier identifier = processSignIn(authRequestDTO.getIdentifierTypeId(), authRequestDTO.getIdentifierValue(), authRequestDTO.getPassword(), remoteAddress);
         if (identifier == null) {
             throw new InvalidIdentifierException("Identifier not found");
         }
         Token token = new Token();
-        token.setValue(getUniqueToken());
         token.setUser(identifier.getUser());
         token.setLastRequest(new Date());
-        token.setTokenStatus(ds.get(TokenStatus.class, DataConstants.TokenTypes.ACTIVE.getValue()));
+        token.setActive(true);
+        token.setIdentifier(identifier);
         idObjectService.save(token);
 
-        return new TokenDTO(token.getValue());
-    }
-
-    private UUID getUniqueToken() {
-        boolean tokenFound = false;
-        UUID token = UUID.randomUUID();
-        Map<String, Object> params = new HashMap<>();
-        params.put("value", token);
-        String cause = " el.value = :value ";
-        while (!tokenFound) {
-            List<Token> tokens = idObjectService.getList(Token.class, null, cause, params, null, null, 1);
-            if (tokens.isEmpty()) {
-                tokenFound = true;
-            } else  {
-                token = UUID.randomUUID();
-                params.put("value", token);
-            }
-        }
-        return token;
+        return new TokenDTO(token.getId());
     }
 }

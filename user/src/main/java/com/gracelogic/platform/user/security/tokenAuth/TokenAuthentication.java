@@ -7,16 +7,17 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class TokenAuthentication implements Authentication {
 
-    private String token;
+    private UUID token;
     private boolean isAuthenticated;
     private AuthorizedUser authorizedUser;
     private Collection<? extends GrantedAuthority> grantedAuthorities;
 
 
-    public TokenAuthentication(String token) {
+    public TokenAuthentication(UUID token) {
         this.token = token;
     }
 
@@ -56,7 +57,7 @@ public class TokenAuthentication implements Authentication {
 
     @Override
     public String getName() {
-        return token;
+        return token.toString();
     }
 
     public Collection<? extends GrantedAuthority> getGrantedAuthorities() {
@@ -65,5 +66,13 @@ public class TokenAuthentication implements Authentication {
 
     public void setGrantedAuthorities(Collection<? extends GrantedAuthority> grantedAuthorities) {
         this.grantedAuthorities = grantedAuthorities;
+    }
+
+    public UUID getToken() {
+        return token;
+    }
+
+    public void setToken(UUID token) {
+        this.token = token;
     }
 }
