@@ -16,4 +16,7 @@ public class Path extends PlatformPath {
     public static final String API_AUTH = PLATFORM_API + "/auth";
 
     public static final String API_IDENTIFIER = PLATFORM_API + "/identifier";
+
+    public static final String API_AUTH_TOKEN = PLATFORM_API + "/auth/token";
+
 }
