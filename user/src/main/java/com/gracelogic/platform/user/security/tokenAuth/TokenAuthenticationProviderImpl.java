@@ -28,8 +28,7 @@ public class TokenAuthenticationProviderImpl implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         TokenAuthentication tokenAuthentication = (TokenAuthentication)authentication;
-        String fetches = " left join fetch el.tokenStatus " +
-                " left join fetch el.user " +
+        String fetches = " left join fetch el.user " +
                 " left join fetch el.identifier ";
 
         Token token = idObjectService.getObjectById(Token.class, fetches, tokenAuthentication.getToken());
@@ -41,8 +40,8 @@ public class TokenAuthenticationProviderImpl implements AuthenticationProvider {
             throw new TokenExpiredException("Token is expired");
         }
 
-        token.setLastRequest(new Date());
-        idObjectService.save(token);
+//        token.setLastRequest(new Date());
+//        idObjectService.save(token);
 
         User user = token.getUser();
         AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
@@ -78,7 +77,7 @@ public class TokenAuthenticationProviderImpl implements AuthenticationProvider {
         tokenAuthentication.setGrantedAuthorities(authorities);
 
 
-        return authentication;
+        return tokenAuthentication;
     }
 
     @Override
