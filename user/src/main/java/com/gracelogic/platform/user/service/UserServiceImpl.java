@@ -9,6 +9,7 @@ import com.gracelogic.platform.notification.dto.Message;
 import com.gracelogic.platform.notification.dto.SendingType;
 import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.notification.service.MessageSenderService;
+import com.gracelogic.platform.property.model.Property;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.template.dto.LoadedTemplate;
 import com.gracelogic.platform.template.service.TemplateService;
@@ -24,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -1019,5 +1021,18 @@ public class UserServiceImpl implements UserService {
         idObjectService.save(token);
 
         return new TokenDTO(token.getId());
+    }
+
+    @Override
+    @Transactional
+    public void updateTokenInfo(Token newToken) {
+        idObjectService.save(newToken);
+    }
+
+    @Override
+    @Transactional
+    public void logout(TokenDTO tokenDTO) {
+        SecurityContextHolder.clearContext();
+        idObjectService.updateFieldValue(Token.class, tokenDTO.getToken(), "active", false);
     }
 }

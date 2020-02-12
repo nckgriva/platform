@@ -8,16 +8,19 @@ import com.gracelogic.platform.user.dto.TokenDTO;
 import com.gracelogic.platform.user.dto.UserDTO;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.ServletUtils;
+import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,6 +54,26 @@ public class TokenAuthApi {
             TokenDTO tokenDTO = userService.login(authRequestDTO, ServletUtils.getRemoteAddress(request));
             return new ResponseEntity<TokenDTO>(tokenDTO, HttpStatus.OK);
         } catch (Exception e) {
+            return new ResponseEntity<ErrorResponse>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
+            value = "signOut",
+            notes = "Sign out user",
+            response = ResponseEntity.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(value = "/sign-out", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity logout(@RequestBody TokenDTO tokenDTO) {
+        try {
+            userService.logout(tokenDTO);
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (Exception ignored) {
             return new ResponseEntity<ErrorResponse>(HttpStatus.BAD_REQUEST);
         }
     }

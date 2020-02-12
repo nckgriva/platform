@@ -82,4 +82,8 @@ public interface UserService {
     void verifyIdentifierViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode) throws ObjectNotFoundException, InvalidPassphraseException;
 
     TokenDTO login(AuthRequestDTO authRequestDTO, String remoteAddress);
+
+    void updateTokenInfo(Token newToken);
+
+    void logout(TokenDTO tokenDTO);
 }
