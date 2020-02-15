@@ -8,7 +8,7 @@ import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.model.UserSession;
-import com.gracelogic.platform.user.security.AuthenticationToken;
+import com.gracelogic.platform.user.security.SessionBasedAuthentication;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.ServletUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -195,10 +195,10 @@ public class OAuthController extends AbstractAuthorizedController {
         Exception exception = null;
 
         //login here
-        AuthenticationToken authentication = null;
+        SessionBasedAuthentication authentication = null;
         try {
-            authentication = (AuthenticationToken) authenticationManager.authenticate(
-                    new AuthenticationToken(user.getId(), null, ServletUtils.getRemoteAddress(request), com.gracelogic.platform.user.service.DataConstants.IdentifierTypes.USER_ID.getValue(), true)
+            authentication = (SessionBasedAuthentication) authenticationManager.authenticate(
+                    new SessionBasedAuthentication(user.getId(), null, ServletUtils.getRemoteAddress(request), com.gracelogic.platform.user.service.DataConstants.IdentifierTypes.USER_ID.getValue(), true)
             );
         } catch (Exception e) {
             exception = e;

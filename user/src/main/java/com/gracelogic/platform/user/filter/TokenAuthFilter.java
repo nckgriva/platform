@@ -1,9 +1,6 @@
 package com.gracelogic.platform.user.filter;
 
-import com.gracelogic.platform.user.security.AuthenticationToken;
-import com.gracelogic.platform.user.security.tokenAuth.TokenAuthentication;
-import com.gracelogic.platform.web.ServletUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.gracelogic.platform.user.security.TokenBasedAuthentication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -33,12 +30,12 @@ public class TokenAuthFilter implements Filter {
                             getRequiredWebApplicationContext(filterConfig.getServletContext()).
                             getBean("authenticationManager");
 
-            TokenAuthentication tokenAuthentication = new TokenAuthentication(UUID.fromString(token));
-            tokenAuthentication.setAuthenticated(false);
-            //SecurityContextHolder.getContext().setAuthentication(tokenAuthentication);
+            TokenBasedAuthentication tokenBasedAuthentication = new TokenBasedAuthentication(UUID.fromString(token));
+            tokenBasedAuthentication.setAuthenticated(false);
+            //SecurityContextHolder.getContext().setAuthentication(tokenBasedAuthentication);
             try {
-                TokenAuthentication authentication = (TokenAuthentication) authenticationManager.authenticate(
-                        tokenAuthentication
+                TokenBasedAuthentication authentication = (TokenBasedAuthentication) authenticationManager.authenticate(
+                        tokenBasedAuthentication
                 );
 
                 if (authentication != null) {

@@ -12,7 +12,7 @@ import javax.servlet.http.HttpSession;
 public interface UserLifecycleService {
     User signUp(SignUpDTO signUpDTO) throws InvalidIdentifierException, InvalidPassphraseException, CustomLocalizedException;
 
-    void signIn(AuthorizedUser authorizedUser, HttpSession httpSession) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException;
+    void signIn(AuthorizedUser authorizedUser);
 
     User save(UserDTO userDTO, boolean mergeRoles, AuthorizedUser executor) throws ObjectNotFoundException;
 

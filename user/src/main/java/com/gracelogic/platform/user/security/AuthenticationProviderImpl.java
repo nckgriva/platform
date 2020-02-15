@@ -6,13 +6,11 @@ import com.gracelogic.platform.user.dto.IdentifierDTO;
 import com.gracelogic.platform.user.exception.TokenExpiredException;
 import com.gracelogic.platform.user.exception.TokenNotFoundException;
 import com.gracelogic.platform.user.model.*;
-import com.gracelogic.platform.user.security.tokenAuth.TokenAuthentication;
 import com.gracelogic.platform.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,14 +28,14 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
 
     @Override
     public org.springframework.security.core.Authentication authenticate(org.springframework.security.core.Authentication authentication) throws AuthenticationException {
-        if (authentication instanceof AuthenticationToken) {
-            Identifier identifier = userService.processSignIn(((AuthenticationToken) authentication).getIdentifierTypeId(), (String) authentication.getPrincipal(), (String) authentication.getCredentials(), ((AuthenticationToken) authentication).getRemoteAddress());
+        if (authentication instanceof SessionBasedAuthentication) {
+            Identifier identifier = userService.processSignIn(((SessionBasedAuthentication) authentication).getIdentifierTypeId(), (String) authentication.getPrincipal(), (String) authentication.getCredentials(), ((SessionBasedAuthentication) authentication).getRemoteAddress());
             if (identifier != null) {
                 User user = identifier.getUser();
                 AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
                 authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(identifier));
-                Set<GrantedAuthority> authorities = commonAuth(user, authorizedUser);
-                authentication = new AuthenticationToken(authentication.getPrincipal(), authentication.getCredentials(), authorities, ((AuthenticationToken) authentication).getRemoteAddress(), ((AuthenticationToken) authentication).getIdentifierTypeId(), false);
+                Set<GrantedAuthority> authorities = fillAuthorities(user, authorizedUser);
+                authentication = new SessionBasedAuthentication(authentication.getPrincipal(), authentication.getCredentials(), authorities, ((SessionBasedAuthentication) authentication).getRemoteAddress(), ((SessionBasedAuthentication) authentication).getIdentifierTypeId(), false);
 
                 ((UsernamePasswordAuthenticationToken) authentication).setDetails(authorizedUser);
             } else {
@@ -47,11 +45,9 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
             return authentication;
 
         } else {
-            TokenAuthentication tokenAuthentication = (TokenAuthentication)authentication;
-            String fetches = " left join fetch el.user " +
-                    " left join fetch el.identifier ";
-
-            Token token = idObjectService.getObjectById(Token.class, fetches, tokenAuthentication.getToken());
+            TokenBasedAuthentication tokenBasedAuthentication = (TokenBasedAuthentication)authentication;
+            Token token = idObjectService.getObjectById(Token.class, "left join fetch el.user " +
+                    "left join fetch el.identifier", tokenBasedAuthentication.getToken());
             if (token == null) {
                 throw new TokenNotFoundException("Token not found");
             }
@@ -60,23 +56,21 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
                 throw new TokenExpiredException("Token is expired");
             }
 
-            token.setLastRequest(new Date());
-            userService.updateTokenInfo(token);
+            userService.updateTokenLastRequestDate(token);
 
             User user = token.getUser();
             AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
             authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(token.getIdentifier()));
 
-            Set<GrantedAuthority> authorities = commonAuth(user, authorizedUser);
-            tokenAuthentication.setAuthenticated(true);
-            tokenAuthentication.setUserDetails(authorizedUser);
-            tokenAuthentication.setGrantedAuthorities(authorities);
-            return tokenAuthentication;
+            Set<GrantedAuthority> authorities = fillAuthorities(user, authorizedUser);
+            tokenBasedAuthentication.setAuthenticated(true);
+            tokenBasedAuthentication.setUserDetails(authorizedUser);
+            tokenBasedAuthentication.setGrantedAuthorities(authorities);
+            return tokenBasedAuthentication;
         }
     }
 
-    private Set<GrantedAuthority> commonAuth(User user, AuthorizedUser authorizedUser) {
-
+    private Set<GrantedAuthority> fillAuthorities(User user, AuthorizedUser authorizedUser) {
         //Load roles & grants
         Map<String, Object> params = new HashMap<>();
         params.put("userId", user.getId());
@@ -107,6 +101,7 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return authentication.equals(AuthenticationToken.class) || authentication.equals(TokenAuthentication.class);
+        return authentication.equals(SessionBasedAuthentication.class) ||
+                authentication.equals(TokenBasedAuthentication.class);
     }
 }

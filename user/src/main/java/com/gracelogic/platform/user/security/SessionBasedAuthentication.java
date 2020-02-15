@@ -6,23 +6,23 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.Collection;
 import java.util.UUID;
 
-public class AuthenticationToken extends UsernamePasswordAuthenticationToken {
+public class SessionBasedAuthentication extends UsernamePasswordAuthenticationToken {
     private String remoteAddress = null;
     private UUID identifierTypeId = null;
     private boolean trust = false;  //for oauth
 
-    public AuthenticationToken(Object principal, Object credentials, String remoteAddress, UUID identifierTypeId, boolean trust) {
+    public SessionBasedAuthentication(Object principal, Object credentials, String remoteAddress, UUID identifierTypeId, boolean trust) {
         super(principal, credentials);
         this.remoteAddress = remoteAddress;
         this.identifierTypeId = identifierTypeId;
         this.trust = trust;
     }
 
-    public AuthenticationToken(Object principal, Object credentials) {
+    public SessionBasedAuthentication(Object principal, Object credentials) {
         super(principal, credentials);
     }
 
-    public AuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities, String remoteAddress, UUID identifierTypeId, boolean trust) {
+    public SessionBasedAuthentication(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities, String remoteAddress, UUID identifierTypeId, boolean trust) {
         super(principal, credentials, authorities);
         this.remoteAddress = remoteAddress;
         this.identifierTypeId = identifierTypeId;

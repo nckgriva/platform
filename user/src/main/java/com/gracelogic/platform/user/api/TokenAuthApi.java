@@ -4,8 +4,12 @@ package com.gracelogic.platform.user.api;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.AuthRequestDTO;
+import com.gracelogic.platform.user.dto.AuthorizedUser;
+import com.gracelogic.platform.user.dto.IdentifierDTO;
 import com.gracelogic.platform.user.dto.TokenDTO;
-import com.gracelogic.platform.user.dto.UserDTO;
+import com.gracelogic.platform.user.model.Token;
+import com.gracelogic.platform.user.model.User;
+import com.gracelogic.platform.user.service.UserLifecycleService;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.ServletUtils;
 import com.gracelogic.platform.web.dto.EmptyResponse;
@@ -15,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,12 +31,15 @@ import javax.servlet.http.HttpServletResponse;
 @Controller
 @RequestMapping(value = Path.API_AUTH_TOKEN)
 @Secured(PlatformRole.ANONYMOUS)
-@Api(value = Path.API_AUTH_TOKEN, tags = {"Auth API"},
+@Api(value = Path.API_AUTH_TOKEN, tags = {"Token Auth API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class TokenAuthApi {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserLifecycleService lifecycleService;
 
     @ApiOperation(
             value = "signIn",
@@ -49,10 +55,16 @@ public class TokenAuthApi {
             @ApiResponse(code = 510, message = "Not allowed IP"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/sign-in", method = RequestMethod.POST)
-    public ResponseEntity login(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
+    public ResponseEntity signIn(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
         try {
-            TokenDTO tokenDTO = userService.login(authRequestDTO, ServletUtils.getRemoteAddress(request));
-            return new ResponseEntity<TokenDTO>(tokenDTO, HttpStatus.OK);
+            Token token = userService.establishToken(authRequestDTO, ServletUtils.getRemoteAddress(request));
+
+            User user = token.getIdentifier().getUser();
+            AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
+            authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(token.getIdentifier()));
+            lifecycleService.signIn(authorizedUser);
+
+            return new ResponseEntity<TokenDTO>(new TokenDTO(token.getId()), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<ErrorResponse>(HttpStatus.BAD_REQUEST);
         }
@@ -69,9 +81,9 @@ public class TokenAuthApi {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/sign-out", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity logout(@RequestBody TokenDTO tokenDTO) {
+    public ResponseEntity signOut(@RequestBody TokenDTO tokenDTO) {
         try {
-            userService.logout(tokenDTO);
+            userService.deactivateToken(tokenDTO);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception ignored) {
             return new ResponseEntity<ErrorResponse>(HttpStatus.BAD_REQUEST);

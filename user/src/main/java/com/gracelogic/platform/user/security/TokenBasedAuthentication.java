@@ -1,23 +1,21 @@
-package com.gracelogic.platform.user.security.tokenAuth;
+package com.gracelogic.platform.user.security;
 
 
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.UUID;
 
-public class TokenAuthentication implements Authentication {
-
+public class TokenBasedAuthentication implements Authentication {
     private UUID token;
     private boolean isAuthenticated;
     private AuthorizedUser authorizedUser;
     private Collection<? extends GrantedAuthority> grantedAuthorities;
 
 
-    public TokenAuthentication(UUID token) {
+    public TokenBasedAuthentication(UUID token) {
         this.token = token;
     }
 

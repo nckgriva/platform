@@ -6,7 +6,7 @@ import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.*;
-import com.gracelogic.platform.user.security.AuthenticationToken;
+import com.gracelogic.platform.user.security.SessionBasedAuthentication;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -15,7 +15,7 @@ import java.util.*;
 public interface UserService {
     void changeUserPassword(UUID userId, String newPassword);
 
-    UserSession updateSessionInfo(HttpSession session, AuthenticationToken authenticationToken, String userAgent, boolean isDestroying);
+    UserSession updateSessionInfo(HttpSession session, SessionBasedAuthentication sessionBasedAuthentication, String userAgent, boolean isDestroying);
 
     void changePasswordViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode, String newPassword) throws ObjectNotFoundException, InvalidPassphraseException;
 
@@ -81,9 +81,9 @@ public interface UserService {
 
     void verifyIdentifierViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode) throws ObjectNotFoundException, InvalidPassphraseException;
 
-    TokenDTO login(AuthRequestDTO authRequestDTO, String remoteAddress);
+    void updateTokenLastRequestDate(Token newToken);
 
-    void updateTokenInfo(Token newToken);
+    Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress);
 
-    void logout(TokenDTO tokenDTO);
+    void deactivateToken(TokenDTO tokenDTO);
 }
