@@ -76,4 +76,18 @@ public class DataConstants {
             return value;
         }
     }
+
+    public enum TokenTypes {
+        ACTIVE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        EXPIRED(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72"));
+        private UUID value;
+
+        TokenTypes(UUID value) {
+            this.value = value;
+        }
+
+        public UUID getValue() {
+            return value;
+        }
+    }
 }

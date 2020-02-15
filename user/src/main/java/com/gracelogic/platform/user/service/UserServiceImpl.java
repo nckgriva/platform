@@ -17,13 +17,14 @@ import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.filter.LocaleFilter;
 import com.gracelogic.platform.user.model.*;
-import com.gracelogic.platform.user.security.AuthenticationToken;
+import com.gracelogic.platform.user.security.SessionBasedAuthentication;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,16 +100,16 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public UserSession updateSessionInfo(HttpSession session, AuthenticationToken authenticationToken, String userAgent, boolean isDestroying) {
+    public UserSession updateSessionInfo(HttpSession session, SessionBasedAuthentication sessionBasedAuthentication, String userAgent, boolean isDestroying) {
         if (session != null && !StringUtils.isEmpty(session.getId())) {
-            AuthenticationToken authentication = null;
+            SessionBasedAuthentication authentication = null;
             try {
-                authentication = (AuthenticationToken) ((org.springframework.security.core.context.SecurityContextImpl) session.getAttribute("SPRING_SECURITY_CONTEXT")).getAuthentication();
+                authentication = (SessionBasedAuthentication) ((org.springframework.security.core.context.SecurityContextImpl) session.getAttribute("SPRING_SECURITY_CONTEXT")).getAuthentication();
             } catch (Exception ignored) {
             }
 
             if (authentication == null) {
-                authentication = authenticationToken;
+                authentication = sessionBasedAuthentication;
             }
 
             if (authentication != null && authentication.getDetails() != null && authentication.getDetails() instanceof AuthorizedUser) {
@@ -1002,5 +1003,36 @@ public class UserServiceImpl implements UserService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress) {
+        Identifier identifier = processSignIn(authRequestDTO.getIdentifierTypeId(), authRequestDTO.getIdentifierValue(), authRequestDTO.getPassword(), remoteAddress);
+        if (identifier == null) {
+            throw new InvalidIdentifierException("Identifier not found");
+        }
+        Token token = new Token();
+        token.setUser(identifier.getUser());
+        token.setLastRequest(new Date());
+        token.setActive(true);
+        token.setIdentifier(identifier);
+        token = idObjectService.save(token);
+
+        return token;
+    }
+
+    @Override
+    @Transactional
+    public void updateTokenLastRequestDate(Token newToken) {
+        newToken.setLastRequest(new Date());
+        idObjectService.save(newToken);
+    }
+
+    @Override
+    @Transactional
+    public void deactivateToken(TokenDTO tokenDTO) {
+        idObjectService.updateFieldValue(Token.class, tokenDTO.getToken(), "active", false);
+        SecurityContextHolder.clearContext();
     }
 }

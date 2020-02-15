@@ -15,8 +15,6 @@ public class ServletUtils {
     private static Logger logger = Logger.getLogger(ServletUtils.class);
 
     public static String getRemoteAddress(HttpServletRequest request) {
-        //TODO: Брать бездумно заголовок X-FORWARDED-FOR - большая дыра в безопасности
-
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         if (StringUtils.isEmpty(ipAddress)) {
             ipAddress = request.getRemoteAddr();
