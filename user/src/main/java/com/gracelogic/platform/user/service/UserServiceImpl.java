@@ -525,7 +525,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
             List<Identifier> userIdentifiers = identifiers.stream().filter(o -> o.getUser().getId().equals(user.getId())).collect(Collectors.toList());
-            el.setIdentifiers(userIdentifiers.stream().map(IdentifierDTO::prepare).collect(Collectors.toList()));
+            el.setIdentifiers(userIdentifiers.stream().map(o -> IdentifierDTO.prepare(o, false)).collect(Collectors.toList()));
             entityListResponse.addData(el);
         }
 
@@ -538,11 +538,14 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new ObjectNotFoundException();
         }
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+
+        List<Identifier> userIdentifiers = idObjectService.getList(Identifier.class, " left join fetch el.identifierType ", "el.user.id=:userId", params, null, null, null, null);
 
         UserDTO el = UserDTO.prepare(user);
+        el.setIdentifiers(userIdentifiers.stream().map(o -> IdentifierDTO.prepare(o, true)).collect(Collectors.toList()));
         if (fetchRoles) {
-            Map<String, Object> params = new HashMap<>();
-            params.put("userId", userId);
             List<UserRole> userRoles = idObjectService.getList(UserRole.class, null, "el.user.id=:userId", params, null, null, null, null);
             for (UserRole ur : userRoles) {
                 if (ur.getUser().getId().equals(userId)) {

@@ -12,6 +12,7 @@ public class IdentifierDTO extends IdObjectDTO implements Serializable {
     private Boolean primary;
     private UUID identifierTypeId;
     private UUID userId;
+    private String identifierTypeName;
 
     public String getValue() {
         return value;
@@ -53,7 +54,15 @@ public class IdentifierDTO extends IdObjectDTO implements Serializable {
         this.userId = userId;
     }
 
-    public static IdentifierDTO prepare(Identifier model) {
+    public String getIdentifierTypeName() {
+        return identifierTypeName;
+    }
+
+    public void setIdentifierTypeName(String identifierTypeName) {
+        this.identifierTypeName = identifierTypeName;
+    }
+
+    public static IdentifierDTO prepare(Identifier model, boolean enrich) {
         IdentifierDTO dto = new IdentifierDTO();
         IdObjectDTO.prepare(dto, model);
         dto.setValue(model.getValue());
@@ -61,6 +70,9 @@ public class IdentifierDTO extends IdObjectDTO implements Serializable {
         dto.setVerified(model.getVerified());
         if (model.getIdentifierType() != null) {
             dto.setIdentifierTypeId(model.getIdentifierType().getId());
+        }
+        if (enrich) {
+            dto.setIdentifierTypeName(model.getIdentifierType().getName());
         }
         if (model.getUser() != null) {
             dto.setUserId(model.getUser().getId());

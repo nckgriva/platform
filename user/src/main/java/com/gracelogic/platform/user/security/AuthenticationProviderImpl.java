@@ -33,7 +33,7 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
             if (identifier != null) {
                 User user = identifier.getUser();
                 AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
-                authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(identifier));
+                authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(identifier, false));
                 Set<GrantedAuthority> authorities = fillAuthorities(user, authorizedUser);
                 authentication = new SessionBasedAuthentication(authentication.getPrincipal(), authentication.getCredentials(), authorities, ((SessionBasedAuthentication) authentication).getRemoteAddress(), ((SessionBasedAuthentication) authentication).getIdentifierTypeId(), false);
 
@@ -60,7 +60,7 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
 
             User user = token.getUser();
             AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
-            authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(token.getIdentifier()));
+            authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(token.getIdentifier(), false));
 
             Set<GrantedAuthority> authorities = fillAuthorities(user, authorizedUser);
             tokenBasedAuthentication.setAuthenticated(true);

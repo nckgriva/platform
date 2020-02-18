@@ -61,7 +61,7 @@ public class TokenAuthApi {
 
             User user = token.getIdentifier().getUser();
             AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
-            authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(token.getIdentifier()));
+            authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(token.getIdentifier(), false));
             lifecycleService.signIn(authorizedUser);
 
             return new ResponseEntity<TokenDTO>(new TokenDTO(token.getId()), HttpStatus.OK);
