@@ -326,7 +326,7 @@ public class UserServiceImpl implements UserService {
             idObjectService.save(identifier);
         }
 
-        idObjectService.delete(IncorrectAuthAttempt.class, "el.identifier.user.id=:userId", params);
+        idObjectService.delete(IncorrectAuthAttempt.class, "el.user.id=:userId", params);
         idObjectService.delete(Passphrase.class, "el.user.id=:userId", params);
         idObjectService.delete(UserSession.class, "el.user.id=:userId", params);
         idObjectService.delete(UserRole.class, "el.user.id=:userId", params);
