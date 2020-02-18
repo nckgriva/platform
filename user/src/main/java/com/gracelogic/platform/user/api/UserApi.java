@@ -98,8 +98,8 @@ public class UserApi extends AbstractAuthorizedController {
                                    @ApiParam(name = "fetchRoles", value = "fetchRoles") @RequestParam(value = "fetchRoles", required = false) Boolean fetchRoles,
                                    @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                    @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
-                                   @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sort", required = false, defaultValue = "el.created") String sortField,
-                                   @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sort", required = false, defaultValue = "el.created") String sortDir,
+                                   @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                   @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
                                     @ApiParam(name = "fields", value = "fields") @RequestParam Map<String, String> allRequestParams) {
 
         Map<String, String> fields = new HashMap<String, String>();

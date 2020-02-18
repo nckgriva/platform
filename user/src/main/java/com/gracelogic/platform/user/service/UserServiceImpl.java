@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service("userService")
 public class UserServiceImpl implements UserService {
@@ -507,23 +508,24 @@ public class UserServiceImpl implements UserService {
         EntityListResponse<UserDTO> entityListResponse = new EntityListResponse<UserDTO>(totalCount, count, page, start);
         List<User> items = userDao.getUsers(identifierValue, approved, blocked, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
         List<UserRole> userRoles = Collections.emptyList();
+        List<UUID> userIds = items.stream().map(o -> o.getId()).collect(Collectors.toList());
+        Map<String, Object> params = new HashMap<>();
+        params.put("userIds", userIds);
         if (!items.isEmpty() && fetchRoles) {
-            Set<UUID> userIds = new HashSet<>();
-            for (User u : items) {
-                userIds.add(u.getId());
-            }
-            Map<String, Object> params = new HashMap<>();
-            params.put("userIds", userIds);
             userRoles = idObjectService.getList(UserRole.class, null, "el.user.id in (:userIds)", params, null, null, null);
         }
 
-        for (User e : items) {
-            UserDTO el = UserDTO.prepare(e);
+        List<Identifier> identifiers = idObjectService.getList(Identifier.class, " left join fetch el.user ", " el.user.id in (:userIds) ", params, null, null, null);
+
+        for (User user : items) {
+            UserDTO el = UserDTO.prepare(user);
             for (UserRole ur : userRoles) {
-                if (ur.getUser().getId().equals(e.getId())) {
+                if (ur.getUser().getId().equals(user.getId())) {
                     el.getRoles().add(ur.getRole().getId());
                 }
             }
+            List<Identifier> userIdentifiers = identifiers.stream().filter(o -> o.getUser().getId().equals(user.getId())).collect(Collectors.toList());
+            el.setIdentifiers(userIdentifiers.stream().map(IdentifierDTO::prepare).collect(Collectors.toList()));
             entityListResponse.addData(el);
         }
 

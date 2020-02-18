@@ -23,7 +23,7 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
     @Override
     public Integer getUsersCount(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields) {
         BigInteger count = null;
-        StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_user el " +
+        StringBuilder queryStr = new StringBuilder("select count(DISTINCT el.ID) from {h-schema}cmn_user el " +
                 "inner join {h-schema}cmn_identifier iden on el.id = iden.user_id where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
@@ -63,7 +63,7 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
     @Override
     public List<User> getUsers(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
         List<User> users = Collections.emptyList();
-        StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_user el " +
+        StringBuilder queryStr = new StringBuilder("select DISTINCT ON (el.created_dt,  el.id) * from {h-schema}cmn_user el " +
                 "inner join {h-schema}cmn_identifier iden on el.id = iden.user_id  where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
@@ -84,6 +84,8 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
                 queryStr.append(String.format("and el.fields ->> '%s' = '%s' ", key, fields.get(key)));
             }
         }
+
+        sortField+=", el.id ";
 
         appendSortClause(queryStr, sortField, sortDir);
 
