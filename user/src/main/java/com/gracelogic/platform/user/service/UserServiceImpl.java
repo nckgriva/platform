@@ -324,6 +324,10 @@ public class UserServiceImpl implements UserService {
             identifier.setVerified(false);
             identifier.setUser(null);
             idObjectService.save(identifier);
+            logger.info("Identifier: " + identifier.getId());
+            logger.info("user: " + identifier.getUser());
+            logger.info("------------------");
+
         }
 
         idObjectService.delete(IncorrectAuthAttempt.class, "el.user.id=:userId", params);
