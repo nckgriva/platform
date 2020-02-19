@@ -183,6 +183,7 @@ public class UserApi extends AbstractAuthorizedController {
             lifecycleService.delete(idObjectService.getObjectById(User.class, id));
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
+            logger.error(e.getStackTrace());
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.FAILED_TO_DELETE_USER", messageSource.getMessage("common.FAILED_TO_DELETE_USER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
