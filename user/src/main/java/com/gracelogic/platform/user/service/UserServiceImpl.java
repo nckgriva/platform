@@ -331,6 +331,7 @@ public class UserServiceImpl implements UserService {
         idObjectService.delete(UserSession.class, "el.user.id=:userId", params);
         idObjectService.delete(UserRole.class, "el.user.id=:userId", params);
         idObjectService.delete(UserSetting.class, "el.user.id=:userId", params);
+        idObjectService.delete(Token.class, "el.user.id=:userId", params);
         idObjectService.delete(User.class, user.getId());
     }
 
