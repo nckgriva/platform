@@ -318,24 +318,13 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(User user) {
         HashMap<String, Object> params = new HashMap<>();
         params.put("userId", user.getId());
-
-        List<Identifier> identifiers = idObjectService.getList(Identifier.class, null, "el.user.id=:userId", params, null, null, null);
-        for (Identifier identifier : identifiers) {
-            identifier.setVerified(false);
-            identifier.setUser(null);
-            idObjectService.save(identifier);
-            logger.info("Identifier: " + identifier.getId());
-            logger.info("user: " + identifier.getUser());
-            logger.info("------------------");
-
-        }
-
         idObjectService.delete(IncorrectAuthAttempt.class, "el.user.id=:userId", params);
         idObjectService.delete(Passphrase.class, "el.user.id=:userId", params);
         idObjectService.delete(UserSession.class, "el.user.id=:userId", params);
         idObjectService.delete(UserRole.class, "el.user.id=:userId", params);
         idObjectService.delete(UserSetting.class, "el.user.id=:userId", params);
         idObjectService.delete(Token.class, "el.user.id=:userId", params);
+        idObjectService.delete(Identifier.class, "el.user.id=:userId", params);
         idObjectService.delete(User.class, user.getId());
     }
 
