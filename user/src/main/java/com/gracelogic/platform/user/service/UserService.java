@@ -27,11 +27,13 @@ public interface UserService {
 
     void addRoleToUser(User user, Collection<UUID> roleIds);
 
-    User saveUser(UserDTO user, boolean mergeRoles, AuthorizedUser executor) throws ObjectNotFoundException;
+    User saveUser(UserDTO user, boolean mergeRoles, boolean mergeIdentifiers, AuthorizedUser executor) throws ObjectNotFoundException;
 
     List<UserRole> getUserRoles(UUID userId);
 
     void mergeUserRoles(UUID userId, Collection<UUID> activeRoles);
+
+    void mergeUserIdentifiers(UUID userId, Collection<IdentifierDTO> identifierDTOList);
 
     EntityListResponse<UserDTO> getUsersPaged(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
 

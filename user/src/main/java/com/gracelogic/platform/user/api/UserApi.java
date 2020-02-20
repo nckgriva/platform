@@ -158,7 +158,7 @@ public class UserApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity saveUser(@ApiParam(name = "user", value = "user") @RequestBody UserDTO userDTO) {
         try {
-            User user = lifecycleService.save(userDTO, true, getUser());
+            User user = lifecycleService.save(userDTO, true, true, getUser());
             return new ResponseEntity<IDResponse>(new IDResponse(user.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);

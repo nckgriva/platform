@@ -62,6 +62,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private TemplateService templateService;
 
+
+
     @PostConstruct
     private void init() {
         //Load user name format
@@ -390,7 +392,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User saveUser(UserDTO userDTO, boolean mergeRoles, AuthorizedUser executor) throws ObjectNotFoundException {
+    public User saveUser(UserDTO userDTO, boolean mergeRoles, boolean mergeIdentifiers, AuthorizedUser executor) throws ObjectNotFoundException {
         if (userDTO.getId() == null) {
             throw new ObjectNotFoundException();
         }
@@ -419,6 +421,10 @@ public class UserServiceImpl implements UserService {
 
         if (mergeRoles) {
             mergeUserRoles(user.getId(), userDTO.getRoles());
+        }
+
+        if (mergeIdentifiers) {
+            mergeUserIdentifiers(user.getId(), userDTO.getIdentifiers());
         }
 
         return user;
@@ -458,6 +464,40 @@ public class UserServiceImpl implements UserService {
                 userRole.setUser(user);
                 userRole.setRole(idObjectService.getObjectById(Role.class, roleId));
                 idObjectService.save(userRole);
+            }
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void mergeUserIdentifiers(UUID userId, Collection<IdentifierDTO> identifierDTOList) {
+        User user = idObjectService.getObjectById(User.class, userId);
+        Set<UUID> currentIdentifiers = new HashSet<>();
+        for (IdentifierDTO dto : identifierDTOList) {
+            if (dto.getId() != null) currentIdentifiers.add(dto.getId());
+        }
+
+        //Delete non-active identifier
+        String query = "el.user.id=:userId ";
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        if (!currentIdentifiers.isEmpty()) {
+            query += "and el.id not in (:identifiers) ";
+            params.put("identifiers", currentIdentifiers);
+        }
+        idObjectService.delete(Identifier.class, query, params);
+
+        //Add active identifier
+        for (IdentifierDTO dto : identifierDTOList) {
+            if (dto.getId() == null && isIdentifierValid(dto.getIdentifierTypeId(), dto.getValue())) {
+                Identifier identifier = new Identifier();
+                identifier.setId(dto.getId());
+                identifier.setUser(user);
+                identifier.setIdentifierType(ds.get(IdentifierType.class, dto.getIdentifierTypeId()));
+                identifier.setPrimary(dto.getPrimary());
+                identifier.setVerified(dto.getVerified());
+                identifier.setValue(dto.getValue());
+                idObjectService.save(identifier);
             }
         }
     }
