@@ -62,7 +62,7 @@ public class TaskDTO extends IdObjectDTO {
         this.active = active;
     }
 
-    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.ALWAYS)
     @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getLastExecutionDate() {
         return lastExecutionDate;

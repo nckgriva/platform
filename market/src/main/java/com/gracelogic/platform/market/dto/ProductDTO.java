@@ -130,7 +130,7 @@ public class ProductDTO extends IdObjectDTO {
         this.ownershipTypeName = ownershipTypeName;
     }
 
-    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.ALWAYS)
     @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getLifetimeExpiration() {
         return lifetimeExpiration;

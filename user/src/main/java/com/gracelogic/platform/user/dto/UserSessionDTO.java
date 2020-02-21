@@ -40,7 +40,7 @@ public class UserSessionDTO extends IdObjectDTO {
         this.sessionId = sessionId;
     }
 
-    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.ALWAYS)
     @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getSessionCreatedDt() {
         return sessionCreatedDt;
@@ -58,7 +58,7 @@ public class UserSessionDTO extends IdObjectDTO {
         this.maxInactiveInterval = maxInactiveInterval;
     }
 
-    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.ALWAYS)
     @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getLastAccessDt() {
         return lastAccessDt;

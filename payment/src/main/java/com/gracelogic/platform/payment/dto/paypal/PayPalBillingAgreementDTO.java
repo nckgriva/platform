@@ -42,7 +42,7 @@ public class PayPalBillingAgreementDTO {
         this.description = description;
     }
 
-    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.ALWAYS)
     @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getStart_date() {
         return start_date;

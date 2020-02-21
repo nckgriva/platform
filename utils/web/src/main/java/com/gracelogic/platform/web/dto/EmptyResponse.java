@@ -2,7 +2,7 @@ package com.gracelogic.platform.web.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+@JsonSerialize(include= JsonSerialize.Inclusion.ALWAYS)
 public class EmptyResponse extends PlatformResponse {
     private static final EmptyResponse emptyResponse = new EmptyResponse();
 

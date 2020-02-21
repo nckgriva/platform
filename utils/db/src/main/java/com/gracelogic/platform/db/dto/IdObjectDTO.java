@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
-//@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
+//@JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS)
 public class IdObjectDTO implements Serializable {
     private UUID id;
     private Date created;
@@ -22,7 +22,7 @@ public class IdObjectDTO implements Serializable {
         this.id = id;
     }
 
-    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.ALWAYS)
     @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getCreated() {
         return created;
@@ -32,7 +32,7 @@ public class IdObjectDTO implements Serializable {
         this.created = created;
     }
 
-    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.NON_NULL)
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.ALWAYS)
     @JsonDeserialize(using = JsonDateDeserializer.class)
     public Date getChanged() {
         return changed;
