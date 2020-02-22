@@ -471,32 +471,38 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void mergeUserIdentifiers(User user, Collection<IdentifierDTO> identifierDTOList, boolean throwExceptionIfAlreadyAttached) {
-        Set<UUID> currentIdentifiers = new HashSet<>();
-        Map<UUID, Identifier> activeIdentifierMap = new HashMap<>();
-        for (IdentifierDTO dto : identifierDTOList) {
-            if (dto.getId() != null) currentIdentifiers.add(dto.getId());
-        }
 
-        //Delete non-active identifier
-        String query = "el.user.id=:userId ";
-        String notActiveIdentifierQuery = "";
+        // get existing identifiers list
         HashMap<String, Object> params = new HashMap<>();
+        String cause = " el.user.id = :userId ";
         params.put("userId", user.getId());
-        idObjectService.delete(Token.class, " el.identifier.id in (:identifiers)");
-        idObjectService.delete(UserSession.class, " el.identifier.id in (:identifiers)");
-        idObjectService.delete(IncorrectAuthAttempt.class, " el.identifier.id in (:identifiers)");
+        List<Identifier> existingIdentifierList = idObjectService.getList(Identifier.class, null, cause, params, null, null, null);
+        Map<UUID, Identifier> existingIdentifierMap = existingIdentifierList.stream().collect(Collectors.toMap(Identifier::getId, o -> o));
 
-        if (!currentIdentifiers.isEmpty()) {
-            notActiveIdentifierQuery =  query + "and el.id not in (:identifiers) ";
+        if (!existingIdentifierList.isEmpty()) {
+            Set<UUID> currentIdentifiers = new HashSet<>();
+            for (IdentifierDTO dto : identifierDTOList) {
+                if (dto.getId() != null) currentIdentifiers.add(dto.getId());
+            }
+
+            //Delete non-active identifier
+            String notActiveIdentifierQuery = "";
             params.put("identifiers", currentIdentifiers);
-            idObjectService.delete(Identifier.class, notActiveIdentifierQuery, params);
 
-            // Get active identifier
-            String activeIdentifierQuery = query + "and el.id in (:identifiers) ";
-            List<Identifier> activeIdentifierList = idObjectService.getList(Identifier.class, null, activeIdentifierQuery, params, null, null, null);
-            activeIdentifierMap = activeIdentifierList.stream().collect(Collectors.toMap(Identifier::getId, o -> o));
+            if (!currentIdentifiers.isEmpty()) {
+                notActiveIdentifierQuery =  cause + "and el.id not in (:identifiers) ";
+                params.put("identifiers", currentIdentifiers);
+                idObjectService.delete(Token.class, " el.identifier.id in (:identifiers)");
+                idObjectService.delete(UserSession.class, " el.identifier.id in (:identifiers)");
+                idObjectService.delete(IncorrectAuthAttempt.class, " el.identifier.id in (:identifiers)");
+                idObjectService.delete(Identifier.class, notActiveIdentifierQuery, params);
+
+                // Get active identifier
+                List<Identifier> activeIdentifierList = existingIdentifierList.stream().filter(o -> currentIdentifiers.contains(o.getId())).collect(Collectors.toList());
+                existingIdentifierMap = activeIdentifierList.stream().collect(Collectors.toMap(Identifier::getId, o -> o));
+            }
+
         }
-
 
         //Add active identifier
         for (IdentifierDTO dto : identifierDTOList) {
@@ -504,7 +510,7 @@ public class UserServiceImpl implements UserService {
                 throw new InvalidIdentifierException(dto.getValue());
             }
 
-            Identifier identifier = dto.getId() != null ? activeIdentifierMap.get(dto.getId()) : null;
+            Identifier identifier = dto.getId() != null ? existingIdentifierMap.get(dto.getId()) : null;
 
             if (identifier != null && identifier.getVerified() && identifier.getUser() != null && !identifier.getUser().getId().equals(user.getId())) {
                 if (throwExceptionIfAlreadyAttached) {
@@ -523,7 +529,7 @@ public class UserServiceImpl implements UserService {
             identifier.setPrimary(dto.getPrimary() != null ? dto.getPrimary() : false);
             identifier.setValue(dto.getValue());
             identifier.setIdentifierType(identifierType);
-            identifier.setVerified(dto.getVerified());
+            identifier.setVerified(identifier.getId() != null ? dto.getVerified() : identifierType.getAutomaticVerification());
 
             idObjectService.save(identifier);
         }
