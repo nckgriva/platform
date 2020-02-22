@@ -523,7 +523,7 @@ public class UserServiceImpl implements UserService {
             identifier.setPrimary(dto.getPrimary() != null ? dto.getPrimary() : false);
             identifier.setValue(dto.getValue());
             identifier.setIdentifierType(identifierType);
-            identifier.setVerified(identifierType.getAutomaticVerification());
+            identifier.setVerified(dto.getVerified());
 
             idObjectService.save(identifier);
         }
