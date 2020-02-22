@@ -541,7 +541,7 @@ public class UserServiceImpl implements UserService {
             IdentifierType identifierType = ds.get(IdentifierType.class, dto.getIdentifierTypeId());
             identifier.setIdentifierType(identifierType);
             if (isNewUser) {
-                identifier.setVerified(identifierType.getAutomaticVerification());
+                identifier.setVerified(!identifierType.getAutomaticVerification());
             } else {
                 identifier.setVerified(dto.getVerified() != null ? dto.getVerified() : false);
             }
