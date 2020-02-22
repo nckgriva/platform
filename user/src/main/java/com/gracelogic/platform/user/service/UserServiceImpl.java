@@ -416,8 +416,7 @@ public class UserServiceImpl implements UserService {
             user.setBlockedByUser(null);
         }
 
-        if (!StringUtils.isEmpty(userDTO.getAuthScheduleCronExpression()) &&
-                CronExpression.isValidExpression(userDTO.getAuthScheduleCronExpression())) {
+        if (StringUtils.isEmpty(userDTO.getAuthScheduleCronExpression()) || CronExpression.isValidExpression(userDTO.getAuthScheduleCronExpression())) {
             user.setAuthScheduleCronExpression(userDTO.getAuthScheduleCronExpression());
         }
         user.setBlockAfterDt(userDTO.getBlockAfterDt());
