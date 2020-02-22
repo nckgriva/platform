@@ -62,7 +62,7 @@ public class IdentifierDTO extends IdObjectDTO implements Serializable {
         this.identifierTypeName = identifierTypeName;
     }
 
-    public static IdentifierDTO prepare(Identifier model, boolean enrich) {
+    public static IdentifierDTO prepare(Identifier model) {
         IdentifierDTO dto = new IdentifierDTO();
         IdObjectDTO.prepare(dto, model);
         dto.setValue(model.getValue());
@@ -71,12 +71,15 @@ public class IdentifierDTO extends IdObjectDTO implements Serializable {
         if (model.getIdentifierType() != null) {
             dto.setIdentifierTypeId(model.getIdentifierType().getId());
         }
-        if (enrich) {
-            dto.setIdentifierTypeName(model.getIdentifierType().getName());
-        }
         if (model.getUser() != null) {
             dto.setUserId(model.getUser().getId());
         }
+        return dto;
+    }
+
+    public static IdentifierDTO enrich(IdentifierDTO dto, Identifier model) {
+        dto.setIdentifierTypeName(model.getIdentifierType().getName());
+
         return dto;
     }
 }

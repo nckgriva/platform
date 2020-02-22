@@ -33,7 +33,7 @@ public interface UserService {
 
     void mergeUserRoles(UUID userId, Collection<UUID> activeRoles);
 
-    void mergeUserIdentifiers(User user, Collection<IdentifierDTO> identifierDTOList, boolean throwExceptionIfAlreadyAttached);
+    void mergeUserIdentifiers(User user, boolean isNewUser, Collection<IdentifierDTO> identifierDTOList, boolean throwExceptionIfAlreadyAttached);
 
     EntityListResponse<UserDTO> getUsersPaged(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
 

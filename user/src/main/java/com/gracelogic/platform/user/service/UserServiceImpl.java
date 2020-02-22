@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service("userService")
 public class UserServiceImpl implements UserService {
@@ -61,7 +60,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private TemplateService templateService;
-
 
 
     @PostConstruct
@@ -282,7 +280,6 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
     private static Integer generateCode() {
         Random random = new Random();
         int rage = 999999;
@@ -309,7 +306,7 @@ public class UserServiceImpl implements UserService {
         signUpDTO.getIdentifiers().add(identifierDTO);
 
 
-        mergeUserIdentifiers(user, signUpDTO.getIdentifiers(),true);
+        mergeUserIdentifiers(user, true, signUpDTO.getIdentifiers(), true);
         updatePassphrase(user, signUpDTO.getPassword(), DataConstants.PassphraseTypes.USER_PASSWORD.getValue(), user.getId(), false);
 
         return user;
@@ -424,7 +421,11 @@ public class UserServiceImpl implements UserService {
         }
 
         if (mergeIdentifiers) {
-            mergeUserIdentifiers(user, userDTO.getIdentifiers(), true);
+            mergeUserIdentifiers(user, false, userDTO.getIdentifiers(), true);
+        }
+
+        if (!StringUtils.isEmpty(userDTO.getPassword())) {
+            changeUserPassword(user.getId(), userDTO.getPassword());
         }
 
         return user;
@@ -468,69 +469,85 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public void mergeUserIdentifiers(User user, Collection<IdentifierDTO> identifierDTOList, boolean throwExceptionIfAlreadyAttached) {
-
-        // get existing identifiers list
-        HashMap<String, Object> params = new HashMap<>();
-        String cause = " el.user.id = :userId ";
-        params.put("userId", user.getId());
-        List<Identifier> existingIdentifierList = idObjectService.getList(Identifier.class, null, cause, params, null, null, null);
-        Map<UUID, Identifier> existingIdentifierMap = existingIdentifierList.stream().collect(Collectors.toMap(Identifier::getId, o -> o));
-
-        if (!existingIdentifierList.isEmpty()) {
-            Set<UUID> currentIdentifiers = new HashSet<>();
-            for (IdentifierDTO dto : identifierDTOList) {
-                if (dto.getId() != null) currentIdentifiers.add(dto.getId());
-            }
-
-            //Delete non-active identifier
-            String notActiveIdentifierQuery = "";
-            params.put("identifiers", currentIdentifiers);
-
-            if (!currentIdentifiers.isEmpty()) {
-                notActiveIdentifierQuery =  cause + "and el.id not in (:identifiers) ";
-                params.put("identifiers", currentIdentifiers);
-                idObjectService.delete(Token.class, " el.identifier.id in (:identifiers)");
-                idObjectService.delete(UserSession.class, " el.identifier.id in (:identifiers)");
-                idObjectService.delete(IncorrectAuthAttempt.class, " el.identifier.id in (:identifiers)");
-                idObjectService.delete(Identifier.class, notActiveIdentifierQuery, params);
-
-                // Get active identifier
-                List<Identifier> activeIdentifierList = existingIdentifierList.stream().filter(o -> currentIdentifiers.contains(o.getId())).collect(Collectors.toList());
-                existingIdentifierMap = activeIdentifierList.stream().collect(Collectors.toMap(Identifier::getId, o -> o));
-            }
-
+    public void deleteIdentifiersCascade(Set<UUID> identifierIds) {
+        if (identifierIds.isEmpty()) {
+            return;
         }
 
-        //Add active identifier
-        for (IdentifierDTO dto : identifierDTOList) {
-            if (!isIdentifierValid(dto.getIdentifierTypeId(), dto.getValue())) {
-                throw new InvalidIdentifierException(dto.getValue());
-            }
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("identifierIds", identifierIds);
 
-            Identifier identifier = dto.getId() != null ? existingIdentifierMap.get(dto.getId()) : null;
+        idObjectService.delete(Token.class, "el.identifier.id in (:identifierIds)", params);
+        idObjectService.delete(UserSession.class, " el.identifier.id in (:identifierIds)", params);
+        idObjectService.delete(IncorrectAuthAttempt.class, " el.identifier.id in (:identifierIds)", params);
+        idObjectService.delete(Identifier.class, "el.id in (:identifierIds)", params);
+    }
 
-            if (identifier != null && identifier.getVerified() && identifier.getUser() != null && !identifier.getUser().getId().equals(user.getId())) {
-                if (throwExceptionIfAlreadyAttached) {
-                    throw new InvalidIdentifierException();
-                } else {
-                    continue;
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void mergeUserIdentifiers(User user, boolean isNewUser, Collection<IdentifierDTO> identifierDTOs, boolean throwExceptionIfAlreadyAttached) {
+        List<Identifier> existingIdentifiers = Collections.emptyList();
+        if (!isNewUser) {
+            Set<UUID> toDelete = new HashSet<>();
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("userId", user.getId());
+            existingIdentifiers = idObjectService.getList(Identifier.class, null, "el.user.id = :userId", params, null, null, null);
+
+            for (Identifier identifier : existingIdentifiers) {
+                boolean found = false;
+                for (IdentifierDTO dto : identifierDTOs) {
+                    if (dto.getId() != null && dto.getId().equals(identifier.getId())) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    toDelete.add(identifier.getId());
                 }
             }
+            deleteIdentifiersCascade(toDelete);
+        }
 
-            if (identifier == null) {
+        for (IdentifierDTO dto : identifierDTOs) {
+            if (!isIdentifierValid(dto.getIdentifierTypeId(), dto.getValue())) {
+                throw new InvalidIdentifierException("Identifier value is not valid: " + dto.getValue());
+            }
+
+            Identifier identifier = null;
+            if (dto.getId() != null) {
+                for (Identifier i : existingIdentifiers) {
+                    if (dto.getId().equals(i.getId())) {
+                        identifier = i;
+                        break;
+                    }
+                }
+                if (identifier == null) {
+                    Identifier nonCurrentUserIdentifier = idObjectService.getObjectById(Identifier.class, dto.getId());
+                    if (nonCurrentUserIdentifier != null) {
+                        if (nonCurrentUserIdentifier.getUser() == null || !nonCurrentUserIdentifier.getVerified()) {
+                            identifier = nonCurrentUserIdentifier;
+                        } else {
+                            throw new InvalidIdentifierException("Identifier is already used: " + nonCurrentUserIdentifier.getId());
+                        }
+                    } else {
+                        throw new InvalidIdentifierException("Identifier not found by id: " + dto.getId());
+                    }
+                }
+            } else {
                 identifier = new Identifier();
             }
 
             IdentifierType identifierType = ds.get(IdentifierType.class, dto.getIdentifierTypeId());
-            identifier.setUser(user);
-            identifier.setPrimary(dto.getPrimary() != null ? dto.getPrimary() : false);
-            identifier.setValue(dto.getValue());
             identifier.setIdentifierType(identifierType);
-            identifier.setVerified(identifier.getId() != null ? dto.getVerified() : identifierType.getAutomaticVerification());
-
+            if (isNewUser) {
+                identifier.setVerified(identifierType.getAutomaticVerification());
+            } else {
+                identifier.setVerified(dto.getVerified() != null ? dto.getVerified() : false);
+            }
+            identifier.setPrimary(dto.getPrimary() != null ? dto.getPrimary() : false);
+            identifier.setUser(user);
+            identifier.setValue(dto.getValue());
             idObjectService.save(identifier);
         }
     }
@@ -573,26 +590,40 @@ public class UserServiceImpl implements UserService {
         int totalCount = userDao.getUsersCount(identifierValue, approved, blocked, fields);
 
         EntityListResponse<UserDTO> entityListResponse = new EntityListResponse<UserDTO>(totalCount, count, page, start);
+
         List<User> items = userDao.getUsers(identifierValue, approved, blocked, fields, sortField, sortDir, entityListResponse.getStartRecord(), count);
-        List<UserRole> userRoles = Collections.emptyList();
-        List<UUID> userIds = items.stream().map(o -> o.getId()).collect(Collectors.toList());
-        Map<String, Object> params = new HashMap<>();
-        params.put("userIds", userIds);
-        if (!items.isEmpty() && fetchRoles) {
-            userRoles = idObjectService.getList(UserRole.class, null, "el.user.id in (:userIds)", params, null, null, null);
+        Set<UUID> userIds = new HashSet<>();
+        for (User user : items) {
+            userIds.add(user.getId());
         }
 
-        List<Identifier> identifiers = idObjectService.getList(Identifier.class, " left join fetch el.user ", " el.user.id in (:userIds) ", params, null, null, null);
+        List<UserRole> userRoles = Collections.emptyList();
+        List<Identifier> identifiers = Collections.emptyList();
+
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("userIds", userIds);
+        if (!items.isEmpty()) {
+            if (fetchRoles) {
+                userRoles = idObjectService.getList(UserRole.class, null, "el.user.id in (:userIds)", params, null, null, null);
+            }
+            identifiers = idObjectService.getList(Identifier.class, null, "el.user.id in (:userIds) ", params, null, null, null);
+        }
 
         for (User user : items) {
             UserDTO el = UserDTO.prepare(user);
+
             for (UserRole ur : userRoles) {
                 if (ur.getUser().getId().equals(user.getId())) {
                     el.getRoles().add(ur.getRole().getId());
                 }
             }
-            List<Identifier> userIdentifiers = identifiers.stream().filter(o -> o.getUser().getId().equals(user.getId())).collect(Collectors.toList());
-            el.setIdentifiers(userIdentifiers.stream().map(o -> IdentifierDTO.prepare(o, false)).collect(Collectors.toList()));
+            for (Identifier identifier : identifiers) {
+                if (identifier.getUser().getId().equals(user.getId())) {
+                    el.getIdentifiers().add(IdentifierDTO.prepare(identifier));
+                }
+            }
+
             entityListResponse.addData(el);
         }
 
@@ -607,17 +638,16 @@ public class UserServiceImpl implements UserService {
         }
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
-
-        List<Identifier> userIdentifiers = idObjectService.getList(Identifier.class, " left join fetch el.identifierType ", "el.user.id=:userId", params, null, null, null, null);
+        List<Identifier> identifiers = idObjectService.getList(Identifier.class, null, "el.user.id=:userId", params, null, null, null, null);
 
         UserDTO el = UserDTO.prepare(user);
-        el.setIdentifiers(userIdentifiers.stream().map(o -> IdentifierDTO.prepare(o, true)).collect(Collectors.toList()));
+        for (Identifier identifier : identifiers) {
+            el.getIdentifiers().add(IdentifierDTO.prepare(identifier));
+        }
         if (fetchRoles) {
             List<UserRole> userRoles = idObjectService.getList(UserRole.class, null, "el.user.id=:userId", params, null, null, null, null);
             for (UserRole ur : userRoles) {
-                if (ur.getUser().getId().equals(userId)) {
-                    el.getRoles().add(ur.getRole().getId());
-                }
+                el.getRoles().add(ur.getRole().getId());
             }
         }
         return el;
@@ -795,7 +825,8 @@ public class UserServiceImpl implements UserService {
 
             try {
                 request.getSession(false).setAttribute(LocaleFilter.SESSION_ATTRIBUTE_LOCALE, locale);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
             LocaleHolder.setLocale(l);
         }
