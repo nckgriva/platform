@@ -472,6 +472,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void mergeUserIdentifiers(User user, Collection<IdentifierDTO> identifierDTOList, boolean throwExceptionIfAlreadyAttached) {
         Set<UUID> currentIdentifiers = new HashSet<>();
+        Map<UUID, Identifier> activeIdentifierMap = new HashMap<>();
         for (IdentifierDTO dto : identifierDTOList) {
             if (dto.getId() != null) currentIdentifiers.add(dto.getId());
         }
@@ -481,19 +482,20 @@ public class UserServiceImpl implements UserService {
         String notActiveIdentifierQuery = "";
         HashMap<String, Object> params = new HashMap<>();
         params.put("userId", user.getId());
-        if (!currentIdentifiers.isEmpty()) {
-            notActiveIdentifierQuery =  query + "and el.id not in (:identifiers) ";
-            params.put("identifiers", currentIdentifiers);
-        }
         idObjectService.delete(Token.class, " el.identifier.id in (:identifiers)");
         idObjectService.delete(UserSession.class, " el.identifier.id in (:identifiers)");
         idObjectService.delete(IncorrectAuthAttempt.class, " el.identifier.id in (:identifiers)");
-        idObjectService.delete(Identifier.class, notActiveIdentifierQuery, params);
 
-        // Get active identifier
-        String activeIdentifierQuery = query + "and el.id in (:identifiers) ";
-        List<Identifier> activeIdentifierList = idObjectService.getList(Identifier.class, null, activeIdentifierQuery, params, null, null, null);
-        Map<UUID, Identifier> activeIdentifierMap = activeIdentifierList.stream().collect(Collectors.toMap(Identifier::getId, o -> o));
+        if (!currentIdentifiers.isEmpty()) {
+            notActiveIdentifierQuery =  query + "and el.id not in (:identifiers) ";
+            params.put("identifiers", currentIdentifiers);
+            idObjectService.delete(Identifier.class, notActiveIdentifierQuery, params);
+
+            // Get active identifier
+            String activeIdentifierQuery = query + "and el.id in (:identifiers) ";
+            List<Identifier> activeIdentifierList = idObjectService.getList(Identifier.class, null, activeIdentifierQuery, params, null, null, null);
+            activeIdentifierMap = activeIdentifierList.stream().collect(Collectors.toMap(Identifier::getId, o -> o));
+        }
 
 
         //Add active identifier
