@@ -77,6 +77,12 @@ public class User extends IdObject<UUID> {
     @Column(name = "LOCALE", nullable = true)
     private String locale;
 
+    @Column(name = "BLOCK_AFTER_DT", nullable = true)
+    private Date blockAfterDt;
+
+    @Column(name = "AUTH_SCHEDULE_CRON_EXPRESSION", nullable = true)
+    private String authScheduleCronExpression;
+
     @Override
     public UUID getId() {
         return id;
@@ -185,5 +191,21 @@ public class User extends IdObject<UUID> {
 
     public void setLocale(String locale) {
         this.locale = locale;
+    }
+
+    public Date getBlockAfterDt() {
+        return blockAfterDt;
+    }
+
+    public void setBlockAfterDt(Date blockAfterDt) {
+        this.blockAfterDt = blockAfterDt;
+    }
+
+    public String getAuthScheduleCronExpression() {
+        return authScheduleCronExpression;
+    }
+
+    public void setAuthScheduleCronExpression(String authScheduleCronExpression) {
+        this.authScheduleCronExpression = authScheduleCronExpression;
     }
 }

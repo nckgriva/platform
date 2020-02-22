@@ -23,6 +23,7 @@ import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.apache.log4j.Logger;
+import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -414,6 +416,12 @@ public class UserServiceImpl implements UserService {
             user.setBlockedByUser(null);
         }
 
+        if (!StringUtils.isEmpty(userDTO.getAuthScheduleCronExpression()) &&
+                CronExpression.isValidExpression(userDTO.getAuthScheduleCronExpression())) {
+            user.setAuthScheduleCronExpression(userDTO.getAuthScheduleCronExpression());
+        }
+        user.setBlockAfterDt(userDTO.getBlockAfterDt());
+
         user = idObjectService.save(user);
 
         if (mergeRoles) {
@@ -469,7 +477,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public void deleteIdentifiersCascade(Set<UUID> identifierIds) {
+    private void deleteIdentifiersCascade(Set<UUID> identifierIds) {
         if (identifierIds.isEmpty()) {
             return;
         }
@@ -930,8 +938,10 @@ public class UserServiceImpl implements UserService {
             if (!identifierType.getSignInAllowed()) {
                 throw new InvalidIdentifierException("Sign in is not allowed");
             }
-
             User user = identifier.getUser();
+            long currentTimeMillis = System.currentTimeMillis();
+            Date currentDate = new Date(currentTimeMillis);
+
             if (!user.getApproved()) {
                 throw new UserNotApprovedException();
             }
@@ -952,13 +962,22 @@ public class UserServiceImpl implements UserService {
                     throw new NotAllowedIPException();
                 }
             }
-            long currentTimeMillis = System.currentTimeMillis();
-            Date endDate = new Date(currentTimeMillis);
+
+
+            if (!StringUtils.isEmpty(user.getAuthScheduleCronExpression())) {
+                try {
+                    CronExpression cronExpression = new CronExpression(user.getAuthScheduleCronExpression());
+                    if (!cronExpression.isSatisfiedBy(currentDate)) {
+                        throw new UserBlockedException("User blocked at this time");
+                    }
+                } catch (ParseException ignored) {}
+            }
+
             Date startDate = new Date(currentTimeMillis - propertyService.getPropertyValueAsInteger("user:block_period"));
             Map<String, Object> params = new HashMap<>();
             params.put("identifierId", identifier.getId());
             params.put("startDate", startDate);
-            params.put("endDate", endDate);
+            params.put("endDate", currentDate);
             Integer attemptsToBlock = identifierType.getMaxIncorrectAuthAttempts();
             Integer checkIncorrectLoginAttempts = idObjectService.checkExist(IncorrectAuthAttempt.class, null, "el.identifier.id=:identifierId and el.created >= :startDate and el.created <= :endDate", params, attemptsToBlock);
 

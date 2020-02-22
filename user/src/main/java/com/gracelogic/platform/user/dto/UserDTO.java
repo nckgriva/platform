@@ -27,6 +27,8 @@ public class UserDTO extends IdObjectDTO implements Serializable {
     private String locale;
     private String password;
     private List<IdentifierDTO> identifiers = new LinkedList<>();
+    private Date blockAfterDt;
+    private String authScheduleCronExpression;
 
     public Boolean getApproved() {
         return approved;
@@ -87,6 +89,22 @@ public class UserDTO extends IdObjectDTO implements Serializable {
         return identifiers;
     }
 
+    public Date getBlockAfterDt() {
+        return blockAfterDt;
+    }
+
+    public void setBlockAfterDt(Date blockAfterDt) {
+        this.blockAfterDt = blockAfterDt;
+    }
+
+    public String getAuthScheduleCronExpression() {
+        return authScheduleCronExpression;
+    }
+
+    public void setAuthScheduleCronExpression(String authScheduleCronExpression) {
+        this.authScheduleCronExpression = authScheduleCronExpression;
+    }
+
     public void setIdentifiers(List<IdentifierDTO> identifiers) {
         this.identifiers = identifiers;
     }
@@ -99,6 +117,8 @@ public class UserDTO extends IdObjectDTO implements Serializable {
         userDTO.setBlocked(user.getBlocked());
         userDTO.setFormattedUserName(formatUserName(user));
         userDTO.setLocale(user.getLocale());
+        userDTO.setBlockAfterDt(user.getBlockAfterDt());
+        userDTO.setAuthScheduleCronExpression(user.getAuthScheduleCronExpression());
 
         if (!StringUtils.isEmpty(user.getFields())) {
             userDTO.setFields(JsonUtils.jsonToMap(user.getFields()));

@@ -32,7 +32,6 @@ public class TokenAuthFilter implements Filter {
 
             TokenBasedAuthentication tokenBasedAuthentication = new TokenBasedAuthentication(UUID.fromString(token));
             tokenBasedAuthentication.setAuthenticated(false);
-            //SecurityContextHolder.getContext().setAuthentication(tokenBasedAuthentication);
             try {
                 TokenBasedAuthentication authentication = (TokenBasedAuthentication) authenticationManager.authenticate(
                         tokenBasedAuthentication
