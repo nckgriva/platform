@@ -1,9 +1,13 @@
 package com.gracelogic.platform.user.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.gracelogic.platform.db.dto.IdObjectDTO;
+import com.gracelogic.platform.db.dto.JsonDateDeserializer;
+import com.gracelogic.platform.db.dto.JsonDateSerializer;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.service.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +31,9 @@ public class UserDTO extends IdObjectDTO implements Serializable {
     private String locale;
     private String password;
     private List<IdentifierDTO> identifiers = new LinkedList<>();
+
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.ALWAYS)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
     private Date blockAfterDt;
     private String authScheduleCronExpression;
 
