@@ -46,7 +46,7 @@ public class Passphrase extends IdObject<UUID> {
     private PassphraseState passphraseState;
 
     @Column(name = "REFERENCE_OBJECT_ID", nullable = false)
-    @org.hibernate.annotations.Type(type = "pg-uuid")
+    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     private UUID referenceObjectId;
 
     @Override
