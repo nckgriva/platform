@@ -1,6 +1,7 @@
 package com.gracelogic.platform.notification.email;
 
-import com.gracelogic.platform.notification.dto.Message;
+import com.gracelogic.platform.notification.service.DataConstants;
+import com.gracelogic.platform.notification.service.NotificationSender;
 import com.gracelogic.platform.property.service.PropertyService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,17 +14,18 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.util.Date;
 import java.util.Properties;
+import java.util.UUID;
 
 @Service
-public class EmailServiceImpl implements EmailService {
-    private static Logger logger = Logger.getLogger(EmailServiceImpl.class);
+public class EmailNotificationSender implements NotificationSender {
+    private static Logger logger = Logger.getLogger(EmailNotificationSender.class);
 
     @Autowired
     private PropertyService propertyService;
 
     @Override
-    public boolean sendMessage(Message message) {
-        logger.info(String.format("Sending e-mail to: %s", message.getTo()));
+    public boolean send(String source, String destination, String content) {
+        logger.info(String.format("Sending e-mail to: %s", destination));
 
         try {
             Properties p = new Properties();
@@ -40,25 +42,28 @@ public class EmailServiceImpl implements EmailService {
             };
             Session s = Session.getInstance(p, auth);
             javax.mail.Message msg = new MimeMessage(s);
-            msg.setFrom(new InternetAddress(message.getFrom()));
-            for (String e : message.getToArr()) {
-                msg.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(e));
-            }
-            msg.setSubject(message.getSubject());
+            msg.setFrom(new InternetAddress(source));
+            msg.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(destination));
+            //msg.setSubject(message.getSubject()); //TODO: Extract from content
             msg.setSentDate(new Date());
             MimeBodyPart bodyPart = new MimeBodyPart();
             Multipart body = new MimeMultipart();
-            bodyPart.setText(message.getText(), "utf-8");
+            bodyPart.setText(content, "utf-8");
             body.addBodyPart(bodyPart);
             msg.setContent(body);
 
             Transport.send(msg);
         } catch (Exception e) {
-            logger.error(String.format("Failed to send email to: %s.", message.getTo()), e);
+            logger.error(String.format("Failed to send email to: %s.", destination), e);
             return false;
         }
         logger.info("Email send successfully");
         return true;
+    }
+
+    @Override
+    public boolean supports(UUID notificationMethodId) {
+        return notificationMethodId != null && notificationMethodId.equals(DataConstants.NotificationMethods.EMAIL.getValue());
     }
 
 

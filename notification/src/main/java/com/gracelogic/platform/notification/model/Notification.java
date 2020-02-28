@@ -34,6 +34,9 @@ public class Notification extends IdObject<UUID> {
     @JoinColumn(name = "NOTIFICATION_METHOD_ID", nullable = false)
     private NotificationMethod notificationMethod;
 
+    @Column(name = "SOURCE", nullable = true)
+    private String source;
+
     @Column(name = "DESTINATION", nullable = false)
     private String destination;
 
@@ -111,5 +114,13 @@ public class Notification extends IdObject<UUID> {
 
     public void setPriority(Integer priority) {
         this.priority = priority;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 }
