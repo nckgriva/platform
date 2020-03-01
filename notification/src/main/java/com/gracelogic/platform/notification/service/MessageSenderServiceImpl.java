@@ -4,7 +4,7 @@ import com.gracelogic.platform.notification.dto.Message;
 import com.gracelogic.platform.notification.dto.SendingType;
 import com.gracelogic.platform.notification.email.EmailService;
 import com.gracelogic.platform.notification.exception.SendingException;
-import com.gracelogic.platform.notification.sms.SmsService;
+import com.gracelogic.platform.notification.service.sms.SmsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.gracelogic.platform.notification.email;
+package com.gracelogic.platform.notification.service.email;
 
 import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationSender;

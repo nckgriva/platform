@@ -1,4 +1,4 @@
-package com.gracelogic.platform.notification.sms;
+package com.gracelogic.platform.notification.service.sms;
 
 import com.gracelogic.platform.notification.dto.Message;
 import com.gracelogic.platform.property.service.PropertyService;
