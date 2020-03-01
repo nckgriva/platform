@@ -2,9 +2,6 @@ package com.gracelogic.platform.notification.dto;
 
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.notification.model.Notification;
-import com.gracelogic.platform.notification.model.NotificationMethod;
-import com.gracelogic.platform.notification.model.NotificationState;
-import com.gracelogic.platform.notification.service.DataConstants;
 
 import java.util.UUID;
 
@@ -86,7 +83,7 @@ public class NotificationDTO extends IdObjectDTO {
     public NotificationDTO() {
     }
 
-    public NotificationDTO(String source, String destination, String content, Integer priority, UUID notificationMethodId, UUID notificationStateId) {
+    public NotificationDTO(String source, String destination, String content, Integer priority, UUID notificationStateId, UUID notificationMethodId) {
         this.notificationStateId = notificationStateId;
         this.notificationMethodId = notificationMethodId;
         this.source = source;
