@@ -24,7 +24,8 @@ public class DataConstants {
     public enum NotificationStates {
         QUEUED(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
         SENT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
-        DELIVERED(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73"));
+        DELIVERED(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
+        ERROR(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74"));
 
         private UUID value;
 

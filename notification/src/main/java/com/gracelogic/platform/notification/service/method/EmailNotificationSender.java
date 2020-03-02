@@ -1,5 +1,6 @@
-package com.gracelogic.platform.notification.service.email;
+package com.gracelogic.platform.notification.service.method;
 
+import com.gracelogic.platform.notification.dto.NotificationSenderResult;
 import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationSender;
 import com.gracelogic.platform.property.service.PropertyService;
@@ -24,7 +25,7 @@ public class EmailNotificationSender implements NotificationSender {
     private PropertyService propertyService;
 
     @Override
-    public boolean send(String source, String destination, String content) {
+    public NotificationSenderResult send(String source, String destination, String content, String preview) {
         logger.info(String.format("Sending e-mail to: %s", destination));
 
         try {
@@ -44,7 +45,7 @@ public class EmailNotificationSender implements NotificationSender {
             javax.mail.Message msg = new MimeMessage(s);
             msg.setFrom(new InternetAddress(source));
             msg.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(destination));
-            //msg.setSubject(message.getSubject()); //TODO: Extract from content
+            msg.setSubject(preview);
             msg.setSentDate(new Date());
             MimeBodyPart bodyPart = new MimeBodyPart();
             Multipart body = new MimeMultipart();
@@ -54,11 +55,9 @@ public class EmailNotificationSender implements NotificationSender {
 
             Transport.send(msg);
         } catch (Exception e) {
-            logger.error(String.format("Failed to send email to: %s.", destination), e);
-            return false;
+            return new NotificationSenderResult(false, e.getMessage());
         }
-        logger.info("Email send successfully");
-        return true;
+        return new NotificationSenderResult(true, null);
     }
 
     @Override

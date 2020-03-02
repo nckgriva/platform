@@ -1,9 +1,12 @@
 package com.gracelogic.platform.notification.service;
 
-import com.gracelogic.platform.db.exception.ObjectNotFoundException;
-import com.gracelogic.platform.notification.dto.NotificationDTO;
 import com.gracelogic.platform.notification.model.Notification;
 
-public interface NotificationService extends NotificationSender {
-    Notification saveNotification(NotificationDTO dto) throws ObjectNotFoundException;
+import java.util.UUID;
+import java.util.concurrent.Future;
+
+public interface NotificationService {
+    Future<Notification> send(UUID notificationMethodId, String source, String destination, String content, String preview, Integer priority);
+
+    Notification saveNotification(Notification notification);
 }

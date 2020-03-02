@@ -46,6 +46,9 @@ public class Notification extends IdObject<UUID> {
     @Column(name = "PRIORITY", nullable = false)
     private Integer priority;
 
+    @Column(name = "ERROR_DESCRIPTION", nullable = true)
+    private String errorDescription;
+
     @Override
     public UUID getId() {
         return id;
@@ -122,5 +125,13 @@ public class Notification extends IdObject<UUID> {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public String getErrorDescription() {
+        return errorDescription;
+    }
+
+    public void setErrorDescription(String errorDescription) {
+        this.errorDescription = errorDescription;
     }
 }
