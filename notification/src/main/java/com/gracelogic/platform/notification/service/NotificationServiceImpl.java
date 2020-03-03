@@ -112,7 +112,7 @@ public class NotificationServiceImpl implements NotificationService{
         }
 
         if (!StringUtils.isEmpty(notificationMethodId)) {
-            params.put("notificationStateId", "%%" + StringUtils.lowerCase(notificationStateId) + "%%");
+            params.put("notificationState", "%%" + StringUtils.lowerCase(notificationStateId) + "%%");
             cause += " and lower(el.notificationState) like :notificationState";
         }
 
