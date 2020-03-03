@@ -1,17 +1,23 @@
 package com.gracelogic.platform.notification.service;
 
+import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
+import com.gracelogic.platform.notification.dto.NotificationDTO;
 import com.gracelogic.platform.notification.dto.NotificationSenderResult;
 import com.gracelogic.platform.notification.model.Notification;
 import com.gracelogic.platform.notification.model.NotificationMethod;
 import com.gracelogic.platform.notification.model.NotificationState;
 import com.gracelogic.platform.notification.service.method.EmailNotificationSender;
 import com.gracelogic.platform.notification.service.method.InternalNotificationSender;
+import com.gracelogic.platform.notification.service.method.PushNotificationSender;
 import com.gracelogic.platform.notification.service.method.SmsNotificationSender;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -33,6 +39,9 @@ public class NotificationServiceImpl implements NotificationService{
 
     @Autowired
     private InternalNotificationSender internalNotificationSender;
+
+    @Autowired
+    private PushNotificationSender pushNotificationSender;
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -60,6 +69,8 @@ public class NotificationServiceImpl implements NotificationService{
                         result = smsNotificationSender.send(source, destination, content, preview);
                     } else if (notificationMethodId.equals(DataConstants.NotificationMethods.INTERNAL.getValue())) {
                         result = internalNotificationSender.send(source, destination, content, preview);
+                    } else if (notificationMethodId.equals(DataConstants.NotificationMethods.PUSH.getValue())) {
+                        result = pushNotificationSender.send(source, destination, content, preview);
                     } else {
                         result = new NotificationSenderResult(false, "Method is not implemented");
                     }
@@ -80,5 +91,41 @@ public class NotificationServiceImpl implements NotificationService{
     @Transactional(rollbackFor = Exception.class)
     public Notification saveNotification(Notification notification) {
         return idObjectService.save(notification);
+    }
+
+    @Override
+    public EntityListResponse<NotificationDTO> getNotificationsPaged(String name, String serviceName, Boolean active, boolean enrich,
+                                                                     Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = "";
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (!StringUtils.isEmpty(name)) {
+            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+            cause += " and lower(el.name) like :name";
+        }
+
+        if (!StringUtils.isEmpty(serviceName)) {
+            params.put("serviceName", "%%" + StringUtils.lowerCase(serviceName) + "%%");
+            cause += " and lower(el.serviceName) like :serviceName";
+        }
+
+        if (active != null) {
+            cause += " and el.active = :active";
+            params.put("active", active);
+        }
+
+        int totalCount = idObjectService.getCount(Notification.class, null, countFetches, cause, params);
+
+        EntityListResponse<NotificationDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
+
+        List<Notification> items = idObjectService.getList(Notification.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
+        for (Notification e : items) {
+            NotificationDTO el = NotificationDTO.prepare(e);
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
     }
 }

@@ -27,6 +27,8 @@ public class SmsNotificationSender implements NotificationSender {
     private final String API_URL = "http://sms.ru/sms/send?api_id=%s&to=%s&text=%s%s";
 
     public NotificationSenderResult send(String source, String destination, String content, String preview) {
+        logger.info(String.format("Sending sms to: %s", destination));
+
         try {
             CloseableHttpClient httpClient = HttpClients.custom().build();
 

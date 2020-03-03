@@ -19,10 +19,10 @@ import java.util.UUID;
 
 @Service
 public class EmailNotificationSender implements NotificationSender {
-    private static Logger logger = Logger.getLogger(EmailNotificationSender.class);
 
     @Autowired
     private PropertyService propertyService;
+    private static Logger logger = Logger.getLogger(EmailNotificationSender.class);
 
     @Override
     public NotificationSenderResult send(String source, String destination, String content, String preview) {
