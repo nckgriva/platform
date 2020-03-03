@@ -4,55 +4,40 @@ import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.notification.model.Template;
 import com.gracelogic.platform.notification.model.TemplateType;
 
+import java.util.UUID;
+
 public class TemplateDTO extends IdObjectDTO {
-    private TemplateTypeDTO templateTypeDTO;
+    private UUID templateTypeId;
+    private String templateTypeName;
 
     private String name;
     private String content;
 
-    private class TemplateTypeDTO extends IdObjectDTO {
-        private String name;
-        private Integer sortOrder;
-
-        public TemplateTypeDTO prepare(TemplateType model) {
-            TemplateTypeDTO dto = new TemplateTypeDTO();
-            IdObjectDTO.prepare(dto, model);
-            dto.setName(model.getName());
-            dto.setSortOrder(model.getSortOrder());
-            return dto;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public Integer getSortOrder() {
-            return sortOrder;
-        }
-
-        public void setSortOrder(Integer sortOrder) {
-            this.sortOrder = sortOrder;
-        }
-    }
 
     public TemplateDTO prepare(Template model) {
         TemplateDTO dto = new TemplateDTO();
         IdObjectDTO.prepare(dto, model);
         dto.setName(model.getName());
         dto.setContent(model.getContent());
+        dto.setTemplateTypeId(model.getTemplateType().getId());
+        dto.setTemplateTypeName(model.getTemplateType().getName());
         return dto;
     }
 
-    public TemplateTypeDTO getTemplateTypeDTO() {
-        return templateTypeDTO;
+    public UUID getTemplateTypeId() {
+        return templateTypeId;
     }
 
-    public void setTemplateTypeDTO(TemplateTypeDTO templateTypeDTO) {
-        this.templateTypeDTO = templateTypeDTO;
+    public void setTemplateTypeId(UUID templateTypeId) {
+        this.templateTypeId = templateTypeId;
+    }
+
+    public String getTemplateTypeName() {
+        return templateTypeName;
+    }
+
+    public void setTemplateTypeName(String templateTypeName) {
+        this.templateTypeName = templateTypeName;
     }
 
     public String getName() {

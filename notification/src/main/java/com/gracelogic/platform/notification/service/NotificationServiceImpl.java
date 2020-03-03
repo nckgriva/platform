@@ -94,7 +94,7 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
     @Override
-    public EntityListResponse<NotificationDTO> getNotificationsPaged(String name, String serviceName, Boolean active, boolean enrich,
+    public EntityListResponse<NotificationDTO> getNotificationsPaged(String name, boolean enrich,
                                                                      Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
         String countFetches = "";
@@ -106,15 +106,6 @@ public class NotificationServiceImpl implements NotificationService{
             cause += " and lower(el.name) like :name";
         }
 
-        if (!StringUtils.isEmpty(serviceName)) {
-            params.put("serviceName", "%%" + StringUtils.lowerCase(serviceName) + "%%");
-            cause += " and lower(el.serviceName) like :serviceName";
-        }
-
-        if (active != null) {
-            cause += " and el.active = :active";
-            params.put("active", active);
-        }
 
         int totalCount = idObjectService.getCount(Notification.class, null, countFetches, cause, params);
 

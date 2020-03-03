@@ -1,4 +1,4 @@
-package com.gracelogic.platform.notification.service.transport;
+package com.gracelogic.platform.notification.firebase.transport;
 
 public class NotificationFields {
     public static final String ID_FIELD = "externalId";
