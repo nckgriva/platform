@@ -15,6 +15,6 @@ public interface TemplateService {
     @Transactional(rollbackFor = Exception.class)
     void deleteTemplate(UUID id);
 
-    public EntityListResponse<TemplateDTO> getNotificationsPaged(String name, String templateTypeName, boolean enrich,
+    public EntityListResponse<TemplateDTO> getTemplatesPaged(String name, String templateTypeId, boolean enrich,
                                                                  Integer count, Integer page, Integer start, String sortField, String sortDir);
 }

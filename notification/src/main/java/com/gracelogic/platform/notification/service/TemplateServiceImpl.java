@@ -1,13 +1,17 @@
 package com.gracelogic.platform.notification.service;
 
+import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.notification.dto.TemplateDTO;
 import com.gracelogic.platform.notification.model.Template;
 import com.gracelogic.platform.notification.model.TemplateType;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class TemplateServiceImpl implements TemplateService {
@@ -41,5 +45,37 @@ public class TemplateServiceImpl implements TemplateService {
     @Transactional(rollbackFor = Exception.class)
     public void deleteTemplate(UUID id) {
         idObjectService.delete(Template.class, id);
+    }
+
+    @Override
+    public EntityListResponse<TemplateDTO> getTemplatesPaged(String name, String templateTypeId, boolean enrich,
+                                                                     Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String fetches = "";
+        String countFetches = "";
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<String, Object>();
+
+        if (!StringUtils.isEmpty(name)) {
+            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+            cause += " and lower(el.name) like :name";
+        }
+
+        if (!StringUtils.isEmpty(templateTypeId)) {
+            params.put("templateType", "%%" + StringUtils.lowerCase(templateTypeId) + "%%");
+            cause += " and lower(el.templateType) like :templateType";
+        }
+
+
+        int totalCount = idObjectService.getCount(Template.class, null, countFetches, cause, params);
+
+        EntityListResponse<TemplateDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
+
+        List<Template> items = idObjectService.getList(Template.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
+        for (Template e : items) {
+            TemplateDTO el = TemplateDTO.prepare(e);
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
     }
 }

@@ -14,7 +14,7 @@ public class TemplateDTO extends IdObjectDTO {
     private String content;
 
 
-    public TemplateDTO prepare(Template model) {
+    public static TemplateDTO prepare(Template model) {
         TemplateDTO dto = new TemplateDTO();
         IdObjectDTO.prepare(dto, model);
         dto.setName(model.getName());
