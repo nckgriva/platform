@@ -9,12 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 public interface TemplateService {
-    @Transactional(rollbackFor = Exception.class)
     Template saveTemplate(TemplateDTO dto) throws ObjectNotFoundException;
 
-    @Transactional(rollbackFor = Exception.class)
     void deleteTemplate(UUID id);
 
-    public EntityListResponse<TemplateDTO> getTemplatesPaged(String name, String templateTypeId, boolean enrich,
+    EntityListResponse<TemplateDTO> getTemplatesPaged(String name, UUID templateTypeId, boolean enrich,
                                                                  Integer count, Integer page, Integer start, String sortField, String sortDir);
 }

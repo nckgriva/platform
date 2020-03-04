@@ -5,7 +5,6 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.localization.service.LocaleHolder;
-import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.notification.service.NotificationService;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.template.dto.LoadedTemplate;
@@ -153,7 +152,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void sendVerificationCodeForPasswordChanging(UUID identifierTypeId, String identifierValue, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException, SendingException {
+    public void sendVerificationCodeForPasswordChanging(UUID identifierTypeId, String identifierValue, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException {
         if (identifierTypeId == null) {
             identifierTypeId = resolveIdentifierTypeId(identifierValue);
         }
@@ -184,7 +183,6 @@ public class UserServiceImpl implements UserService {
                                 propertyService.getPropertyValue("notification:sms_from"), identifierValue, templateService.apply(template, templateParams), null,0);
                     } catch (IOException e) {
                         logger.error(e);
-                        throw new SendingException(e.getMessage());
                     }
                 } else if (identifierTypeId.equals(DataConstants.IdentifierTypes.EMAIL.getValue())) {
                     try {
@@ -195,7 +193,6 @@ public class UserServiceImpl implements UserService {
                                 propertyService.getPropertyValue("notification:smtp_from"), identifierValue, templateService.apply(template, templateParams), template.getSubject(), 0);
                     } catch (IOException e) {
                         logger.error(e);
-                        throw new SendingException(e.getMessage());
                     }
                 }
             } else {
@@ -331,7 +328,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void sendIdentifierVerificationCode(UUID identifierId, Map<String, String> templateParams) throws SendingException {
+    public void sendIdentifierVerificationCode(UUID identifierId, Map<String, String> templateParams) {
         Identifier identifier = idObjectService.getObjectById(Identifier.class, identifierId);
         if (identifier == null || identifier.getVerified() && identifier.getUser() != null) {
             return;
@@ -359,7 +356,6 @@ public class UserServiceImpl implements UserService {
                         propertyService.getPropertyValue("notification:sms_from"), identifier.getValue(), templateService.apply(template, templateParams), template.getSubject(), 0);
             } catch (IOException e) {
                 logger.error(e);
-                throw new SendingException(e.getMessage());
             }
 
         } else if (identifier.getIdentifierType().getId().equals(DataConstants.IdentifierTypes.PHONE.getValue())) {
@@ -372,7 +368,6 @@ public class UserServiceImpl implements UserService {
 
             } catch (IOException e) {
                 logger.error(e);
-                throw new SendingException(e.getMessage());
             }
 
         }

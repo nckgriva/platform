@@ -2,14 +2,12 @@ package com.gracelogic.platform.user.api;
 
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
-import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.dto.ChangePasswordViaVerificationCodeRequestDTO;
 import com.gracelogic.platform.user.dto.SendVerificationCodeForPasswordChangingRequestDTO;
 import com.gracelogic.platform.user.exception.*;
-import com.gracelogic.platform.user.service.UserLifecycleService;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
@@ -119,8 +117,6 @@ public class AuthApi extends AbstractAuthorizedController {
 
         try {
             userService.sendVerificationCodeForPasswordChanging(request.getIdentifierTypeId(), request.getIdentifierValue(), null);
-        } catch (SendingException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.SENDING_ERROR", messageSource.getMessage("common.SENDING_ERROR", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (TooFastOperationException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.TOO_FAST_OPERATION", messageSource.getMessage("common.TOO_FAST_OPERATION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException e) {

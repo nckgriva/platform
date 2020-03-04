@@ -7,22 +7,10 @@ import com.gracelogic.platform.notification.model.TemplateType;
 import java.util.UUID;
 
 public class TemplateDTO extends IdObjectDTO {
-    private UUID templateTypeId;
-    private String templateTypeName;
-
     private String name;
     private String content;
-
-
-    public static TemplateDTO prepare(Template model) {
-        TemplateDTO dto = new TemplateDTO();
-        IdObjectDTO.prepare(dto, model);
-        dto.setName(model.getName());
-        dto.setContent(model.getContent());
-        dto.setTemplateTypeId(model.getTemplateType().getId());
-        dto.setTemplateTypeName(model.getTemplateType().getName());
-        return dto;
-    }
+    private UUID templateTypeId;
+    private String templateTypeName;
 
     public UUID getTemplateTypeId() {
         return templateTypeId;
@@ -54,5 +42,16 @@ public class TemplateDTO extends IdObjectDTO {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public static TemplateDTO prepare(Template model) {
+        TemplateDTO dto = new TemplateDTO();
+        IdObjectDTO.prepare(dto, model);
+        dto.setName(model.getName());
+        dto.setContent(model.getContent());
+        if (model.getTemplateType() != null) {
+            dto.setTemplateTypeId(model.getTemplateType().getId());
+        }
+        return dto;
     }
 }

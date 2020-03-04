@@ -15,23 +15,6 @@ public class NotificationDTO extends IdObjectDTO {
     private String content;
     private Integer priority;
 
-    public static NotificationDTO prepare(Notification model) {
-        NotificationDTO dto = new NotificationDTO();
-        IdObjectDTO.prepare(dto, model);
-
-        if (model.getNotificationState() != null) {
-            dto.setNotificationStateId(model.getNotificationState().getId());
-        }
-        if (model.getNotificationMethod() != null) {
-            dto.setNotificationMethodId(model.getNotificationMethod().getId());
-        }
-        dto.setSource(model.getSource());
-        dto.setDestination(model.getDestination());
-        dto.setContent(model.getContent());
-        dto.setPriority(model.getPriority());
-        return dto;
-    }
-
     public UUID getNotificationStateId() {
         return notificationStateId;
     }
@@ -80,15 +63,20 @@ public class NotificationDTO extends IdObjectDTO {
         this.priority = priority;
     }
 
-    public NotificationDTO() {
-    }
+    public static NotificationDTO prepare(Notification model) {
+        NotificationDTO dto = new NotificationDTO();
+        IdObjectDTO.prepare(dto, model);
 
-    public NotificationDTO(String source, String destination, String content, Integer priority, UUID notificationStateId, UUID notificationMethodId) {
-        this.notificationStateId = notificationStateId;
-        this.notificationMethodId = notificationMethodId;
-        this.source = source;
-        this.destination = destination;
-        this.content = content;
-        this.priority = priority;
+        if (model.getNotificationState() != null) {
+            dto.setNotificationStateId(model.getNotificationState().getId());
+        }
+        if (model.getNotificationMethod() != null) {
+            dto.setNotificationMethodId(model.getNotificationMethod().getId());
+        }
+        dto.setSource(model.getSource());
+        dto.setDestination(model.getDestination());
+        dto.setContent(model.getContent());
+        dto.setPriority(model.getPriority());
+        return dto;
     }
 }
