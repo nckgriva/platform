@@ -37,6 +37,9 @@ public class Template extends IdObject<UUID> {
     @Column(name = "CONTENT", nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "LOCALE", nullable = true)
+    private String locale;
+
     @Override
     public UUID getId() {
         return id;
@@ -89,5 +92,13 @@ public class Template extends IdObject<UUID> {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 }

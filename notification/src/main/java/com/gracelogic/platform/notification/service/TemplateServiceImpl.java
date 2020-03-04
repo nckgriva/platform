@@ -37,6 +37,7 @@ public class TemplateServiceImpl implements TemplateService {
 
         template.setName(dto.getName());
         template.setContent(dto.getContent());
+        template.setLocale(dto.getLocale());
         template.setTemplateType(ds.get(TemplateType.class, dto.getTemplateTypeId()));
 
         return idObjectService.save(template);

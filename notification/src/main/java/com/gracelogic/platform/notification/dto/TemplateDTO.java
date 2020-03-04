@@ -2,7 +2,6 @@ package com.gracelogic.platform.notification.dto;
 
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.notification.model.Template;
-import com.gracelogic.platform.notification.model.TemplateType;
 
 import java.util.UUID;
 
@@ -11,6 +10,7 @@ public class TemplateDTO extends IdObjectDTO {
     private String content;
     private UUID templateTypeId;
     private String templateTypeName;
+    private String locale;
 
     public UUID getTemplateTypeId() {
         return templateTypeId;
@@ -44,11 +44,20 @@ public class TemplateDTO extends IdObjectDTO {
         this.content = content;
     }
 
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
     public static TemplateDTO prepare(Template model) {
         TemplateDTO dto = new TemplateDTO();
         IdObjectDTO.prepare(dto, model);
         dto.setName(model.getName());
         dto.setContent(model.getContent());
+        dto.setLocale(model.getLocale());
         if (model.getTemplateType() != null) {
             dto.setTemplateTypeId(model.getTemplateType().getId());
         }
