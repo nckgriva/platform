@@ -1,6 +1,7 @@
 package com.gracelogic.platform.notification.service;
 
 import com.gracelogic.platform.notification.dto.NotificationSenderResult;
+import com.gracelogic.platform.notification.exception.TransportException;
 
 import java.util.UUID;
 

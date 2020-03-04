@@ -1,4 +1,4 @@
-package com.gracelogic.platform.notification.firebase.protocol;
+package com.gracelogic.platform.notification.firebase;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
