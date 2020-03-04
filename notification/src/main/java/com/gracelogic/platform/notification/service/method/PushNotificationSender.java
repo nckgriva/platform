@@ -74,6 +74,8 @@ public class PushNotificationSender implements NotificationSender {
         FcmMessage request = FcmMessage.to(destination);
         request.setNotification(fcmNotification);
         request.data("source", source);
+
+        request.setTime_to_live(0L);
         return request;
     }
 
