@@ -1,5 +1,6 @@
-package com.gracelogic.platform.notification.service.method;
+package com.gracelogic.platform.notification.method.email;
 
+import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.dto.NotificationSenderResult;
 import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationSender;
@@ -25,7 +26,7 @@ public class EmailNotificationSender implements NotificationSender {
     private static Logger logger = Logger.getLogger(EmailNotificationSender.class);
 
     @Override
-    public NotificationSenderResult send(String source, String destination, String content, String preview) {
+    public NotificationSenderResult send(String source, String destination, Content content) {
         logger.info(String.format("Sending e-mail to: %s", destination));
 
         try {
@@ -45,11 +46,11 @@ public class EmailNotificationSender implements NotificationSender {
             javax.mail.Message msg = new MimeMessage(s);
             msg.setFrom(new InternetAddress(source));
             msg.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(destination));
-            msg.setSubject(preview);
+            msg.setSubject(content.getTitle());
             msg.setSentDate(new Date());
             MimeBodyPart bodyPart = new MimeBodyPart();
             Multipart body = new MimeMultipart();
-            bodyPart.setText(content, "utf-8");
+            bodyPart.setText(content.getBody(), "utf-8");
             body.addBodyPart(bodyPart);
             msg.setContent(body);
 

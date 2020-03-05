@@ -1,11 +1,9 @@
-package com.gracelogic.platform.notification.service.method;
+package com.gracelogic.platform.notification.method.push;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.dto.NotificationSenderResult;
-import com.gracelogic.platform.notification.firebase.FcmMessage;
-import com.gracelogic.platform.notification.firebase.FcmNotification;
-import com.gracelogic.platform.notification.firebase.FcmResponse;
-import com.gracelogic.platform.notification.firebase.utils.HttpUtils;
+import com.gracelogic.platform.notification.service.HttpUtils;
 import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationSender;
 import com.gracelogic.platform.property.service.PropertyService;
@@ -21,7 +19,6 @@ import java.util.UUID;
 
 @Service
 public class PushNotificationSender implements NotificationSender {
-
     @Autowired
     private PropertyService propertyService;
 
@@ -30,12 +27,12 @@ public class PushNotificationSender implements NotificationSender {
     private static Logger logger = Logger.getLogger(PushNotificationSender.class);
 
     @Override
-    public NotificationSenderResult send(String source, String destination, String content, String preview) {
+    public NotificationSenderResult send(String source, String destination, Content content) {
         HttpPost post = new HttpPost(FCM_SERVICE_URL);
         post.addHeader("Authorization", "key=" + propertyService.getPropertyValue("notification:firebase_auth_key"));
         try {
             ObjectMapper mapper = new ObjectMapper();
-            FcmMessage fcmMessage = createFcmMessage(source, destination, content, preview);
+            FcmMessage fcmMessage = createFcmMessage(destination, content);
             String json = mapper.writeValueAsString(fcmMessage);
 
             StringEntity entity = new StringEntity(json, "UTF-8");
@@ -58,16 +55,25 @@ public class PushNotificationSender implements NotificationSender {
         return new NotificationSenderResult(true, null);
     }
 
-    private FcmMessage createFcmMessage(String source, String destination, String content, String preview) {
+    private FcmMessage createFcmMessage(String destination, Content content) {
         FcmNotification fcmNotification = new FcmNotification();
-        fcmNotification.setTitle(preview);
-        fcmNotification.setBody(content); // or request.data("content", content);
+        fcmNotification.setTitle(content.getTitle());
+        fcmNotification.setBody(content.getBody());
+        fcmNotification.setCategory(content.getFields().get("category"));
+        fcmNotification.setBadge(content.getFields().get("badge"));
+        fcmNotification.setSound(content.getFields().get("sound"));
+        fcmNotification.setClickAction(content.getFields().get("clickAction"));
 
         FcmMessage request = FcmMessage.to(destination);
         request.setNotification(fcmNotification);
-        request.data("source", source);
 
-        request.setTime_to_live(0L);
+        if (content.getFields() != null) {
+            for (String key : content.getFields().keySet()) {
+                request.getData().put(key, content.getFields().get(key));
+            }
+        }
+
+        request.setTimeToLive(0L);
         return request;
     }
 

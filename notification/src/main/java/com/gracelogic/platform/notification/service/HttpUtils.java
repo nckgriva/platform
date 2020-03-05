@@ -1,4 +1,4 @@
-package com.gracelogic.platform.notification.firebase.utils;
+package com.gracelogic.platform.notification.service;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.config.Registry;

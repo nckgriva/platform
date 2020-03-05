@@ -5,6 +5,7 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.localization.service.LocaleHolder;
+import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.service.NotificationService;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.template.dto.LoadedTemplate;
@@ -178,9 +179,11 @@ public class UserServiceImpl implements UserService {
                     try {
                         LoadedTemplate template = templateService.load("sms_repair_code");
                         templateParams.put("verificationCode", passphrase.getValue());
-
+                        Content content = new Content();
+                        content.setBody(templateService.apply(template, templateParams));
+                        content.setTitle(template.getSubject());
                         notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.SMS.getValue(),
-                                propertyService.getPropertyValue("notification:sms_from"), identifierValue, templateService.apply(template, templateParams), null,0);
+                                propertyService.getPropertyValue("notification:sms_from"), identifierValue, content,0);
                     } catch (IOException e) {
                         logger.error(e);
                     }
@@ -188,9 +191,11 @@ public class UserServiceImpl implements UserService {
                     try {
                         LoadedTemplate template = templateService.load("email_repair_code");
                         templateParams.put("verificationCode", passphrase.getValue());
-
+                        Content content = new Content();
+                        content.setBody(templateService.apply(template, templateParams));
+                        content.setTitle(template.getSubject());
                         notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.EMAIL.getValue(),
-                                propertyService.getPropertyValue("notification:smtp_from"), identifierValue, templateService.apply(template, templateParams), template.getSubject(), 0);
+                                propertyService.getPropertyValue("notification:smtp_from"), identifierValue, content, 0);
                     } catch (IOException e) {
                         logger.error(e);
                     }
@@ -351,9 +356,12 @@ public class UserServiceImpl implements UserService {
             try {
                 LoadedTemplate template = templateService.load("sms_validation_code");
                 templateParams.put("verificationCode", passphrase.getValue());
+                Content content = new Content();
+                content.setBody(templateService.apply(template, templateParams));
+                content.setTitle(template.getSubject());
 
                 notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.EMAIL.getValue(),
-                        propertyService.getPropertyValue("notification:sms_from"), identifier.getValue(), templateService.apply(template, templateParams), template.getSubject(), 0);
+                        propertyService.getPropertyValue("notification:sms_from"), identifier.getValue(), content, 0);
             } catch (IOException e) {
                 logger.error(e);
             }
@@ -362,9 +370,11 @@ public class UserServiceImpl implements UserService {
             try {
                 LoadedTemplate template = templateService.load("email_validation_code");
                 templateParams.put("verificationCode", passphrase.getValue());
-
+                Content content = new Content();
+                content.setBody(templateService.apply(template, templateParams));
+                content.setTitle(template.getSubject());
                 notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.SMS.getValue(),
-                        propertyService.getPropertyValue("notification:smtp_from"), identifier.getValue(), templateService.apply(template, templateParams), template.getSubject(), 0);
+                        propertyService.getPropertyValue("notification:smtp_from"), identifier.getValue(), content, 0);
 
             } catch (IOException e) {
                 logger.error(e);

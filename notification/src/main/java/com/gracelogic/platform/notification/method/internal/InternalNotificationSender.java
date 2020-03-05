@@ -1,5 +1,6 @@
-package com.gracelogic.platform.notification.service.method;
+package com.gracelogic.platform.notification.method.internal;
 
+import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.dto.NotificationSenderResult;
 import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationSender;
@@ -13,7 +14,7 @@ public class InternalNotificationSender implements NotificationSender {
     private static Logger logger = Logger.getLogger(InternalNotificationSender.class);
 
     @Override
-    public NotificationSenderResult send(String source, String destination, String content, String preview) {
+    public NotificationSenderResult send(String source, String destination, Content content) {
         //Nothing to do, because INTERNAL method only save notification in DB
         return new NotificationSenderResult(true, null);
     }

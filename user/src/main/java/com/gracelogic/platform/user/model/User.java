@@ -71,7 +71,7 @@ public class User extends IdObject<UUID> {
     private String lastVisitIP;
 
     @Type(type = "stringJsonObject")
-    @Column(columnDefinition = "json", nullable = true)
+    @Column(columnDefinition = "json", nullable = true, name = "FIELDS")
     private String fields;
 
     @Column(name = "LOCALE", nullable = true)

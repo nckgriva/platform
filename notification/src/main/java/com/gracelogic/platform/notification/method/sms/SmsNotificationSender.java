@@ -1,5 +1,6 @@
-package com.gracelogic.platform.notification.service.method;
+package com.gracelogic.platform.notification.method.sms;
 
+import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.dto.NotificationSenderResult;
 import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationSender;
@@ -26,7 +27,7 @@ public class SmsNotificationSender implements NotificationSender {
 
     private final String API_URL = "http://sms.ru/sms/send?api_id=%s&to=%s&text=%s%s";
 
-    public NotificationSenderResult send(String source, String destination, String content, String preview) {
+    public NotificationSenderResult send(String source, String destination, Content content) {
         logger.info(String.format("Sending sms to: %s", destination));
 
         try {
@@ -36,7 +37,7 @@ public class SmsNotificationSender implements NotificationSender {
                     API_URL,
                     propertyService.getPropertyValue("notification:sms_apikey"),
                     destination,
-                    URLEncoder.encode(content, "UTF-8"),
+                    URLEncoder.encode(content.getBody(), "UTF-8"),
                     !StringUtils.isEmpty(source) ? String.format("&from=%s", source) : ""
             );
 

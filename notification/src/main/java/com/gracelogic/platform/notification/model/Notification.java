@@ -3,6 +3,7 @@ package com.gracelogic.platform.notification.model;
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -40,8 +41,15 @@ public class Notification extends IdObject<UUID> {
     @Column(name = "DESTINATION", nullable = false)
     private String destination;
 
-    @Column(name = "CONTENT", nullable = false, columnDefinition = "TEXT")
-    private String content;
+    @Column(name = "TITLE", nullable = false)
+    private String title;
+
+    @Column(name = "BODY", nullable = false)
+    private String body;
+
+    @Type(type = "stringJsonObject")
+    @Column(columnDefinition = "json", nullable = true, name = "FIELDS")
+    private String fields;
 
     @Column(name = "PRIORITY", nullable = false)
     private Integer priority;
@@ -103,12 +111,28 @@ public class Notification extends IdObject<UUID> {
         this.destination = destination;
     }
 
-    public String getContent() {
-        return content;
+    public String getTitle() {
+        return title;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public String getFields() {
+        return fields;
+    }
+
+    public void setFields(String fields) {
+        this.fields = fields;
     }
 
     public Integer getPriority() {

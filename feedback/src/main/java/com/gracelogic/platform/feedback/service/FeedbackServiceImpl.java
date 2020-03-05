@@ -6,6 +6,7 @@ import com.gracelogic.platform.feedback.model.Feedback;
 import com.gracelogic.platform.feedback.model.FeedbackType;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
+import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationService;
 import com.gracelogic.platform.property.service.PropertyService;
@@ -60,7 +61,11 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         if (!StringUtils.isEmpty(feedbackType.getNotifyEmail())) {
             try {
-                notificationService.send(DataConstants.NotificationMethods.EMAIL.getValue(), propertyService.getPropertyValue("notification:smtp_from"), feedbackType.getNotifyEmail(), sb.toString(), feedbackType.getName(), 0);
+                Content content = new Content();
+                content.setBody(sb.toString());
+                content.setTitle(feedbackType.getName());
+
+                notificationService.send(DataConstants.NotificationMethods.EMAIL.getValue(), propertyService.getPropertyValue("notification:smtp_from"), feedbackType.getNotifyEmail(), content, 0);
             } catch (Exception e) {
                 logger.error("Failed to send feedback", e);
             }

@@ -2,18 +2,21 @@ package com.gracelogic.platform.notification.dto;
 
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.notification.model.Notification;
+import com.gracelogic.platform.notification.service.JsonUtils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class NotificationDTO extends IdObjectDTO {
-
-    private UUID notificationStateId;
-    private UUID notificationMethodId;
-
     private String source;
     private String destination;
-    private String content;
+    private String title;
+    private String body;
+    private Map<String, String> fields = new HashMap<>();
     private Integer priority;
+    private UUID notificationStateId;
+    private UUID notificationMethodId;
 
     public UUID getNotificationStateId() {
         return notificationStateId;
@@ -47,12 +50,28 @@ public class NotificationDTO extends IdObjectDTO {
         this.destination = destination;
     }
 
-    public String getContent() {
-        return content;
+    public String getTitle() {
+        return title;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public Map<String, String> getFields() {
+        return fields;
+    }
+
+    public void setFields(Map<String, String> fields) {
+        this.fields = fields;
     }
 
     public Integer getPriority() {
@@ -75,7 +94,9 @@ public class NotificationDTO extends IdObjectDTO {
         }
         dto.setSource(model.getSource());
         dto.setDestination(model.getDestination());
-        dto.setContent(model.getContent());
+        dto.setBody(model.getBody());
+        dto.setTitle(model.getTitle());
+        dto.setFields(JsonUtils.jsonToMap(model.getFields()));
         dto.setPriority(model.getPriority());
         return dto;
     }

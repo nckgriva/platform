@@ -3,15 +3,16 @@ package com.gracelogic.platform.notification.service;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
+import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.dto.NotificationDTO;
 import com.gracelogic.platform.notification.dto.NotificationSenderResult;
+import com.gracelogic.platform.notification.method.push.PushNotificationSender;
 import com.gracelogic.platform.notification.model.Notification;
 import com.gracelogic.platform.notification.model.NotificationMethod;
 import com.gracelogic.platform.notification.model.NotificationState;
-import com.gracelogic.platform.notification.service.method.EmailNotificationSender;
-import com.gracelogic.platform.notification.service.method.InternalNotificationSender;
-import com.gracelogic.platform.notification.service.method.PushNotificationSender;
-import com.gracelogic.platform.notification.service.method.SmsNotificationSender;
+import com.gracelogic.platform.notification.method.email.EmailNotificationSender;
+import com.gracelogic.platform.notification.method.internal.InternalNotificationSender;
+import com.gracelogic.platform.notification.method.sms.SmsNotificationSender;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +47,7 @@ public class NotificationServiceImpl implements NotificationService{
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
-    public Future<Notification> send(final UUID notificationMethodId, final String source, final String destination, final String content, final String preview, final Integer priority) {
+    public Future<Notification> send(final UUID notificationMethodId, final String source, final String destination, final Content content, final Integer priority) {
         return executorService.submit(new Callable<Notification>() {
             @Override
             public Notification call() throws Exception {
@@ -54,7 +55,9 @@ public class NotificationServiceImpl implements NotificationService{
                 Notification notification = new Notification();
                 notification.setNotificationMethod(ds.get(NotificationMethod.class, notificationMethodId));
                 notification.setNotificationState(ds.get(NotificationState.class, DataConstants.NotificationStates.QUEUED.getValue()));
-                notification.setContent(content);
+                notification.setTitle(content.getTitle());
+                notification.setBody(content.getBody());
+                notification.setFields(JsonUtils.mapToJson(content.getFields()));
                 notification.setSource(source);
                 notification.setDestination(destination);
                 notification.setPriority(priority);
@@ -64,13 +67,13 @@ public class NotificationServiceImpl implements NotificationService{
                 NotificationSenderResult result;
                 try {
                     if (notificationMethodId.equals(DataConstants.NotificationMethods.EMAIL.getValue())) {
-                        result = emailNotificationSender.send(source, destination, content, preview);
+                        result = emailNotificationSender.send(source, destination, content);
                     } else if (notificationMethodId.equals(DataConstants.NotificationMethods.SMS.getValue())) {
-                        result = smsNotificationSender.send(source, destination, content, preview);
+                        result = smsNotificationSender.send(source, destination, content);
                     } else if (notificationMethodId.equals(DataConstants.NotificationMethods.INTERNAL.getValue())) {
-                        result = internalNotificationSender.send(source, destination, content, preview);
+                        result = internalNotificationSender.send(source, destination, content);
                     } else if (notificationMethodId.equals(DataConstants.NotificationMethods.PUSH.getValue())) {
-                        result = pushNotificationSender.send(source, destination, content, preview);
+                        result = pushNotificationSender.send(source, destination, content);
                     } else {
                         result = new NotificationSenderResult(false, "Method is not implemented");
                     }

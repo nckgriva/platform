@@ -1,25 +1,16 @@
-package com.gracelogic.platform.notification.firebase;
+package com.gracelogic.platform.notification.method.push;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class FcmResult {
-
+    @JsonProperty("message_id")
     private String messageId;
 
+    @JsonProperty("registration_id")
     private String registrationId;
 
+    @JsonProperty("error")
     private String error;
-
-    public FcmResult() {
-    }
-
-    public FcmResult(String messageId, String registrationId, String error) {
-        this.messageId = messageId;
-        this.registrationId = registrationId;
-        this.error = error;
-    }
 
     public String getMessageId() {
         return messageId;
