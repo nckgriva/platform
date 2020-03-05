@@ -9,7 +9,6 @@ import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.service.NotificationService;
 import com.gracelogic.platform.property.service.PropertyService;
-import com.gracelogic.platform.template.dto.LoadedTemplate;
 import com.gracelogic.platform.notification.service.TemplateService;
 import com.gracelogic.platform.user.dao.UserDao;
 import com.gracelogic.platform.user.dto.*;
@@ -493,7 +492,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void mergeUserIdentifiers(User user, boolean isNewUser, Collection<IdentifierDTO> identifierDTOs, boolean throwExceptionIfAlreadyAttached) {
+    public void mergeUserIdentifiers(User user, boolean isNewUser, Collection<IdentifierDTO> identifierDTOs, boolean throwExceptionIfAlreadyAttached) throws InvalidIdentifierException {
         List<Identifier> existingIdentifiers = Collections.emptyList();
         if (!isNewUser) {
             Set<UUID> toDelete = new HashSet<>();
@@ -543,7 +542,16 @@ public class UserServiceImpl implements UserService {
                     }
                 }
             } else {
-                identifier = new Identifier();
+                Identifier nonCurrentUserIdentifier = findIdentifier(dto.getIdentifierTypeId(), dto.getValue(), false);
+                if (nonCurrentUserIdentifier != null) {
+                    if (nonCurrentUserIdentifier.getUser() == null || !nonCurrentUserIdentifier.getVerified()) {
+                        identifier = nonCurrentUserIdentifier;
+                    } else {
+                        throw new InvalidIdentifierException("Identifier is already used: " + nonCurrentUserIdentifier.getId());
+                    }
+                } else {
+                    identifier = new Identifier();
+                }
             }
 
             IdentifierType identifierType = ds.get(IdentifierType.class, dto.getIdentifierTypeId());
@@ -1039,51 +1047,6 @@ public class UserServiceImpl implements UserService {
             passphrase.setPassphraseState(archiveState);
             idObjectService.save(passphrase);
         }
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public List<Identifier> createIdentifiers(List<IdentifierDTO> identifierDTOs, User user, boolean throwExceptionIfAlreadyAttached) throws InvalidIdentifierException {
-        List<Identifier> attachedIdentifiers = new LinkedList<>();
-
-        for (IdentifierDTO identifierDTO : identifierDTOs) {
-            if (!isIdentifierValid(identifierDTO.getIdentifierTypeId(), identifierDTO.getValue())) {
-                throw new InvalidIdentifierException(identifierDTO.getValue());
-            }
-
-            Map<String, Object> params = new HashMap<>();
-            params.put("value", identifierDTO.getValue());
-            params.put("identifierTypeId", identifierDTO.getIdentifierTypeId());
-
-            List<Identifier> identifiers = idObjectService.getList(Identifier.class, null, "el.value=:value and el.identifierType.id=:identifierTypeId", params, null, null, 1);
-            Identifier identifier = null;
-            if (!identifiers.isEmpty()) {
-                identifier = identifiers.iterator().next();
-            }
-
-            if (identifier != null && identifier.getVerified() && identifier.getUser() != null && !identifier.getUser().getId().equals(user.getId())) {
-                if (throwExceptionIfAlreadyAttached) {
-                    throw new InvalidIdentifierException();
-                } else {
-                    continue;
-                }
-            }
-
-            if (identifier == null) {
-                identifier = new Identifier();
-            }
-
-            IdentifierType identifierType = ds.get(IdentifierType.class, identifierDTO.getIdentifierTypeId());
-            identifier.setUser(user);
-            identifier.setPrimary(identifierDTO.getPrimary() != null ? identifierDTO.getPrimary() : false);
-            identifier.setValue(identifierDTO.getValue());
-            identifier.setIdentifierType(identifierType);
-            identifier.setVerified(identifierType.getAutomaticVerification());
-
-            identifiers.add(idObjectService.save(identifier));
-        }
-
-        return attachedIdentifiers;
     }
 
     private Passphrase createPassphrase(User user, PassphraseType passphraseType, String value, UUID referenceObjectId) {

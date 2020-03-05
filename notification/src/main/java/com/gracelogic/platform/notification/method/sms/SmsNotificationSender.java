@@ -15,10 +15,12 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
 import java.util.UUID;
 
+@Service("smsNotificationSender")
 public class SmsNotificationSender implements NotificationSender {
     @Autowired
     private PropertyService propertyService;

@@ -18,7 +18,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
 
-@Service
+@Service("emailNotificationSender")
 public class EmailNotificationSender implements NotificationSender {
 
     @Autowired

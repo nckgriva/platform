@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.UUID;
 
-@Service
+@Service("pushNotificationSender")
 public class PushNotificationSender implements NotificationSender {
     @Autowired
     private PropertyService propertyService;

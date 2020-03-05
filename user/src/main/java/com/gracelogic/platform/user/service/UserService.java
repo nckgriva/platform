@@ -62,8 +62,6 @@ public interface UserService {
 
     Identifier findIdentifier(UUID identifierTypeId, String value, boolean enrich);
 
-    List<Identifier> createIdentifiers(List<IdentifierDTO> identifierDTOs, User user, boolean throwExceptionIfAlreadyAttached) throws InvalidIdentifierException;
-
     void archiveActualPassphrases(UUID userId, UUID passphraseTypeId, UUID referenceObjectId);
 
     Passphrase updatePassphrase(User user, String value, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveOtherPassphrases) throws InvalidPassphraseException;

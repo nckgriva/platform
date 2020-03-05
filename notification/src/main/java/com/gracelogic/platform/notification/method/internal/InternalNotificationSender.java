@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-@Service
+@Service("internalNotificationSender")
 public class InternalNotificationSender implements NotificationSender {
     private static Logger logger = Logger.getLogger(InternalNotificationSender.class);
 

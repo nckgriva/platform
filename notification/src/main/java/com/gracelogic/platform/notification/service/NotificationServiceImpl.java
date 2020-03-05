@@ -16,6 +16,8 @@ import com.gracelogic.platform.notification.method.internal.InternalNotification
 import com.gracelogic.platform.notification.method.sms.SmsNotificationSender;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
 
+@Service
 public class NotificationServiceImpl implements NotificationService{
     @Autowired
     private IdObjectService idObjectService;
@@ -34,16 +37,20 @@ public class NotificationServiceImpl implements NotificationService{
     private DictionaryService ds;
 
     @Autowired
-    private EmailNotificationSender emailNotificationSender;
+    @Qualifier("emailNotificationSender")
+    private NotificationSender emailNotificationSender;
 
     @Autowired
-    private SmsNotificationSender smsNotificationSender;
+    @Qualifier("smsNotificationSender")
+    private NotificationSender smsNotificationSender;
 
     @Autowired
-    private InternalNotificationSender internalNotificationSender;
+    @Qualifier("internalNotificationSender")
+    private NotificationSender internalNotificationSender;
 
     @Autowired
-    private PushNotificationSender pushNotificationSender;
+    @Qualifier("pushNotificationSender")
+    private NotificationSender pushNotificationSender;
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 

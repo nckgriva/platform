@@ -13,12 +13,14 @@ import com.gracelogic.platform.notification.model.Template;
 import com.gracelogic.platform.notification.model.TemplateType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.*;
 
+@Service
 public class TemplateServiceImpl implements TemplateService {
     @Autowired
     private IdObjectService idObjectService;

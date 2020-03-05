@@ -37,11 +37,6 @@
         </dependency>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
-            <artifactId>platform-template</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-user</artifactId>
             <version>1.2</version>
         </dependency>
