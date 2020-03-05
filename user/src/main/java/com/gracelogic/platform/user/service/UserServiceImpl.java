@@ -1,17 +1,15 @@
 package com.gracelogic.platform.user.service;
 
+import com.gracelogic.platform.db.JsonUtils;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.localization.service.LocaleHolder;
-import com.gracelogic.platform.notification.dto.Message;
-import com.gracelogic.platform.notification.dto.SendingType;
-import com.gracelogic.platform.notification.exception.SendingException;
-import com.gracelogic.platform.notification.service.MessageSenderService;
+import com.gracelogic.platform.notification.dto.Content;
+import com.gracelogic.platform.notification.service.NotificationService;
 import com.gracelogic.platform.property.service.PropertyService;
-import com.gracelogic.platform.template.dto.LoadedTemplate;
-import com.gracelogic.platform.template.service.TemplateService;
+import com.gracelogic.platform.notification.service.TemplateService;
 import com.gracelogic.platform.user.dao.UserDao;
 import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
@@ -46,7 +44,7 @@ public class UserServiceImpl implements UserService {
     private IdObjectService idObjectService;
 
     @Autowired
-    private MessageSenderService messageSenderService;
+    private NotificationService notificationService;
 
     @Autowired
     private UserDao userDao;
@@ -155,7 +153,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void sendVerificationCodeForPasswordChanging(UUID identifierTypeId, String identifierValue, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException, SendingException {
+    public void sendVerificationCodeForPasswordChanging(UUID identifierTypeId, String identifierValue, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException {
         if (identifierTypeId == null) {
             identifierTypeId = resolveIdentifierTypeId(identifierValue);
         }
@@ -179,23 +177,23 @@ public class UserServiceImpl implements UserService {
             if (passphrase.getCreated().getTime() > currentTimeMills || (currentTimeMills - passphrase.getCreated().getTime() > propertyService.getPropertyValueAsLong("user:action_delay"))) {
                 if (identifierTypeId.equals(DataConstants.IdentifierTypes.PHONE.getValue())) {
                     try {
-                        LoadedTemplate template = templateService.load("sms_repair_code");
                         templateParams.put("verificationCode", passphrase.getValue());
 
-                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:sms_from"), identifierValue, template.getSubject(), templateService.apply(template, templateParams)), SendingType.SMS);
-                    } catch (IOException e) {
+                        Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.SMS_REPAIRING.getValue(), LocaleHolder.getLocale(), templateParams);
+                        notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.SMS.getValue(),
+                                propertyService.getPropertyValue("notification:sms_from"), identifierValue, content,0);
+                    } catch (Exception e) {
                         logger.error(e);
-                        throw new SendingException(e.getMessage());
                     }
                 } else if (identifierTypeId.equals(DataConstants.IdentifierTypes.EMAIL.getValue())) {
                     try {
-                        LoadedTemplate template = templateService.load("email_repair_code");
                         templateParams.put("verificationCode", passphrase.getValue());
 
-                        messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"), identifierValue, template.getSubject(), templateService.apply(template, templateParams)), SendingType.EMAIL);
-                    } catch (IOException e) {
+                        Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.EMAIL_REPAIRING.getValue(), LocaleHolder.getLocale(), templateParams);
+                        notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.EMAIL.getValue(),
+                                propertyService.getPropertyValue("notification:smtp_from"), identifierValue, content, 0);
+                    } catch (Exception e) {
                         logger.error(e);
-                        throw new SendingException(e.getMessage());
                     }
                 }
             } else {
@@ -331,7 +329,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void sendIdentifierVerificationCode(UUID identifierId, Map<String, String> templateParams) throws SendingException {
+    public void sendIdentifierVerificationCode(UUID identifierId, Map<String, String> templateParams) {
         Identifier identifier = idObjectService.getObjectById(Identifier.class, identifierId);
         if (identifier == null || identifier.getVerified() && identifier.getUser() != null) {
             return;
@@ -352,24 +350,26 @@ public class UserServiceImpl implements UserService {
 
         if (identifier.getIdentifierType().getId().equals(DataConstants.IdentifierTypes.EMAIL.getValue())) {
             try {
-                LoadedTemplate template = templateService.load("sms_validation_code");
                 templateParams.put("verificationCode", passphrase.getValue());
 
-                messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:sms_from"), identifier.getValue(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.SMS);
-            } catch (IOException e) {
+                Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.EMAIL_VERIFICATION.getValue(), LocaleHolder.getLocale(), templateParams);
+                notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.EMAIL.getValue(),
+                        propertyService.getPropertyValue("notification:sms_from"), identifier.getValue(), content, 0);
+            } catch (Exception e) {
                 logger.error(e);
-                throw new SendingException(e.getMessage());
             }
 
         } else if (identifier.getIdentifierType().getId().equals(DataConstants.IdentifierTypes.PHONE.getValue())) {
             try {
-                LoadedTemplate template = templateService.load("email_validation_code");
                 templateParams.put("verificationCode", passphrase.getValue());
 
-                messageSenderService.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"), identifier.getValue(), template.getSubject(), templateService.apply(template, templateParams)), SendingType.EMAIL);
-            } catch (IOException e) {
+                Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.SMS_VERIFICATION.getValue(), LocaleHolder.getLocale(), templateParams);
+
+                notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.SMS.getValue(),
+                        propertyService.getPropertyValue("notification:smtp_from"), identifier.getValue(), content, 0);
+
+            } catch (Exception e) {
                 logger.error(e);
-                throw new SendingException(e.getMessage());
             }
 
         }
@@ -492,7 +492,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void mergeUserIdentifiers(User user, boolean isNewUser, Collection<IdentifierDTO> identifierDTOs, boolean throwExceptionIfAlreadyAttached) {
+    public void mergeUserIdentifiers(User user, boolean isNewUser, Collection<IdentifierDTO> identifierDTOs, boolean throwExceptionIfAlreadyAttached) throws InvalidIdentifierException {
         List<Identifier> existingIdentifiers = Collections.emptyList();
         if (!isNewUser) {
             Set<UUID> toDelete = new HashSet<>();
@@ -542,7 +542,16 @@ public class UserServiceImpl implements UserService {
                     }
                 }
             } else {
-                identifier = new Identifier();
+                Identifier nonCurrentUserIdentifier = findIdentifier(dto.getIdentifierTypeId(), dto.getValue(), false);
+                if (nonCurrentUserIdentifier != null) {
+                    if (nonCurrentUserIdentifier.getUser() == null || !nonCurrentUserIdentifier.getVerified()) {
+                        identifier = nonCurrentUserIdentifier;
+                    } else {
+                        throw new InvalidIdentifierException("Identifier is already used: " + nonCurrentUserIdentifier.getId());
+                    }
+                } else {
+                    identifier = new Identifier();
+                }
             }
 
             IdentifierType identifierType = ds.get(IdentifierType.class, dto.getIdentifierTypeId());
@@ -1038,51 +1047,6 @@ public class UserServiceImpl implements UserService {
             passphrase.setPassphraseState(archiveState);
             idObjectService.save(passphrase);
         }
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public List<Identifier> createIdentifiers(List<IdentifierDTO> identifierDTOs, User user, boolean throwExceptionIfAlreadyAttached) throws InvalidIdentifierException {
-        List<Identifier> attachedIdentifiers = new LinkedList<>();
-
-        for (IdentifierDTO identifierDTO : identifierDTOs) {
-            if (!isIdentifierValid(identifierDTO.getIdentifierTypeId(), identifierDTO.getValue())) {
-                throw new InvalidIdentifierException(identifierDTO.getValue());
-            }
-
-            Map<String, Object> params = new HashMap<>();
-            params.put("value", identifierDTO.getValue());
-            params.put("identifierTypeId", identifierDTO.getIdentifierTypeId());
-
-            List<Identifier> identifiers = idObjectService.getList(Identifier.class, null, "el.value=:value and el.identifierType.id=:identifierTypeId", params, null, null, 1);
-            Identifier identifier = null;
-            if (!identifiers.isEmpty()) {
-                identifier = identifiers.iterator().next();
-            }
-
-            if (identifier != null && identifier.getVerified() && identifier.getUser() != null && !identifier.getUser().getId().equals(user.getId())) {
-                if (throwExceptionIfAlreadyAttached) {
-                    throw new InvalidIdentifierException();
-                } else {
-                    continue;
-                }
-            }
-
-            if (identifier == null) {
-                identifier = new Identifier();
-            }
-
-            IdentifierType identifierType = ds.get(IdentifierType.class, identifierDTO.getIdentifierTypeId());
-            identifier.setUser(user);
-            identifier.setPrimary(identifierDTO.getPrimary() != null ? identifierDTO.getPrimary() : false);
-            identifier.setValue(identifierDTO.getValue());
-            identifier.setIdentifierType(identifierType);
-            identifier.setVerified(identifierType.getAutomaticVerification());
-
-            identifiers.add(idObjectService.save(identifier));
-        }
-
-        return attachedIdentifiers;
     }
 
     private Passphrase createPassphrase(User user, PassphraseType passphraseType, String value, UUID referenceObjectId) {

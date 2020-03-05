@@ -2,7 +2,6 @@ package com.gracelogic.platform.user.service;
 
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
-import com.gracelogic.platform.notification.exception.SendingException;
 import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.*;
@@ -63,21 +62,19 @@ public interface UserService {
 
     Identifier findIdentifier(UUID identifierTypeId, String value, boolean enrich);
 
-    List<Identifier> createIdentifiers(List<IdentifierDTO> identifierDTOs, User user, boolean throwExceptionIfAlreadyAttached) throws InvalidIdentifierException;
-
     void archiveActualPassphrases(UUID userId, UUID passphraseTypeId, UUID referenceObjectId);
 
     Passphrase updatePassphrase(User user, String value, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveOtherPassphrases) throws InvalidPassphraseException;
 
     Identifier processSignIn(UUID identifierTypeId, String identifierValue, String password, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException;
 
-    void sendIdentifierVerificationCode(UUID identifierId, Map<String, String> templateParams) throws SendingException;
+    void sendIdentifierVerificationCode(UUID identifierId, Map<String, String> templateParams);
 
     Passphrase getActualVerificationCode(User user, UUID referenceObjectId, UUID passphraseTypeId, boolean createNewIfNotExist);
 
     User processSignUp(SignUpDTO signUpDTO) throws InvalidIdentifierException, InvalidPassphraseException;
 
-    void sendVerificationCodeForPasswordChanging(UUID identifierTypeId, String identifierValue, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException, SendingException;
+    void sendVerificationCodeForPasswordChanging(UUID identifierTypeId, String identifierValue, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException;
 
     boolean processIdentifierVerificationViaVerificationCode(UUID identifierId, String verificationCode);
 

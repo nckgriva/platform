@@ -6,11 +6,11 @@ import com.gracelogic.platform.feedback.model.Feedback;
 import com.gracelogic.platform.feedback.model.FeedbackType;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
-import com.gracelogic.platform.notification.dto.Message;
-import com.gracelogic.platform.notification.dto.SendingType;
-import com.gracelogic.platform.notification.service.MessageSenderService;
+import com.gracelogic.platform.notification.dto.Content;
+import com.gracelogic.platform.notification.service.DataConstants;
+import com.gracelogic.platform.notification.service.NotificationService;
 import com.gracelogic.platform.property.service.PropertyService;
-import com.gracelogic.platform.user.service.JsonUtils;
+import com.gracelogic.platform.db.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     private IdObjectService idObjectService;
 
     @Autowired
-    private MessageSenderService sender;
+    private NotificationService notificationService;
 
     @Autowired
     private PropertyService propertyService;
@@ -44,8 +44,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         Feedback feedback;
         if (feedbackDTO.getId() != null) {
             feedback = idObjectService.getObjectById(Feedback.class, feedbackDTO.getId());
-        }
-        else {
+        } else {
             feedback = new Feedback();
         }
         FeedbackType feedbackType = idObjectService.getObjectById(FeedbackType.class, feedbackDTO.getFeedbackTypeId());
@@ -62,7 +61,11 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         if (!StringUtils.isEmpty(feedbackType.getNotifyEmail())) {
             try {
-                sender.sendMessage(new Message(propertyService.getPropertyValue("notification:smtp_from"),feedbackType.getNotifyEmail(), feedbackType.getName(), sb.toString()), SendingType.EMAIL);
+                Content content = new Content();
+                content.setBody(sb.toString());
+                content.setTitle(feedbackType.getName());
+
+                notificationService.send(DataConstants.NotificationMethods.EMAIL.getValue(), propertyService.getPropertyValue("notification:smtp_from"), feedbackType.getNotifyEmail(), content, 0);
             } catch (Exception e) {
                 logger.error("Failed to send feedback", e);
             }

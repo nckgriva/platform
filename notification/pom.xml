@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>platform-content</artifactId>
-    <name>content</name>
+    <artifactId>platform-notification</artifactId>
+    <name>notification</name>
     <version>1.2</version>
     <packaging>jar</packaging>
     <parent>
@@ -17,11 +17,6 @@
     <dependencies>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
-            <artifactId>platform-db</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-property</artifactId>
             <version>1.2</version>
         </dependency>
@@ -31,43 +26,23 @@
             <version>1.2</version>
         </dependency>
         <dependency>
-            <groupId>com.gracelogic.platform</groupId>
-            <artifactId>platform-web</artifactId>
-            <version>1.2</version>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.gracelogic.platform</groupId>
-            <artifactId>platform-user</artifactId>
-            <version>1.2</version>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.1</version>
         </dependency>
         <dependency>
-            <groupId>com.gracelogic.platform</groupId>
-            <artifactId>platform-file-storage-auth</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
+            <groupId>com.github.spullara.mustache.java</groupId>
+            <artifactId>compiler</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
     <build>

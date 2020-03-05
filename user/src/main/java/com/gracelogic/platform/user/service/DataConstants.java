@@ -77,12 +77,14 @@ public class DataConstants {
         }
     }
 
-    public enum TokenTypes {
-        ACTIVE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
-        EXPIRED(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72"));
+    public enum TemplateTypes {
+        EMAIL_VERIFICATION(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        SMS_VERIFICATION(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
+        EMAIL_REPAIRING(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
+        SMS_REPAIRING(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74"));
         private UUID value;
 
-        TokenTypes(UUID value) {
+        TemplateTypes(UUID value) {
             this.value = value;
         }
 

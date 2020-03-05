@@ -10,7 +10,6 @@ public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
 
     @Override
     public Identifier findIdentifier(UUID identifierTypeId, String identifierValue, boolean enrich) {
-        //TODO: сделать оптимальнее
         String query = "select el from Identifier el " +
                 (enrich ? "left join fetch el.user user " : " ") +
                 "where el.identifierType.id=:identifierTypeId and el.value=:val";
@@ -18,9 +17,15 @@ public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
         logger.info(query);
 
         try {
-            return (Identifier) getEntityManager().createQuery(query, Identifier.class)
+            List<Identifier> identifiers = getEntityManager().createQuery(query, Identifier.class)
                     .setParameter("identifierTypeId", identifierTypeId)
-                    .setParameter("val", identifierValue).getSingleResult();
+                    .setParameter("val", identifierValue).setMaxResults(1).getResultList();
+            if (!identifiers.isEmpty()) {
+                return identifiers.iterator().next();
+            }
+            else {
+                return null;
+            }
         } catch (Exception e) {
             logger.debug(String.format("Failed to get identifier by value: %s", identifierValue), e);
         }

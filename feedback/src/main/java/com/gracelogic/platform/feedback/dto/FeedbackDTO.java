@@ -2,7 +2,7 @@ package com.gracelogic.platform.feedback.dto;
 
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.feedback.model.Feedback;
-import com.gracelogic.platform.user.service.JsonUtils;
+import com.gracelogic.platform.db.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;

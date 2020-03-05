@@ -15,9 +15,8 @@
         <module>swagger/swagger-ui</module>
         <module>utils/db</module>
         <module>utils/finance</module>
-        <module>utils/notification</module>
         <module>utils/localization</module>
-        <module>utils/template</module>
+        <!--<module>utils/template</module>-->
         <module>utils/web</module>
         <module>utils/tcp-server</module>
         <module>utils/onec</module>
@@ -36,5 +35,6 @@
         <module>task-auth</module>
         <module>market</module>
         <module>feedback</module>
+        <module>notification</module>
     </modules>
 </project>
