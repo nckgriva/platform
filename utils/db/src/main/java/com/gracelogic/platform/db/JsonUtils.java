@@ -1,4 +1,4 @@
-package com.gracelogic.platform.notification.service;
+package com.gracelogic.platform.db;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

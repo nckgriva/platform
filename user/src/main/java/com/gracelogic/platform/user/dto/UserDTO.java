@@ -9,7 +9,7 @@ import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.db.dto.JsonDateDeserializer;
 import com.gracelogic.platform.db.dto.JsonDateSerializer;
 import com.gracelogic.platform.user.model.User;
-import com.gracelogic.platform.user.service.JsonUtils;
+import com.gracelogic.platform.db.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;

@@ -34,10 +34,13 @@ public class Template extends IdObject<UUID> {
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Column(name = "CONTENT", nullable = false, columnDefinition = "TEXT")
-    private String content;
+    @Column(name = "TITLE", nullable = true)
+    private String title;
 
-    @Column(name = "LOCALE", nullable = true)
+    @Column(name = "BODY", nullable = true, columnDefinition = "TEXT")
+    private String body;
+
+    @Column(name = "LOCALE", nullable = false)
     private String locale;
 
     @Override
@@ -86,12 +89,20 @@ public class Template extends IdObject<UUID> {
         this.name = name;
     }
 
-    public String getContent() {
-        return content;
+    public String getTitle() {
+        return title;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public String getLocale() {

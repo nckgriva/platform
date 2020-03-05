@@ -10,7 +10,7 @@ import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationService;
 import com.gracelogic.platform.property.service.PropertyService;
-import com.gracelogic.platform.user.service.JsonUtils;
+import com.gracelogic.platform.db.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -16,7 +16,7 @@
         <module>utils/db</module>
         <module>utils/finance</module>
         <module>utils/localization</module>
-        <module>utils/template</module>
+        <!--<module>utils/template</module>-->
         <module>utils/web</module>
         <module>utils/tcp-server</module>
         <module>utils/onec</module>

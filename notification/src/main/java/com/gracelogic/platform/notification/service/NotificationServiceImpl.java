@@ -1,5 +1,6 @@
 package com.gracelogic.platform.notification.service;
 
+import com.gracelogic.platform.db.JsonUtils;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.dictionary.service.DictionaryService;

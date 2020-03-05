@@ -2,7 +2,7 @@ package com.gracelogic.platform.notification.dto;
 
 import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.notification.model.Notification;
-import com.gracelogic.platform.notification.service.JsonUtils;
+import com.gracelogic.platform.db.JsonUtils;
 
 import java.util.HashMap;
 import java.util.Map;

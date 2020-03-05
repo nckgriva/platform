@@ -1,5 +1,6 @@
 package com.gracelogic.platform.user.service;
 
+import com.gracelogic.platform.db.JsonUtils;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
@@ -9,7 +10,7 @@ import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.service.NotificationService;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.template.dto.LoadedTemplate;
-import com.gracelogic.platform.template.service.TemplateService;
+import com.gracelogic.platform.notification.service.TemplateService;
 import com.gracelogic.platform.user.dao.UserDao;
 import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
@@ -177,26 +178,22 @@ public class UserServiceImpl implements UserService {
             if (passphrase.getCreated().getTime() > currentTimeMills || (currentTimeMills - passphrase.getCreated().getTime() > propertyService.getPropertyValueAsLong("user:action_delay"))) {
                 if (identifierTypeId.equals(DataConstants.IdentifierTypes.PHONE.getValue())) {
                     try {
-                        LoadedTemplate template = templateService.load("sms_repair_code");
                         templateParams.put("verificationCode", passphrase.getValue());
-                        Content content = new Content();
-                        content.setBody(templateService.apply(template, templateParams));
-                        content.setTitle(template.getSubject());
+
+                        Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.SMS_REPAIRING.getValue(), LocaleHolder.getLocale(), templateParams);
                         notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.SMS.getValue(),
                                 propertyService.getPropertyValue("notification:sms_from"), identifierValue, content,0);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         logger.error(e);
                     }
                 } else if (identifierTypeId.equals(DataConstants.IdentifierTypes.EMAIL.getValue())) {
                     try {
-                        LoadedTemplate template = templateService.load("email_repair_code");
                         templateParams.put("verificationCode", passphrase.getValue());
-                        Content content = new Content();
-                        content.setBody(templateService.apply(template, templateParams));
-                        content.setTitle(template.getSubject());
+
+                        Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.EMAIL_REPAIRING.getValue(), LocaleHolder.getLocale(), templateParams);
                         notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.EMAIL.getValue(),
                                 propertyService.getPropertyValue("notification:smtp_from"), identifierValue, content, 0);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         logger.error(e);
                     }
                 }
@@ -354,29 +351,25 @@ public class UserServiceImpl implements UserService {
 
         if (identifier.getIdentifierType().getId().equals(DataConstants.IdentifierTypes.EMAIL.getValue())) {
             try {
-                LoadedTemplate template = templateService.load("sms_validation_code");
                 templateParams.put("verificationCode", passphrase.getValue());
-                Content content = new Content();
-                content.setBody(templateService.apply(template, templateParams));
-                content.setTitle(template.getSubject());
 
+                Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.EMAIL_VERIFICATION.getValue(), LocaleHolder.getLocale(), templateParams);
                 notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.EMAIL.getValue(),
                         propertyService.getPropertyValue("notification:sms_from"), identifier.getValue(), content, 0);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error(e);
             }
 
         } else if (identifier.getIdentifierType().getId().equals(DataConstants.IdentifierTypes.PHONE.getValue())) {
             try {
-                LoadedTemplate template = templateService.load("email_validation_code");
                 templateParams.put("verificationCode", passphrase.getValue());
-                Content content = new Content();
-                content.setBody(templateService.apply(template, templateParams));
-                content.setTitle(template.getSubject());
+
+                Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.SMS_VERIFICATION.getValue(), LocaleHolder.getLocale(), templateParams);
+
                 notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.SMS.getValue(),
                         propertyService.getPropertyValue("notification:smtp_from"), identifier.getValue(), content, 0);
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error(e);
             }
 

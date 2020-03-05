@@ -7,7 +7,8 @@ import java.util.UUID;
 
 public class TemplateDTO extends IdObjectDTO {
     private String name;
-    private String content;
+    private String title;
+    private String body;
     private UUID templateTypeId;
     private String templateTypeName;
     private String locale;
@@ -36,12 +37,20 @@ public class TemplateDTO extends IdObjectDTO {
         this.name = name;
     }
 
-    public String getContent() {
-        return content;
+    public String getTitle() {
+        return title;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public String getLocale() {
@@ -56,7 +65,8 @@ public class TemplateDTO extends IdObjectDTO {
         TemplateDTO dto = new TemplateDTO();
         IdObjectDTO.prepare(dto, model);
         dto.setName(model.getName());
-        dto.setContent(model.getContent());
+        dto.setTitle(model.getTitle());
+        dto.setBody(model.getBody());
         dto.setLocale(model.getLocale());
         if (model.getTemplateType() != null) {
             dto.setTemplateTypeId(model.getTemplateType().getId());
