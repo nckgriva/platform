@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @Service
@@ -48,7 +49,7 @@ public class PushNotificationSender implements NotificationSender {
             if (error != null) {
                 return new NotificationSenderResult(false, error);
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             return new NotificationSenderResult(false, ex.getMessage());
         }
 
