@@ -15,6 +15,8 @@ public class Transaction extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     @Access(AccessType.PROPERTY)
     private UUID id;
 
