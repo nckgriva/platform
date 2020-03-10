@@ -57,6 +57,16 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
+    public TemplateDTO getTemplate(UUID id) throws ObjectNotFoundException {
+        Template entity = idObjectService.getObjectById(Template.class, id);
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        return TemplateDTO.prepare(entity);
+    }
+
+    @Override
     public EntityListResponse<TemplateDTO> getTemplatesPaged(String name, UUID templateTypeId, boolean enrich,
                                                              Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";

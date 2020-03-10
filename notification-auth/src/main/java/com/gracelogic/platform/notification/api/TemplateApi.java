@@ -1,0 +1,127 @@
+package com.gracelogic.platform.notification.api;
+
+import com.gracelogic.platform.db.dto.EntityListResponse;
+import com.gracelogic.platform.db.exception.ObjectNotFoundException;
+import com.gracelogic.platform.localization.service.LocaleHolder;
+import com.gracelogic.platform.notification.Path;
+import com.gracelogic.platform.notification.dto.TemplateDTO;
+import com.gracelogic.platform.notification.model.Template;
+import com.gracelogic.platform.notification.service.TemplateService;
+import com.gracelogic.platform.user.api.AbstractAuthorizedController;
+import com.gracelogic.platform.web.dto.EmptyResponse;
+import com.gracelogic.platform.web.dto.ErrorResponse;
+import com.gracelogic.platform.web.dto.IDResponse;
+import io.swagger.annotations.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+@Controller
+@RequestMapping(value = Path.API_TEMPLATE)
+@Api(value = Path.API_TEMPLATE, tags = {"Template API"},
+        authorizations = @Authorization(value = "MybasicAuth"))
+public class TemplateApi extends AbstractAuthorizedController {
+    @Autowired
+    @Qualifier("dbMessageSource")
+    private ResourceBundleMessageSource messageSource;
+
+    @Autowired
+    private TemplateService templateService;
+
+    @ApiOperation(
+            value = "getTemplates",
+            notes = "Get list of templates",
+            response =  EntityListResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
+    @PreAuthorize("hasAuthority('TEMPLATE:SHOW')")
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity getTemplates(@RequestParam(value = "name", required = false) String name,
+                                   @RequestParam(value = "templateTypeId", required = false) UUID templateTypeId,
+                                   @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                   @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                   @RequestParam(value = "page", required = false) Integer page,
+                                   @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                   @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                   @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+
+        EntityListResponse<TemplateDTO> templates = templateService.getTemplatesPaged(name, templateTypeId, enrich, count, page, start, sortField, sortDir);
+        return new ResponseEntity<EntityListResponse<TemplateDTO>>(templates, HttpStatus.OK);
+    }
+
+    @ApiOperation(
+            value = "getTemplate",
+            notes = "Get template",
+            response = TemplateDTO .class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @PreAuthorize("hasAuthority('TEMPLATE:SHOW')")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    @ResponseBody
+    public ResponseEntity getTemplate(@PathVariable(value = "id") UUID id) {
+        try {
+            TemplateDTO templateDTO = templateService.getTemplate(id);
+            return new ResponseEntity<TemplateDTO >(templateDTO, HttpStatus.OK);
+        } catch (ObjectNotFoundException ex) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
+            value = "saveTemplate",
+            notes = "Save template",
+            response = IDResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @PreAuthorize("hasAuthority('TEMPLATE:SAVE')")
+    @RequestMapping(method = RequestMethod.POST, value = "/save")
+    @ResponseBody
+    public ResponseEntity saveTemplate(@RequestBody TemplateDTO templateDTO) {
+        try {
+            Template template = templateService.saveTemplate(templateDTO);
+            return new ResponseEntity<IDResponse>(new IDResponse(template.getId()), HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @ApiOperation(
+            value = "deleteTemplate",
+            notes = "Delete template",
+            response = EmptyResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
+    @PreAuthorize("hasAuthority('TEMPLATE:DELETE')")
+    @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
+    @ResponseBody
+    public ResponseEntity deleteTemplate(@PathVariable(value = "id") UUID id) {
+        try {
+            templateService.deleteTemplate(id);
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+}

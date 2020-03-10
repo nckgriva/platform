@@ -16,6 +16,8 @@ public interface TemplateService {
 
     void deleteTemplate(UUID id);
 
+    TemplateDTO getTemplate(UUID id) throws ObjectNotFoundException;
+
     EntityListResponse<TemplateDTO> getTemplatesPaged(String name, UUID templateTypeId, boolean enrich,
                                                                  Integer count, Integer page, Integer start, String sortField, String sortDir);
 
