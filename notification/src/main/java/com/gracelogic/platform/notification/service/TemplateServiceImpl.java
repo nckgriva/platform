@@ -105,7 +105,7 @@ public class TemplateServiceImpl implements TemplateService {
         dbParams.put("locale", locale.toString());
         dbParams.put("defaultLocale", "*");
 
-        List<Template> templates = idObjectService.getList(Template.class, null, "el.templateType.id=:templateTypeId and el.locale=:locale or el.locale=:defaultLocale", dbParams, "el.locale", "DESC", null, 1);
+        List<Template> templates = idObjectService.getList(Template.class, null, "el.templateType.id=:templateTypeId and (el.locale=:locale or el.locale=:defaultLocale)", dbParams, "el.locale", "DESC", null, 1);
         String titleTemplate;
         String bodyTemplate;
         if (!templates.isEmpty()) {
