@@ -517,7 +517,7 @@ public class UserServiceImpl implements UserService {
         }
 
         for (IdentifierDTO dto : identifierDTOs) {
-            if (!isIdentifierValid(dto.getIdentifierTypeId(), dto.getValue())) {
+            if (!isIdentifierValid(dto.getIdentifierTypeId(), dto.getValue(), false)) {
                 throw new InvalidIdentifierException("Identifier value is not valid: " + dto.getValue());
             }
 
@@ -849,7 +849,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean isIdentifierValid(UUID identifierTypeId, String identifierValue) {
+    public boolean isIdentifierValid(UUID identifierTypeId, String identifierValue, boolean checkAvailability) {
         if (StringUtils.isEmpty(identifierValue)) {
             return false;
         } else {
@@ -862,6 +862,14 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
+
+        if (checkAvailability) {
+            Identifier identifier = findIdentifier(identifierTypeId, identifierValue, false);
+            if (identifier != null && identifier.getUser() != null && identifier.getVerified()) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -869,7 +877,7 @@ public class UserServiceImpl implements UserService {
         //TODO: optimize this get list request
         List<IdentifierType> identifierTypes = idObjectService.getList(IdentifierType.class, null, null, null, "el.resolvePriority ASC", null, null);
         for (IdentifierType identifierType : identifierTypes) {
-            if (isIdentifierValid(identifierType.getId(), identifierValue)) {
+            if (isIdentifierValid(identifierType.getId(), identifierValue, false)) {
                 return identifierType.getId();
             }
         }

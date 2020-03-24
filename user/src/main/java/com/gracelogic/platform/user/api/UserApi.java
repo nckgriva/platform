@@ -74,7 +74,7 @@ public class UserApi extends AbstractAuthorizedController {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("signUp.INVALID_PASSPHRASE", messageSource.getMessage("signUp.INVALID_PASSPHRASE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidIdentifierException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("signUp.INVALID_IDENTIFIER", messageSource.getMessage("signUp.INVALID_IDENTIFIER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
-        }  catch (CustomLocalizedException e) {
+        } catch (CustomLocalizedException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
@@ -100,7 +100,7 @@ public class UserApi extends AbstractAuthorizedController {
                                    @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
                                    @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                    @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
-                                    @ApiParam(name = "fields", value = "fields") @RequestParam Map<String, String> allRequestParams) {
+                                   @ApiParam(name = "fields", value = "fields") @RequestParam Map<String, String> allRequestParams) {
 
         Map<String, String> fields = new HashMap<String, String>();
         if (allRequestParams != null) {

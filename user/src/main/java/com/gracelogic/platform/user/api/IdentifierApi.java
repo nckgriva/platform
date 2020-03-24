@@ -16,10 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping(value = Path.API_IDENTIFIER)
@@ -48,8 +45,10 @@ public class IdentifierApi extends AbstractAuthorizedController {
     @RequestMapping(value = "/validate", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity validate(@ApiParam(name = "identifierDTO", value = "identifierDTO")
-                                       @RequestBody IdentifierDTO identifierDTO) {
-        if (!userService.isIdentifierValid(identifierDTO.getIdentifierTypeId(), identifierDTO.getValue())) {
+                                   @RequestBody IdentifierDTO identifierDTO,
+                                   @ApiParam(name = "checkAvailability", value = "checkAvailability") @RequestParam(value = "checkAvailability", required = false, defaultValue = "false") Boolean checkAvailability
+                                   ) {
+        if (!userService.isIdentifierValid(identifierDTO.getIdentifierTypeId(), identifierDTO.getValue(), checkAvailability)) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } else {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
@@ -69,7 +68,7 @@ public class IdentifierApi extends AbstractAuthorizedController {
     @RequestMapping(value = "/verify", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity verify(@ApiParam(name = "verifyIdentifierRequestDTO", value = "verifyIdentifierRequestDTO")
-                                @RequestBody VerifyIdentifierRequestDTO verifyIdentifierRequestDTO) {
+                                 @RequestBody VerifyIdentifierRequestDTO verifyIdentifierRequestDTO) {
         if (userService.processIdentifierVerificationViaVerificationCode(verifyIdentifierRequestDTO.getIdentifierId(), verifyIdentifierRequestDTO.getVerificationCode())) {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } else {

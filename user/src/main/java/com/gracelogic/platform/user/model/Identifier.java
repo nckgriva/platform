@@ -44,7 +44,6 @@ public class Identifier extends IdObject<UUID> {
     private User user;
 
 
-
     @Override
     public UUID getId() {
         return id;

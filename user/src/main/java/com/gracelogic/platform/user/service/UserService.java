@@ -52,7 +52,7 @@ public interface UserService {
 
     void changeLocale(HttpServletRequest request, AuthorizedUser authorizedUser, String locale) throws IllegalArgumentException;
 
-    boolean isIdentifierValid(UUID identifierTypeId, String identifierValue);
+    boolean isIdentifierValid(UUID identifierTypeId, String identifierValue, boolean checkAvailable);
 
     UUID resolveIdentifierTypeId(String identifierValue) throws InvalidIdentifierException;
 
