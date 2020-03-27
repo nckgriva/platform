@@ -953,7 +953,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, noRollbackFor = InvalidPassphraseException.class)
     public Identifier processSignIn(UUID identifierTypeId, String identifierValue, String password, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
         if (identifierTypeId == null) {
             identifierTypeId = resolveIdentifierTypeId(identifierValue);
@@ -1020,12 +1020,14 @@ public class UserServiceImpl implements UserService {
                     incorrectAuthAttempt.setIdentifier(identifier);
                     incorrectAuthAttempt.setUser(identifier.getUser());
                     idObjectService.save(incorrectAuthAttempt);
+
+                    throw new InvalidPassphraseException();
                 }
             } else {
                 throw new TooManyAttemptsException();
             }
-
         }
+
         return null;
     }
 

@@ -56,7 +56,7 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
                 throw new TokenExpiredException("Token is expired");
             }
 
-            userService.updateTokenLastRequestDate(token);
+            //userService.updateTokenLastRequestDate(token);
 
             User user = token.getUser();
             AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
