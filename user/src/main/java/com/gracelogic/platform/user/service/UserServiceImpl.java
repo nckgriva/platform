@@ -80,6 +80,17 @@ public class UserServiceImpl implements UserService {
                 LastSessionHolder.updateLastSessionSessionId(userId, sessionId);
             }
         }
+
+        //Load default locale
+        String defaultLocale = propertyService.getPropertyValue("user:default_locale");
+        if (!StringUtils.isEmpty(defaultLocale)) {
+            try {
+                LocaleHolder.defaultLocale = LocaleUtils.toLocale(defaultLocale);;
+            }
+            catch (Exception e) {
+                logger.error("Failed to override default locale", e);
+            }
+        }
     }
 
     @Transactional
