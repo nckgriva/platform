@@ -107,8 +107,8 @@ public class NotificationServiceImpl implements NotificationService{
     @Override
     public EntityListResponse<NotificationDTO> getNotificationsPaged(String name, UUID notificationMethodId, UUID notificationStateId, boolean enrich,
                                                                      Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = "";
-        String countFetches = enrich ? "left join fetch el.notificationState left join fetch el.notificationMethod" : "";
+        String fetches = enrich ? "left join fetch el.notificationState left join fetch el.notificationMethod" : "";
+        String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
 
