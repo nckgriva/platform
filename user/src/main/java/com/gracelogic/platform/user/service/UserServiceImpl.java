@@ -1112,21 +1112,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, noRollbackFor = InvalidPassphraseException.class)
     public Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
         Identifier identifier = processSignIn(authRequestDTO.getIdentifierTypeId(), authRequestDTO.getIdentifierValue(), authRequestDTO.getPassword(), remoteAddress);
-        if (identifier == null) {
-            throw new InvalidIdentifierException("Identifier not found");
+        if (identifier != null) {
+            Token token = new Token();
+            token.setUser(identifier.getUser());
+            token.setLastRequest(new Date());
+            token.setActive(true);
+            token.setIdentifier(identifier);
+            token = idObjectService.save(token);
+
+            return token;
         }
-
-        Token token = new Token();
-        token.setUser(identifier.getUser());
-        token.setLastRequest(new Date());
-        token.setActive(true);
-        token.setIdentifier(identifier);
-        token = idObjectService.save(token);
-
-        return token;
+        else {
+            return null;
+        }
     }
 
     @Override

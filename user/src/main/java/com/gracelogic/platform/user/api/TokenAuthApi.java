@@ -66,13 +66,16 @@ public class TokenAuthApi {
     public ResponseEntity signIn(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
         try {
             Token token = userService.establishToken(authRequestDTO, ServletUtils.getRemoteAddress(request));
-
-            User user = token.getIdentifier().getUser();
-            AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
-            authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(token.getIdentifier()));
-            lifecycleService.signIn(authorizedUser);
-
-            return new ResponseEntity<TokenDTO>(new TokenDTO(token.getId()), HttpStatus.OK);
+            if (token != null) {
+                User user = token.getIdentifier().getUser();
+                AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);
+                authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(token.getIdentifier()));
+                lifecycleService.signIn(authorizedUser);
+                return new ResponseEntity<TokenDTO>(new TokenDTO(token.getId()), HttpStatus.OK);
+            }
+            else {
+                throw new InvalidIdentifierException();
+            }
         } catch (InvalidPassphraseException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("signIn.INVALID_PASSPHRASE", messageSource.getMessage("signIn.INVALID_PASSPHRASE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (TooManyAttemptsException e) {
