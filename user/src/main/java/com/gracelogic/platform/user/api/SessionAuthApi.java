@@ -109,37 +109,43 @@ public class SessionAuthApi extends AbstractAuthorizedController {
             if (exception instanceof UserBlockedException) {
                 response.setStatus(HttpStatus.LOCKED.value());
                 try {
-                    resp = objectMapper.writeValueAsString(new ErrorResponse("USER_BLOCKED", messageSource.getMessage("auth.USER_BLOCKED", null, LocaleHolder.getLocale())));
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("signIn.USER_BLOCKED", messageSource.getMessage("signIn.USER_BLOCKED", null, LocaleHolder.getLocale())));
                 } catch (Exception ignored) {
                 }
             } else if (exception instanceof TooManyAttemptsException) {
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
                 try {
-                    resp = objectMapper.writeValueAsString(new ErrorResponse("TOO_MANY_ATTEMPTS", messageSource.getMessage("auth.TO_MANY_ATTEMPTS", null, LocaleHolder.getLocale())));
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("signIn.TOO_MANY_ATTEMPTS", messageSource.getMessage("signIn.TOO_MANY_ATTEMPTS", null, LocaleHolder.getLocale())));
                 } catch (Exception ignored) {
                 }
             } else if (exception instanceof UserNotApprovedException) {
                 response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
                 try {
-                    resp = objectMapper.writeValueAsString(new ErrorResponse("NOT_ACTIVATED", messageSource.getMessage("auth.NOT_ACTIVATED", null, LocaleHolder.getLocale())));
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("signIn.USER_NOT_APPROVED", messageSource.getMessage("signIn.USER_NOT_APPROVED", null, LocaleHolder.getLocale())));
                 } catch (Exception ignored) {
                 }
             } else if (exception instanceof NotAllowedIPException) {
                 response.setStatus(HttpStatus.NOT_EXTENDED.value());
                 try {
-                    resp = objectMapper.writeValueAsString(new ErrorResponse("NOT_ALLOWED_IP", messageSource.getMessage("auth.NOT_ALLOWED_ID", null, LocaleHolder.getLocale())));
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("signIn.NOT_ALLOWED_ID", messageSource.getMessage("signIn.NOT_ALLOWED_ID", null, LocaleHolder.getLocale())));
                 } catch (Exception ignored) {
                 }
             } else if (exception instanceof InvalidIdentifierException) {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 try {
-                    resp = objectMapper.writeValueAsString(new ErrorResponse("INVALID_IDENTIFIER", messageSource.getMessage("auth.INVALID_IDENTIFIER", null, LocaleHolder.getLocale())));
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("signIn.INVALID_IDENTIFIER", messageSource.getMessage("signIn.INVALID_IDENTIFIER", null, LocaleHolder.getLocale())));
+                } catch (Exception ignored) {
+                }
+            } else if (exception instanceof InvalidPassphraseException) {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                try {
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("signIn.INVALID_PASSPHRASE", messageSource.getMessage("signIn.INVALID_PASSPHRASE", null, LocaleHolder.getLocale())));
                 } catch (Exception ignored) {
                 }
             } else {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 try {
-                    resp = objectMapper.writeValueAsString(new ErrorResponse("INVALID_CREDENTIALS", messageSource.getMessage("auth.INVALID_CREDENTIALS", null, LocaleHolder.getLocale())));
+                    resp = objectMapper.writeValueAsString(new ErrorResponse("common.UNEXPECTED_ERROR", messageSource.getMessage("common.UNEXPECTED_ERROR", null, LocaleHolder.getLocale())));
                 } catch (Exception ignored) {
                 }
             }

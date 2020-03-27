@@ -29,7 +29,7 @@ import java.util.UUID;
 public class PropertyApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
-    private ResourceBundleMessageSource messageSource;
+    private ResourceBundleMessageSource dbMessageSource;
 
     @Autowired
     private PropertyService propertyService;
@@ -76,7 +76,7 @@ public class PropertyApi extends AbstractAuthorizedController {
             PropertyDTO propertyDTO = propertyService.getProperty(id);
             return new ResponseEntity<PropertyDTO>(propertyDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -97,7 +97,7 @@ public class PropertyApi extends AbstractAuthorizedController {
             Property property = propertyService.saveProperty(propertyDTO);
             return new ResponseEntity<>(new IDResponse(property.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -119,7 +119,7 @@ public class PropertyApi extends AbstractAuthorizedController {
             propertyService.deleteProperty(id);
             return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }

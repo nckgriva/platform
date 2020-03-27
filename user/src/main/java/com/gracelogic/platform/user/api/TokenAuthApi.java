@@ -1,12 +1,14 @@
 package com.gracelogic.platform.user.api;
 
 
+import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.AuthRequestDTO;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.dto.IdentifierDTO;
 import com.gracelogic.platform.user.dto.TokenDTO;
+import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.Token;
 import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.service.UserLifecycleService;
@@ -16,6 +18,8 @@ import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -41,6 +45,10 @@ public class TokenAuthApi {
     @Autowired
     private UserLifecycleService lifecycleService;
 
+    @Autowired
+    @Qualifier("userMessageSource")
+    private ResourceBundleMessageSource messageSource;
+
     @ApiOperation(
             value = "signIn",
             notes = "Sign in",
@@ -65,8 +73,18 @@ public class TokenAuthApi {
             lifecycleService.signIn(authorizedUser);
 
             return new ResponseEntity<TokenDTO>(new TokenDTO(token.getId()), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<ErrorResponse>(HttpStatus.BAD_REQUEST);
+        } catch (InvalidPassphraseException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signIn.INVALID_PASSPHRASE", messageSource.getMessage("signIn.INVALID_PASSPHRASE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (TooManyAttemptsException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signIn.TOO_MANY_ATTEMPTS", messageSource.getMessage("signIn.TOO_MANY_ATTEMPTS", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (NotAllowedIPException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signIn.NOT_ALLOWED_ID", messageSource.getMessage("signIn.NOT_ALLOWED_ID", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (UserNotApprovedException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signIn.USER_NOT_APPROVED", messageSource.getMessage("signIn.USER_NOT_APPROVED", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (InvalidIdentifierException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signIn.INVALID_IDENTIFIER", messageSource.getMessage("signIn.INVALID_IDENTIFIER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (UserBlockedException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signIn.USER_BLOCKED", messageSource.getMessage("signIn.USER_BLOCKED", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 

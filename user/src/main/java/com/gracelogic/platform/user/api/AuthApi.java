@@ -35,14 +35,15 @@ import javax.servlet.http.HttpServletRequest;
         authorizations = @Authorization(value = "MybasicAuth"))
 public class AuthApi extends AbstractAuthorizedController {
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
     @Qualifier("userMessageSource")
     private ResourceBundleMessageSource messageSource;
+
+    @Autowired
+    @Qualifier("dbMessageSource")
+    private ResourceBundleMessageSource dbMessageSource;
 
     @ApiOperation(
             value = "info",
@@ -59,7 +60,7 @@ public class AuthApi extends AbstractAuthorizedController {
         if (getUser() != null) {
             return new ResponseEntity<AuthorizedUser>(getUser(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.NOT _AUTHORIZED", messageSource.getMessage("common.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -120,7 +121,7 @@ public class AuthApi extends AbstractAuthorizedController {
         } catch (TooFastOperationException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.TOO_FAST_OPERATION", messageSource.getMessage("common.TOO_FAST_OPERATION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
@@ -143,7 +144,7 @@ public class AuthApi extends AbstractAuthorizedController {
         } catch (InvalidPassphraseException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.AUTH_CODE_IS_INCORRECT", messageSource.getMessage("common.AUTH_CODE_IS_INCORRECT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.USER_NOT_FOUND", messageSource.getMessage("common.USER_NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }

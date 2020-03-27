@@ -20,7 +20,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.UUID;
 
 @Controller
@@ -30,7 +29,7 @@ import java.util.UUID;
 public class RoleApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
-    private ResourceBundleMessageSource messageSource;
+    private ResourceBundleMessageSource dbMessageSource;
 
     @Autowired
     private UserService userService;
@@ -77,7 +76,7 @@ public class RoleApi extends AbstractAuthorizedController {
             RoleDTO roleDTO = userService.getRole(id, fetchGrants);
             return new ResponseEntity<RoleDTO>(roleDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException ex) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -98,7 +97,7 @@ public class RoleApi extends AbstractAuthorizedController {
             Role role = userService.saveRole(roleDTO);
             return new ResponseEntity<IDResponse>(new IDResponse(role.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", messageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -121,7 +120,7 @@ public class RoleApi extends AbstractAuthorizedController {
             userService.deleteRole(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
     }

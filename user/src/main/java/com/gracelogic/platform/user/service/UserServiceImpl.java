@@ -952,7 +952,7 @@ public class UserServiceImpl implements UserService {
         if (identifier != null && identifier.getUser() != null && identifier.getVerified()) {
             IdentifierType identifierType = ds.get(IdentifierType.class, identifier.getIdentifierType().getId());
             if (!identifierType.getSignInAllowed()) {
-                throw new InvalidIdentifierException("Sign in is not allowed");
+                throw new InvalidIdentifierException("Sign in is not allowed via this identifier type");
             }
             User user = identifier.getUser();
             long currentTimeMillis = System.currentTimeMillis();
@@ -984,7 +984,7 @@ public class UserServiceImpl implements UserService {
                 try {
                     CronExpression cronExpression = new CronExpression(user.getAuthScheduleCronExpression());
                     if (!cronExpression.isSatisfiedBy(currentDate)) {
-                        throw new UserBlockedException("User blocked at this time");
+                        throw new UserBlockedException("User is blocked or not allowed to sign in at this time");
                     }
                 } catch (ParseException ignored) {}
             }
@@ -1100,11 +1100,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress) {
+    public Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
         Identifier identifier = processSignIn(authRequestDTO.getIdentifierTypeId(), authRequestDTO.getIdentifierValue(), authRequestDTO.getPassword(), remoteAddress);
         if (identifier == null) {
             throw new InvalidIdentifierException("Identifier not found");
         }
+
         Token token = new Token();
         token.setUser(identifier.getUser());
         token.setLastRequest(new Date());

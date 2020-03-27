@@ -49,7 +49,7 @@ public class IdentifierApi extends AbstractAuthorizedController {
                                    @ApiParam(name = "checkAvailability", value = "checkAvailability") @RequestParam(value = "checkAvailability", required = false, defaultValue = "false") Boolean checkAvailability
                                    ) {
         if (!userService.isIdentifierValid(identifierDTO.getIdentifierTypeId(), identifierDTO.getValue(), checkAvailability)) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_PHONE", messageSource.getMessage("register.INVALID_PHONE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signUp.INVALID_IDENTIFIER", messageSource.getMessage("signUp.INVALID_IDENTIFIER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } else {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         }
@@ -72,7 +72,7 @@ public class IdentifierApi extends AbstractAuthorizedController {
         if (userService.processIdentifierVerificationViaVerificationCode(verifyIdentifierRequestDTO.getIdentifierId(), verifyIdentifierRequestDTO.getVerificationCode())) {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("register.INVALID_CODE", messageSource.getMessage("register.INVALID_CODE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.AUTH_CODE_IS_INCORRECT", messageSource.getMessage("common.AUTH_CODE_IS_INCORRECT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 

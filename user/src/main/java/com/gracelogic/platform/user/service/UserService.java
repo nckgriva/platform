@@ -82,7 +82,7 @@ public interface UserService {
 
     void updateTokenLastRequestDate(Token newToken);
 
-    Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress);
+    Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException;
 
     void deactivateToken(TokenDTO tokenDTO);
 }

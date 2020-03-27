@@ -29,6 +29,10 @@ public class SettingApi extends AbstractAuthorizedController {
     @Qualifier("userMessageSource")
     private ResourceBundleMessageSource messageSource;
 
+    @Autowired
+    @Qualifier("dbMessageSource")
+    private ResourceBundleMessageSource dbMessageSource;
+
     @ApiOperation(
             value = "getUserSetting",
             notes = "Get user setting by code",
@@ -50,7 +54,7 @@ public class SettingApi extends AbstractAuthorizedController {
         if (userSetting != null) {
             return new ResponseEntity<UserSettingDTO>(UserSettingDTO.prepare(userSetting), HttpStatus.OK);
         } else {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("setting.NOT_FOUND", messageSource.getMessage("setting.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -70,7 +74,7 @@ public class SettingApi extends AbstractAuthorizedController {
                                           @ApiParam(name = "request", value = "request")
                                           @RequestBody SingleValueDTO request) {
         if (getUser() == null) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("auth.NOT_AUTHORIZED", messageSource.getMessage("auth.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
         }
 
         userService.updateUserSetting(getUser().getId(), key, request.getValue());
