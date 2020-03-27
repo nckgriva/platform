@@ -16,7 +16,9 @@ public class NotificationDTO extends IdObjectDTO {
     private Map<String, String> fields = new HashMap<>();
     private Integer priority;
     private UUID notificationStateId;
+    private String notificationStateName;
     private UUID notificationMethodId;
+    private String notificationMethodName;
 
     public UUID getNotificationStateId() {
         return notificationStateId;
@@ -82,6 +84,22 @@ public class NotificationDTO extends IdObjectDTO {
         this.priority = priority;
     }
 
+    public String getNotificationStateName() {
+        return notificationStateName;
+    }
+
+    public void setNotificationStateName(String notificationStateName) {
+        this.notificationStateName = notificationStateName;
+    }
+
+    public String getNotificationMethodName() {
+        return notificationMethodName;
+    }
+
+    public void setNotificationMethodName(String notificationMethodName) {
+        this.notificationMethodName = notificationMethodName;
+    }
+
     public static NotificationDTO prepare(Notification model) {
         NotificationDTO dto = new NotificationDTO();
         IdObjectDTO.prepare(dto, model);
@@ -98,6 +116,18 @@ public class NotificationDTO extends IdObjectDTO {
         dto.setTitle(model.getTitle());
         dto.setFields(JsonUtils.jsonToMap(model.getFields()));
         dto.setPriority(model.getPriority());
+        return dto;
+    }
+
+    public static NotificationDTO enrich(NotificationDTO dto, Notification model) {
+        if (model.getNotificationMethod() != null) {
+            dto.setNotificationMethodName(model.getNotificationMethod().getName());
+        }
+
+        if (model.getNotificationState() != null) {
+            dto.setNotificationStateName(model.getNotificationState().getName());
+        }
+
         return dto;
     }
 }

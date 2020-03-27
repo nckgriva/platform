@@ -108,7 +108,7 @@ public class NotificationServiceImpl implements NotificationService{
     public EntityListResponse<NotificationDTO> getNotificationsPaged(String name, UUID notificationMethodId, UUID notificationStateId, boolean enrich,
                                                                      Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
-        String countFetches = "";
+        String countFetches = enrich ? "left join fetch el.notificationState left join fetch el.notificationMethod" : "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
 
@@ -135,6 +135,9 @@ public class NotificationServiceImpl implements NotificationService{
         List<Notification> items = idObjectService.getList(Notification.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (Notification e : items) {
             NotificationDTO el = NotificationDTO.prepare(e);
+            if (enrich) {
+                NotificationDTO.enrich(el, e);
+            }
             entityListResponse.addData(el);
         }
 
