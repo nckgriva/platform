@@ -76,7 +76,7 @@ public interface UserService {
 
     void sendVerificationCodeForPasswordChanging(UUID identifierTypeId, String identifierValue, Map<String, String> templateParams) throws ObjectNotFoundException, TooFastOperationException;
 
-    boolean processIdentifierVerificationViaVerificationCode(UUID identifierId, String verificationCode);
+    boolean processIdentifierVerificationViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode);
 
     void verifyIdentifierViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode) throws ObjectNotFoundException, InvalidPassphraseException;
 

@@ -1,8 +1,7 @@
 package com.gracelogic.platform.user.dto;
 
-public class ChangePasswordViaVerificationCodeRequestDTO extends SendVerificationCodeForPasswordChangingRequestDTO {
+public class ChangePasswordViaVerificationCodeRequestDTO extends VerifyIdentifierRequestDTO {
     private String newPassword;
-    private String verificationCode;
 
     public String getNewPassword() {
         return newPassword;
@@ -12,11 +11,12 @@ public class ChangePasswordViaVerificationCodeRequestDTO extends SendVerificatio
         this.newPassword = newPassword;
     }
 
-    public String getVerificationCode() {
-        return verificationCode;
-    }
-
-    public void setVerificationCode(String verificationCode) {
-        this.verificationCode = verificationCode;
+    @Override
+    public String toString() {
+        return "ChangePasswordViaVerificationCodeRequestDTO{" +
+                "newPassword=[not logged]" + '\'' +
+                ", identifierTypeId=" + identifierTypeId +
+                ", identifierValue='" + identifierValue + '\'' +
+                '}';
     }
 }

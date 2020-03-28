@@ -1,20 +1,8 @@
 package com.gracelogic.platform.user.dto;
 
-import com.gracelogic.platform.web.dto.PlatformRequest;
 
-import java.util.UUID;
-
-public class VerifyIdentifierRequestDTO extends PlatformRequest {
-    private UUID identifierId;
+public class VerifyIdentifierRequestDTO extends IdentifierRequestDTO {
     private String verificationCode;
-
-    public UUID getIdentifierId() {
-        return identifierId;
-    }
-
-    public void setIdentifierId(UUID identifierId) {
-        this.identifierId = identifierId;
-    }
 
     public String getVerificationCode() {
         return verificationCode;
@@ -22,5 +10,14 @@ public class VerifyIdentifierRequestDTO extends PlatformRequest {
 
     public void setVerificationCode(String verificationCode) {
         this.verificationCode = verificationCode;
+    }
+
+    @Override
+    public String toString() {
+        return "VerifyIdentifierRequestDTO{" +
+                "verificationCode='" + verificationCode + '\'' +
+                ", identifierTypeId=" + identifierTypeId +
+                ", identifierValue='" + identifierValue + '\'' +
+                '}';
     }
 }

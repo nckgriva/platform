@@ -6,7 +6,7 @@ import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.dto.ChangePasswordViaVerificationCodeRequestDTO;
-import com.gracelogic.platform.user.dto.SendVerificationCodeForPasswordChangingRequestDTO;
+import com.gracelogic.platform.user.dto.IdentifierRequestDTO;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
@@ -114,7 +114,7 @@ public class AuthApi extends AbstractAuthorizedController {
     @RequestMapping(value = "/send-verification-code-for-password-changing", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity sendVerificationCodeForPasswordChanging(@ApiParam(name = "request", value = "request")
-                                         @RequestBody SendVerificationCodeForPasswordChangingRequestDTO request) {
+                                         @RequestBody IdentifierRequestDTO request) {
 
         try {
             userService.sendVerificationCodeForPasswordChanging(request.getIdentifierTypeId(), request.getIdentifierValue(), null);
@@ -148,6 +148,4 @@ public class AuthApi extends AbstractAuthorizedController {
         }
         return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
-
-
 }

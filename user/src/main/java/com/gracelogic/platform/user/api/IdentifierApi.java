@@ -3,7 +3,7 @@ package com.gracelogic.platform.user.api;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
-import com.gracelogic.platform.user.dto.IdentifierDTO;
+import com.gracelogic.platform.user.dto.IdentifierRequestDTO;
 import com.gracelogic.platform.user.dto.VerifyIdentifierRequestDTO;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
@@ -44,11 +44,10 @@ public class IdentifierApi extends AbstractAuthorizedController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/validate", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity validate(@ApiParam(name = "identifierDTO", value = "identifierDTO")
-                                   @RequestBody IdentifierDTO identifierDTO,
+    public ResponseEntity validate(@ApiParam(name = "dto", value = "dto") @RequestBody IdentifierRequestDTO dto,
                                    @ApiParam(name = "checkAvailability", value = "checkAvailability") @RequestParam(value = "checkAvailability", required = false, defaultValue = "false") Boolean checkAvailability
                                    ) {
-        if (!userService.isIdentifierValid(identifierDTO.getIdentifierTypeId(), identifierDTO.getValue(), checkAvailability)) {
+        if (!userService.isIdentifierValid(dto.getIdentifierTypeId(), dto.getIdentifierValue(), checkAvailability)) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("signUp.INVALID_IDENTIFIER", messageSource.getMessage("signUp.INVALID_IDENTIFIER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } else {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
@@ -67,9 +66,9 @@ public class IdentifierApi extends AbstractAuthorizedController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/verify", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity verify(@ApiParam(name = "verifyIdentifierRequestDTO", value = "verifyIdentifierRequestDTO")
-                                 @RequestBody VerifyIdentifierRequestDTO verifyIdentifierRequestDTO) {
-        if (userService.processIdentifierVerificationViaVerificationCode(verifyIdentifierRequestDTO.getIdentifierId(), verifyIdentifierRequestDTO.getVerificationCode())) {
+    public ResponseEntity verify(@ApiParam(name = "dto", value = "dto")
+                                 @RequestBody VerifyIdentifierRequestDTO dto) {
+        if (userService.processIdentifierVerificationViaVerificationCode(dto.getIdentifierTypeId(), dto.getIdentifierValue(), dto.getVerificationCode())) {
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } else {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.AUTH_CODE_IS_INCORRECT", messageSource.getMessage("common.AUTH_CODE_IS_INCORRECT", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);

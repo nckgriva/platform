@@ -1092,13 +1092,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean processIdentifierVerificationViaVerificationCode(UUID identifierId, String verificationCode) {
-        Identifier identifier = idObjectService.getObjectById(Identifier.class, identifierId);
+    public boolean processIdentifierVerificationViaVerificationCode(UUID identifierTypeId, String identifierValue, String verificationCode) {
+        Identifier identifier = findIdentifier(identifierTypeId, identifierValue, false);
         if (identifier == null || identifier.getVerified()) {
             return true;
         }
 
-        Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifierId, DataConstants.PassphraseTypes.IDENTIFIER_VERIFICATION_CODE.getValue(), false);
+        Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifier.getId(), DataConstants.PassphraseTypes.IDENTIFIER_VERIFICATION_CODE.getValue(), false);
         if (isPassphraseValueValid(passphrase, verificationCode)) {
             identifier.setVerified(true);
             idObjectService.save(identifier);

@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.UUID;
 
 public class TokenDTO extends IdObjectDTO implements Serializable {
-
     private UUID token;
 
     public TokenDTO() {
