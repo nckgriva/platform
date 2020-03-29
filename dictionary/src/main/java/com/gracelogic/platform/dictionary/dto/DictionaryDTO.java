@@ -2,19 +2,17 @@ package com.gracelogic.platform.dictionary.dto;
 
 import com.gracelogic.platform.dictionary.model.Dictionary;
 
-import java.util.UUID;
-
 public class DictionaryDTO {
-    private UUID id;
+    private Object id;
     private String name;
     private String code;
     private Integer sortOrder;
 
-    public UUID getId() {
+    public Object getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Object id) {
         this.id = id;
     }
 
