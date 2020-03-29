@@ -2,7 +2,7 @@ package com.gracelogic.platform.web.dto;
 
 import java.util.UUID;
 
-public class IDResponse extends PlatformRequest {
+public class IDResponse extends PlatformResponse {
     private Object id;
 
     public Object getId() {
