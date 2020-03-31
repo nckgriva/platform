@@ -14,8 +14,6 @@ public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
                 (enrich ? "left join fetch el.user user " : " ") +
                 "where el.identifierType.id=:identifierTypeId and el.value=:val";
 
-        logger.info(query);
-
         try {
             List<Identifier> identifiers = getEntityManager().createQuery(query, Identifier.class)
                     .setParameter("identifierTypeId", identifierTypeId)

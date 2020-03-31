@@ -24,4 +24,12 @@ public abstract class AbstractLifecycleService implements UserLifecycleService {
     public User save(UserDTO userDTO, boolean mergeRoles, boolean mergeIdentifiers, AuthorizedUser executor) throws ObjectNotFoundException {
         return getUserService().saveUser(userDTO, mergeRoles, mergeIdentifiers, executor);
     }
+
+    @Override
+    public void signIn(AuthorizedUser authorizedUser) {
+    }
+
+    @Override
+    public void signOut(AuthorizedUser authorizedUser) {
+    }
 }

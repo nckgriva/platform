@@ -17,4 +17,6 @@ public interface UserLifecycleService {
     User save(UserDTO userDTO, boolean mergeRoles, boolean mergeIdentifiers, AuthorizedUser executor) throws ObjectNotFoundException;
 
     void delete(User user);
+
+    void signOut(AuthorizedUser authorizedUser);
 }

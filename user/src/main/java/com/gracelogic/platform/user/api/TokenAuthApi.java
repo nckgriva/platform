@@ -1,6 +1,7 @@
 package com.gracelogic.platform.user.api;
 
 
+import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
@@ -37,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 @Secured(PlatformRole.ANONYMOUS)
 @Api(value = Path.API_AUTH_TOKEN, tags = {"Token Auth API"},
         authorizations = @Authorization(value = "MybasicAuth"))
-public class TokenAuthApi {
+public class TokenAuthApi extends AbstractAuthorizedController {
 
     @Autowired
     private UserService userService;
@@ -48,6 +49,9 @@ public class TokenAuthApi {
     @Autowired
     @Qualifier("userMessageSource")
     private ResourceBundleMessageSource messageSource;
+
+    @Autowired
+    private IdObjectService idObjectService;
 
     @ApiOperation(
             value = "signIn",
@@ -72,8 +76,7 @@ public class TokenAuthApi {
                 authorizedUser.setSignInIdentifier(IdentifierDTO.prepare(token.getIdentifier()));
                 lifecycleService.signIn(authorizedUser);
                 return new ResponseEntity<TokenDTO>(new TokenDTO(token.getId()), HttpStatus.OK);
-            }
-            else {
+            } else {
                 throw new InvalidIdentifierException();
             }
         } catch (InvalidPassphraseException e) {
@@ -105,10 +108,15 @@ public class TokenAuthApi {
     public ResponseEntity signOut(@RequestBody TokenDTO tokenDTO) {
         try {
             userService.deactivateToken(tokenDTO);
+
+            AuthorizedUser user = getUser();
+            if (user != null) {
+                lifecycleService.signOut(getUser());
+            }
+
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception ignored) {
             return new ResponseEntity<ErrorResponse>(HttpStatus.BAD_REQUEST);
         }
     }
-
 }
