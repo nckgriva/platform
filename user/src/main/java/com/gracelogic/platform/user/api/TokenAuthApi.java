@@ -112,7 +112,7 @@ public class TokenAuthApi extends AbstractAuthorizedController {
             userService.deactivateToken(tokenDTO);
 
             if (user != null) {
-                lifecycleService.signOut(getUser());
+                lifecycleService.signOut(user);
             }
 
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
