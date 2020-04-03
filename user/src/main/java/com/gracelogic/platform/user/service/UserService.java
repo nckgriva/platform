@@ -85,4 +85,6 @@ public interface UserService {
     Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException;
 
     void deactivateToken(TokenDTO tokenDTO);
+
+    void blockExpiredUsers();
 }

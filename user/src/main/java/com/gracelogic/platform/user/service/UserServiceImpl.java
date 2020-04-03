@@ -1143,4 +1143,19 @@ public class UserServiceImpl implements UserService {
         idObjectService.updateFieldValue(Token.class, tokenDTO.getToken(), "active", false);
         SecurityContextHolder.clearContext();
     }
+
+    @Override
+    @Transactional
+    public void blockExpiredUsers() {
+        Date currentTime = new Date();
+
+        Map<String, Object> param = new HashMap<>();
+        param.put("currentTime", currentTime);
+        List<User> users = idObjectService.getList(User.class, null, "el.blocked=false and el.blockAfterDt <= :currentTime", param, null, null, null);
+        for (User user : users) {
+            user.setBlocked(true);
+            user.setBlockedDt(currentTime);
+            idObjectService.save(user);
+        }
+    }
 }
