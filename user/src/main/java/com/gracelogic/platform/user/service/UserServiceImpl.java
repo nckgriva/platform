@@ -85,9 +85,9 @@ public class UserServiceImpl implements UserService {
         String defaultLocale = propertyService.getPropertyValue("user:default_locale");
         if (!StringUtils.isEmpty(defaultLocale)) {
             try {
-                LocaleHolder.defaultLocale = LocaleUtils.toLocale(defaultLocale);;
-            }
-            catch (Exception e) {
+                LocaleHolder.defaultLocale = LocaleUtils.toLocale(defaultLocale);
+                ;
+            } catch (Exception e) {
                 logger.error("Failed to override default locale", e);
             }
         }
@@ -192,7 +192,7 @@ public class UserServiceImpl implements UserService {
 
                         Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.SMS_REPAIRING.getValue(), LocaleHolder.getLocale(), templateParams);
                         notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.SMS.getValue(),
-                                propertyService.getPropertyValue("notification:sms_from"), identifierValue, content,0);
+                                propertyService.getPropertyValue("notification:sms_from"), identifierValue, content, 0);
                     } catch (Exception e) {
                         logger.error(e);
                     }
@@ -227,6 +227,7 @@ public class UserServiceImpl implements UserService {
             Passphrase passphrase = getActualVerificationCode(identifier.getUser(), identifier.getUser().getId(), DataConstants.PassphraseTypes.CHANGE_PASSWORD_VERIFICATION_CODE.getValue(), false);
             if (isPassphraseValueValid(passphrase, verificationCode)) {
                 changeUserPassword(identifier.getUser().getId(), newPassword);
+                archivePassphrase(passphrase);
             } else {
                 throw new InvalidPassphraseException();
             }
@@ -997,7 +998,8 @@ public class UserServiceImpl implements UserService {
                     if (!cronExpression.isSatisfiedBy(currentDate)) {
                         throw new UserBlockedException("User is blocked or not allowed to sign in at this time");
                     }
-                } catch (ParseException ignored) {}
+                } catch (ParseException ignored) {
+                }
             }
 
             Date startDate = new Date(currentTimeMillis - propertyService.getPropertyValueAsInteger("user:block_period"));
@@ -1070,6 +1072,14 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void archivePassphrase(Passphrase passphrase) {
+        PassphraseState archiveState = ds.get(PassphraseState.class, DataConstants.PassphraseStates.ARCHIVE.getValue());
+        passphrase.setPassphraseState(archiveState);
+        idObjectService.save(passphrase);
+    }
+
     private Passphrase createPassphrase(User user, PassphraseType passphraseType, String value, UUID referenceObjectId) {
         Passphrase passphrase = new Passphrase();
         passphrase.setUser(user);
@@ -1124,8 +1134,7 @@ public class UserServiceImpl implements UserService {
             token = idObjectService.save(token);
 
             return token;
-        }
-        else {
+        } else {
             return null;
         }
     }

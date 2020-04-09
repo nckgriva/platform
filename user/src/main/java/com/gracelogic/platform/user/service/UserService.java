@@ -87,4 +87,6 @@ public interface UserService {
     void deactivateToken(TokenDTO tokenDTO);
 
     void blockExpiredUsers();
+
+    void archivePassphrase(Passphrase passphrase);
 }
