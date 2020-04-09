@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void changeUserPassword(UUID userId, String newPassword) {
+    public void changeUserPassword(UUID userId, String newPassword) throws InvalidPassphraseException{
         User user = idObjectService.getObjectById(User.class, userId);
         updatePassphrase(user, newPassword, DataConstants.PassphraseTypes.USER_PASSWORD.getValue(), userId, true);
 
@@ -403,7 +403,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User saveUser(UserDTO userDTO, boolean mergeRoles, boolean mergeIdentifiers, AuthorizedUser executor) throws ObjectNotFoundException {
+    public User saveUser(UserDTO userDTO, boolean mergeRoles, boolean mergeIdentifiers, AuthorizedUser executor) throws ObjectNotFoundException, InvalidIdentifierException, InvalidPassphraseException {
         if (userDTO.getId() == null) {
             throw new ObjectNotFoundException();
         }

@@ -21,7 +21,7 @@ public abstract class AbstractLifecycleService implements UserLifecycleService {
     }
 
     @Override
-    public User save(UserDTO userDTO, boolean mergeRoles, boolean mergeIdentifiers, AuthorizedUser executor) throws ObjectNotFoundException {
+    public User save(UserDTO userDTO, boolean mergeRoles, boolean mergeIdentifiers, AuthorizedUser executor) throws ObjectNotFoundException, InvalidIdentifierException, InvalidPassphraseException {
         return getUserService().saveUser(userDTO, mergeRoles, mergeIdentifiers, executor);
     }
 

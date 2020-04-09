@@ -166,6 +166,10 @@ public class UserApi extends AbstractAuthorizedController {
             return new ResponseEntity<IDResponse>(new IDResponse(user.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (InvalidPassphraseException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signUp.INVALID_PASSPHRASE", messageSource.getMessage("signUp.INVALID_PASSPHRASE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (InvalidIdentifierException e) {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signUp.INVALID_IDENTIFIER", messageSource.getMessage("signUp.INVALID_IDENTIFIER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
