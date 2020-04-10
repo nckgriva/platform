@@ -92,4 +92,20 @@ public class DataConstants {
             return value;
         }
     }
+
+    public enum PassphraseGenerators {
+        STATIC_FOUR_ZEROS(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
+        RANDOM_FOUR_DIGITS(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
+        RANDOM_SIX_DIGITS(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73"));
+
+        private UUID value;
+
+        PassphraseGenerators(UUID value) {
+            this.value = value;
+        }
+
+        public UUID getValue() {
+            return value;
+        }
+    }
 }

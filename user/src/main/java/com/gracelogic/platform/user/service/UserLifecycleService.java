@@ -7,8 +7,6 @@ import com.gracelogic.platform.user.dto.UserDTO;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.User;
 
-import javax.servlet.http.HttpSession;
-
 public interface UserLifecycleService {
     User signUp(SignUpDTO signUpDTO) throws InvalidIdentifierException, InvalidPassphraseException, CustomLocalizedException;
 

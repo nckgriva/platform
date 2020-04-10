@@ -292,10 +292,9 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    private static Integer generateCode() {
+    private static Integer generateCode(int maxValue, int minValue) {
         Random random = new Random();
-        int rage = 999999;
-        return 100000 + random.nextInt(rage - 100000);
+        return minValue + random.nextInt(maxValue - minValue);
     }
 
 
@@ -922,7 +921,21 @@ public class UserServiceImpl implements UserService {
     public Passphrase getActualVerificationCode(User user, UUID referenceObjectId, UUID passphraseTypeId, boolean createNewIfNotExist) {
         Passphrase passphrase = getActualPassphrase(user, passphraseTypeId, referenceObjectId, true);
         if (passphrase == null && createNewIfNotExist) {
-            passphrase = createPassphrase(user, ds.get(PassphraseType.class, passphraseTypeId), String.valueOf(generateCode()), referenceObjectId);
+            PassphraseType passphraseType = ds.get(PassphraseType.class, passphraseTypeId);
+            String value = null;
+            if (passphraseType.getPassphraseGenerator() != null) {
+                if (passphraseType.getPassphraseGenerator().getId().equals(DataConstants.PassphraseGenerators.STATIC_FOUR_ZEROS.getValue())) {
+                    value = "0000";
+                }
+                else if (passphraseType.getPassphraseGenerator().getId().equals(DataConstants.PassphraseGenerators.RANDOM_FOUR_DIGITS.getValue())) {
+                    value = String.valueOf(generateCode(9999, 1000));
+                }
+                else if (passphraseType.getPassphraseGenerator().getId().equals(DataConstants.PassphraseGenerators.RANDOM_SIX_DIGITS.getValue())) {
+                    value = String.valueOf(generateCode(999999, 100000));
+                }
+            }
+
+            passphrase = createPassphrase(user, passphraseType, value, referenceObjectId);
         }
 
         return passphrase;
