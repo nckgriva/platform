@@ -90,7 +90,7 @@ public interface UserService {
 
     void archivePassphrase(Passphrase passphrase);
 
-    EntityListResponse<PassphraseTypeDTO> getPassphraseTypePaged(String name, Boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<PassphraseTypeDTO> getPassphraseTypePaged(String name, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     PassphraseTypeDTO getPassphraseType(UUID id) throws ObjectNotFoundException;
 

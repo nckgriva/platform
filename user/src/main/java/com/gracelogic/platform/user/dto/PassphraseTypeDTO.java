@@ -10,32 +10,10 @@ public class PassphraseTypeDTO extends IdObjectDTO {
     private String name;
     private Long lifetime;
     private String validationRegex;
-    private String passphraseEncryptionName;
     private UUID passphraseEncryptionId;
-    private String passphraseGeneratorName;
+    private String passphraseEncryptionName;
     private UUID passphraseGeneratorId;
-
-    public static PassphraseTypeDTO prepare(PassphraseType passphraseType, boolean enrich) {
-        PassphraseTypeDTO dto = new PassphraseTypeDTO();
-        IdObjectDTO.prepare(dto, passphraseType);
-        dto.setName(passphraseType.getName());
-        dto.setLifetime(passphraseType.getLifetime());
-        dto.setValidationRegex(passphraseType.getValidationRegex());
-
-        if (enrich) {
-            if (passphraseType.getPassphraseEncryption() != null) {
-                dto.setPassphraseEncryptionId(passphraseType.getPassphraseEncryption().getId());
-                dto.setPassphraseEncryptionName(passphraseType.getPassphraseEncryption().getName());
-            }
-            if (passphraseType.getPassphraseGenerator() != null) {
-                dto.setPassphraseGeneratorId(passphraseType.getPassphraseGenerator().getId());
-                dto.setPassphraseGeneratorName(passphraseType.getPassphraseGenerator().getName());
-            }
-
-        }
-
-        return dto;
-    }
+    private String passphraseGeneratorName;
 
     public String getName() {
         return name;
@@ -91,5 +69,33 @@ public class PassphraseTypeDTO extends IdObjectDTO {
 
     public void setPassphraseGeneratorId(UUID passphraseGeneratorId) {
         this.passphraseGeneratorId = passphraseGeneratorId;
+    }
+
+    public static PassphraseTypeDTO prepare(PassphraseType model) {
+        PassphraseTypeDTO dto = new PassphraseTypeDTO();
+        IdObjectDTO.prepare(dto, model);
+        dto.setName(model.getName());
+        dto.setLifetime(model.getLifetime());
+        dto.setValidationRegex(model.getValidationRegex());
+
+        if (model.getPassphraseEncryption() != null) {
+            dto.setPassphraseEncryptionId(model.getPassphraseEncryption().getId());
+        }
+        if (model.getPassphraseGenerator() != null) {
+            dto.setPassphraseGeneratorId(model.getPassphraseGenerator().getId());
+        }
+
+        return dto;
+    }
+
+    public static PassphraseTypeDTO enrich(PassphraseTypeDTO dto, PassphraseType model) {
+        if (model.getPassphraseEncryption() != null) {
+            dto.setPassphraseEncryptionName(model.getPassphraseEncryption().getName());
+        }
+        if (model.getPassphraseGenerator() != null) {
+            dto.setPassphraseGeneratorName(model.getPassphraseGenerator().getName());
+        }
+
+        return dto;
     }
 }

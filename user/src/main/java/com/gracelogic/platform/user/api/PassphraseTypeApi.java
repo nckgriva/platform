@@ -47,7 +47,7 @@ public class PassphraseTypeApi {
     @ApiOperation(
             value = "getPassphraseTypes",
             notes = "Get list of passphrase type",
-            response =  EntityListResponse.class
+            response = EntityListResponse.class
     )
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -57,11 +57,11 @@ public class PassphraseTypeApi {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getPassphraseTypes(@RequestParam(value = "name", required = false) String name,
-                                   @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
-                                   @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                   @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                   @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                   @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                             @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                             @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                             @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                             @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                             @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
         try {
             EntityListResponse<PassphraseTypeDTO> dto = userService.getPassphraseTypePaged(name, enrich, count, null, start, sortField, sortDir);
             return new ResponseEntity<EntityListResponse<PassphraseTypeDTO>>(dto, HttpStatus.OK);
@@ -141,7 +141,4 @@ public class PassphraseTypeApi {
         }
 
     }
-
-
-
 }

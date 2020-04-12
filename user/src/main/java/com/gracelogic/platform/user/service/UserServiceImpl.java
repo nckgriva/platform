@@ -1182,10 +1182,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EntityListResponse<PassphraseTypeDTO> getPassphraseTypePaged(String name, Boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-
-        String fetches = "";
-        String countFetches = "";
+    public EntityListResponse<PassphraseTypeDTO> getPassphraseTypePaged(String name, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
         if (!StringUtils.isEmpty(name)) {
@@ -1193,13 +1190,17 @@ public class UserServiceImpl implements UserService {
             cause += " and lower(el.name) like :name";
         }
 
-        int totalCount = idObjectService.getCount(PassphraseType.class, null, countFetches, cause, params);
+        int totalCount = idObjectService.getCount(PassphraseType.class, null, null, cause, params);
 
         EntityListResponse<PassphraseTypeDTO> entityListResponse = new EntityListResponse<PassphraseTypeDTO>(totalCount, count, page, start);
 
-        List<PassphraseType> items = idObjectService.getList(PassphraseType.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
+        List<PassphraseType> items = idObjectService.getList(PassphraseType.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (PassphraseType e : items) {
-            PassphraseTypeDTO el = PassphraseTypeDTO.prepare(e, enrich);
+            PassphraseTypeDTO el = PassphraseTypeDTO.prepare(e);
+            if (enrich) {
+                PassphraseTypeDTO.enrich(el, e);
+            }
+
             entityListResponse.addData(el);
         }
 
@@ -1208,19 +1209,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public PassphraseTypeDTO getPassphraseType(UUID id) throws ObjectNotFoundException {
-
-        String fetches = " left join fetch el.passphraseEncryption left join fetch el.passphraseGenerator ";
-        String cause = " el.id = :id ";
-        HashMap<String, Object> params = new HashMap<>();
-        params.put("id", id);
-
-        List<PassphraseType> items = idObjectService.getList(PassphraseType.class, fetches, cause, params, null, null, null);
-
-        if (items.isEmpty()) {
+        PassphraseType passphraseType = idObjectService.getObjectById(PassphraseType.class, "left join fetch el.passphraseEncryption left join fetch el.passphraseGenerator", id);
+        if (passphraseType == null) {
             throw new ObjectNotFoundException();
         }
 
-        return PassphraseTypeDTO.prepare(items.get(0), true);
+        return PassphraseTypeDTO.prepare(passphraseType);
     }
 
     @Override
@@ -1248,13 +1242,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deletePassphraseType(UUID id) {
-
-        String cause = " el.passphraseType.id = :id ";
-        Map<String, Object> param = new HashMap<>();
-        param.put("id", id);
-
-        idObjectService.delete(Passphrase.class, cause, param);
-
         idObjectService.delete(PassphraseType.class, id);
     }
 }
