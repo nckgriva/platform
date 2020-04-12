@@ -1180,4 +1180,68 @@ public class UserServiceImpl implements UserService {
             idObjectService.save(user);
         }
     }
+
+    @Override
+    public EntityListResponse<PassphraseTypeDTO> getPassphraseTypePaged(String name, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+        String cause = "1=1 ";
+        HashMap<String, Object> params = new HashMap<>();
+        if (!StringUtils.isEmpty(name)) {
+            params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
+            cause += " and lower(el.name) like :name";
+        }
+
+        int totalCount = idObjectService.getCount(PassphraseType.class, null, null, cause, params);
+
+        EntityListResponse<PassphraseTypeDTO> entityListResponse = new EntityListResponse<PassphraseTypeDTO>(totalCount, count, page, start);
+
+        List<PassphraseType> items = idObjectService.getList(PassphraseType.class, null, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
+        for (PassphraseType e : items) {
+            PassphraseTypeDTO el = PassphraseTypeDTO.prepare(e);
+            if (enrich) {
+                PassphraseTypeDTO.enrich(el, e);
+            }
+
+            entityListResponse.addData(el);
+        }
+
+        return entityListResponse;
+    }
+
+    @Override
+    public PassphraseTypeDTO getPassphraseType(UUID id) throws ObjectNotFoundException {
+        PassphraseType passphraseType = idObjectService.getObjectById(PassphraseType.class, "left join fetch el.passphraseEncryption left join fetch el.passphraseGenerator", id);
+        if (passphraseType == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        return PassphraseTypeDTO.prepare(passphraseType);
+    }
+
+    @Override
+    @Transactional
+    public PassphraseType savePassphraseType(PassphraseTypeDTO dto) throws ObjectNotFoundException {
+        PassphraseType entity;
+        if (dto.getId() != null) {
+            entity = idObjectService.getObjectById(PassphraseType.class, dto.getId());
+            if (entity == null) {
+                throw new ObjectNotFoundException();
+            }
+        } else {
+            entity = new PassphraseType();
+        }
+
+        entity.setName(dto.getName());
+        entity.setLifetime(dto.getLifetime());
+        entity.setValidationRegex(dto.getValidationRegex());
+        entity.setPassphraseEncryption(ds.get(PassphraseEncryption.class, dto.getPassphraseEncryptionId()));
+        entity.setPassphraseGenerator(ds.get(PassphraseGenerator.class, dto.getPassphraseGeneratorId()));
+
+        return idObjectService.save(entity);
+    }
+
+    @Override
+    @Transactional
+    public void deletePassphraseType(UUID id) {
+        idObjectService.delete(PassphraseType.class, id);
+    }
 }

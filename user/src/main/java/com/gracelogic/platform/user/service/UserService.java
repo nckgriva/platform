@@ -89,4 +89,12 @@ public interface UserService {
     void blockExpiredUsers();
 
     void archivePassphrase(Passphrase passphrase);
+
+    EntityListResponse<PassphraseTypeDTO> getPassphraseTypePaged(String name, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
+
+    PassphraseTypeDTO getPassphraseType(UUID id) throws ObjectNotFoundException;
+
+    PassphraseType savePassphraseType(PassphraseTypeDTO passphraseTypeDTO) throws ObjectNotFoundException;
+
+    void deletePassphraseType(UUID id);
 }
