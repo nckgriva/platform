@@ -1248,7 +1248,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deletePassphraseType(UUID id) {
-        // TODO добавить проверку, что PassphraseType используется в Passphrase
+
+        String cause = " el.passphraseType.id = :id ";
+        Map<String, Object> param = new HashMap<>();
+        param.put("id", id);
+
+        idObjectService.delete(Passphrase.class, cause, param);
+
         idObjectService.delete(PassphraseType.class, id);
     }
 }
