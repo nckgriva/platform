@@ -860,6 +860,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Date getUserPasswordExpirationDate(UUID userId) throws ObjectNotFoundException {
+        Passphrase passphrase = getActualPassphrase(userId, DataConstants.PassphraseTypes.USER_PASSWORD.getValue(), userId, false);
+        if (passphrase == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        PassphraseType passphraseType = ds.get(PassphraseType.class, DataConstants.PassphraseTypes.USER_PASSWORD.getValue());
+        if (passphraseType.getLifetime() != null && passphraseType.getLifetime() > 0) {
+            return new Date(passphrase.getCreated().getTime() + passphraseType.getLifetime());
+        }
+        return null;
+    }
+
+    @Override
     public boolean isIdentifierValid(UUID identifierTypeId, String identifierValue, boolean checkAvailability) {
         if (StringUtils.isEmpty(identifierValue)) {
             return false;
@@ -919,7 +933,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Passphrase getActualVerificationCode(User user, UUID referenceObjectId, UUID passphraseTypeId, boolean createNewIfNotExist) {
-        Passphrase passphrase = getActualPassphrase(user, passphraseTypeId, referenceObjectId, true);
+        Passphrase passphrase = getActualPassphrase(user.getId(), passphraseTypeId, referenceObjectId, true);
         if (passphrase == null && createNewIfNotExist) {
             PassphraseType passphraseType = ds.get(PassphraseType.class, passphraseTypeId);
             String value = null;
@@ -942,13 +956,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Passphrase getActualPassphrase(User user, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveExpiredPassphrase) {
+    public Passphrase getActualPassphrase(UUID userId, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveExpiredPassphrase) {
         PassphraseType passphraseType = ds.get(PassphraseType.class, passphraseTypeId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("passphraseTypeId", passphraseType.getId());
         params.put("referenceObjectId", referenceObjectId);
-        params.put("userId", user.getId());
+        params.put("userId", userId);
         params.put("passphraseStateId", DataConstants.PassphraseStates.ACTUAL.getValue());
         List<Passphrase> passphrases = idObjectService.getList(Passphrase.class, null, "el.user.id=:userId and el.passphraseType.id=:passphraseTypeId and el.passphraseState.id=:passphraseStateId and el.referenceObjectId=:referenceObjectId", params, "el.created DESC", null, 1);
         Passphrase passphrase = null;
@@ -1024,7 +1038,7 @@ public class UserServiceImpl implements UserService {
             Integer checkIncorrectLoginAttempts = idObjectService.checkExist(IncorrectAuthAttempt.class, null, "el.identifier.id=:identifierId and el.created >= :startDate and el.created <= :endDate", params, attemptsToBlock);
 
             if (checkIncorrectLoginAttempts < attemptsToBlock) {
-                Passphrase passphrase = getActualPassphrase(user, DataConstants.PassphraseTypes.USER_PASSWORD.getValue(), user.getId(), true);
+                Passphrase passphrase = getActualPassphrase(user.getId(), DataConstants.PassphraseTypes.USER_PASSWORD.getValue(), user.getId(), true);
                 if (isPassphraseValueValid(passphrase, password)) {
                     user.setLastVisitDt(new Date());
                     user.setLastVisitIP(remoteAddress);

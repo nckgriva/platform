@@ -7,6 +7,7 @@ import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.dto.ChangePasswordViaVerificationCodeRequestDTO;
 import com.gracelogic.platform.user.dto.IdentifierRequestDTO;
+import com.gracelogic.platform.user.dto.PasswordExpirationDateDTO;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 @Controller
 @RequestMapping(value = Path.API_AUTH)
@@ -60,7 +62,7 @@ public class AuthApi extends AbstractAuthorizedController {
         if (getUser() != null) {
             return new ResponseEntity<AuthorizedUser>(getUser(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.NOT _AUTHORIZED", messageSource.getMessage("common.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.NOT_AUTHORIZED", messageSource.getMessage("common.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -78,6 +80,31 @@ public class AuthApi extends AbstractAuthorizedController {
     public ResponseEntity locale() {
         return new ResponseEntity<SingleValueDTO>(new SingleValueDTO(LocaleHolder.getLocale().toString()), HttpStatus.OK);
 
+    }
+
+    @ApiOperation(
+            value = "getPasswordExpirationDate",
+            notes = "Get user password expiration date",
+            response = PasswordExpirationDateDTO.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(value = "/password-expiration-date", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity getPasswordExpirationDate() {
+        if (getUser() != null) {
+            try {
+                Date date = userService.getUserPasswordExpirationDate(getUser().getId());
+                return new ResponseEntity<PasswordExpirationDateDTO>(new PasswordExpirationDateDTO(date), HttpStatus.OK);
+            }
+            catch (ObjectNotFoundException e) {
+                return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            }
+        } else {
+            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.NOT_AUTHORIZED", messageSource.getMessage("common.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
+        }
     }
 
     @ApiOperation(

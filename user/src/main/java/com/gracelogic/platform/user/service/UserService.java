@@ -54,11 +54,13 @@ public interface UserService {
 
     boolean isIdentifierValid(UUID identifierTypeId, String identifierValue, boolean checkAvailable);
 
+    Date getUserPasswordExpirationDate(UUID userId) throws ObjectNotFoundException;
+
     UUID resolveIdentifierTypeId(String identifierValue) throws InvalidIdentifierException;
 
     boolean isPassphraseValueValid(Passphrase passphrase, String value);
 
-    Passphrase getActualPassphrase(User user, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveExpiredPassphrase);
+    Passphrase getActualPassphrase(UUID userId, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveExpiredPassphrase);
 
     Identifier findIdentifier(UUID identifierTypeId, String value, boolean enrich);
 
