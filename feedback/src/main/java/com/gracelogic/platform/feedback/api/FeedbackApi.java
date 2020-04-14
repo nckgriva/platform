@@ -1,6 +1,7 @@
 package com.gracelogic.platform.feedback.api;
 
 import com.gracelogic.platform.db.dto.DateFormatConstants;
+import com.gracelogic.platform.feedback.model.Feedback;
 import com.gracelogic.platform.feedback.service.FeedbackService;
 import com.gracelogic.platform.feedback.dto.FeedbackDTO;
 import com.gracelogic.platform.db.dto.EntityListResponse;
@@ -8,6 +9,7 @@ import com.gracelogic.platform.feedback.Path;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
+import com.gracelogic.platform.web.dto.IDResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,8 +38,8 @@ public class FeedbackApi extends AbstractAuthorizedController {
     public ResponseEntity addFeedback(@RequestBody FeedbackDTO feedbackDTO) {
         try {
             feedbackDTO.setId(null);
-            feedbackService.saveFeedback(feedbackDTO);
-            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+            Feedback feedback = feedbackService.saveFeedback(feedbackDTO);
+            return new ResponseEntity<IDResponse>(new IDResponse(feedback.getId()), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), e.getMessage()), HttpStatus.BAD_REQUEST);
         }
