@@ -40,7 +40,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void saveFeedback(FeedbackDTO feedbackDTO) {
+    public Feedback saveFeedback(FeedbackDTO feedbackDTO) {
         Feedback feedback;
         if (feedbackDTO.getId() != null) {
             feedback = idObjectService.getObjectById(Feedback.class, feedbackDTO.getId());
@@ -51,7 +51,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedback.setFeedbackType(feedbackType);
         feedback.setFields(JsonUtils.mapToJson(feedbackDTO.getFields()));
 
-        idObjectService.save(feedback);
+        feedback = idObjectService.save(feedback);
 
         StringBuilder sb = new StringBuilder("Feedback:\n");
         sb.append(String.format("Type: %s\n", feedbackType.getName()));
@@ -71,6 +71,8 @@ public class FeedbackServiceImpl implements FeedbackService {
             }
 
         }
+
+        return feedback;
     }
 
     @Override
