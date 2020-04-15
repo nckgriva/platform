@@ -112,27 +112,48 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     public Integer getPropertyValueAsInteger(String propertyName) {
-        return Integer.parseInt(getPropertyValue(propertyName));
+        String value = getPropertyValue(propertyName);
+        if (value == null) {
+            return null;
+        }
+        return Integer.parseInt(value);
     }
 
     @Override
     public Long getPropertyValueAsLong(String propertyName) {
-        return Long.parseLong(getPropertyValue(propertyName));
+        String value = getPropertyValue(propertyName);
+        if (value == null) {
+            return null;
+        }
+        return Long.parseLong(value);
     }
 
     @Override
     public Boolean getPropertyValueAsBoolean(String propertyName) {
-        return Boolean.parseBoolean(getPropertyValue(propertyName));
+        String value = getPropertyValue(propertyName);
+        if (value == null) {
+            return null;
+        }
+        return Boolean.parseBoolean(value);
     }
 
     @Override
     public Double getPropertyValueAsDouble(String propertyName) {
-        return Double.parseDouble(getPropertyValue(propertyName));
+        String value = getPropertyValue(propertyName);
+        if (value == null) {
+            return null;
+        }
+
+        return Double.parseDouble(value);
     }
 
     @Override
     public UUID getPropertyValueAsUUID(String propertyName) {
-        return UUID.fromString(getPropertyValue(propertyName));
+        String value = getPropertyValue(propertyName);
+        if (value == null) {
+            return null;
+        }
+        return UUID.fromString(value);
     }
 
 }
