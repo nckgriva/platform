@@ -70,7 +70,8 @@ public class UserServiceImpl implements UserService {
             UserDTO.setUserNameFormat(userNameFormat);
         }
 
-        if (propertyService.getPropertyValueAsBoolean("user:one_session_per_user")) {
+        Boolean oneSessionPerUser = propertyService.getPropertyValueAsBoolean("user:one_session_per_user");
+        if (oneSessionPerUser != null && oneSessionPerUser) {
             List<Object[]> lastActiveUsersSession = userDao.getLastActiveUsersSessions();
             logger.info("Loaded last users sessions: " + lastActiveUsersSession.size());
             for (Object[] obj : lastActiveUsersSession) {
