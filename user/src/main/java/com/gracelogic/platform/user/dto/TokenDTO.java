@@ -22,4 +22,6 @@ public class TokenDTO extends IdObjectDTO implements Serializable {
     public void setToken(UUID token) {
         this.token = token;
     }
+
+
 }

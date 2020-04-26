@@ -1,7 +1,5 @@
 package com.gracelogic.platform.user.api;
 
-
-import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.user.PlatformRole;
@@ -50,9 +48,6 @@ public class TokenAuthApi extends AbstractAuthorizedController {
     @Qualifier("userMessageSource")
     private ResourceBundleMessageSource messageSource;
 
-    @Autowired
-    private IdObjectService idObjectService;
-
     @ApiOperation(
             value = "signIn",
             notes = "Sign in",
@@ -69,7 +64,7 @@ public class TokenAuthApi extends AbstractAuthorizedController {
     @RequestMapping(value = "/sign-in", method = RequestMethod.POST)
     public ResponseEntity signIn(HttpServletRequest request, HttpServletResponse response, @RequestBody AuthRequestDTO authRequestDTO) {
         try {
-            Token token = userService.establishToken(authRequestDTO, ServletUtils.getRemoteAddress(request));
+            Token token = userService.establishToken(authRequestDTO, ServletUtils.getRemoteAddress(request), false);
             if (token != null) {
                 User user = token.getIdentifier().getUser();
                 AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);

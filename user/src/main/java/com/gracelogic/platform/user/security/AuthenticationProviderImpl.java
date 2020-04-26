@@ -29,7 +29,7 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
     @Override
     public org.springframework.security.core.Authentication authenticate(org.springframework.security.core.Authentication authentication) throws AuthenticationException {
         if (authentication instanceof SessionBasedAuthentication) {
-            Identifier identifier = userService.processSignIn(((SessionBasedAuthentication) authentication).getIdentifierTypeId(), (String) authentication.getPrincipal(), (String) authentication.getCredentials(), ((SessionBasedAuthentication) authentication).getRemoteAddress());
+            Identifier identifier = userService.processSignIn(((SessionBasedAuthentication) authentication).getIdentifierTypeId(), (String) authentication.getPrincipal(), (String) authentication.getCredentials(), ((SessionBasedAuthentication) authentication).getRemoteAddress(), false);
             if (identifier != null) {
                 User user = identifier.getUser();
                 AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);

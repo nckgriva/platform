@@ -1,20 +1,23 @@
 package com.gracelogic.platform.oauth.service;
 
+import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
+import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.AuthProviderDTO;
 import com.gracelogic.platform.oauth.model.AuthProvider;
-import com.gracelogic.platform.oauth.model.AuthProviderLinkage;
+import com.gracelogic.platform.user.dto.AuthRequestDTO;
+import com.gracelogic.platform.user.dto.IdentifierDTO;
+import com.gracelogic.platform.user.dto.TokenDTO;
+import com.gracelogic.platform.user.dto.UserDTO;
+import com.gracelogic.platform.user.exception.*;
+import com.gracelogic.platform.user.model.Token;
 import com.gracelogic.platform.user.model.User;
-import org.apache.commons.lang3.StringUtils;
+import com.gracelogic.platform.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class OAuthServiceImpl implements OAuthService {
@@ -49,13 +52,8 @@ public class OAuthServiceImpl implements OAuthService {
     @Autowired
     private OAuthServiceProvider esia;
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public void deleteAuthProviderLinkages(User user) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("userId", user.getId());
-        idObjectService.delete(AuthProviderLinkage.class, "el.user.id=:userId", params);
-    }
+    @Autowired
+    private UserService userService;
 
     @Override
     public List<AuthProviderDTO> getAuthProviders() {
@@ -63,25 +61,19 @@ public class OAuthServiceImpl implements OAuthService {
         List<AuthProviderDTO> dtos = new LinkedList<>();
         for (AuthProvider provider : providers) {
             AuthProviderDTO dto = AuthProviderDTO.prepare(provider);
-            if (StringUtils.equalsIgnoreCase(provider.getName(), "VK")) {
+            if (dto.getId().equals(DataConstants.OAuthProviders.VK.getValue())) {
                 dto.setUrl(vk.buildAuthRedirect());
-            }
-            else if (StringUtils.equalsIgnoreCase(provider.getName(), "OK")) {
+            } else if (dto.getId().equals(DataConstants.OAuthProviders.OK.getValue())) {
                 dto.setUrl(ok.buildAuthRedirect());
-            }
-            else if (StringUtils.equalsIgnoreCase(provider.getName(), "INSTAGRAM")) {
+            } else if (dto.getId().equals(DataConstants.OAuthProviders.INSTAGRAM.getValue())) {
                 dto.setUrl(instagram.buildAuthRedirect());
-            }
-            else if (StringUtils.equalsIgnoreCase(provider.getName(), "FACEBOOK")) {
+            } else if (dto.getId().equals(DataConstants.OAuthProviders.FACEBOOK.getValue())) {
                 dto.setUrl(facebook.buildAuthRedirect());
-            }
-            else if (StringUtils.equalsIgnoreCase(provider.getName(), "GOOGLE")) {
+            } else if (dto.getId().equals(DataConstants.OAuthProviders.GOOGLE.getValue())) {
                 dto.setUrl(google.buildAuthRedirect());
-            }
-            else if (StringUtils.equalsIgnoreCase(provider.getName(), "LINKEDIN")) {
+            } else if (dto.getId().equals(DataConstants.OAuthProviders.LINKEDIN.getValue())) {
                 dto.setUrl(linkedin.buildAuthRedirect());
-            }
-            else if (StringUtils.equalsIgnoreCase(provider.getName(), "ESIA")) {
+            } else if (dto.getId().equals(DataConstants.OAuthProviders.ESIA.getValue())) {
                 dto.setUrl(esia.buildAuthRedirect());
             }
 
@@ -89,5 +81,71 @@ public class OAuthServiceImpl implements OAuthService {
         }
 
         return dtos;
+    }
+
+    public UUID getIdentifierTypeForAuthProvider(UUID authProviderId) {
+        if (authProviderId == null) {
+            return null;
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.VK.getValue())) {
+            return DataConstants.OAuthIdentifierTypes.VK.getValue();
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.OK.getValue())) {
+            return DataConstants.OAuthIdentifierTypes.OK.getValue();
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.FACEBOOK.getValue())) {
+            return DataConstants.OAuthIdentifierTypes.FACEBOOK.getValue();
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.TWITTER.getValue())) {
+            return DataConstants.OAuthIdentifierTypes.TWITTER.getValue();
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.INSTAGRAM.getValue())) {
+            return DataConstants.OAuthIdentifierTypes.INSTAGRAM.getValue();
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.LINKEDIN.getValue())) {
+            return DataConstants.OAuthIdentifierTypes.LINKEDIN.getValue();
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.GOOGLE.getValue())) {
+            return DataConstants.OAuthIdentifierTypes.GOOGLE.getValue();
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.ESIA.getValue())) {
+            return DataConstants.OAuthIdentifierTypes.ESIA.getValue();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Token tokenByCode(UUID authProviderId, String code, String remoteAddress) throws ObjectNotFoundException, UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
+        User user = null;
+        if (authProviderId.equals(DataConstants.OAuthProviders.VK.getValue())) {
+            user = vk.processAuthorization(code, null);
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.OK.getValue())) {
+            user = ok.processAuthorization(code, null);
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.FACEBOOK.getValue())) {
+            user = facebook.processAuthorization(code, null);
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.LINKEDIN.getValue())) {
+            user = linkedin.processAuthorization(code, null);
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.INSTAGRAM.getValue())) {
+            user = instagram.processAuthorization(code, null);
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.GOOGLE.getValue())) {
+            user = google.processAuthorization(code, null);
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.ESIA.getValue())) {
+            user = esia.processAuthorization(code, null);
+        }
+
+        if (user == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        UserDTO userDTO = userService.getUser(user.getId(), false);
+        UUID oauthIdentifierTypeId = getIdentifierTypeForAuthProvider(authProviderId);
+        AuthRequestDTO authRequestDTO = null;
+
+        for (IdentifierDTO identifierDTO : userDTO.getIdentifiers()) {
+            if (identifierDTO.getIdentifierTypeId().equals(oauthIdentifierTypeId)) {
+                authRequestDTO = new AuthRequestDTO();
+                authRequestDTO.setIdentifierTypeId(identifierDTO.getIdentifierTypeId());
+                authRequestDTO.setIdentifierValue(identifierDTO.getValue());
+                break;
+            }
+        }
+
+        if (authRequestDTO == null) {
+            throw new ObjectNotFoundException();
+        }
+        return userService.establishToken(authRequestDTO, remoteAddress, true);
     }
 }

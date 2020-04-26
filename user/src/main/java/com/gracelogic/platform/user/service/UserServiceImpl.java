@@ -983,7 +983,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class, noRollbackFor = InvalidPassphraseException.class)
-    public Identifier processSignIn(UUID identifierTypeId, String identifierValue, String password, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
+    public Identifier processSignIn(UUID identifierTypeId, String identifierValue, String password, String remoteAddress, boolean trust) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
         if (identifierTypeId == null) {
             identifierTypeId = resolveIdentifierTypeId(identifierValue);
         }
@@ -1040,7 +1040,7 @@ public class UserServiceImpl implements UserService {
 
             if (checkIncorrectLoginAttempts < attemptsToBlock) {
                 Passphrase passphrase = getActualPassphrase(user.getId(), DataConstants.PassphraseTypes.USER_PASSWORD.getValue(), user.getId(), true);
-                if (isPassphraseValueValid(passphrase, password)) {
+                if (trust || isPassphraseValueValid(passphrase, password)) {
                     user.setLastVisitDt(new Date());
                     user.setLastVisitIP(remoteAddress);
                     user = idObjectService.save(user);
@@ -1151,8 +1151,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class, noRollbackFor = InvalidPassphraseException.class)
-    public Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
-        Identifier identifier = processSignIn(authRequestDTO.getIdentifierTypeId(), authRequestDTO.getIdentifierValue(), authRequestDTO.getPassword(), remoteAddress);
+    public Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress, boolean trust) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
+        Identifier identifier = processSignIn(authRequestDTO.getIdentifierTypeId(), authRequestDTO.getIdentifierValue(), authRequestDTO.getPassword(), remoteAddress, trust);
         if (identifier != null) {
             Token token = new Token();
             token.setUser(identifier.getUser());

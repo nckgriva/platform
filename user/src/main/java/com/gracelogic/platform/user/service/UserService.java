@@ -68,7 +68,7 @@ public interface UserService {
 
     Passphrase updatePassphrase(User user, String value, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveOtherPassphrases) throws InvalidPassphraseException;
 
-    Identifier processSignIn(UUID identifierTypeId, String identifierValue, String password, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException;
+    Identifier processSignIn(UUID identifierTypeId, String identifierValue, String password, String remoteAddress, boolean trust) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException;
 
     void sendIdentifierVerificationCode(UUID identifierId, Map<String, String> templateParams);
 
@@ -84,7 +84,7 @@ public interface UserService {
 
     void updateTokenLastRequestDate(Token newToken);
 
-    Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException;
+    Token establishToken(AuthRequestDTO authRequestDTO, String remoteAddress, boolean trust) throws UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException;
 
     void deactivateToken(TokenDTO tokenDTO);
 
