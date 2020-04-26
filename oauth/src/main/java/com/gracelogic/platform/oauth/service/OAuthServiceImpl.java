@@ -82,10 +82,13 @@ public class OAuthServiceImpl implements OAuthService {
         return dtos;
     }
 
+    @Override
     public UUID getIdentifierTypeForAuthProvider(UUID authProviderId) {
         if (authProviderId == null) {
             return null;
-        } else if (authProviderId.equals(DataConstants.OAuthProviders.VK.getValue())) {
+        }
+
+        if (authProviderId.equals(DataConstants.OAuthProviders.VK.getValue())) {
             return DataConstants.OAuthIdentifierTypes.VK.getValue();
         } else if (authProviderId.equals(DataConstants.OAuthProviders.OK.getValue())) {
             return DataConstants.OAuthIdentifierTypes.OK.getValue();
@@ -107,6 +110,7 @@ public class OAuthServiceImpl implements OAuthService {
     @Override
     public Token tokenByCode(UUID authProviderId, String code, String remoteAddress) throws ObjectNotFoundException, UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException {
         User user = null;
+        
         if (authProviderId.equals(DataConstants.OAuthProviders.VK.getValue())) {
             user = vk.processAuthorization(code, null);
         } else if (authProviderId.equals(DataConstants.OAuthProviders.OK.getValue())) {
