@@ -1,10 +1,7 @@
 package com.gracelogic.platform.oauth.model;
 
-
-
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import com.gracelogic.platform.dictionary.model.Dictionary;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -13,7 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "AUTH_PROVIDER")
-public class AuthProvider extends IdObject<UUID> implements Dictionary {
+public class AuthProvider extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
@@ -32,11 +29,23 @@ public class AuthProvider extends IdObject<UUID> implements Dictionary {
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Column(name = "FULL_NAME", nullable = true)
-    private String fullName;
-
-    @Column(name = SORT_ORDER, nullable = true)
+    @Column(name = "SORT_ORDER", nullable = true)
     private Integer sortOrder;
+
+    @Column(name = "ACCESS_TOKEN_ENDPOINT", nullable = false)
+    private String accessTokenEndpoint;
+
+    @Column(name = "INFO_ENDPOINT", nullable = false)
+    private String infoEndpoint;
+
+    @Column(name = "CLIENT_ID", nullable = false)
+    private String clientId;
+
+    @Column(name = "CLIENT_SECRET", nullable = false)
+    private String clientSecret;
+
+    @Column(name = "CLIENT_PUBLIC_KEY", nullable = false)
+    private String clientPublicKey;
 
     @Override
     public UUID getId() {
@@ -76,22 +85,48 @@ public class AuthProvider extends IdObject<UUID> implements Dictionary {
         this.name = name;
     }
 
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    @Override
-    public String getCode() {
-        return null;
-    }
-
-    @Override
     public Integer getSortOrder() {
         return sortOrder;
+    }
+
+    public String getAccessTokenEndpoint() {
+        return accessTokenEndpoint;
+    }
+
+    public void setAccessTokenEndpoint(String accessTokenEndpoint) {
+        this.accessTokenEndpoint = accessTokenEndpoint;
+    }
+
+    public String getInfoEndpoint() {
+        return infoEndpoint;
+    }
+
+    public void setInfoEndpoint(String infoEndpoint) {
+        this.infoEndpoint = infoEndpoint;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
+    }
+
+    public String getClientPublicKey() {
+        return clientPublicKey;
+    }
+
+    public void setClientPublicKey(String clientPublicKey) {
+        this.clientPublicKey = clientPublicKey;
     }
 
     public void setSortOrder(Integer sortOrder) {

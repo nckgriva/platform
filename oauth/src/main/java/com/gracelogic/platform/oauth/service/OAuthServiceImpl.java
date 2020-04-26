@@ -7,7 +7,6 @@ import com.gracelogic.platform.oauth.dto.AuthProviderDTO;
 import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.user.dto.AuthRequestDTO;
 import com.gracelogic.platform.user.dto.IdentifierDTO;
-import com.gracelogic.platform.user.dto.TokenDTO;
 import com.gracelogic.platform.user.dto.UserDTO;
 import com.gracelogic.platform.user.exception.*;
 import com.gracelogic.platform.user.model.Token;
@@ -92,8 +91,6 @@ public class OAuthServiceImpl implements OAuthService {
             return DataConstants.OAuthIdentifierTypes.OK.getValue();
         } else if (authProviderId.equals(DataConstants.OAuthProviders.FACEBOOK.getValue())) {
             return DataConstants.OAuthIdentifierTypes.FACEBOOK.getValue();
-        } else if (authProviderId.equals(DataConstants.OAuthProviders.TWITTER.getValue())) {
-            return DataConstants.OAuthIdentifierTypes.TWITTER.getValue();
         } else if (authProviderId.equals(DataConstants.OAuthProviders.INSTAGRAM.getValue())) {
             return DataConstants.OAuthIdentifierTypes.INSTAGRAM.getValue();
         } else if (authProviderId.equals(DataConstants.OAuthProviders.LINKEDIN.getValue())) {

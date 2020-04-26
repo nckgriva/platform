@@ -1,35 +1,34 @@
 package com.gracelogic.platform.oauth.service.impl;
 
+import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.OAuthDTO;
+import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.oauth.service.AbstractOauthProvider;
 import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
 import com.gracelogic.platform.oauth.service.OAuthUtils;
-import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.net.URLEncoder;
 import java.util.Map;
 
 @Service("instagram")
 public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
-    //private static final String CLIENT_ID = "6e538b20833949b6ab179e8fbcb48eef";
-    //private static final String CLIENT_SECRET = "3d892ed595ad4b59aaddd17848c95e9a";
-    private static final String ACCESS_TOKEN_ENDPOINT = "https://api.instagram.com/oauth/access_token";
+    private String ACCESS_TOKEN_ENDPOINT = "https://api.instagram.com/oauth/access_token";
+    private String CLIENT_ID = null;
+    private String CLIENT_SECRET = null;
 
     @Autowired
-    private PropertyService propertyService;
+    private IdObjectService idObjectService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public User processAuthorization(String code, String redirectUri) {
-        String CLIENT_ID = propertyService.getPropertyValue("oauth:instagram_client_id");
-        String CLIENT_SECRET = propertyService.getPropertyValue("oauth:instagram_client_secret");
-
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
             sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.INSTAGRAM.name());
@@ -76,7 +75,6 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
 
     @Override
     public String buildAuthRedirect() {
-        String CLIENT_ID = propertyService.getPropertyValue("oauth:instagram_client_id");
         String sRedirectUri = buildRedirectUri(null);
 
         return String.format("https://api.instagram.com/oauth/authorize/?client_id=%s&response_type=code&redirect_uri=%s", CLIENT_ID, sRedirectUri);
@@ -94,5 +92,15 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
         catch (Exception ignored) {}
 
         return sRedirectUri;
+    }
+
+    @PostConstruct
+    public void init() {
+        AuthProvider authProvider = idObjectService.getObjectById(AuthProvider.class, DataConstants.OAuthProviders.INSTAGRAM.getValue());
+        if (authProvider != null) {
+            ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
+            CLIENT_ID = authProvider.getClientId();
+            CLIENT_SECRET = authProvider.getClientSecret();
+        }
     }
 }

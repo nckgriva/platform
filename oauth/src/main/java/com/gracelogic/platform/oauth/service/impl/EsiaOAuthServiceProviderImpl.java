@@ -2,11 +2,12 @@ package com.gracelogic.platform.oauth.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.OAuthDTO;
+import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.oauth.service.AbstractOauthProvider;
 import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
-import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
@@ -25,27 +26,26 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Map;
 
 @Service("esia")
 public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
-    private static final String ACCESS_TOKEN_ENDPOINT = "http://safecity.amfitel.ru:2111/aas/oauth2/te";
-
-    private static final String API_ENDPOINT = "http://safecity.amfitel.ru:2111/rs/prns";
+    private String ACCESS_TOKEN_ENDPOINT = "http://safecity.amfitel.ru:2111/aas/oauth2/te";
+    private String INFO_ENDPOINT = "http://safecity.amfitel.ru:2111/rs/prns";
+    private String CLIENT_ID = null;
+    private String CLIENT_SECRET = null;
 
     @Autowired
-    private PropertyService propertyService;
+    private IdObjectService idObjectService;
 
     private static Logger logger = Logger.getLogger(EsiaOAuthServiceProviderImpl.class);
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public User processAuthorization(String code, String redirectUri) {
-        String CLIENT_ID = propertyService.getPropertyValue("oauth:esia_client_id");
-        String CLIENT_SECRET = propertyService.getPropertyValue("oauth:esia_client_secret");
-
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
             sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.ESIA.name());
@@ -68,7 +68,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
         OAuthDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
         OAuthDTO.setUserId(response.get("urn:esia:sbj_id") != null ? String.valueOf(response.get("urn:esia:sbj_id")) : null);
 
-        response = getQueryWithAuthenticationReturnJson(String.format("%s/%s", API_ENDPOINT, OAuthDTO.getUserId()), "Bearer " + OAuthDTO.getAccessToken());
+        response = getQueryWithAuthenticationReturnJson(String.format("%s/%s", INFO_ENDPOINT, OAuthDTO.getUserId()), "Bearer " + OAuthDTO.getAccessToken());
 
         OAuthDTO.setLastName(response.get("name") != null ? (String) response.get("name") : null);
         OAuthDTO.setOrg(response.get("org") != null ? (String) response.get("org") : null);
@@ -79,7 +79,6 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
     @Override
     public String buildAuthRedirect() {
         String sRedirectUri = buildRedirectUri(null);
-        String CLIENT_ID = propertyService.getPropertyValue("oauth:esia_client_id");
 
         return String.format("http://safecity.amfitel.ru:2111/aas/oauth2/ac?response_type=code&scope=read&client_id=%s&redirect_uri=%s", CLIENT_ID, sRedirectUri);
     }
@@ -189,5 +188,16 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
 
         }
         return result;
+    }
+
+    @PostConstruct
+    public void init() {
+        AuthProvider authProvider = idObjectService.getObjectById(AuthProvider.class, DataConstants.OAuthProviders.ESIA.getValue());
+        if (authProvider != null) {
+            ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
+            INFO_ENDPOINT = authProvider.getInfoEndpoint();
+            CLIENT_ID = authProvider.getClientId();
+            CLIENT_SECRET = authProvider.getClientSecret();
+        }
     }
 }

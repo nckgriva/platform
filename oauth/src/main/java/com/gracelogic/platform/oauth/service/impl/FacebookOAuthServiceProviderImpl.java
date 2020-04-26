@@ -1,11 +1,12 @@
 package com.gracelogic.platform.oauth.service.impl;
 
+import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.OAuthDTO;
+import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.oauth.service.AbstractOauthProvider;
 import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
 import com.gracelogic.platform.oauth.service.OAuthUtils;
-import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.net.URLEncoder;
 import java.util.Map;
 
@@ -21,18 +23,17 @@ import java.util.Map;
 public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
     private static Logger logger = Logger.getLogger(FacebookOAuthServiceProviderImpl.class);
 
-    private static final String ACCESS_TOKEN_ENDPOINT = "https://graph.facebook.com/oauth/access_token?client_id=%s&redirect_uri=%s&client_secret=%s&code=%s";
-    private static final String API_ENDPOINT = "https://graph.facebook.com/me?access_token=%s&fields=id,name,last_name,first_name,email";
+    private String ACCESS_TOKEN_ENDPOINT = "https://graph.facebook.com/oauth/access_token?client_id=%s&redirect_uri=%s&client_secret=%s&code=%s";
+    private String INFO_ENDPOINT = "https://graph.facebook.com/me?access_token=%s&fields=id,name,last_name,first_name,email";
+    private String CLIENT_ID = null;
+    private String CLIENT_SECRET = null;
 
     @Autowired
-    private PropertyService propertyService;
+    private IdObjectService idObjectService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public User processAuthorization(String code, String redirectUri) {
-        String CLIENT_ID = propertyService.getPropertyValue("oauth:facebook_client_id");
-        String CLIENT_SECRET = propertyService.getPropertyValue("oauth:facebook_client_secret");
-
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
             sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.FACEBOOK.name());
@@ -54,7 +55,7 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
         OAuthDTO OAuthDTO = new OAuthDTO();
         OAuthDTO.setAccessToken(accessToken);
 
-        Map response = OAuthUtils.getQueryReturnJson(String.format(API_ENDPOINT, OAuthDTO.getAccessToken()));
+        Map response = OAuthUtils.getQueryReturnJson(String.format(INFO_ENDPOINT, OAuthDTO.getAccessToken()));
         OAuthDTO.setUserId(response.get("id") != null ? StringEscapeUtils.unescapeJava((String) response.get("id")) : null);
         OAuthDTO.setFirstName(response.get("first_name") != null ? StringEscapeUtils.unescapeJava((String) response.get("first_name")) : null);
         OAuthDTO.setLastName(response.get("last_name") != null ? StringEscapeUtils.unescapeJava((String) response.get("last_name")) : null);
@@ -65,7 +66,6 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
 
     @Override
     public String buildAuthRedirect() {
-        String CLIENT_ID = propertyService.getPropertyValue("oauth:facebook_client_id");
         String sRedirectUri = buildRedirectUri(null);
 
         return String.format("https://www.facebook.com/dialog/oauth?client_id=%s&redirect_uri=%s&response_type=code&scope=public_profile,email", CLIENT_ID, sRedirectUri);
@@ -83,5 +83,16 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
         catch (Exception ignored) {}
 
         return sRedirectUri;
+    }
+
+    @PostConstruct
+    public void init() {
+        AuthProvider authProvider = idObjectService.getObjectById(AuthProvider.class, DataConstants.OAuthProviders.FACEBOOK.getValue());
+        if (authProvider != null) {
+            ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
+            INFO_ENDPOINT = authProvider.getInfoEndpoint();
+            CLIENT_ID = authProvider.getClientId();
+            CLIENT_SECRET = authProvider.getClientSecret();
+        }
     }
 }

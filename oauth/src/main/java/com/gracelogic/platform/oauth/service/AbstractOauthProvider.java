@@ -1,7 +1,5 @@
 package com.gracelogic.platform.oauth.service;
 
-import com.gracelogic.platform.db.service.IdObjectService;
-import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.oauth.Path;
 import com.gracelogic.platform.oauth.dto.OAuthDTO;
 import com.gracelogic.platform.property.service.PropertyService;

@@ -30,10 +30,9 @@ public class DataConstants {
         OK(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e82")),
         INSTAGRAM(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e83")),
         FACEBOOK(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e84")),
-        TWITTER(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e85")),
-        GOOGLE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e86")),
-        LINKEDIN(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e87")),
-        ESIA(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e88"));
+        GOOGLE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e85")),
+        LINKEDIN(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e86")),
+        ESIA(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e87"));
 
         private UUID value;
 

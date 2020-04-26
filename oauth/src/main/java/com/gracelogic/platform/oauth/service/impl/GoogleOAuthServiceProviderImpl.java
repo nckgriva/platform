@@ -1,11 +1,12 @@
 package com.gracelogic.platform.oauth.service.impl;
 
+import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.oauth.DataConstants;
 import com.gracelogic.platform.oauth.dto.OAuthDTO;
+import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.oauth.service.AbstractOauthProvider;
 import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
 import com.gracelogic.platform.oauth.service.OAuthUtils;
-import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Map;
@@ -21,20 +23,17 @@ import java.util.Map;
 public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
     private static Logger logger = Logger.getLogger(GoogleOAuthServiceProviderImpl.class);
 
-    //private static final String CLIENT_ID = "455561325092-6t8utfr5bvbqgmgatc8bkaop96qjkko2.apps.googleusercontent.com";
-    //private static final String CLIENT_SECRET = "C8z3Ox69EC_W8FpFgpyyuvDE";
-    private static final String ACCESS_TOKEN_ENDPOINT = "https://accounts.google.com/o/oauth2/token";
-    private static final String API_ENDPOINT = "https://www.googleapis.com/plus/v1/people/me?access_token=%s&fields=id,name,emails";
+    private String ACCESS_TOKEN_ENDPOINT = "https://accounts.google.com/o/oauth2/token";
+    private String INFO_ENDPOINT = "https://www.googleapis.com/plus/v1/people/me?access_token=%s&fields=id,name,emails";
+    private String CLIENT_ID = null;
+    private String CLIENT_SECRET = null;
 
     @Autowired
-    private PropertyService propertyService;
+    private IdObjectService idObjectService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public User processAuthorization(String code, String redirectUri) {
-        String CLIENT_ID = propertyService.getPropertyValue("oauth:google_client_id");
-        String CLIENT_SECRET = propertyService.getPropertyValue("oauth:google_client_secret");
-
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
             sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.GOOGLE.name());
@@ -53,7 +52,7 @@ public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implem
         OAuthDTO OAuthDTO = new OAuthDTO();
         OAuthDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
 
-        response = OAuthUtils.getQueryReturnJson(String.format(API_ENDPOINT, OAuthDTO.getAccessToken()));
+        response = OAuthUtils.getQueryReturnJson(String.format(INFO_ENDPOINT, OAuthDTO.getAccessToken()));
         OAuthDTO.setUserId(response.get("id") != null ? (String) response.get("id") : null);
 
         Map name = (Map) response.get("name");
@@ -73,7 +72,6 @@ public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implem
 
     @Override
     public String buildAuthRedirect() {
-        String CLIENT_ID = propertyService.getPropertyValue("oauth:google_client_id");
         String sRedirectUri = buildRedirectUri(null);
 
         return String.format("https://accounts.google.com/o/oauth2/auth?redirect_uri=%s&response_type=code&client_id=%s&scope=email", sRedirectUri, CLIENT_ID);
@@ -91,5 +89,16 @@ public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implem
         catch (Exception ignored) {}
 
         return sRedirectUri;
+    }
+
+    @PostConstruct
+    public void init() {
+        AuthProvider authProvider = idObjectService.getObjectById(AuthProvider.class, DataConstants.OAuthProviders.GOOGLE.getValue());
+        if (authProvider != null) {
+            ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
+            INFO_ENDPOINT = authProvider.getInfoEndpoint();
+            CLIENT_ID = authProvider.getClientId();
+            CLIENT_SECRET = authProvider.getClientSecret();
+        }
     }
 }
