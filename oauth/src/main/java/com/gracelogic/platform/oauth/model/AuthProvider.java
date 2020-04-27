@@ -35,7 +35,7 @@ public class AuthProvider extends IdObject<UUID> {
     @Column(name = "ACCESS_TOKEN_ENDPOINT", nullable = false)
     private String accessTokenEndpoint;
 
-    @Column(name = "INFO_ENDPOINT", nullable = false)
+    @Column(name = "INFO_ENDPOINT", nullable = true)
     private String infoEndpoint;
 
     @Column(name = "CLIENT_ID", nullable = false)
@@ -44,7 +44,7 @@ public class AuthProvider extends IdObject<UUID> {
     @Column(name = "CLIENT_SECRET", nullable = false)
     private String clientSecret;
 
-    @Column(name = "CLIENT_PUBLIC_KEY", nullable = false)
+    @Column(name = "CLIENT_PUBLIC_KEY", nullable = true)
     private String clientPublicKey;
 
     @Override
