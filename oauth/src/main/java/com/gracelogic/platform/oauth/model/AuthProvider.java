@@ -32,7 +32,7 @@ public class AuthProvider extends IdObject<UUID> {
     @Column(name = "SORT_ORDER", nullable = true)
     private Integer sortOrder;
 
-    @Column(name = "ACCESS_TOKEN_ENDPOINT", nullable = false)
+    @Column(name = "ACCESS_TOKEN_ENDPOINT", nullable = true)
     private String accessTokenEndpoint;
 
     @Column(name = "INFO_ENDPOINT", nullable = true)
