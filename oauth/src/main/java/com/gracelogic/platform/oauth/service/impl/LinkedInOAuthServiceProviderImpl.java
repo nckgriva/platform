@@ -64,7 +64,7 @@ public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider impl
     public String buildAuthRedirect() {
         String sRedirectUri = buildRedirectUri(null);
 
-        return String.format("https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=%s&redirect_uri=%s&state=987654321&scope=%s",CLIENT_ID, sRedirectUri, "r_basicprofile%20r_emailaddress");
+        return String.format("https://www.linkedin.com/oauth/v2/authorization?response_type=code&state=987654321&scope=r_basicprofile%%20r_emailaddress&client_id=%s&redirect_uri=%s",CLIENT_ID, sRedirectUri);
     }
 
     @Override
@@ -85,8 +85,12 @@ public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider impl
     public void init() {
         AuthProvider authProvider = idObjectService.getObjectById(AuthProvider.class, DataConstants.OAuthProviders.LINKEDIN.getValue());
         if (authProvider != null) {
-            ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
-            INFO_ENDPOINT = authProvider.getInfoEndpoint();
+            if (authProvider.getAccessTokenEndpoint() != null) {
+                ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
+            }
+            if (authProvider.getInfoEndpoint() != null) {
+                INFO_ENDPOINT = authProvider.getInfoEndpoint();
+            }
             CLIENT_ID = authProvider.getClientId();
             CLIENT_SECRET = authProvider.getClientSecret();
         }

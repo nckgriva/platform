@@ -68,7 +68,7 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
     public String buildAuthRedirect() {
         String sRedirectUri = buildRedirectUri(null);
 
-        return String.format("https://connect.ok.ru/oauth/authorize?client_id=%s&scope=VALUABLE_ACCESS&response_type=code&layout=w&redirect_uri=%s", CLIENT_ID, sRedirectUri);
+        return String.format("https://connect.ok.ru/oauth/authorize?scope=VALUABLE_ACCESS&response_type=code&layout=w&client_id=%s&redirect_uri=%s", CLIENT_ID, sRedirectUri);
     }
 
     @Override
@@ -89,8 +89,12 @@ public class OkOAuthServiceProviderImpl extends AbstractOauthProvider implements
     public void init() {
         AuthProvider authProvider = idObjectService.getObjectById(AuthProvider.class, DataConstants.OAuthProviders.OK.getValue());
         if (authProvider != null) {
-            ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
-            INFO_ENDPOINT = authProvider.getInfoEndpoint();
+            if (authProvider.getAccessTokenEndpoint() != null) {
+                ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
+            }
+            if (authProvider.getInfoEndpoint() != null) {
+                INFO_ENDPOINT = authProvider.getInfoEndpoint();
+            }
             CLIENT_ID = authProvider.getClientId();
             CLIENT_SECRET = authProvider.getClientSecret();
         }

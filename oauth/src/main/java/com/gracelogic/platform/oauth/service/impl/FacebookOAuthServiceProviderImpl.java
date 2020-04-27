@@ -68,7 +68,7 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
     public String buildAuthRedirect() {
         String sRedirectUri = buildRedirectUri(null);
 
-        return String.format("https://www.facebook.com/dialog/oauth?client_id=%s&redirect_uri=%s&response_type=code&scope=public_profile,email", CLIENT_ID, sRedirectUri);
+        return String.format("https://www.facebook.com/dialog/oauth?response_type=code&scope=public_profile,email&client_id=%s&redirect_uri=%s", CLIENT_ID, sRedirectUri);
     }
 
     @Override
@@ -89,8 +89,12 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
     public void init() {
         AuthProvider authProvider = idObjectService.getObjectById(AuthProvider.class, DataConstants.OAuthProviders.FACEBOOK.getValue());
         if (authProvider != null) {
-            ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
-            INFO_ENDPOINT = authProvider.getInfoEndpoint();
+            if (authProvider.getAccessTokenEndpoint() != null) {
+                ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
+            }
+            if (authProvider.getInfoEndpoint() != null) {
+                INFO_ENDPOINT = authProvider.getInfoEndpoint();
+            }
             CLIENT_ID = authProvider.getClientId();
             CLIENT_SECRET = authProvider.getClientSecret();
         }

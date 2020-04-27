@@ -77,7 +77,7 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
     public String buildAuthRedirect() {
         String sRedirectUri = buildRedirectUri(null);
 
-        return String.format("https://api.instagram.com/oauth/authorize/?client_id=%s&response_type=code&redirect_uri=%s", CLIENT_ID, sRedirectUri);
+        return String.format("https://api.instagram.com/oauth/authorize/?response_type=code&client_id=%s&redirect_uri=%s", CLIENT_ID, sRedirectUri);
     }
 
     @Override
@@ -98,7 +98,9 @@ public class InstagramOAuthServiceProviderImpl extends AbstractOauthProvider imp
     public void init() {
         AuthProvider authProvider = idObjectService.getObjectById(AuthProvider.class, DataConstants.OAuthProviders.INSTAGRAM.getValue());
         if (authProvider != null) {
-            ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
+            if (authProvider.getAccessTokenEndpoint() != null) {
+                ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
+            }
             CLIENT_ID = authProvider.getClientId();
             CLIENT_SECRET = authProvider.getClientSecret();
         }

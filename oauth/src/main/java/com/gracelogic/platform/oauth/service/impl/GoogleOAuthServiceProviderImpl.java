@@ -74,7 +74,7 @@ public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implem
     public String buildAuthRedirect() {
         String sRedirectUri = buildRedirectUri(null);
 
-        return String.format("https://accounts.google.com/o/oauth2/auth?redirect_uri=%s&response_type=code&client_id=%s&scope=email", sRedirectUri, CLIENT_ID);
+        return String.format("https://accounts.google.com/o/oauth2/auth?response_type=code&scope=email&client_id=%s&redirect_uri=%s", CLIENT_ID, sRedirectUri);
     }
 
     @Override
@@ -95,8 +95,12 @@ public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implem
     public void init() {
         AuthProvider authProvider = idObjectService.getObjectById(AuthProvider.class, DataConstants.OAuthProviders.GOOGLE.getValue());
         if (authProvider != null) {
-            ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
-            INFO_ENDPOINT = authProvider.getInfoEndpoint();
+            if (authProvider.getAccessTokenEndpoint() != null) {
+                ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();
+            }
+            if (authProvider.getInfoEndpoint() != null) {
+                INFO_ENDPOINT = authProvider.getInfoEndpoint();
+            }
             CLIENT_ID = authProvider.getClientId();
             CLIENT_SECRET = authProvider.getClientSecret();
         }
