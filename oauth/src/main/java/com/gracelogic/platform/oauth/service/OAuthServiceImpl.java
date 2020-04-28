@@ -60,6 +60,7 @@ public class OAuthServiceImpl implements OAuthService {
         List<AuthProviderDTO> dtos = new LinkedList<>();
         for (AuthProvider provider : providers) {
             AuthProviderDTO dto = AuthProviderDTO.prepare(provider);
+            dto.setClientId(provider.getClientId());
             if (dto.getId().equals(DataConstants.OAuthProviders.VK.getValue())) {
                 dto.setUrl(vk.buildAuthRedirect());
             } else if (dto.getId().equals(DataConstants.OAuthProviders.OK.getValue())) {

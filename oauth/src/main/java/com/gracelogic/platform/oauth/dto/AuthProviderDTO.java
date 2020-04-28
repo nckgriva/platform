@@ -6,6 +6,7 @@ import com.gracelogic.platform.oauth.model.AuthProvider;
 public class AuthProviderDTO extends IdObjectDTO {
     private String name;
     private String url;
+    private String clientId;
     private Integer sortOrder;
 
     public String getName() {
@@ -32,12 +33,21 @@ public class AuthProviderDTO extends IdObjectDTO {
         this.sortOrder = sortOrder;
     }
 
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
     public static AuthProviderDTO prepare(AuthProvider model) {
         AuthProviderDTO dto = new AuthProviderDTO();
         IdObjectDTO.prepare(dto, model);
 
         dto.setName(model.getName());
         dto.setSortOrder(model.getSortOrder());
+        dto.setClientId(model.getClientId());
 
         return dto;
     }
