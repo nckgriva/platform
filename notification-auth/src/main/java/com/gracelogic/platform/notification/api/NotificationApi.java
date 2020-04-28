@@ -46,6 +46,7 @@ public class NotificationApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getNotifications(@RequestParam(value = "name", required = false) String name,
+                                           @RequestParam(value = "destination", required = false) String destination,
                                            @RequestParam(value = "notificationMethodId", required = false) UUID notificationMethodId,
                                            @RequestParam(value = "notificationStateId", required = false) UUID notificationStateId,
                                            @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
@@ -55,7 +56,7 @@ public class NotificationApi extends AbstractAuthorizedController {
                                            @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                            @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<NotificationDTO> notifications = notificationService.getNotificationsPaged(name, notificationMethodId, notificationStateId, enrich, count, null, start, sortField, sortDir);
+        EntityListResponse<NotificationDTO> notifications = notificationService.getNotificationsPaged(name, destination, notificationMethodId, notificationStateId, enrich, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<NotificationDTO>>(notifications, HttpStatus.OK);
     }
 }

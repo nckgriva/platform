@@ -105,16 +105,22 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
     @Override
-    public EntityListResponse<NotificationDTO> getNotificationsPaged(String name, UUID notificationMethodId, UUID notificationStateId, boolean enrich,
+    public EntityListResponse<NotificationDTO> getNotificationsPaged(String name, String destination, UUID notificationMethodId, UUID notificationStateId, boolean enrich,
                                                                      Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? "left join fetch el.notificationState left join fetch el.notificationMethod" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
 
+
         if (!StringUtils.isEmpty(name)) {
             params.put("name", "%%" + StringUtils.lowerCase(name) + "%%");
             cause += " and lower(el.name) like :name";
+        }
+
+        if (!StringUtils.isEmpty(destination)) {
+            params.put("destination", "%%" + StringUtils.lowerCase(destination) + "%%");
+            cause += " and lower(el.destination) like :destination";
         }
 
         if (notificationMethodId != null) {
@@ -126,7 +132,6 @@ public class NotificationServiceImpl implements NotificationService{
             params.put("notificationStateId", notificationStateId);
             cause += " and el.notificationState.id=:notificationStateId";
         }
-
 
         int totalCount = idObjectService.getCount(Notification.class, null, countFetches, cause, params);
 
