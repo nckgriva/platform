@@ -83,11 +83,7 @@ public class EntityListResponse<E extends IdObjectDTO> {
     }
 
     //For datatables
-    public int getRecordsTotal() {
-        return getTotalCount();
-    }
-
-    public int getRecordsFiltered() {
+    public Integer getRecordsTotal() {
         return getTotalCount();
     }
 
