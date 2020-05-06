@@ -63,7 +63,7 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
     @Override
     public List<User> getUsers(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
         List<User> users = Collections.emptyList();
-        StringBuilder queryStr = new StringBuilder("select DISTINCT ON (el.created_dt,  el.id) * from {h-schema}cmn_user el " +
+        StringBuilder queryStr = new StringBuilder(String.format("select DISTINCT ON (%s,  el.id) * from {h-schema}cmn_user el ", sortField) +
                 "inner join {h-schema}cmn_identifier iden on el.id = iden.user_id  where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
