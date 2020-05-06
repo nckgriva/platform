@@ -3,8 +3,8 @@ package com.gracelogic.platform.db.dto;
 import java.util.LinkedList;
 
 public class EntityListResponse<E extends IdObjectDTO> {
-    private Integer pages = 0;
-    private Integer page = 1;
+    private Integer pages = null;
+    private Integer page = null;
     private Integer totalCount = 0;
     private Integer queriedCount = 0;
     private Integer startRecord;
