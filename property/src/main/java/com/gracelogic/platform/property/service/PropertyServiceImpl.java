@@ -70,7 +70,7 @@ public class PropertyServiceImpl implements PropertyService {
             params.put("visible", visible);
         }
 
-        Integer totalCount = page != null ? idObjectService.getCount(Property.class, null, countFetches, cause, params) : null;
+        Integer totalCount = idObjectService.getCount(Property.class, null, countFetches, cause, params);
 
         EntityListResponse<PropertyDTO> entityListResponse = new EntityListResponse<PropertyDTO>(totalCount, count, page, start);
 

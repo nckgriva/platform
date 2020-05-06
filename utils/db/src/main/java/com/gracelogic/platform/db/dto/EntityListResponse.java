@@ -87,6 +87,10 @@ public class EntityListResponse<E extends IdObjectDTO> {
         return getTotalCount();
     }
 
+    public Integer getRecordsFiltered() {
+        return getTotalCount();
+    }
+
     public Integer getStartRecord() {
         return startRecord;
     }
