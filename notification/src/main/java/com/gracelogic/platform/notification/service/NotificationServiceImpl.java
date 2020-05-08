@@ -7,13 +7,9 @@ import com.gracelogic.platform.dictionary.service.DictionaryService;
 import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.dto.NotificationDTO;
 import com.gracelogic.platform.notification.dto.NotificationSenderResult;
-import com.gracelogic.platform.notification.method.push.PushNotificationSender;
 import com.gracelogic.platform.notification.model.Notification;
 import com.gracelogic.platform.notification.model.NotificationMethod;
 import com.gracelogic.platform.notification.model.NotificationState;
-import com.gracelogic.platform.notification.method.email.EmailNotificationSender;
-import com.gracelogic.platform.notification.method.internal.InternalNotificationSender;
-import com.gracelogic.platform.notification.method.sms.SmsNotificationSender;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,7 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 public class NotificationServiceImpl implements NotificationService{
