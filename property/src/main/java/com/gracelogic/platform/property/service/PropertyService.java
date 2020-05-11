@@ -5,6 +5,8 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.property.dto.PropertyDTO;
 import com.gracelogic.platform.property.model.Property;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public interface PropertyService {
@@ -27,4 +29,6 @@ public interface PropertyService {
     void deleteProperty(UUID id);
 
     EntityListResponse<PropertyDTO> getPropertiesPaged(String name, Boolean visible, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
+
+    HashMap<String, String> getPropertiesMap(List<String> names);
 }

@@ -84,6 +84,15 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
+    public HashMap<String, String> getPropertiesMap(List<String> names) {
+        HashMap<String, String> propertiesMap = new HashMap<>();
+        for (String name : names){
+            propertiesMap.put(name, cache.get(name));
+        }
+        return propertiesMap;
+    }
+
+    @Override
     public PropertyDTO getProperty(UUID id) throws ObjectNotFoundException {
         Property entity = idObjectService.getObjectById(Property.class, id);
         if (entity == null) {

@@ -14,13 +14,14 @@ import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = Path.API_PROPERTY)
@@ -122,6 +123,21 @@ public class PropertyApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
+    }
+
+    @ApiOperation(
+            value = "getProperties",
+            notes = "Get properties",
+            response = ResponseEntity.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @RequestMapping(method = RequestMethod.POST, value = "/list")
+    @ResponseBody
+    public ResponseEntity<?> getPropertiesMap(@RequestBody ArrayList<String> names) {
+        return new ResponseEntity<>(propertyService.getPropertiesMap(names), HttpStatus.OK);
     }
 
 }
