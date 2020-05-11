@@ -51,6 +51,10 @@ public class NotificationServiceImpl implements NotificationService{
     @Qualifier("pushNotificationSender")
     private NotificationSender pushNotificationSender;
 
+    @Autowired
+    @Qualifier("telegramNotificationSender")
+    private NotificationSender telegramNotificationSender;
+
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
@@ -81,6 +85,8 @@ public class NotificationServiceImpl implements NotificationService{
                         result = internalNotificationSender.send(source, destination, content);
                     } else if (notificationMethodId.equals(DataConstants.NotificationMethods.PUSH.getValue())) {
                         result = pushNotificationSender.send(source, destination, content);
+                    } else if (notificationMethodId.equals(DataConstants.NotificationMethods.TELEGRAM.getValue())) {
+                        result = telegramNotificationSender.send(source, destination, content);
                     } else {
                         result = new NotificationSenderResult(false, "Method is not implemented");
                     }

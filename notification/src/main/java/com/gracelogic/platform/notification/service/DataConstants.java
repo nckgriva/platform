@@ -8,7 +8,9 @@ public class DataConstants {
         INTERNAL(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
         EMAIL(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
         SMS(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
-        PUSH(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74"));
+        PUSH(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74")),
+        TELEGRAM(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e81"));
+
 
         private UUID value;
 

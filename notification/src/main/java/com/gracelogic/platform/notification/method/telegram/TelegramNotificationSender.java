@@ -1,8 +1,9 @@
-package com.gracelogic.platform.notification.method.bot;
+package com.gracelogic.platform.notification.method.telegram;
 
 import com.gracelogic.platform.notification.bots.telegram.TelegramNotificationBot;
 import com.gracelogic.platform.notification.dto.Content;
 import com.gracelogic.platform.notification.dto.NotificationSenderResult;
+import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationSender;
 import com.gracelogic.platform.property.service.PropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import javax.annotation.PostConstruct;
 import java.util.UUID;
 
-@Service
-public class BotNotificationSender implements NotificationSender {
+@Service("telegramNotificationSender")
+public class TelegramNotificationSender implements NotificationSender {
     @Autowired
     private PropertyService propertyService;
 
@@ -40,11 +41,16 @@ public class BotNotificationSender implements NotificationSender {
 
     @Override
     public NotificationSenderResult send(String source, String destination, Content content) {
-        return null;
+        try {
+            telegramNotificationBot.sendNotification(content.getBody(), destination);
+        } catch (TelegramApiException e) {
+            return new NotificationSenderResult(false, e.getMessage());
+        }
+        return new NotificationSenderResult(true, null);
     }
 
     @Override
     public boolean supports(UUID notificationMethodId) {
-        return false;
+        return notificationMethodId != null && notificationMethodId.equals(DataConstants.NotificationMethods.TELEGRAM.getValue());
     }
 }
