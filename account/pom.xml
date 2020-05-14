@@ -6,29 +6,29 @@
 
     <artifactId>platform-account</artifactId>
     <name>account</name>
-    <version>1.2</version>
+    <version>1.3</version>
     <packaging>jar</packaging>
     <parent>
         <groupId>com.gracelogic.platform</groupId>
         <artifactId>platform-parent</artifactId>
-        <version>1.2</version>
+        <version>1.3</version>
         <relativePath>../parent</relativePath>
     </parent>
     <dependencies>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-db</artifactId>
-            <version>1.2</version>
+            <version>1.3</version>
         </dependency>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-user</artifactId>
-            <version>1.2</version>
+            <version>1.3</version>
         </dependency>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-finance</artifactId>
-            <version>1.2</version>
+            <version>1.3</version>
         </dependency>
     </dependencies>
     <build>
