@@ -19,7 +19,7 @@
         <httpclient.version>4.5.12</httpclient.version>
         <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
         <aws-java-sdk-s3.version>1.11.204</aws-java-sdk-s3.version>
-        <jstl.version>1.2</jstl.version>
+        <!--<jstl.version>1.2</jstl.version>-->
         <slf4j.version>1.7.30</slf4j.version>
         <jackson.version>2.11.0</jackson.version>
         <log4j.version>1.2.17</log4j.version>
@@ -29,17 +29,17 @@
         <commons-fileupload.version>1.4</commons-fileupload.version>
         <commons-io.version>2.6</commons-io.version>
         <commons-lang3.version>3.10</commons-lang3.version>
-        <poi.version>4.1.2</poi.version>
+        <!--<poi.version>4.1.2</poi.version>-->
         <quartz.version>2.3.2</quartz.version>
         <commons-net.version>3.6</commons-net.version>
-        <joda-time.version>2.9.4</joda-time.version>
+        <!--<joda-time.version>2.9.4</joda-time.version>-->
         <mustache.version>0.8.18</mustache.version>
         <reflections.version>0.9.12</reflections.version>
-        <guava.version>28.2-jre</guava.version>
+        <!--<guava.version>28.2-jre</guava.version>-->
         <javassist.version>3.18.1-GA</javassist.version>
         <expiringmap.version>0.5.8</expiringmap.version>
-        <uadetector-resources.version>2014.01</uadetector-resources.version>
-        <google-zxing-core.version>2.0</google-zxing-core.version>
+        <!--<uadetector-resources.version>2014.01</uadetector-resources.version>-->
+        <!--<google-zxing-core.version>2.0</google-zxing-core.version>-->
     </properties>
 
     <dependencyManagement>
@@ -342,31 +342,31 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.google.zxing</groupId>
-                <artifactId>core</artifactId>
-                <version>${google-zxing-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.sf.uadetector</groupId>
-                <artifactId>uadetector-resources</artifactId>
-                <version>${uadetector-resources.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi</artifactId>
-                <version>${poi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi-ooxml</artifactId>
-                <version>${poi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>joda-time</groupId>
-                <artifactId>joda-time</artifactId>
-                <version>${joda-time.version}</version>
-            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>com.google.zxing</groupId>-->
+                <!--<artifactId>core</artifactId>-->
+                <!--<version>${google-zxing-core.version}</version>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+                <!--<groupId>net.sf.uadetector</groupId>-->
+                <!--<artifactId>uadetector-resources</artifactId>-->
+                <!--<version>${uadetector-resources.version}</version>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+                <!--<groupId>org.apache.poi</groupId>-->
+                <!--<artifactId>poi</artifactId>-->
+                <!--<version>${poi.version}</version>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+                <!--<groupId>org.apache.poi</groupId>-->
+                <!--<artifactId>poi-ooxml</artifactId>-->
+                <!--<version>${poi.version}</version>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+                <!--<groupId>joda-time</groupId>-->
+                <!--<artifactId>joda-time</artifactId>-->
+                <!--<version>${joda-time.version}</version>-->
+            <!--</dependency>-->
             <dependency>
                 <groupId>com.github.spullara.mustache.java</groupId>
                 <artifactId>compiler</artifactId>
@@ -377,11 +377,11 @@
                 <artifactId>reflections</artifactId>
                 <version>${reflections.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
-            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>com.google.guava</groupId>-->
+                <!--<artifactId>guava</artifactId>-->
+                <!--<version>${guava.version}</version>-->
+            <!--</dependency>-->
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
@@ -418,17 +418,6 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.11</version>
-            </dependency>
-            <dependency>
-                <groupId>org.docx4j</groupId>
-                <artifactId>docx4j</artifactId>
-                <version>6.1.2</version>
-<!--                <exclusions>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>log4j</groupId>-->
-<!--                        <artifactId>log4j</artifactId>-->
-<!--                    </exclusion>-->
-<!--                </exclusions>-->
             </dependency>
 
             <dependency>
