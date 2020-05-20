@@ -464,7 +464,7 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
                 <property>
-                    <name>!profile.mssql</name>
+                    <name>profile.postgres</name>
                 </property>
             </activation>
             <properties>
