@@ -316,31 +316,6 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
             </dependency>
-            <!--<dependency>-->
-                <!--<groupId>com.google.zxing</groupId>-->
-                <!--<artifactId>core</artifactId>-->
-                <!--<version>${google-zxing-core.version}</version>-->
-            <!--</dependency>-->
-            <!--<dependency>-->
-                <!--<groupId>net.sf.uadetector</groupId>-->
-                <!--<artifactId>uadetector-resources</artifactId>-->
-                <!--<version>${uadetector-resources.version}</version>-->
-            <!--</dependency>-->
-            <!--<dependency>-->
-                <!--<groupId>org.apache.poi</groupId>-->
-                <!--<artifactId>poi</artifactId>-->
-                <!--<version>${poi.version}</version>-->
-            <!--</dependency>-->
-            <!--<dependency>-->
-                <!--<groupId>org.apache.poi</groupId>-->
-                <!--<artifactId>poi-ooxml</artifactId>-->
-                <!--<version>${poi.version}</version>-->
-            <!--</dependency>-->
-            <!--<dependency>-->
-                <!--<groupId>joda-time</groupId>-->
-                <!--<artifactId>joda-time</artifactId>-->
-                <!--<version>${joda-time.version}</version>-->
-            <!--</dependency>-->
             <dependency>
                 <groupId>com.github.spullara.mustache.java</groupId>
                 <artifactId>compiler</artifactId>
@@ -351,11 +326,6 @@
                 <artifactId>reflections</artifactId>
                 <version>${reflections.version}</version>
             </dependency>
-            <!--<dependency>-->
-                <!--<groupId>com.google.guava</groupId>-->
-                <!--<artifactId>guava</artifactId>-->
-                <!--<version>${guava.version}</version>-->
-            <!--</dependency>-->
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
