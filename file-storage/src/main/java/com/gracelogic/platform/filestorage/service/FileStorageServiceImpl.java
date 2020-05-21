@@ -8,7 +8,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
-import com.google.common.io.Files;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.db.service.IdObjectService;
@@ -27,10 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -256,7 +252,10 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public void writeStoredFileDataToOutputStream(StoredFile storedFile, OutputStream os) throws UnsupportedStoreModeException, StoredFileDataUnavailableException, IOException {
         if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.LOCAL.getValue())) {
-            Files.copy(getFile(storedFile), os);
+            FileInputStream fis = new FileInputStream(getFile(storedFile));
+            IOUtils.copy(fis, os);
+            fis.close();
+
         } else if (storedFile.getStoreMode().getId().equals(DataConstants.StoreModes.DATABASE.getValue())) {
             StoredFileData storedFileData = idObjectService.getObjectById(StoredFileData.class, storedFile.getStoredFileData().getId());
             os.write(storedFileData.getData());

@@ -1,7 +1,6 @@
 package com.gracelogic.platform.web;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
@@ -12,8 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ServletUtils {
-    private static Logger logger = Logger.getLogger(ServletUtils.class);
-
     public static String getRemoteAddress(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         if (StringUtils.isEmpty(ipAddress)) {

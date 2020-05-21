@@ -75,13 +75,13 @@ public class UserApi extends AbstractAuthorizedController {
             User user = lifecycleService.signUp(signUpDTO);
             return new ResponseEntity<>(new IDResponse(user.getId()), HttpStatus.OK);
         } catch (InvalidPassphraseException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signUp.INVALID_PASSPHRASE", messageSource.getMessage("signUp.INVALID_PASSPHRASE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("signUp.INVALID_PASSPHRASE", messageSource.getMessage("signUp.INVALID_PASSPHRASE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidIdentifierException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signUp.INVALID_IDENTIFIER", messageSource.getMessage("signUp.INVALID_IDENTIFIER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("signUp.INVALID_IDENTIFIER", messageSource.getMessage("signUp.INVALID_IDENTIFIER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (CustomLocalizedException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse(e.getMessage(), messageSource.getMessage(e.getMessage(), null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.UNEXPECTED_ERROR", messageSource.getMessage("common.UNEXPECTED_ERROR", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("common.UNEXPECTED_ERROR", messageSource.getMessage("common.UNEXPECTED_ERROR", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -108,7 +108,7 @@ public class UserApi extends AbstractAuthorizedController {
                                    @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
                                    @ApiParam(name = "fields", value = "fields") @RequestParam Map<String, String> allRequestParams) {
 
-        Map<String, String> fields = new HashMap<String, String>();
+        Map<String, String> fields = new HashMap<>();
         if (allRequestParams != null) {
             for (String paramName : allRequestParams.keySet()) {
                 if (StringUtils.startsWithIgnoreCase(paramName, "fields.")) {
@@ -126,7 +126,7 @@ public class UserApi extends AbstractAuthorizedController {
         }
 
         EntityListResponse<UserDTO> users = userService.getUsersPaged(identifierValue, approved, blocked, fields, fetchRoles != null ? fetchRoles : false, length, null, start, sortField, sortDir);
-        return new ResponseEntity<EntityListResponse<UserDTO>>(users, HttpStatus.OK);
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @ApiOperation(
@@ -165,15 +165,15 @@ public class UserApi extends AbstractAuthorizedController {
     public ResponseEntity saveUser(@ApiParam(name = "user", value = "user") @RequestBody UserDTO userDTO) {
         try {
             User user = lifecycleService.save(userDTO, true, true, getUser());
-            return new ResponseEntity<IDResponse>(new IDResponse(user.getId()), HttpStatus.OK);
+            return new ResponseEntity<>(new IDResponse(user.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidPassphraseException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signUp.INVALID_PASSPHRASE", messageSource.getMessage("signUp.INVALID_PASSPHRASE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("signUp.INVALID_PASSPHRASE", messageSource.getMessage("signUp.INVALID_PASSPHRASE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (InvalidIdentifierException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("signUp.INVALID_IDENTIFIER", messageSource.getMessage("signUp.INVALID_IDENTIFIER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("signUp.INVALID_IDENTIFIER", messageSource.getMessage("signUp.INVALID_IDENTIFIER", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.UNEXPECTED_ERROR", messageSource.getMessage("common.UNEXPECTED_ERROR", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("common.UNEXPECTED_ERROR", messageSource.getMessage("common.UNEXPECTED_ERROR", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -193,9 +193,9 @@ public class UserApi extends AbstractAuthorizedController {
     public ResponseEntity deleteUser(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
         try {
             lifecycleService.delete(idObjectService.getObjectById(User.class, id));
-            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+            return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 }

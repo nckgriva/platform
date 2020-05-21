@@ -2,6 +2,7 @@ package com.gracelogic.platform.db.model;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.UserType;
 
 import java.io.IOException;
@@ -92,12 +93,12 @@ public class StringJsonUserType implements UserType {
      * @param rs      a JDBC result set
      * @param names   the column names
      * @param session
-     * @param owner   the containing entity  @return Object
+     * @param o   the containing entity  @return Object
      * @throws org.hibernate.HibernateException
      * @throws java.sql.SQLException
      */
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor session, Object owner) throws HibernateException, SQLException {
+    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object o) throws HibernateException, SQLException {
         if (rs.getString(names[0]) == null) {
             return null;
         }
@@ -117,7 +118,7 @@ public class StringJsonUserType implements UserType {
      * @throws java.sql.SQLException
      */
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SessionImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value == null) {
             st.setNull(index, TYPE);
             return;
