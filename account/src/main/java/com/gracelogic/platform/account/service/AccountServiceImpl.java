@@ -75,7 +75,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public EntityListResponse<TransactionDTO> getTransactionsPaged(UUID userId, UUID accountId, Collection<UUID> transactionTypeIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<TransactionDTO> getTransactionsPaged(UUID ownerId, UUID accountId, Collection<UUID> transactionTypeIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "left join fetch el.account acc left join fetch acc.user usr left join fetch el.transactionType ttp";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -83,9 +83,9 @@ public class AccountServiceImpl implements AccountService {
             cause += "and el.account.id=:accountId ";
             params.put("accountId", accountId);
         }
-        if (userId != null) {
-            cause += "and el.account.user.id=:userId ";
-            params.put("userId", userId);
+        if (ownerId != null) {
+            cause += "and el.ownerId=:ownerId ";
+            params.put("ownerId", ownerId);
         }
         if (startDate != null) {
             cause += "and el.created >= :startDate ";
@@ -118,7 +118,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public EntityListResponse<AccountDTO> getAccountsPaged(UUID accountTypeId, UUID currencyId, UUID userId, String externalIdentifier, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<AccountDTO> getAccountsPaged(UUID accountTypeId, UUID currencyId, UUID ownerId, String externalIdentifier, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? "left join fetch el.user left join fetch el.accountType left join fetch el.currency" : "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -139,9 +139,9 @@ public class AccountServiceImpl implements AccountService {
             params.put("currencyId", currencyId);
         }
 
-        if (userId != null) {
-            cause += "and el.user.id = :userId ";
-            params.put("userId", userId);
+        if (ownerId != null) {
+            cause += "and el.ownerId = :ownerId ";
+            params.put("ownerId", ownerId);
         }
 
         int totalCount = idObjectService.getCount(Account.class, null, countFetches, cause, params);

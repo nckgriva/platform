@@ -13,8 +13,7 @@ public class AccountDTO extends IdObjectDTO {
     private String accountTypeName;
     private UUID currencyId;
     private String currencyName;
-    private UUID userId;
-    private String userName;
+    private UUID ownerId;
     private String externalIdentifier;
 
     public Long getBalance() {
@@ -70,20 +69,12 @@ public class AccountDTO extends IdObjectDTO {
         this.currencyName = currencyName;
     }
 
-    public UUID getUserId() {
-        return userId;
+    public UUID getOwnerId() {
+        return ownerId;
     }
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 
     public String getExternalIdentifier() {
@@ -105,18 +96,13 @@ public class AccountDTO extends IdObjectDTO {
         if (model.getCurrency() != null) {
             dto.setCurrencyId(model.getCurrency().getId());
         }
-        if (model.getUser() != null) {
-            dto.setUserId(model.getUser().getId()); 
-        }
+        dto.setOwnerId(model.getOwnerId());
         dto.setExternalIdentifier(model.getExternalIdentifier());
 
         return dto;
     }
 
     public static void enrich(AccountDTO dto, Account model) {
-        if (model.getUser() != null) {
-            dto.setUserName(UserDTO.formatUserName(model.getUser()));
-        }
         if (model.getAccountType() != null) {
             dto.setAccountTypeName(model.getAccountType().getName());
         }

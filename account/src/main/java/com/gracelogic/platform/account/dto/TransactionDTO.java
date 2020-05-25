@@ -9,8 +9,7 @@ import java.util.UUID;
 
 
 public class TransactionDTO extends IdObjectDTO {
-    private UUID userId;
-    private String userName;
+    private UUID ownerId;
     private UUID accountId;
     private String accountExternalIdentifier;
     private UUID transactionTypeId;
@@ -76,14 +75,6 @@ public class TransactionDTO extends IdObjectDTO {
         this.referenceObjectId = referenceObjectId;
     }
 
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
-
     public UUID getAccountId() {
         return accountId;
     }
@@ -92,13 +83,12 @@ public class TransactionDTO extends IdObjectDTO {
         this.accountId = accountId;
     }
 
-
-    public String getUserName() {
-        return userName;
+    public UUID getOwnerId() {
+        return ownerId;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 
     public static TransactionDTO prepare(Transaction model) {
@@ -123,10 +113,7 @@ public class TransactionDTO extends IdObjectDTO {
         if (model.getAccount() != null) {
             dto.setAccountExternalIdentifier(model.getAccount().getExternalIdentifier());
 
-            if (model.getAccount().getUser() != null) {
-                dto.setUserId(model.getAccount().getUser().getId());
-                dto.setUserName(UserDTO.formatUserName(model.getAccount().getUser()));
-            }
+            dto.setOwnerId(model.getAccount().getOwnerId());
         }
         if (model.getTransactionType() != null) {
             dto.setTransactionTypeName(model.getTransactionType().getName());

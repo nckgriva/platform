@@ -3,7 +3,6 @@ package com.gracelogic.platform.account.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import com.gracelogic.platform.user.model.User;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -39,9 +38,9 @@ public class Account extends IdObject<UUID> {
     @JoinColumn(name = "CURRENCY_ID", nullable = false)
     private Currency currency;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "USER_ID", nullable = false)
-    private User user;
+    @Column(name = "OWNER_ID", nullable = false)
+    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
+    private UUID ownerId;
 
     @Column(name = "EXTERNAL_IDENTIFIER", nullable = true)
     private String externalIdentifier;
@@ -100,12 +99,12 @@ public class Account extends IdObject<UUID> {
         this.currency = currency;
     }
 
-    public User getUser() {
-        return user;
+    public UUID getOwnerId() {
+        return ownerId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 
     public String getExternalIdentifier() {

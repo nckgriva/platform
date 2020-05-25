@@ -9,8 +9,7 @@ import java.util.UUID;
 
 
 public class PaymentDTO extends IdObjectDTO {
-    private UUID userId;
-    private String userName;
+    private UUID ownerId;
     private UUID accountId;
     private String accountExternalIdentifier;
     private UUID paymentSystemId;
@@ -27,12 +26,12 @@ public class PaymentDTO extends IdObjectDTO {
     private UUID currencyId;
     private String currencyName;
 
-    public UUID getUserId() {
-        return userId;
+    public UUID getOwnerId() {
+        return ownerId;
     }
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 
     public UUID getAccountId() {
@@ -123,14 +122,6 @@ public class PaymentDTO extends IdObjectDTO {
         this.paymentStateName = paymentStateName;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     public String getAccountExternalIdentifier() {
         return accountExternalIdentifier;
     }
@@ -199,10 +190,7 @@ public class PaymentDTO extends IdObjectDTO {
             dto.setAccountExternalIdentifier(model.getAccount().getExternalIdentifier());
             dto.setCurrencyId(model.getAccount().getCurrency().getId());
             dto.setCurrencyName(model.getAccount().getCurrency().getName());
-            if (model.getAccount().getUser() != null) {
-                dto.setUserId(model.getAccount().getUser().getId());
-                dto.setUserName(UserDTO.formatUserName(model.getAccount().getUser()));
-            }
+            dto.setOwnerId(model.getAccount().getOwnerId());
         }
     }
 }
