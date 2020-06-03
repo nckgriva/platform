@@ -31,7 +31,8 @@ import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ import java.util.*;
 @Service
 public class MarketServiceImpl implements MarketService {
 
-    private static Logger logger = Logger.getLogger(MarketServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(MarketServiceImpl.class);
 
     @Autowired
     private IdObjectService idObjectService;

@@ -6,7 +6,8 @@ import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.payment.service.PaymentExecutor;
 import com.gracelogic.platform.web.ServletUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
@@ -30,13 +31,13 @@ public class PaymentController {
     @Autowired
     private ApplicationContext applicationContext;
 
-    private static Logger logger = Logger.getLogger(PaymentController.class);
+    private static Logger logger = LoggerFactory.getLogger(PaymentController.class);
 
     @RequestMapping(value = "/{paymentSystemId}")
     public void process(HttpServletRequest request,
                         HttpServletResponse response,
                         @PathVariable(value = "paymentSystemId") UUID paymentSystemId) throws IOException {
-        logger.info("Payment callback received: " + (paymentSystemId != null ? paymentSystemId.toString() : "null"));
+        logger.info("Payment callback received: {}", (paymentSystemId != null ? paymentSystemId.toString() : "null"));
         PaymentSystem paymentSystem = idObjectService.getObjectById(PaymentSystem.class, paymentSystemId);
         if (paymentSystem == null || !paymentSystem.getActive()) {
             response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);

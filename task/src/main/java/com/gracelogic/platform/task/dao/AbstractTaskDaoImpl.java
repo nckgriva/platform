@@ -2,12 +2,13 @@ package com.gracelogic.platform.task.dao;
 
 import com.gracelogic.platform.db.dao.BaseDao;
 import com.gracelogic.platform.task.DataConstants;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.Query;
 
 public abstract class AbstractTaskDaoImpl extends BaseDao implements TaskDao {
-    private static Logger logger = Logger.getLogger(AbstractTaskDaoImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(AbstractTaskDaoImpl.class);
 
     public void resetAllTasks() {
         Query query = getEntityManager().createQuery("UPDATE TaskExecutionLog l SET l.state.id = :failState where l.state.id = :inProgressState");

@@ -14,7 +14,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import java.io.IOException;
@@ -23,10 +24,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OAuthUtils {
-    private static Logger logger = Logger.getLogger(OAuthUtils.class);
+    private static Logger logger = LoggerFactory.getLogger(OAuthUtils.class);
 
     public static Map<Object, Object> postJsonBodyReturnJson(String url, HashMap<String, String> params) {
-        logger.info("Request to: " + url);
+        logger.info("Request to: {}", url);
 
         CloseableHttpClient httpClient = HttpClients.custom().build();
         HttpPost postMethod = new HttpPost(url);
@@ -49,7 +50,7 @@ public class OAuthUtils {
             }
         }
 
-        logger.info("Request body: " + request);
+        logger.info("Request body: {}", request);
 
         String response = null;
 
@@ -64,14 +65,14 @@ public class OAuthUtils {
             }
 
             CloseableHttpResponse httpResult = httpClient.execute(postMethod);
-            logger.info("Request status: " + httpResult);
+            logger.info("Request status: {}", httpResult);
             HttpEntity entity = httpResult.getEntity();
             if (entity != null) {
                 if (httpResult.getStatusLine().getStatusCode() == 200) {
                     response = EntityUtils.toString(entity);
                 }
                 EntityUtils.consume(entity);
-                logger.info("Response body: " + response);
+                logger.info("Response body: {}", response);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -90,7 +91,7 @@ public class OAuthUtils {
     }
 
     public static Map<Object, Object> postTextBodyReturnJson(String url, String body) {
-        logger.info("Request to: " + url);
+        logger.info("Request to: {}", url);
 
         CloseableHttpClient httpClient = HttpClients.custom().build();
         HttpPost postMethod = new HttpPost(url);
@@ -105,7 +106,7 @@ public class OAuthUtils {
 
         String request = body;
 
-        logger.info("Request body: " + request);
+        logger.info("Request body: {}", request);
 
         String response = null;
 
@@ -120,14 +121,14 @@ public class OAuthUtils {
             }
 
             CloseableHttpResponse httpResult = httpClient.execute(postMethod);
-            logger.info("Request status: " + httpResult);
+            logger.info("Request status: {}", httpResult);
             HttpEntity entity = httpResult.getEntity();
             if (entity != null) {
                 if (httpResult.getStatusLine().getStatusCode() == 200) {
                     response = EntityUtils.toString(entity);
                 }
                 EntityUtils.consume(entity);
-                logger.info("Response body: " + response);
+                logger.info("Response body: {}", response);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -146,7 +147,7 @@ public class OAuthUtils {
     }
 
     public static Map<Object, Object> getQueryReturnJson(String url) {
-        logger.info("Request to: " + url);
+        logger.info("Request to: {}", url);
 
         CloseableHttpClient httpClient = HttpClients.custom().build();
 
@@ -163,7 +164,7 @@ public class OAuthUtils {
 
         try {
             CloseableHttpResponse httpResult = httpClient.execute(method);
-            logger.info("Request status: " + httpResult);
+            logger.info("Request status: {}", httpResult);
 
             HttpEntity entity = httpResult.getEntity();
             if (entity != null) {
@@ -171,7 +172,7 @@ public class OAuthUtils {
                     response = EntityUtils.toString(entity);
                 }
                 EntityUtils.consume(entity);
-                logger.info("Response body: " + response);
+                logger.info("Response body: {}", response);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -182,7 +183,7 @@ public class OAuthUtils {
                 result = objectMapper.readValue(response, new TypeReference<Map<Object, Object>>() {
                 });
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
 
         }
@@ -190,7 +191,7 @@ public class OAuthUtils {
     }
 
     public static String getQueryReturnText(String url) {
-        logger.info("Request to: " + url);
+        logger.info("Request to: {}", url);
 
         CloseableHttpClient httpClient = HttpClients.custom().build();
 
@@ -203,7 +204,7 @@ public class OAuthUtils {
 
         try {
             CloseableHttpResponse httpResult = httpClient.execute(method);
-            logger.info("Request status: " + httpResult);
+            logger.info("Request status: {}", httpResult);
 
             HttpEntity entity = httpResult.getEntity();
             if (entity != null) {
@@ -211,7 +212,7 @@ public class OAuthUtils {
                     response = EntityUtils.toString(entity);
                 }
                 EntityUtils.consume(entity);
-                logger.info("Response body: " + response);
+                logger.info("Response body: {}", response);
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -5,13 +5,11 @@ import com.gracelogic.platform.db.service.IdObjectService;
 import com.gracelogic.platform.market.DataConstants;
 import com.gracelogic.platform.market.model.OrderProduct;
 import com.gracelogic.platform.market.model.Product;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
 public abstract class AbstractMarketDaoImpl extends BaseDao implements MarketDao {
-    private static Logger logger = Logger.getLogger(AbstractMarketDaoImpl.class);
 
     @Autowired
     private IdObjectService idObjectService;

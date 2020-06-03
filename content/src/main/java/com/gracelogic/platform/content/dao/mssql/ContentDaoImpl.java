@@ -5,7 +5,8 @@ import com.gracelogic.platform.content.model.Element;
 import com.gracelogic.platform.db.condition.OnMSSQLServerConditional;
 import com.gracelogic.platform.db.service.IdObjectServiceImpl;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +23,7 @@ import java.util.UUID;
 @Repository
 @Conditional(OnMSSQLServerConditional.class)
 public class ContentDaoImpl extends AbstractContentDaoImpl {
-    private static Logger logger = Logger.getLogger(ContentDaoImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(ContentDaoImpl.class);
 
     @Override
     public Integer getElementsCount(String query, Collection<String> queryFields, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields) {

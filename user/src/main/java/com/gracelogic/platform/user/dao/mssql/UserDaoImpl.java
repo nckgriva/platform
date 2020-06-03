@@ -4,7 +4,8 @@ import com.gracelogic.platform.db.condition.OnMSSQLServerConditional;
 import com.gracelogic.platform.user.dao.AbstractUserDaoImpl;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +18,7 @@ import java.util.Map;
 @Repository
 @Conditional(OnMSSQLServerConditional.class)
 public class UserDaoImpl extends AbstractUserDaoImpl {
-    private static Logger logger = Logger.getLogger(UserDaoImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(UserDaoImpl.class);
 
     @Override
     public Integer getUsersCount(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields) {

@@ -20,7 +20,8 @@ import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
     @Autowired
     private IdObjectService idObjectService;
 
-    private static Logger logger = Logger.getLogger(EsiaOAuthServiceProviderImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(EsiaOAuthServiceProviderImpl.class);
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -57,7 +58,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
         }
 
         String credentials = new String(CLIENT_ID + ":" + CLIENT_SECRET);
-        logger.info("Credentials: " + credentials);
+        logger.info("Credentials: {}", credentials);
         Map response = postQueryWithAuthenticationReturnJson(String.format("%s?grant_type=authorization_code&client_id=%s&client_secret=%s&code=%s&redirect_uri=%s", ACCESS_TOKEN_ENDPOINT, CLIENT_ID, CLIENT_SECRET, code, sRedirectUri), "Basic " + new String(Base64.encodeBase64(credentials.getBytes())));
 
         if (response == null) {
@@ -98,7 +99,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
     }
 
     private static Map<Object, Object> getQueryWithAuthenticationReturnJson(String url, String authentication) {
-        logger.info("Request to: " + url);
+        logger.info("Request to: {}", url);
 
         CloseableHttpClient httpClient = HttpClients.custom().build();
 
@@ -117,7 +118,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
 
         try {
             CloseableHttpResponse httpResult = httpClient.execute(method);
-            logger.info("Request status: " + httpResult);
+            logger.info("Request status: {}", httpResult);
 
             HttpEntity entity = httpResult.getEntity();
             if (entity != null) {
@@ -125,7 +126,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
                     response = EntityUtils.toString(entity);
                 }
                 EntityUtils.consume(entity);
-                logger.info("Response body: " + response);
+                logger.info("Response body: {}", response);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -144,7 +145,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
     }
 
     private static Map<Object, Object> postQueryWithAuthenticationReturnJson(String url, String authentication) {
-        logger.info("Request to: " + url);
+        logger.info("Request to: {}", url);
 
         CloseableHttpClient httpClient = HttpClients.custom().build();
 
@@ -164,7 +165,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
 
         try {
             CloseableHttpResponse httpResult = httpClient.execute(method);
-            logger.info("Request status: " + httpResult);
+            logger.info("Request status: {}", httpResult);
 
             HttpEntity entity = httpResult.getEntity();
             if (entity != null) {
@@ -172,7 +173,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
                     response = EntityUtils.toString(entity);
                 }
                 EntityUtils.consume(entity);
-                logger.info("Response body: " + response);
+                logger.info("Response body: {}", response);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -183,7 +184,7 @@ public class EsiaOAuthServiceProviderImpl extends AbstractOauthProvider implemen
                 result = objectMapper.readValue(response, new TypeReference<Map<Object, Object>>() {
                 });
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
 
         }

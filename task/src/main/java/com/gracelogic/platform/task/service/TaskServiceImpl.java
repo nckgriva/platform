@@ -13,8 +13,9 @@ import com.gracelogic.platform.task.model.TaskExecuteMethod;
 import com.gracelogic.platform.task.model.TaskExecuteState;
 import com.gracelogic.platform.task.model.TaskExecutionLog;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.quartz.CronExpression;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ import java.util.*;
 
 @Service("taskService")
 public class TaskServiceImpl implements TaskService {
-    private static Logger logger = Logger.getLogger(TaskServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);
 
     @Autowired
     private IdObjectService idObjectService;
@@ -94,7 +95,7 @@ public class TaskServiceImpl implements TaskService {
 
             taskService.setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.COMPLETED.getValue());
         } catch (Exception e) {
-            logger.error(String.format("Failed to complete task: %s", execution.getTask().getServiceName()), e);
+            logger.error("Failed to complete task: {}", execution.getTask().getServiceName(), e);
             taskService.setTaskExecutionState(execution.getId(), DataConstants.TaskExecutionStates.FAIL.getValue());
         }
 
@@ -124,7 +125,7 @@ public class TaskServiceImpl implements TaskService {
                     }
                 }
             } catch (Exception e) {
-                logger.error(String.format("Failed to schedule task %s", task.getId()), e);
+                logger.error("Failed to schedule task {}", task.getId(), e);
             }
         }
     }

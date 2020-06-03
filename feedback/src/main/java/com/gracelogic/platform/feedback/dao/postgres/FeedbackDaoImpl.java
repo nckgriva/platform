@@ -3,7 +3,8 @@ package com.gracelogic.platform.feedback.dao.postgres;
 import com.gracelogic.platform.db.condition.OnPostgreSQLConditional;
 import com.gracelogic.platform.feedback.dao.AbstractFeedbackDaoImpl;
 import com.gracelogic.platform.feedback.model.Feedback;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +20,7 @@ import java.util.UUID;
 @Repository
 @Conditional(OnPostgreSQLConditional.class)
 public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
-    private static Logger logger = Logger.getLogger(FeedbackDaoImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(FeedbackDaoImpl.class);
 
     @Override
     public Integer getFeedbacksCount(UUID feedbackTypeId, Date startDate, Date endDate, Map<String, String> fields) {

@@ -9,7 +9,8 @@ import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
 import com.gracelogic.platform.oauth.service.OAuthUtils;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,7 @@ import java.util.Map;
 
 @Service("linkedin")
 public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
-    private static Logger logger = Logger.getLogger(LinkedInOAuthServiceProviderImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(LinkedInOAuthServiceProviderImpl.class);
 
     private String ACCESS_TOKEN_ENDPOINT = "https://www.linkedin.com/oauth/v2/accessToken";
     private String INFO_ENDPOINT = "https://api.linkedin.com/v1/people/~:(id,first-name,last-name,email-address)?oauth2_access_token=%s&format=json";
@@ -42,7 +43,7 @@ public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider impl
             }
             catch (Exception ignored) {}
         }
-        logger.info("REDIRECT_URL: " + redirectUri);
+        logger.info("REDIRECT_URL: {}", redirectUri);
 
         Map response = OAuthUtils.postTextBodyReturnJson(ACCESS_TOKEN_ENDPOINT, String.format("grant_type=authorization_code&code=%s&client_id=%s&client_secret=%s&redirect_uri=%s", code, CLIENT_ID, CLIENT_SECRET, sRedirectUri));
         if (response == null) {

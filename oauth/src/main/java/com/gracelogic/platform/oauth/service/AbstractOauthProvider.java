@@ -12,13 +12,14 @@ import com.gracelogic.platform.user.service.DataConstants;
 import com.gracelogic.platform.user.service.UserLifecycleService;
 import com.gracelogic.platform.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
 
 public abstract class AbstractOauthProvider implements OAuthServiceProvider {
-    private static Logger logger = Logger.getLogger(AbstractOauthProvider.class);
+    private static Logger logger = LoggerFactory.getLogger(AbstractOauthProvider.class);
 
     @Autowired
     private UserLifecycleService registrationService;
@@ -74,7 +75,7 @@ public abstract class AbstractOauthProvider implements OAuthServiceProvider {
             signUpDTO.getFields().put(UserDTO.FIELD_ORG, !StringUtils.isEmpty(OAuthDTO.getOrg()) ? OAuthDTO.getOrg() : null);
 
 
-            logger.info("Oauth registration: " + signUpDTO.toString());
+            logger.info("Oauth registration: {}", signUpDTO.toString());
 
             try {
                 user = registrationService.signUp(signUpDTO);

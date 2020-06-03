@@ -18,7 +18,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,11 +31,11 @@ import java.util.UUID;
 public class YandexKassaPaymentExecutor implements PaymentExecutor {
     private static final String API_URL = "https://payment.yandex.net";
     private static final ObjectMapper mapper = new ObjectMapper();
-    private static Logger logger = Logger.getLogger(YandexKassaPaymentExecutor.class);
+    private static Logger logger = LoggerFactory.getLogger(YandexKassaPaymentExecutor.class);
 
     @Override
     public PaymentExecutionResultDTO execute(PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
-        PropertyService propertyService = null;
+        PropertyService propertyService;
         try {
             propertyService = context.getBean(PropertyService.class);
         } catch (Exception e) {
@@ -47,7 +48,6 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
         paymentDTO.setConfirmation(new YandexKassaConfirmationDTO("redirect", propertyService.getPropertyValue("payment:yandex_kassa_redirect_url")));
         try {
             YandexKassaPaymentDTO result = createPayment(paymentDTO, propertyService.getPropertyValue("payment:yandex_kassa_shop_id"), propertyService.getPropertyValue("payment:yandex_kassa_secret"));
-            Map<String, String> responseParams = new HashMap<>();
             request.getParams().put("confirmation_url", result.getConfirmation().getConfirmation_url());
             return new PaymentExecutionResultDTO(false, result.getId(), request.getParams());
         } catch (Exception e) {
@@ -60,8 +60,8 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
     @Override
     public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) throws PaymentExecutionException {
         logger.info("Yandex.Kassa callback accepted");
-        PropertyService propertyService = null;
-        PaymentService paymentService = null;
+        PropertyService propertyService;
+        PaymentService paymentService;
         try {
             propertyService = context.getBean(PropertyService.class);
             paymentService = context.getBean(PaymentService.class);
@@ -71,7 +71,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
 
         try {
             String requestBody = IOUtils.toString(request.getInputStream());
-            logger.info("raw request: " + requestBody);
+            logger.info("raw request: {}", requestBody);
             YandexKassaNotificationDTO notification = mapper.readValue(requestBody, YandexKassaNotificationDTO.class);
             logger.info(notification.toString());
             if (StringUtils.equalsIgnoreCase(notification.getEvent(), "payment.succeeded") && !StringUtils.isEmpty(notification.getObject().getId())) {
@@ -85,7 +85,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
                     paymentService.processPayment(paymentSystemId, req, null);
                 }
                 else {
-                    logger.warn("Payment not succeed, but event accepted: " + notification.getObject().getId());
+                    logger.warn("Payment not succeed, but event accepted: {}", notification.getObject().getId());
                 }
             }
         } catch (Exception e) {
@@ -102,34 +102,34 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
     private static YandexKassaPaymentDTO createPayment(YandexKassaCreatePaymentDTO request, String shopId, String secret) throws Exception {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
         String uri = API_URL + "/api/v3/payments";
-        logger.debug("request url: " + uri);
+        logger.debug("request url: {}", uri);
         HttpPost sendMethod = new HttpPost(uri);
         sendMethod.addHeader("Authorization", "Basic " + Utils.getBase64Authorization(shopId, secret));
         sendMethod.addHeader("Content-Type", "application/json");
         sendMethod.addHeader("Accept", "application/json");
         sendMethod.addHeader("Idempotence-Key", UUID.randomUUID().toString());
         String requestBody = mapper.writeValueAsString(request);
-        logger.debug("request body: " + requestBody);
+        logger.debug("request body: {}", requestBody);
         sendMethod.setEntity(new StringEntity(requestBody));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
-        logger.debug("response status: " + result.getStatusLine().getStatusCode());
+        logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
         String response = EntityUtils.toString(entity);
-        logger.debug("response body: " + response);
+        logger.debug("response body: {}", response);
         return mapper.readValue(response, YandexKassaPaymentDTO.class);
     }
 
     private static YandexKassaPaymentDTO getPayment(String id, String shopId, String secret) throws Exception {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
         String uri = API_URL + "/api/v3/payments/" + id;
-        logger.debug("request url: " + uri);
+        logger.debug("request url: {}", uri);
         HttpGet sendMethod = new HttpGet(uri);
         sendMethod.addHeader("Authorization", "Basic " + Utils.getBase64Authorization(shopId, secret));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
-        logger.debug("response status: " + result.getStatusLine().getStatusCode());
+        logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
         String response = EntityUtils.toString(entity);
-        logger.debug("response body: " + response);
+        logger.debug("response body: {}", response);
         return mapper.readValue(response, YandexKassaPaymentDTO.class);
     }
 }

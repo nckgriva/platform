@@ -20,8 +20,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.quartz.CronExpression;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 
 @Service("userService")
 public class UserServiceImpl implements UserService {
-    private static Logger logger = Logger.getLogger(UserServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     private IdObjectService idObjectService;
@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
         Boolean oneSessionPerUser = propertyService.getPropertyValueAsBoolean("user:one_session_per_user");
         if (oneSessionPerUser != null && oneSessionPerUser) {
             List<Object[]> lastActiveUsersSession = userDao.getLastActiveUsersSessions();
-            logger.info("Loaded last users sessions: " + lastActiveUsersSession.size());
+            logger.info("Loaded last users sessions: {}", lastActiveUsersSession.size());
             for (Object[] obj : lastActiveUsersSession) {
                 UUID userId = UUID.fromString((String) obj[0]);
                 String sessionId = (String) obj[1];
@@ -195,7 +195,7 @@ public class UserServiceImpl implements UserService {
                         notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.SMS.getValue(),
                                 propertyService.getPropertyValue("notification:sms_from"), identifierValue, content, 0);
                     } catch (Exception e) {
-                        logger.error(e);
+                        logger.error(e.getMessage(), e);
                     }
                 } else if (identifierTypeId.equals(DataConstants.IdentifierTypes.EMAIL.getValue())) {
                     try {
@@ -205,7 +205,7 @@ public class UserServiceImpl implements UserService {
                         notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.EMAIL.getValue(),
                                 propertyService.getPropertyValue("notification:smtp_from"), identifierValue, content, 0);
                     } catch (Exception e) {
-                        logger.error(e);
+                        logger.error(e.getMessage(), e);
                     }
                 }
             } else {
@@ -367,7 +367,7 @@ public class UserServiceImpl implements UserService {
                 notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.EMAIL.getValue(),
                         propertyService.getPropertyValue("notification:smtp_from"), identifier.getValue(), content, 0);
             } catch (Exception e) {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
 
         } else if (identifier.getIdentifierType().getId().equals(DataConstants.IdentifierTypes.PHONE.getValue())) {
@@ -378,7 +378,7 @@ public class UserServiceImpl implements UserService {
                         propertyService.getPropertyValue("notification:sms_from"), identifier.getValue(), content, 0);
 
             } catch (Exception e) {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
 
         }

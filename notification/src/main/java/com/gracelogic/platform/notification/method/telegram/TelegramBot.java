@@ -1,7 +1,8 @@
 package com.gracelogic.platform.notification.method.telegram;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -17,7 +18,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String botUsername;
     private ReplyKeyboardMarkup keyboard;
 
-    private static Logger logger = Logger.getLogger(TelegramBot.class);
+    private static Logger logger = LoggerFactory.getLogger(TelegramBot.class);
 
     @Override
     public void onUpdateReceived(Update update) {
