@@ -19,7 +19,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +41,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static Logger logger = Logger.getLogger(PayPalPaymentExecutor.class);
+    private static Logger logger = LoggerFactory.getLogger(PayPalPaymentExecutor.class);
 
     private final static String BILLING_AGREEMENT_ID_REGEXP = "billing-agreements\\/(.*?)\\/agreement-execute";
 
@@ -81,13 +82,13 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
     @Override
     public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) {
         try {
-            logger.info("PayPal callback query:" + request.getQueryString());
+            logger.info("PayPal callback query: {}", request.getQueryString());
 //            logger.info(IOUtils.toString(request.getReader()));
 
             PaymentService paymentService = context.getBean(PaymentService.class);
 
             String transactionType = request.getParameter("txn_type");
-            logger.info("transactionType: " + transactionType);
+            logger.info("transactionType: {}", transactionType);
             if (StringUtils.equalsIgnoreCase(transactionType, "recurring_payment")) {
                 Double amount = Double.parseDouble(request.getParameter("amount"));
                 String recurringPaymentId = request.getParameter("recurring_payment_id");
@@ -286,19 +287,19 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
 
         String uri = apiUrl + "/v1/oauth2/token";
-        logger.debug("request url: " + uri);
+        logger.debug("request url: {}", uri);
         HttpPost sendMethod = new HttpPost(uri);
         sendMethod.addHeader("Authorization", "Basic " + Utils.getBase64Authorization(clientId, secret));
         sendMethod.addHeader("Content-Type", "application/x-www-form-urlencoded");
         sendMethod.addHeader("Accept", "application/json");
         String requestBody = "grant_type=client_credentials";
-        logger.debug("request body: " + requestBody);
+        logger.debug("request body: {}", requestBody);
         sendMethod.setEntity(new StringEntity(requestBody));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
-        logger.debug("response status: " + result.getStatusLine().getStatusCode());
+        logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
         String response = EntityUtils.toString(entity);
-        logger.debug("response body: " + response);
+        logger.debug("response body: {}", response);
         return mapper.readValue(response, PayPalOAuthResponseDTO.class);
     }
 
@@ -306,18 +307,18 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
 
         String uri = apiUrl + "/v1/payments/payment";
-        logger.debug("request url: " + uri);
+        logger.debug("request url: {}", uri);
         HttpPost sendMethod = new HttpPost(uri);
         sendMethod.addHeader("Authorization", "Bearer " + accessToken);
         sendMethod.addHeader("Content-Type", "application/json");
         String requestBody = mapper.writeValueAsString(requestDTO);
-        logger.debug("request body: " + requestBody);
+        logger.debug("request body: {}", requestBody);
         sendMethod.setEntity(new StringEntity(requestBody));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
-        logger.debug("response status: " + result.getStatusLine().getStatusCode());
+        logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
         String response = EntityUtils.toString(entity);
-        logger.debug("response body: " + response);
+        logger.debug("response body: {}", response);
         return mapper.readValue(response, PayPalCreateResponseDTO.class);
     }
 
@@ -325,18 +326,18 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
 
         String uri = apiUrl + "/v1/payments/payment/" + id + "/execute";
-        logger.debug("request url: " + uri);
+        logger.debug("request url: {}", uri);
         HttpPost sendMethod = new HttpPost(uri);
         sendMethod.addHeader("Authorization", "Bearer " + accessToken);
         sendMethod.addHeader("Content-Type", "application/json");
         String requestBody = mapper.writeValueAsString(requestDTO);
-        logger.debug("request body: " + requestBody);
+        logger.debug("request body: {}", requestBody);
         sendMethod.setEntity(new StringEntity(requestBody));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
-        logger.debug("response status: " + result.getStatusLine().getStatusCode());
+        logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
         String response = EntityUtils.toString(entity);
-        logger.debug("response body: " + response);
+        logger.debug("response body: {}", response);
         return mapper.readValue(response, PayPalExecuteResponseDTO.class);
     }
 
@@ -344,18 +345,18 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
 
         String uri = apiUrl + "/v1/payments/billing-plans";
-        logger.debug("request url: " + uri);
+        logger.debug("request url: {}", uri);
         HttpPost sendMethod = new HttpPost(uri);
         sendMethod.addHeader("Authorization", "Bearer " + accessToken);
         sendMethod.addHeader("Content-Type", "application/json");
         String requestBody = mapper.writeValueAsString(requestDTO);
-        logger.debug("request body: " + requestBody);
+        logger.debug("request body: {}", requestBody);
         sendMethod.setEntity(new StringEntity(requestBody));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
-        logger.debug("response status: " + result.getStatusLine().getStatusCode());
+        logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
         String response = EntityUtils.toString(entity);
-        logger.debug("response body: " + response);
+        logger.debug("response body: {}", response);
         return mapper.readValue(response, PayPalPlanDTO.class);
     }
 
@@ -363,7 +364,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
 
         String uri = apiUrl + "/v1/payments/billing-plans/" + planId;
-        logger.debug("request url: " + uri);
+        logger.debug("request url: {}", uri);
         HttpPatch sendMethod = new HttpPatch(uri);
         sendMethod.addHeader("Authorization", "Bearer " + accessToken);
         sendMethod.addHeader("Content-Type", "application/json");
@@ -374,31 +375,31 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         List<PayPalPathDTO> list = new LinkedList<>();
         list.add(payPalPathDTO);
         String requestBody = mapper.writeValueAsString(list);
-        logger.debug("request body: " + requestBody);
+        logger.debug("request body: {}", requestBody);
         sendMethod.setEntity(new StringEntity(requestBody));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
-        logger.debug("response status: " + result.getStatusLine().getStatusCode());
+        logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
         String response = EntityUtils.toString(entity);
-        logger.debug("response body: " + response);
+        logger.debug("response body: {}", response);
     }
 
     private static PayPalBillingAgreementDTO createBillingAgreement(String apiUrl, String accessToken, PayPalBillingAgreementDTO requestDTO) throws Exception {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
 
         String uri = apiUrl + "/v1/payments/billing-agreements";
-        logger.debug("request url: " + uri);
+        logger.debug("request url: {}", uri);
         HttpPost sendMethod = new HttpPost(uri);
         sendMethod.addHeader("Authorization", "Bearer " + accessToken);
         sendMethod.addHeader("Content-Type", "application/json");
         String requestBody = mapper.writeValueAsString(requestDTO);
-        logger.debug("request body: " + requestBody);
+        logger.debug("request body: {}", requestBody);
         sendMethod.setEntity(new StringEntity(requestBody));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
-        logger.debug("response status: " + result.getStatusLine().getStatusCode());
+        logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
         String response = EntityUtils.toString(entity);
-        logger.debug("response body: " + response);
+        logger.debug("response body: {}", response);
         return mapper.readValue(response, PayPalBillingAgreementDTO.class);
     }
 
@@ -406,15 +407,15 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
 
         String uri = apiUrl + "/v1/payments/billing-agreements/" + billingAgreementId + "/agreement-execute";
-        logger.debug("request url: " + uri);
+        logger.debug("request url: {}", uri);
         HttpPost sendMethod = new HttpPost(uri);
         sendMethod.addHeader("Authorization", "Bearer " + accessToken);
         sendMethod.addHeader("Content-Type", "application/json");
         CloseableHttpResponse result = httpClient.execute(sendMethod);
-        logger.debug("response status: " + result.getStatusLine().getStatusCode());
+        logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
         String response = EntityUtils.toString(entity);
-        logger.debug("response body: " + response);
+        logger.debug("response body: {}", response);
         return mapper.readValue(response, PayPalBillingAgreementDTO.class);
     }
 

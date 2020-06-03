@@ -11,7 +11,8 @@ import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.web.ServletUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +25,7 @@ import java.util.UUID;
 
 //TODO: Проверить безопасность этого способа оплаты
 public class SbrfPaymentExecutor implements PaymentExecutor {
-    private static Logger logger = Logger.getLogger(SbrfPaymentExecutor.class);
+    private static Logger logger = LoggerFactory.getLogger(SbrfPaymentExecutor.class);
 
     private static final String ACTION_CHECK = "check";
     private static final String ACTION_PAY = "payment";
@@ -72,11 +73,11 @@ public class SbrfPaymentExecutor implements PaymentExecutor {
         }
 
         logger.info("Sbrf request");
-        logger.info("ACTION:" + action);
-        logger.info("ACCOUNT:" + account);
-        logger.info("AMOUNT:" + amount);
-        logger.info("PAY_ID:" + payId);
-        logger.info("PAY_DATE:" + payDate);
+        logger.info("ACTION: {}", action);
+        logger.info("ACCOUNT: {}", account);
+        logger.info("AMOUNT: {}", amount);
+        logger.info("PAY_ID: {}", payId);
+        logger.info("PAY_DATE: {}", payDate);
 
         String resp;
         if (StringUtils.equalsIgnoreCase(action, ACTION_CHECK)) {
@@ -114,7 +115,7 @@ public class SbrfPaymentExecutor implements PaymentExecutor {
         }
 
         try {
-            logger.info("Response: " + resp);
+            logger.info("Response: {}", resp);
             response.setCharacterEncoding("UTF-8");
             response.getWriter().print(resp);
             response.getWriter().flush();

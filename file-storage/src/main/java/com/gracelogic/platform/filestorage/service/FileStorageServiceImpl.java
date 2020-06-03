@@ -21,7 +21,8 @@ import com.gracelogic.platform.filestorage.model.StoredFileData;
 import com.gracelogic.platform.property.service.PropertyService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +44,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Autowired
     private PropertyService propertyService;
 
-    private static Logger logger = Logger.getLogger(FileStorageServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(FileStorageServiceImpl.class);
 
 
     private AmazonS3 s3client = null;
@@ -179,11 +180,16 @@ public class FileStorageServiceImpl implements FileStorageService {
                     "means your request made it " +
                     "to Amazon S3, but was rejected with an error response" +
                     " for some reason.");
-            logger.error("Error Message:    " + ase.getMessage() + "\n" +
-                    "HTTP Status Code: " + ase.getStatusCode() + "\n" +
-                    "AWS Error Code:   " + ase.getErrorCode() + "\n" +
-                    "Error Type:       " + ase.getErrorType() + "\n" +
-                    "Request ID:       " + ase.getRequestId() + "\n");
+            logger.error("Error Message: {}\n" +
+                    "HTTP Status Code: {}\n"  +
+                    "AWS Error Code: {}\n"  +
+                    "Error Type: {}\n"  +
+                    "Request ID: {}\n",
+                    ase.getMessage(),
+                    ase.getStatusCode(),
+                    ase.getErrorCode(),
+                    ase.getErrorType(),
+                    ase.getRequestId());
             throw new IOException(ase);
         } catch (AmazonClientException ace) {
             logger.error("Caught an AmazonClientException, which " +

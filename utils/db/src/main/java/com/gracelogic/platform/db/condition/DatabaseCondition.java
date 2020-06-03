@@ -1,6 +1,7 @@
 package com.gracelogic.platform.db.condition;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
@@ -10,7 +11,7 @@ import java.util.Properties;
 
 public abstract class DatabaseCondition implements Condition {
 
-    protected Logger logger = Logger.getLogger(this.getClass());
+    protected Logger logger = LoggerFactory.getLogger(this.getClass());
     private Properties dbProperties;
 
     public DatabaseCondition() {

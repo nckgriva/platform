@@ -5,7 +5,8 @@ import com.gracelogic.platform.notification.dto.NotificationSenderResult;
 import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationSender;
 import com.gracelogic.platform.property.service.PropertyService;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +24,11 @@ public class EmailNotificationSender implements NotificationSender {
 
     @Autowired
     private PropertyService propertyService;
-    private static Logger logger = Logger.getLogger(EmailNotificationSender.class);
+    private static Logger logger = LoggerFactory.getLogger(EmailNotificationSender.class);
 
     @Override
     public NotificationSenderResult send(String source, String destination, Content content) {
-        logger.info(String.format("Sending e-mail to: %s", destination));
+        logger.info("Sending e-mail to: {}", destination);
 
         try {
             Properties p = new Properties();

@@ -3,7 +3,8 @@ package com.gracelogic.platform.feedback.dao.mssql;
 import com.gracelogic.platform.db.condition.OnMSSQLServerConditional;
 import com.gracelogic.platform.feedback.dao.AbstractFeedbackDaoImpl;
 import com.gracelogic.platform.feedback.model.Feedback;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Repository;
 
@@ -19,14 +20,14 @@ import java.util.UUID;
 @Repository
 @Conditional(OnMSSQLServerConditional.class)
 public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
-    private static Logger logger = Logger.getLogger(FeedbackDaoImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(FeedbackDaoImpl.class);
 
     @Override
     public Integer getFeedbacksCount(UUID feedbackTypeId, Date startDate, Date endDate, Map<String, String> fields) {
         Integer count = null;
         StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_feedback el where 1=1 ");
 
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         if (feedbackTypeId != null) {
             queryStr.append("and el.feedback_type_id = :feedbackTypeId ");
             params.put("feedbackTypeId", feedbackTypeId);

@@ -12,7 +12,8 @@ import com.gracelogic.platform.user.security.SessionBasedAuthentication;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.ServletUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -67,7 +68,7 @@ public class OAuthController extends AbstractAuthorizedController {
     @Autowired
     private PropertyService propertyService;
 
-    private static Logger logger = Logger.getLogger(OAuthController.class);
+    private static Logger logger = LoggerFactory.getLogger(OAuthController.class);
 
     @RequestMapping(value = "/{authProvider}", method = RequestMethod.GET)
     public void process(HttpServletRequest request,
@@ -77,8 +78,8 @@ public class OAuthController extends AbstractAuthorizedController {
                         @RequestParam(value = "fwd", required = false) String fwd) throws IOException {
 
         logger.info("OAUTH request");
-        logger.info("provider: " + authProvider);
-        logger.info("code: " + code);
+        logger.info("provider: {}", authProvider);
+        logger.info("code: {}", code);
 
         if (StringUtils.isEmpty(code)) {
             response.sendRedirect(propertyService.getPropertyValue("oauth:redirect_fail_url"));

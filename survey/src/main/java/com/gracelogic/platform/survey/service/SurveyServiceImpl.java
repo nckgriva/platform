@@ -15,7 +15,6 @@ import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -26,8 +25,6 @@ import java.util.*;
 
 @Service
 public class SurveyServiceImpl implements SurveyService {
-
-    private static Logger logger = Logger.getLogger(SurveyServiceImpl.class);
 
     @Autowired
     private IdObjectService idObjectService;

@@ -3,7 +3,6 @@ package com.gracelogic.platform.dictionary.service;
 import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.db.service.IdObjectService;
 import net.jodah.expiringmap.ExpiringMap;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +10,6 @@ import java.util.*;
 
 @Service
 public class DictionaryServiceImpl implements DictionaryService {
-    private static Logger logger = Logger.getLogger(DictionaryServiceImpl.class);
 
     @Autowired
     private IdObjectService idObjectService;

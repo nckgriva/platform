@@ -11,7 +11,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class PushNotificationSender implements NotificationSender {
 
     private static final String FCM_SERVICE_URL = "https://fcm.googleapis.com/fcm/send";
 
-    private static Logger logger = Logger.getLogger(PushNotificationSender.class);
+    private static Logger logger = LoggerFactory.getLogger(PushNotificationSender.class);
 
     @Override
     public NotificationSenderResult send(String source, String destination, Content content) {
@@ -42,7 +43,7 @@ public class PushNotificationSender implements NotificationSender {
             HttpResponse httpResponse = HttpUtils.createTrustAllSecuredHttpClient().execute(post);
 
             String responseJson = EntityUtils.toString(httpResponse.getEntity());
-            logger.info("Response received: " + httpResponse.getStatusLine() + "; content: " + responseJson);
+            logger.info("Response received: {}; content: {}", httpResponse.getStatusLine(), responseJson);
 
             FcmResponse response = mapper.readValue(responseJson, FcmResponse.class);
             String error = response.getResults().iterator().next().getError();
