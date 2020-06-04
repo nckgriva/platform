@@ -61,7 +61,7 @@ public class TemplateDTO extends IdObjectDTO {
         this.locale = locale;
     }
 
-    public static TemplateDTO prepare(Template model) {
+    public static TemplateDTO prepare(Template model, boolean enrich) {
         TemplateDTO dto = new TemplateDTO();
         IdObjectDTO.prepare(dto, model);
         dto.setName(model.getName());
@@ -70,6 +70,9 @@ public class TemplateDTO extends IdObjectDTO {
         dto.setLocale(model.getLocale());
         if (model.getTemplateType() != null) {
             dto.setTemplateTypeId(model.getTemplateType().getId());
+            if (enrich) {
+                dto.setTemplateTypeName(model.getTemplateType().getName());
+            }
         }
         return dto;
     }

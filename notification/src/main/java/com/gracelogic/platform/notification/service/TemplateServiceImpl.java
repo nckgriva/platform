@@ -63,13 +63,13 @@ public class TemplateServiceImpl implements TemplateService {
             throw new ObjectNotFoundException();
         }
 
-        return TemplateDTO.prepare(entity);
+        return TemplateDTO.prepare(entity, false);
     }
 
     @Override
     public EntityListResponse<TemplateDTO> getTemplatesPaged(String name, UUID templateTypeId, boolean enrich,
                                                              Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = "";
+        String fetches = enrich ? " left join fetch el.templateType " : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -91,7 +91,7 @@ public class TemplateServiceImpl implements TemplateService {
 
         List<Template> items = idObjectService.getList(Template.class, fetches, cause, params, sortField, sortDir, entityListResponse.getStartRecord(), count);
         for (Template e : items) {
-            TemplateDTO el = TemplateDTO.prepare(e);
+            TemplateDTO el = TemplateDTO.prepare(e, enrich);
             entityListResponse.addData(el);
         }
 
