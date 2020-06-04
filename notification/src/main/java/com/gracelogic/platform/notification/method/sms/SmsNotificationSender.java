@@ -13,7 +13,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +26,12 @@ public class SmsNotificationSender implements NotificationSender {
     @Autowired
     private PropertyService propertyService;
 
-    private Logger logger = Logger.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private final String API_URL = "http://sms.ru/sms/send?api_id=%s&to=%s&text=%s%s";
 
     public NotificationSenderResult send(String source, String destination, Content content) {
-        logger.info(String.format("Sending sms to: %s", destination));
+        logger.info("Sending sms to: {}", destination);
 
         try {
             CloseableHttpClient httpClient = HttpClients.custom().build();

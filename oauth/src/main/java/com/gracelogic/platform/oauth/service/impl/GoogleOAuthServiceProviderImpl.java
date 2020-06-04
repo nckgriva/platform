@@ -9,7 +9,6 @@ import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
 import com.gracelogic.platform.oauth.service.OAuthUtils;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +20,6 @@ import java.util.Map;
 
 @Service("google")
 public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
-    private static Logger logger = Logger.getLogger(GoogleOAuthServiceProviderImpl.class);
 
     private String ACCESS_TOKEN_ENDPOINT = "https://accounts.google.com/o/oauth2/token";
     private String INFO_ENDPOINT = "https://www.googleapis.com/plus/v1/people/me?access_token=%s&fields=id,name,emails";

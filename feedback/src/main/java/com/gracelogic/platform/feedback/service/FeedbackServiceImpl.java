@@ -12,7 +12,8 @@ import com.gracelogic.platform.notification.service.NotificationService;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.db.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ import java.util.UUID;
 
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
-    private static Logger logger = Logger.getLogger(FeedbackServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(FeedbackServiceImpl.class);
 
     @Autowired
     private FeedbackDao feedbackDao;

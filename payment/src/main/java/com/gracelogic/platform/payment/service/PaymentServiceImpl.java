@@ -21,7 +21,8 @@ import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ import java.util.*;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
-    private static Logger logger = Logger.getLogger(PaymentServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(PaymentServiceImpl.class);
 
     @Autowired
     private IdObjectService idObjectService;
@@ -119,7 +120,7 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setPaymentState(ds.get(PaymentState.class, DataConstants.PaymentStates.ACTIVATED.getValue()));
             idObjectService.save(payment);
         } catch (Exception e) {
-            logger.fatal("Failed to transmit payment event", e);
+            logger.error("Failed to transmit payment event", e);
         }
 
         return payment;

@@ -16,7 +16,8 @@ import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
 import io.swagger.annotations.*;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -53,7 +54,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @Qualifier("filestorageMessageSource")
     private ResourceBundleMessageSource messageSource;
 
-    private static Logger logger = Logger.getLogger(FileStorageApi.class);
+    private static Logger logger = LoggerFactory.getLogger(FileStorageApi.class);
 
     @ApiOperation(
             value = "updateStoredFile",
@@ -71,23 +72,23 @@ public class FileStorageApi extends AbstractAuthorizedController {
         StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, id);
 
         if (storedFile == null) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
         }
 
         if (!filePermissionResolver.canWrite(storedFile, getUser())) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.FORBIDDEN", messageSource.getMessage("fileStorage.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new ErrorResponse("fileStorage.FORBIDDEN", messageSource.getMessage("fileStorage.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
         }
 
         try {
             fileStorageService.updateStoredFile(id, dto.getContent() != null ? dto.getContent().getInputStream() : null, dto.getContent() != null ? FileStorageUtils.getFileExtension(dto.getContent().getOriginalFilename()) : "", dto.getMeta());
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
         } catch (IOException e) {
             logger.error("Failed to update file", e);
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 
     @ApiOperation(
@@ -107,21 +108,21 @@ public class FileStorageApi extends AbstractAuthorizedController {
                                                HttpServletRequest request) {
         StoredFile storedFile = idObjectService.getObjectById(StoredFile.class, id);
         if (storedFile == null) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
         }
         if (!filePermissionResolver.canWrite(storedFile, getUser())) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.FORBIDDEN", messageSource.getMessage("fileStorage.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(new ErrorResponse("fileStorage.FORBIDDEN", messageSource.getMessage("fileStorage.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
         }
         try {
             fileStorageService.updateStoredFile(id, request.getInputStream(), filename, meta);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             logger.error("Failed to upload file", e);
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 
     @ApiOperation(
@@ -204,7 +205,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
 
         EntityListResponse<StoredFileDTO> storedFiles = fileStorageService.getStoredFilesPaged(referenceObjectId, dataAvailable, storeModeId != null ? Collections.singletonList(storeModeId) : null, enrich, length, page, start, sortField, sortDir);
 
-        return new ResponseEntity<EntityListResponse<StoredFileDTO>>(storedFiles, HttpStatus.OK);
+        return new ResponseEntity<>(storedFiles, HttpStatus.OK);
     }
 
     @ApiOperation(
@@ -223,9 +224,9 @@ public class FileStorageApi extends AbstractAuthorizedController {
                                         @ApiParam(name = "enrich", value = "enrich") @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich) {
         try {
             StoredFileDTO storedFileDTO = fileStorageService.getStoredFile(id, enrich);
-            return new ResponseEntity<StoredFileDTO>(storedFileDTO, HttpStatus.OK);
+            return new ResponseEntity<>(storedFileDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ErrorResponse("fileStorage.NOT_FOUND", messageSource.getMessage("fileStorage.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
 
         }
     }
@@ -245,12 +246,12 @@ public class FileStorageApi extends AbstractAuthorizedController {
     public ResponseEntity createStoredFile(@RequestBody StoredFileDTO dto) {
         try {
             StoredFile storedFile = fileStorageService.createStoredFile(dto.getStoreModeId(), dto.getReferenceObjectId(), null, null, dto.getMeta());
-            return new ResponseEntity<IDResponse>(new IDResponse(storedFile.getId()), HttpStatus.OK);
+            return new ResponseEntity<>(new IDResponse(storedFile.getId()), HttpStatus.OK);
         } catch (UnsupportedStoreModeException e) {
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.UNSUPPORTED_STORE_MODE", messageSource.getMessage("fileStorage.UNSUPPORTED_STORE_MODE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("fileStorage.UNSUPPORTED_STORE_MODE", messageSource.getMessage("fileStorage.UNSUPPORTED_STORE_MODE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (IOException e) {
             logger.error("Failed to create file", e);
-            return new ResponseEntity<ErrorResponse>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorResponse("fileStorage.IO_EXCEPTION", messageSource.getMessage("fileStorage.IO_EXCEPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
 }

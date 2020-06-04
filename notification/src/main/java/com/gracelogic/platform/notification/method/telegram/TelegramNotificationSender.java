@@ -6,7 +6,8 @@ import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationSender;
 import com.gracelogic.platform.property.service.PropertyService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.ApiContextInitializer;
@@ -23,7 +24,7 @@ public class TelegramNotificationSender implements NotificationSender {
 
     private TelegramBot telegramBot = null;
 
-    private static Logger logger = Logger.getLogger(TelegramNotificationSender.class);
+    private static Logger logger = LoggerFactory.getLogger(TelegramNotificationSender.class);
 
 
     @PostConstruct
