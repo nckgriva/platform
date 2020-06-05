@@ -119,7 +119,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public EntityListResponse<AccountDTO> getAccountsPaged(UUID accountTypeId, UUID currencyId, UUID ownerId, String externalIdentifier, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = enrich ? "left join fetch el.user left join fetch el.accountType left join fetch el.currency" : "";
+        String fetches = enrich ? " left join fetch el.accountType left join fetch el.currency" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
