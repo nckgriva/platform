@@ -76,7 +76,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public EntityListResponse<TransactionDTO> getTransactionsPaged(UUID ownerId, UUID accountId, Collection<UUID> transactionTypeIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = "left join fetch el.account acc left join fetch acc.user usr left join fetch el.transactionType ttp";
+        String fetches = "left join fetch el.account left join fetch el.transactionType ttp";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
         if (accountId != null) {
