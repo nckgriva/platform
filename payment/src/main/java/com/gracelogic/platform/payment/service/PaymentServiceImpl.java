@@ -181,7 +181,7 @@ public class PaymentServiceImpl implements PaymentService {
     public EntityListResponse<PaymentDTO> getPaymentsPaged(UUID userId, UUID accountId, UUID paymentSystemId, Collection<UUID> paymentStateIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
         String countFetches = "";
-        String fetches = enrich ? "left join fetch el.account acc left join fetch acc.currency crr left join fetch acc.user usr left join fetch el.paymentSystem pss left join fetch el.paymentState pst" : null;
+        String fetches = enrich ? "left join fetch el.account acc left join fetch acc.currency crr left join fetch el.paymentSystem pss left join fetch el.paymentState pst" : null;
         HashMap<String, Object> params = new HashMap<String, Object>();
         if (userId != null) {
             cause += "and el.user.id=:userId ";
