@@ -3,9 +3,15 @@ package com.gracelogic.platform.filestorage.service;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.gracelogic.platform.db.dto.EntityListResponse;
@@ -51,8 +57,11 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     private AmazonS3 getAmazonS3Client() {
         if (s3client == null) {
-            AWSCredentials credentials = new BasicAWSCredentials(propertyService.getPropertyValue("file-storage:s3_access_key"), propertyService.getPropertyValue("file-storage:s3_secret_key"));
-            s3client = new AmazonS3Client(credentials);
+            AWSCredentialsProvider doCred = new AWSStaticCredentialsProvider(new BasicAWSCredentials(propertyService.getPropertyValue("file-storage:s3_access_key"), propertyService.getPropertyValue("file-storage:s3_secret_key")));
+            s3client = AmazonS3ClientBuilder.standard()
+                    .withCredentials(doCred)
+                    .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(propertyService.getPropertyValue("file-storage:s3_endpoint"), propertyService.getPropertyValue("file-storage:s3_signing_region")))
+                    .build();
         }
         return s3client;
     }
@@ -172,9 +181,13 @@ public class FileStorageServiceImpl implements FileStorageService {
     private PutObjectResult saveDataViaS3(InputStream is, UUID storedFileId, UUID referenceObjectId, String extension) throws IOException {
         PutObjectResult result = null;
         try {
+            ObjectMetadata om = new ObjectMetadata();
+//            om.setContentLength(file.getSize());
+//            om.setContentType(file.getContentType());
+
             result = getAmazonS3Client().putObject(new PutObjectRequest(
-                    propertyService.getPropertyValue("file-storage:s3_bucket_prefix") + referenceObjectId,
-                    storedFileId.toString(), is, null));
+                    propertyService.getPropertyValue("file-storage:s3_bucket_prefix"),
+                    storedFileId.toString(), is, om).withCannedAcl(CannedAccessControlList.PublicRead));
         } catch (AmazonServiceException ase) {
             logger.error("Caught an AmazonServiceException, which " +
                     "means your request made it " +
