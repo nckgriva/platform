@@ -7,8 +7,12 @@ import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.oauth.service.AbstractOauthProvider;
 import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
 import com.gracelogic.platform.oauth.service.OAuthUtils;
+import com.gracelogic.platform.user.exception.CustomLocalizedException;
+import com.gracelogic.platform.user.exception.InvalidIdentifierException;
+import com.gracelogic.platform.user.exception.InvalidPassphraseException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +24,10 @@ import java.util.Map;
 
 @Service("google")
 public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
+    private static Logger logger = Logger.getLogger(GoogleOAuthServiceProviderImpl.class);
 
     private String ACCESS_TOKEN_ENDPOINT = "https://accounts.google.com/o/oauth2/token";
-    private String INFO_ENDPOINT = "https://www.googleapis.com/plus/v1/people/me?access_token=%s&fields=id,name,emails";
+    private String INFO_ENDPOINT = "https://www.googleapis.com/oauth2/v3/userinfo?access_token=%s";
     private String CLIENT_ID = null;
     private String CLIENT_SECRET = null;
 
@@ -31,41 +36,39 @@ public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implem
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User processAuthorization(String code, String redirectUri) {
+    public User processAuthorization(String code, String token, String redirectUri) throws InvalidIdentifierException, InvalidPassphraseException, CustomLocalizedException  {
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
             sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.GOOGLE.name());
 
             try {
                 sRedirectUri = URLEncoder.encode(sRedirectUri, "UTF-8");
+            } catch (Exception ignored) {
             }
-            catch (Exception ignored) {}
         }
 
-        Map response = OAuthUtils.postTextBodyReturnJson(ACCESS_TOKEN_ENDPOINT, String.format("code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=authorization_code", code, CLIENT_ID, CLIENT_SECRET, sRedirectUri));
-        if (response == null) {
-            return null;
+        Map response = null;
+
+        String accessToken = token;
+        if (accessToken == null) {
+            response = OAuthUtils.postTextBodyReturnJson(ACCESS_TOKEN_ENDPOINT, String.format("code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=authorization_code", code, CLIENT_ID, CLIENT_SECRET, sRedirectUri));
+            accessToken = response != null && response.get("access_token") != null ? (String) response.get("access_token") : null;
+            if (accessToken == null) {
+                return null;
+            }
         }
 
         OAuthDTO OAuthDTO = new OAuthDTO();
-        OAuthDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
+        OAuthDTO.setAccessToken(accessToken);
 
         response = OAuthUtils.getQueryReturnJson(String.format(INFO_ENDPOINT, OAuthDTO.getAccessToken()));
-        OAuthDTO.setUserId(response.get("id") != null ? (String) response.get("id") : null);
+        OAuthDTO.setUserId(response.get("sub") != null ? (String) response.get("sub") : null);
 
-        Map name = (Map) response.get("name");
-        if (name != null) {
-            OAuthDTO.setFirstName(name.get("givenName") != null ? (String) name.get("givenName") : null);
-            OAuthDTO.setLastName(name.get("familyName") != null ? (String) name.get("familyName") : null);
-        }
+        OAuthDTO.setFirstName(response.get("given_name") != null ? (String) response.get("given_name") : null);
+        OAuthDTO.setLastName(response.get("family_name") != null ? (String) response.get("family_name") : null);
+        OAuthDTO.setEmail(response.get("email") != null ? (String) response.get("email") : null);
 
-        Collection<Map> emails = (Collection<Map>) response.get("emails");
-        if (emails != null && !emails.isEmpty()) {
-            Map email = emails.iterator().next();
-            OAuthDTO.setEmail(email.get("value") != null ? (String) email.get("value") : null);
-        }
-
-        return processAuthorization(DataConstants.OAuthProviders.GOOGLE.getValue(), code, OAuthDTO);
+        return processAuthorization(DataConstants.OAuthProviders.GOOGLE.getValue(), OAuthDTO);
     }
 
     @Override
@@ -83,8 +86,8 @@ public class GoogleOAuthServiceProviderImpl extends AbstractOauthProvider implem
         }
         try {
             sRedirectUri = URLEncoder.encode(sRedirectUri, "UTF-8");
+        } catch (Exception ignored) {
         }
-        catch (Exception ignored) {}
 
         return sRedirectUri;
     }

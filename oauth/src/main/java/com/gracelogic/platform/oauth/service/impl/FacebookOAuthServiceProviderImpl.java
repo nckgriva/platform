@@ -7,9 +7,13 @@ import com.gracelogic.platform.oauth.model.AuthProvider;
 import com.gracelogic.platform.oauth.service.AbstractOauthProvider;
 import com.gracelogic.platform.oauth.service.OAuthServiceProvider;
 import com.gracelogic.platform.oauth.service.OAuthUtils;
+import com.gracelogic.platform.user.exception.CustomLocalizedException;
+import com.gracelogic.platform.user.exception.InvalidIdentifierException;
+import com.gracelogic.platform.user.exception.InvalidPassphraseException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +24,7 @@ import java.util.Map;
 
 @Service("facebook")
 public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
+    private static Logger logger = Logger.getLogger(FacebookOAuthServiceProviderImpl.class);
 
     private String ACCESS_TOKEN_ENDPOINT = "https://graph.facebook.com/oauth/access_token?client_id=%s&redirect_uri=%s&client_secret=%s&code=%s";
     private String INFO_ENDPOINT = "https://graph.facebook.com/me?access_token=%s&fields=id,name,last_name,first_name,email";
@@ -31,7 +36,7 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User processAuthorization(String code, String redirectUri) {
+    public User processAuthorization(String code, String token, String redirectUri) throws InvalidIdentifierException, InvalidPassphraseException, CustomLocalizedException {
         String sRedirectUri = redirectUri;
         if (StringUtils.isEmpty(redirectUri)) {
             sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.FACEBOOK.name());
@@ -41,13 +46,15 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
             }
             catch (Exception ignored) {}
         }
-        Map<Object, Object> accessTokenResponse = OAuthUtils.getQueryReturnJson(String.format(ACCESS_TOKEN_ENDPOINT, CLIENT_ID, sRedirectUri, CLIENT_SECRET, code));
-        String accessToken = null;
-        if (accessTokenResponse != null && accessTokenResponse.containsKey("access_token")) {
-            accessToken = (String) accessTokenResponse.get("access_token");
-        }
+        String accessToken = token;
         if (accessToken == null) {
-            return null;
+            Map<Object, Object> accessTokenResponse = OAuthUtils.getQueryReturnJson(String.format(ACCESS_TOKEN_ENDPOINT, CLIENT_ID, sRedirectUri, CLIENT_SECRET, code));
+            if (accessTokenResponse != null && accessTokenResponse.containsKey("access_token")) {
+                accessToken = (String) accessTokenResponse.get("access_token");
+            }
+            if (accessToken == null) {
+                return null;
+            }
         }
 
         OAuthDTO OAuthDTO = new OAuthDTO();
@@ -59,7 +66,7 @@ public class FacebookOAuthServiceProviderImpl extends AbstractOauthProvider impl
         OAuthDTO.setLastName(response.get("last_name") != null ? StringEscapeUtils.unescapeJava((String) response.get("last_name")) : null);
         OAuthDTO.setEmail(response.get("email") != null ? StringEscapeUtils.unescapeJava((String) response.get("email")) : null);
 
-        return processAuthorization(DataConstants.OAuthProviders.FACEBOOK.getValue(), code, OAuthDTO);
+        return processAuthorization(DataConstants.OAuthProviders.FACEBOOK.getValue(), OAuthDTO);
     }
 
     @Override
