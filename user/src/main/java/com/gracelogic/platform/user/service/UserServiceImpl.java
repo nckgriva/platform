@@ -609,10 +609,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EntityListResponse<UserDTO> getUsersPaged(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<UserDTO> getUsersPaged(String identifierValue, Boolean approved, Boolean blocked, boolean returnTotalCount,
+                                                     Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         sortField = translateUserSortFieldToNative(sortField);
 
-        int totalCount = userDao.getUsersCount(identifierValue, approved, blocked, fields);
+        int totalCount = returnTotalCount ? userDao.getUsersCount(identifierValue, approved, blocked, fields) : 0;
 
         EntityListResponse<UserDTO> entityListResponse = new EntityListResponse<UserDTO>(totalCount, count, page, start);
 

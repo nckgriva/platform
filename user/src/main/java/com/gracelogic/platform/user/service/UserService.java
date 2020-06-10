@@ -34,7 +34,7 @@ public interface UserService {
 
     void mergeUserIdentifiers(User user, boolean isNewUser, Collection<IdentifierDTO> identifierDTOList, boolean throwExceptionIfAlreadyAttached);
 
-    EntityListResponse<UserDTO> getUsersPaged(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<UserDTO> getUsersPaged(String identifierValue, Boolean approved, Boolean blocked, boolean returnTotalCount, Map<String, String> fields, boolean fetchRoles, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     UserDTO getUser(UUID userId, boolean fetchRoles) throws ObjectNotFoundException;
 

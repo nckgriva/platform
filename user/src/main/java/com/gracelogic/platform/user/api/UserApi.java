@@ -101,6 +101,7 @@ public class UserApi extends AbstractAuthorizedController {
     public ResponseEntity getUsers(@ApiParam(name = "identifierValue", value = "identifierValue") @RequestParam(value = "identifierValue", required = false) String identifierValue,
                                    @ApiParam(name = "approved", value = "approved") @RequestParam(value = "approved", required = false) Boolean approved,
                                    @ApiParam(name = "blocked", value = "blocked") @RequestParam(value = "blocked", required = false) Boolean blocked,
+                                   @ApiParam(name = "returnTotalCount", value = "returnTotalCount") @RequestParam(value = "returnTotalCount", defaultValue = "true") Boolean returnTotalCount,
                                    @ApiParam(name = "fetchRoles", value = "fetchRoles") @RequestParam(value = "fetchRoles", required = false) Boolean fetchRoles,
                                    @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                    @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
@@ -125,7 +126,7 @@ public class UserApi extends AbstractAuthorizedController {
             }
         }
 
-        EntityListResponse<UserDTO> users = userService.getUsersPaged(identifierValue, approved, blocked, fields, fetchRoles != null ? fetchRoles : false, length, null, start, sortField, sortDir);
+        EntityListResponse<UserDTO> users = userService.getUsersPaged(identifierValue, approved, blocked, returnTotalCount, fields, fetchRoles != null ? fetchRoles : false, length, null, start, sortField, sortDir);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
