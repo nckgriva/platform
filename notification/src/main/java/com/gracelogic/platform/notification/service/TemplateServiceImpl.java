@@ -67,7 +67,7 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public EntityListResponse<TemplateDTO> getTemplatesPaged(String name, UUID templateTypeId, boolean enrich,
+    public EntityListResponse<TemplateDTO> getTemplatesPaged(String name, UUID templateTypeId, boolean enrich, boolean calculate,
                                                              Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? " left join fetch el.templateType " : "";
         String countFetches = "";
@@ -85,7 +85,7 @@ public class TemplateServiceImpl implements TemplateService {
         }
 
 
-        int totalCount = idObjectService.getCount(Template.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(Template.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<TemplateDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 

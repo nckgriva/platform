@@ -48,15 +48,16 @@ public class TemplateApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getTemplates(@RequestParam(value = "name", required = false) String name,
-                                   @RequestParam(value = "templateTypeId", required = false) UUID templateTypeId,
-                                   @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
-                                   @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                   @RequestParam(value = "page", required = false) Integer page,
-                                   @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                   @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                   @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                       @RequestParam(value = "templateTypeId", required = false) UUID templateTypeId,
+                                       @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                       @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
+                                       @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                       @RequestParam(value = "page", required = false) Integer page,
+                                       @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                       @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                       @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<TemplateDTO> templates = templateService.getTemplatesPaged(name, templateTypeId, enrich, count, page, start, sortField, sortDir);
+        EntityListResponse<TemplateDTO> templates = templateService.getTemplatesPaged(name, templateTypeId, enrich, calculate, count, page, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<TemplateDTO>>(templates, HttpStatus.OK);
     }
 

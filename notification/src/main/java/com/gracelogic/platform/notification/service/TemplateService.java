@@ -18,7 +18,7 @@ public interface TemplateService {
 
     TemplateDTO getTemplate(UUID id) throws ObjectNotFoundException;
 
-    EntityListResponse<TemplateDTO> getTemplatesPaged(String name, UUID templateTypeId, boolean enrich,
+    EntityListResponse<TemplateDTO> getTemplatesPaged(String name, UUID templateTypeId, boolean enrich, boolean calculate,
                                                                  Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     Content buildFromTemplate(UUID templateTypeId, Locale locale, Map<String, String> params);

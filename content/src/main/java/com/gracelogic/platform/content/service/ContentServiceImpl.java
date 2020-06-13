@@ -159,7 +159,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public EntityListResponse<ElementDTO> getElementsPaged(String query, Collection<String> queryFields, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<ElementDTO> getElementsPaged(String query, Collection<String> queryFields, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, Integer count, Integer page, Integer start, boolean calculate, String sortField, String sortDir) {
         if (!StringUtils.isEmpty(sortField)) {
             //Т.к. в данном методе запрос используется нативный и требуется сохранить единообразие - транслируем название jpa полей в нативные sql
             if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
@@ -199,7 +199,7 @@ public class ContentServiceImpl implements ContentService {
 
 
 
-        int totalCount = contentDao.getElementsCount(query, queryFields, sectionIds, active, validOnDate, fields);
+        Integer totalCount = calculate ? contentDao.getElementsCount(query, queryFields, sectionIds, active, validOnDate, fields) : null;
 
         EntityListResponse<ElementDTO> entityListResponse = new EntityListResponse<ElementDTO>(totalCount, count, page, start);
 

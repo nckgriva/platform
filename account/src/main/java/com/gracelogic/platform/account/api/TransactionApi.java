@@ -48,6 +48,7 @@ public class TransactionApi extends AbstractAuthorizedController {
                                        @RequestParam(value = "accountId", required = false) UUID accountId,
                                        @RequestParam(value = "transactionTypeId", required = false) UUID transactionTypeId,
                                        @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                       @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
                                        @RequestParam(value = "startDate", required = false) String sStartDate,
                                        @RequestParam(value = "endDate", required = false) String sEndDate,
                                        @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
@@ -68,7 +69,7 @@ public class TransactionApi extends AbstractAuthorizedController {
         } catch (Exception ignored) {
         }
 
-        EntityListResponse<TransactionDTO> transactions = accountService.getTransactionsPaged(userId, accountId, transactionTypeId != null ? Collections.singletonList(transactionTypeId) : null, startDate, endDate, enrich, length, null, start, sortField, sortDir);
+        EntityListResponse<TransactionDTO> transactions = accountService.getTransactionsPaged(userId, accountId, transactionTypeId != null ? Collections.singletonList(transactionTypeId) : null, startDate, endDate, enrich, calculate, length, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<TransactionDTO>>(transactions, HttpStatus.OK);
     }
 }

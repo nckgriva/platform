@@ -680,7 +680,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EntityListResponse<RoleDTO> getRolesPaged(String code, String name, boolean fetchGrants, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<RoleDTO> getRolesPaged(String code, String name, boolean fetchGrants, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -695,7 +695,7 @@ public class UserServiceImpl implements UserService {
             cause += "and lower(el.name) like :name ";
         }
 
-        int totalCount = idObjectService.getCount(Role.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(Role.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<RoleDTO> entityListResponse = new EntityListResponse<RoleDTO>(totalCount, count, page, start);
 

@@ -89,16 +89,17 @@ public class ContentApi extends AbstractAuthorizedController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/element", method = RequestMethod.GET)
     public ResponseEntity<EntityListResponse<ElementDTO>> getElements(@ApiParam(name = "query", value = "query") @RequestParam(value = "query", required = false) String query,
-                                      @ApiParam(name = "queryFields", value = "queryFields") @RequestParam(value = "queryFields", required = false) String sQueryFields,
-                                      @ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
-                                      @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false) Boolean active,
-                                      @ApiParam(name = "validOnDate", value = "validOnDate") @RequestParam(value = "validOnDate", required = false) String sValidOnDate,
-                                      @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                      @ApiParam(name = "page", value = "page") @RequestParam(value = "page", required = false) Integer page,
-                                      @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
-                                      @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                      @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
-                                      @ApiParam(name = "fields", value = "fields") @RequestParam Map<String, String> allRequestParams) {
+                                                                      @ApiParam(name = "queryFields", value = "queryFields") @RequestParam(value = "queryFields", required = false) String sQueryFields,
+                                                                      @ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
+                                                                      @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false) Boolean active,
+                                                                      @ApiParam(name = "validOnDate", value = "validOnDate") @RequestParam(value = "validOnDate", required = false) String sValidOnDate,
+                                                                      @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                                                      @ApiParam(name = "calculate", value = "calculate") @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
+                                                                      @ApiParam(name = "page", value = "page") @RequestParam(value = "page", required = false) Integer page,
+                                                                      @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
+                                                                      @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                                                      @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                                                      @ApiParam(name = "fields", value = "fields") @RequestParam Map<String, String> allRequestParams) {
 
         Map<String, String> fields = new HashMap<>();
         if (allRequestParams != null) {
@@ -139,7 +140,7 @@ public class ContentApi extends AbstractAuthorizedController {
         }
 
         EntityListResponse<ElementDTO> elements = contentService.getElementsPaged(query, queryFields, sectionIds, active, validOnDate,
-                fields, length, page, start, sortField, sortDir);
+                fields, length, page, start, calculate, sortField, sortDir);
 
         return ResponseEntity.ok(elements);
     }

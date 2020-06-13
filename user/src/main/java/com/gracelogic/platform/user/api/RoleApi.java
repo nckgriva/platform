@@ -49,12 +49,13 @@ public class RoleApi extends AbstractAuthorizedController {
     public ResponseEntity getRoles(@RequestParam(value = "code", required = false) String code,
                                    @RequestParam(value = "name", required = false) String name,
                                    @RequestParam(value = "fetchGrants", required = false, defaultValue = "false") Boolean fetchGrants,
+                                   @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
                                    @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                    @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                    @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                    @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<RoleDTO> roles = userService.getRolesPaged(code, name, fetchGrants, count, null, start, sortField, sortDir);
+        EntityListResponse<RoleDTO> roles = userService.getRolesPaged(code, name, fetchGrants, calculate, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<RoleDTO>>(roles, HttpStatus.OK);
     }
 

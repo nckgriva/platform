@@ -55,7 +55,7 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public EntityListResponse<PropertyDTO> getPropertiesPaged(String name, Boolean visible, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<PropertyDTO> getPropertiesPaged(String name, Boolean visible, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -70,7 +70,7 @@ public class PropertyServiceImpl implements PropertyService {
             params.put("visible", visible);
         }
 
-        Integer totalCount = idObjectService.getCount(Property.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(Property.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<PropertyDTO> entityListResponse = new EntityListResponse<PropertyDTO>(totalCount, count, page, start);
 

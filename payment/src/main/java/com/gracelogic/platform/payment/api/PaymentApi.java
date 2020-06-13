@@ -67,6 +67,7 @@ public class PaymentApi extends AbstractAuthorizedController {
                                    @RequestParam(value = "paymentSystemId", required = false) UUID paymentSystemId,
                                    @RequestParam(value = "paymentStateId", required = false) UUID paymentStateId,
                                    @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                   @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
                                    @RequestParam(value = "startDate", required = false) String sStartDate,
                                    @RequestParam(value = "endDate", required = false) String sEndDate,
                                    @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
@@ -87,7 +88,7 @@ public class PaymentApi extends AbstractAuthorizedController {
         } catch (Exception ignored) {
         }
 
-        EntityListResponse<PaymentDTO> payments = paymentService.getPaymentsPaged(userId, accountId, paymentSystemId, paymentStateId != null ? Collections.singletonList(paymentStateId) : null, startDate, endDate, enrich, length, null, start, sortField, sortDir);
+        EntityListResponse<PaymentDTO> payments = paymentService.getPaymentsPaged(userId, accountId, paymentSystemId, paymentStateId != null ? Collections.singletonList(paymentStateId) : null, startDate, endDate, enrich, calculate, length, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<PaymentDTO>>(payments, HttpStatus.OK);
     }
 

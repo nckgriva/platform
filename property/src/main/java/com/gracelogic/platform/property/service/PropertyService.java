@@ -28,7 +28,7 @@ public interface PropertyService {
 
     void deleteProperty(UUID id);
 
-    EntityListResponse<PropertyDTO> getPropertiesPaged(String name, Boolean visible, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<PropertyDTO> getPropertiesPaged(String name, Boolean visible, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     HashMap<String, String> getPropertiesMap(List<String> names);
 }

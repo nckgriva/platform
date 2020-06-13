@@ -58,12 +58,13 @@ public class AccountApi extends AbstractAuthorizedController {
                                        @RequestParam(value = "userId", required = false) UUID userId,
                                        @RequestParam(value = "externalIdentifier", required = false) String externalIdentifier,
                                        @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                       @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
                                        @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                        @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
                                        @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                        @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<AccountDTO> docs = accountService.getAccountsPaged(accountTypeId, currencyId, userId, externalIdentifier, enrich, length, null, start, sortField, sortDir);
+        EntityListResponse<AccountDTO> docs = accountService.getAccountsPaged(accountTypeId, currencyId, userId, externalIdentifier, enrich, calculate, length, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<AccountDTO>>(docs, HttpStatus.OK);
     }
 

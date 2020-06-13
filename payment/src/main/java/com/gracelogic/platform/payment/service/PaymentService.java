@@ -29,5 +29,5 @@ public interface PaymentService {
 
     void restorePayment(UUID paymentId) throws AccountNotFoundException, IncorrectPaymentStateException, InsufficientFundsException;
 
-    EntityListResponse<PaymentDTO> getPaymentsPaged(UUID userId, UUID accountId, UUID paymentSystemId, Collection<UUID> paymentStateIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<PaymentDTO> getPaymentsPaged(UUID userId, UUID accountId, UUID paymentSystemId, Collection<UUID> paymentStateIds, Date startDate, Date endDate, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir);
 }

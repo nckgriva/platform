@@ -178,7 +178,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public EntityListResponse<PaymentDTO> getPaymentsPaged(UUID userId, UUID accountId, UUID paymentSystemId, Collection<UUID> paymentStateIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<PaymentDTO> getPaymentsPaged(UUID userId, UUID accountId, UUID paymentSystemId, Collection<UUID> paymentStateIds, Date startDate, Date endDate, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
         String countFetches = "";
         String fetches = enrich ? "left join fetch el.account acc left join fetch acc.currency crr left join fetch el.paymentSystem pss left join fetch el.paymentState pst" : null;
@@ -208,7 +208,7 @@ public class PaymentServiceImpl implements PaymentService {
             params.put("endDate", endDate);
         }
 
-        int totalCount = idObjectService.getCount(Payment.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(Payment.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<PaymentDTO> entityListResponse = new EntityListResponse<PaymentDTO>(totalCount, count, page, start);
 

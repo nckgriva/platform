@@ -50,12 +50,13 @@ public class PropertyApi extends AbstractAuthorizedController {
     public ResponseEntity getProperties(@RequestParam(value = "name", required = false) String name,
                                         @RequestParam(value = "visible", required = false) Boolean visible,
                                         @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                        @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
                                         @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                         @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                         @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                         @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<PropertyDTO> properties = propertyService.getPropertiesPaged(name, visible, enrich, count, null, start, sortField, sortDir);
+        EntityListResponse<PropertyDTO> properties = propertyService.getPropertiesPaged(name, visible, enrich, calculate, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<PropertyDTO>>(properties, HttpStatus.OK);
 
     }

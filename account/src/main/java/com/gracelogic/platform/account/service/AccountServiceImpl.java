@@ -75,7 +75,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public EntityListResponse<TransactionDTO> getTransactionsPaged(UUID ownerId, UUID accountId, Collection<UUID> transactionTypeIds, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<TransactionDTO> getTransactionsPaged(UUID ownerId, UUID accountId, Collection<UUID> transactionTypeIds, Date startDate, Date endDate, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "left join fetch el.account left join fetch el.transactionType ttp";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();
@@ -100,7 +100,7 @@ public class AccountServiceImpl implements AccountService {
             params.put("transactionTypeIds", transactionTypeIds);
         }
 
-        int totalCount = idObjectService.getCount(Transaction.class, null, null, cause, params);
+        Integer totalCount = calculate ?idObjectService.getCount(Transaction.class, null, null, cause, params) : null;
 
         EntityListResponse<TransactionDTO> entityListResponse = new EntityListResponse<TransactionDTO>(totalCount, count, page, start);
 
@@ -118,7 +118,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public EntityListResponse<AccountDTO> getAccountsPaged(UUID accountTypeId, UUID currencyId, UUID ownerId, String externalIdentifier, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<AccountDTO> getAccountsPaged(UUID accountTypeId, UUID currencyId, UUID ownerId, String externalIdentifier, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? " left join fetch el.accountType left join fetch el.currency" : "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -144,7 +144,7 @@ public class AccountServiceImpl implements AccountService {
             params.put("ownerId", ownerId);
         }
 
-        int totalCount = idObjectService.getCount(Account.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(Account.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<AccountDTO> entityListResponse = new EntityListResponse<AccountDTO>(totalCount, count, page, start);
 
