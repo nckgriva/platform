@@ -23,4 +23,5 @@ public class Path extends PlatformPath {
 
     public static final String API_PASSPHRASE_TYPE = PLATFORM_API + "/passphrase-type";
 
+    public static final String API_TOKEN = PLATFORM_API + "/token";
 }
