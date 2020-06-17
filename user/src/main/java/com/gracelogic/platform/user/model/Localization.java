@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = JPAProperties.TABLE_PREFIX + "GRANT")
-public class Grant extends IdObject<UUID> implements Dictionary {
+@Table(name = JPAProperties.TABLE_PREFIX + "LOCALIZATION")
+public class Localization extends IdObject<UUID> implements Dictionary {
     @Id
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
