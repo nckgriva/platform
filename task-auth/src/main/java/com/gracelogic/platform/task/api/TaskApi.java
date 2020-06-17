@@ -62,7 +62,8 @@ public class TaskApi extends AbstractAuthorizedController {
                                                @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                                @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                                @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                               @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                               @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                               @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
 
         Date startDate = null;
         Date endDate = null;
@@ -79,7 +80,7 @@ public class TaskApi extends AbstractAuthorizedController {
 
         EntityListResponse<TaskExecutionLogDTO> tels =
                 taskService.getTaskExecutionLogsPaged(taskId, methodId != null ? Collections.singletonList(methodId) : null, stateId != null ? Collections.singletonList(stateId) : null, parameter, startDate,
-                        endDate, enrich, count, null, start, sortField, sortDir);
+                        endDate, enrich, count, null, start, sortField, sortDir, calculate);
         return new ResponseEntity<EntityListResponse<TaskExecutionLogDTO>>(tels, HttpStatus.OK);
     }
 
@@ -102,9 +103,10 @@ public class TaskApi extends AbstractAuthorizedController {
                                    @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                    @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                    @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                   @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                   @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                   @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
 
-        EntityListResponse<TaskDTO> tasks = taskService.getTasksPaged(name, serviceName, active, enrich, count, null, start, sortField, sortDir);
+        EntityListResponse<TaskDTO> tasks = taskService.getTasksPaged(name, serviceName, active, enrich, count, null, start, sortField, sortDir, calculate);
         return new ResponseEntity<EntityListResponse<TaskDTO>>(tasks, HttpStatus.OK);
     }
 

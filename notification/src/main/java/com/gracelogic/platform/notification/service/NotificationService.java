@@ -17,5 +17,5 @@ public interface NotificationService {
     Notification saveNotification(Notification notification);
 
     EntityListResponse<NotificationDTO> getNotificationsPaged(String name, String destination, UUID notificationMethodId, UUID notificationStateId, boolean enrich,
-                                                              Integer count, Integer page, Integer start, String sortField, String sortDir);
+                                                              Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate);
 }

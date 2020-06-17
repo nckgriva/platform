@@ -216,7 +216,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public EntityListResponse<StoredFileDTO> getStoredFilesPaged(UUID referenceObjectId, Boolean dataAvailable, Collection<UUID> storeModeIds, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<StoredFileDTO> getStoredFilesPaged(UUID referenceObjectId, Boolean dataAvailable, Collection<UUID> storeModeIds, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate) {
         String fetches = "";
         if (enrich) {
             fetches += "left join fetch el.storeMode ";
@@ -238,7 +238,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             params.put("storeModeIds", storeModeIds);
         }
 
-        int totalCount = idObjectService.getCount(StoredFile.class, null, null, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(StoredFile.class, null, null, cause, params) : null;
 
         EntityListResponse<StoredFileDTO> entityListResponse = new EntityListResponse<StoredFileDTO>(totalCount, count, page, start);
 

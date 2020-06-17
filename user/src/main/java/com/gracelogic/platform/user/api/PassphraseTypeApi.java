@@ -58,12 +58,13 @@ public class PassphraseTypeApi {
     @ResponseBody
     public ResponseEntity getPassphraseTypes(@RequestParam(value = "name", required = false) String name,
                                              @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                             @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate,
                                              @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                              @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                              @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                              @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
         try {
-            EntityListResponse<PassphraseTypeDTO> dto = userService.getPassphraseTypePaged(name, enrich, count, null, start, sortField, sortDir);
+            EntityListResponse<PassphraseTypeDTO> dto = userService.getPassphraseTypePaged(name, enrich, calculate, count, null, start, sortField, sortDir);
             return new ResponseEntity<EntityListResponse<PassphraseTypeDTO>>(dto, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();

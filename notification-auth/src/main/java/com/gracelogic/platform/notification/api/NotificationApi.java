@@ -54,9 +54,10 @@ public class NotificationApi extends AbstractAuthorizedController {
                                            @RequestParam(value = "page", required = false) Integer page,
                                            @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                            @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                           @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                           @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                           @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
 
-        EntityListResponse<NotificationDTO> notifications = notificationService.getNotificationsPaged(name, destination, notificationMethodId, notificationStateId, enrich, count, null, start, sortField, sortDir);
+        EntityListResponse<NotificationDTO> notifications = notificationService.getNotificationsPaged(name, destination, notificationMethodId, notificationStateId, enrich, count, null, start, sortField, sortDir, calculate);
         return new ResponseEntity<EntityListResponse<NotificationDTO>>(notifications, HttpStatus.OK);
     }
 }

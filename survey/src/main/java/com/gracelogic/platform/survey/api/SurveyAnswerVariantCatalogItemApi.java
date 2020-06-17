@@ -57,8 +57,9 @@ public class SurveyAnswerVariantCatalogItemApi {
                                           @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                           @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                           @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                          @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
-        EntityListResponse<SurveyAnswerVariantCatalogItemDTO> properties = surveyService.getCatalogItemsPaged(catalogId, text, count, null, start, sortField, sortDir);
+                                          @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                          @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
+        EntityListResponse<SurveyAnswerVariantCatalogItemDTO> properties = surveyService.getCatalogItemsPaged(catalogId, text, count, null, start, sortField, sortDir, calculate);
         return new ResponseEntity<>(properties, HttpStatus.OK);
     }
 

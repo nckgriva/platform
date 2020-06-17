@@ -249,11 +249,12 @@ public class SurveyApi extends AbstractAuthorizedController {
                                      @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                      @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                      @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                     @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                     @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                     @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
 
 
         EntityListResponse<SurveyDTO> properties = surveyService.getSurveysPaged(name, getExpired,
-                count, null, start, sortField, sortDir);
+                count, null, start, sortField, sortDir, calculate);
         return new ResponseEntity<EntityListResponse<SurveyDTO>>(properties, HttpStatus.OK);
     }
 

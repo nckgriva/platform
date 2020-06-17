@@ -134,8 +134,9 @@ public class ProductApi extends AbstractAuthorizedController {
             @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
             @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
             @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-            @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
-        EntityListResponse<ProductDTO> docs = marketService.getProductsPaged(name, productTypeId, active, enrich, length, null, start, sortField, sortDir);
+            @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+            @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
+        EntityListResponse<ProductDTO> docs = marketService.getProductsPaged(name, productTypeId, active, enrich, length, null, start, sortField, sortDir, calculate);
         return new ResponseEntity<EntityListResponse<ProductDTO>>(docs, HttpStatus.OK);
     }
 }

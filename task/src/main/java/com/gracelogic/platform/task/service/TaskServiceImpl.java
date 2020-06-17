@@ -191,7 +191,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public EntityListResponse<TaskDTO> getTasksPaged(String name, String serviceName, Boolean active, boolean enrich,
-                                                     Integer count, Integer page, Integer start, String sortField, String sortDir) {
+                                                     Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate) {
         String fetches = "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -212,7 +212,7 @@ public class TaskServiceImpl implements TaskService {
             params.put("active", active);
         }
 
-        int totalCount = idObjectService.getCount(Task.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(Task.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<TaskDTO> entityListResponse = new EntityListResponse<TaskDTO>(totalCount, count, page, start);
 
@@ -227,7 +227,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public EntityListResponse<TaskExecutionLogDTO> getTaskExecutionLogsPaged(UUID taskId, Collection<UUID> methodIds, Collection<UUID> stateIds, String parameter, Date startDate, Date endDate,
-                                                                             boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+                                                                             boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate) {
         String fetches = enrich ? "left join fetch el.task left join fetch el.method left join fetch el.state" : "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -261,7 +261,7 @@ public class TaskServiceImpl implements TaskService {
             params.put("endDate", endDate);
         }
 
-        int totalCount = idObjectService.getCount(TaskExecutionLog.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(TaskExecutionLog.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<TaskExecutionLogDTO> entityListResponse = new EntityListResponse<TaskExecutionLogDTO>(totalCount, count, page, start);
 

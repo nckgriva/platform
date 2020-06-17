@@ -1138,7 +1138,7 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyDTO> getSurveysPaged(String name, Boolean getExpired, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<SurveyDTO> getSurveysPaged(String name, Boolean getExpired, Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
@@ -1153,7 +1153,7 @@ public class SurveyServiceImpl implements SurveyService {
             cause += "and el.expirationDate < :dateNow ";
         }
 
-        int totalCount = idObjectService.getCount(Survey.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(Survey.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<SurveyDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
@@ -1297,7 +1297,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Override
     public EntityListResponse<SurveyAnswerVariantDTO> getSurveyAnswerVariantsPaged(UUID surveyQuestionId, String description, Integer count, Integer page,
-                                                                                   Integer start, String sortField, String sortDir) {
+                                                                                   Integer start, String sortField, String sortDir, boolean calculate) {
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
 
@@ -1310,7 +1310,7 @@ public class SurveyServiceImpl implements SurveyService {
             cause += "and lower(el.description) like :description ";
         }
 
-        int totalCount = idObjectService.getCount(SurveyAnswerVariant.class, null, null, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(SurveyAnswerVariant.class, null, null, cause, params) : null;
 
         EntityListResponse<SurveyAnswerVariantDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
@@ -1360,7 +1360,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Override
     public EntityListResponse<SurveyPageDTO> getSurveyPagesPaged(UUID surveyId, String description, Integer count, Integer page,
-                                                                 Integer start, String sortField, String sortDir) {
+                                                                 Integer start, String sortField, String sortDir, boolean calculate) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
@@ -1375,7 +1375,7 @@ public class SurveyServiceImpl implements SurveyService {
             cause += "and lower(el.description) like :description ";
         }
 
-        int totalCount = idObjectService.getCount(SurveyPage.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(SurveyPage.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<SurveyPageDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
@@ -1422,7 +1422,7 @@ public class SurveyServiceImpl implements SurveyService {
     public EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId,
                                                                          Set<UUID> questionTypes, String text,
                                                                          boolean withVariants, Integer count, Integer page,
-                                                                         Integer start, String sortField, String sortDir) {
+                                                                         Integer start, String sortField, String sortDir, boolean calculate) {
         String countFetches = "left join el.surveyPage sp ";
         String fetches = "left join el.surveyPage sp left join fetch el.catalog";
         String cause = "1=1 ";
@@ -1448,7 +1448,7 @@ public class SurveyServiceImpl implements SurveyService {
             cause += "and el.surveyQuestionType.id in (:questionTypes) ";
         }
 
-        int totalCount = idObjectService.getCount(SurveyQuestion.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(SurveyQuestion.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<SurveyQuestionDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
@@ -1555,7 +1555,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Override
     public EntityListResponse<SurveyLogicTriggerDTO> getSurveyLogicTriggersPaged(UUID surveyQuestionId, UUID surveyPageId, UUID surveyAnswerVariantId, Integer count, Integer page,
-                                                                                 Integer start, String sortField, String sortDir) {
+                                                                                 Integer start, String sortField, String sortDir, boolean calculate) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
@@ -1573,7 +1573,7 @@ public class SurveyServiceImpl implements SurveyService {
             params.put("surveyAnswerVariantId", surveyAnswerVariantId);
         }
 
-        int totalCount = idObjectService.getCount(SurveyLogicTrigger.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(SurveyLogicTrigger.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<SurveyLogicTriggerDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
@@ -1629,7 +1629,7 @@ public class SurveyServiceImpl implements SurveyService {
     @Override
     public EntityListResponse<SurveySessionDTO> getSurveySessionsPaged(UUID surveyId, UUID userId, String lastVisitIP,
                                                                        Integer count, Integer page, Integer start,
-                                                                       String sortField, String sortDir) {
+                                                                       String sortField, String sortDir, boolean calculate) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
@@ -1649,7 +1649,7 @@ public class SurveyServiceImpl implements SurveyService {
             params.put("surveyId", surveyId);
         }
 
-        int totalCount = idObjectService.getCount(SurveySession.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(SurveySession.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<SurveySessionDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
@@ -1699,7 +1699,7 @@ public class SurveyServiceImpl implements SurveyService {
     @Override
     public EntityListResponse<SurveyQuestionAnswerDTO> getSurveyQuestionAnswersPaged(UUID surveySessionId,
                                                                                      Integer count, Integer page, Integer start,
-                                                                                     String sortField, String sortDir) {
+                                                                                     String sortField, String sortDir, boolean calculate) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
@@ -1708,7 +1708,7 @@ public class SurveyServiceImpl implements SurveyService {
             cause += String.format("and el.surveySession = '%s' ", surveySessionId);
         }
 
-        int totalCount = idObjectService.getCount(SurveySession.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(SurveySession.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<SurveyQuestionAnswerDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
@@ -1896,7 +1896,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Override
     public EntityListResponse<SurveyAnswerVariantCatalogDTO> getCatalogsPaged(String name, Integer count, Integer page,
-                                                                              Integer start, String sortField, String sortDir) {
+                                                                              Integer start, String sortField, String sortDir, boolean calculate) {
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
 
@@ -1905,7 +1905,7 @@ public class SurveyServiceImpl implements SurveyService {
             cause += "and lower(el.name) like :name ";
         }
 
-        int totalCount = idObjectService.getCount(SurveyAnswerVariantCatalog.class, null, null, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(SurveyAnswerVariantCatalog.class, null, null, cause, params) : null;
 
         EntityListResponse<SurveyAnswerVariantCatalogDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 
@@ -1985,7 +1985,7 @@ public class SurveyServiceImpl implements SurveyService {
 
     @Override
     public EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getCatalogItemsPaged(UUID catalogId, String text, Integer count, Integer page,
-                                                                                      Integer start, String sortField, String sortDir) {
+                                                                                      Integer start, String sortField, String sortDir, boolean calculate) {
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
 
@@ -1999,7 +1999,7 @@ public class SurveyServiceImpl implements SurveyService {
             cause += "and lower(el.text) like :text ";
         }
 
-        int totalCount = idObjectService.getCount(SurveyAnswerVariantCatalogItem.class, null, null, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(SurveyAnswerVariantCatalogItem.class, null, null, cause, params) : null;
 
         EntityListResponse<SurveyAnswerVariantCatalogItemDTO> entityListResponse = new EntityListResponse<>(totalCount, count, page, start);
 

@@ -690,7 +690,7 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, Double totalAmountGreatThan, boolean onlyEmptyParentOrder, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, Double totalAmountGreatThan, boolean onlyEmptyParentOrder, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate) {
         String fetches = enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -721,7 +721,7 @@ public class MarketServiceImpl implements MarketService {
             cause += "and el.parentOrder is null ";
         }
 
-        int totalCount = idObjectService.getCount(Order.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(Order.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<OrderDTO> entityListResponse = new EntityListResponse<OrderDTO>(totalCount, count, page, start);
 
@@ -772,7 +772,7 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public EntityListResponse<ProductDTO> getProductsPaged(String name, UUID productTypeId, Boolean active, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<ProductDTO> getProductsPaged(String name, UUID productTypeId, Boolean active, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate) {
         String fetches = enrich ? "left join fetch el.productType left join fetch el.currency left join fetch el.ownershipType" : "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -790,7 +790,7 @@ public class MarketServiceImpl implements MarketService {
             params.put("active", active);
             cause += "and el.active = :active ";
         }
-        int totalCount = idObjectService.getCount(Product.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(Product.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<ProductDTO> entityListResponse = new EntityListResponse<ProductDTO>(totalCount, count, page, start);
 
@@ -867,7 +867,7 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public EntityListResponse<DiscountDTO> getDiscountsPaged(String name, UUID usedForOrderId, UUID discountTypeId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<DiscountDTO> getDiscountsPaged(String name, UUID usedForOrderId, UUID discountTypeId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate) {
         String fetches = enrich ? "left join fetch el.discountType left join fetch el.currency" : "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -888,7 +888,7 @@ public class MarketServiceImpl implements MarketService {
             params.put("discountTypeId", discountTypeId);
         }
 
-        int totalCount = idObjectService.getCount(Discount.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(Discount.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<DiscountDTO> entityListResponse = new EntityListResponse<DiscountDTO>(totalCount, count, page, start);
 

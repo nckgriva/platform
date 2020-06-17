@@ -53,6 +53,7 @@ public class SessionApi extends AbstractAuthorizedController {
                                         @RequestParam(value = "startDate", required = false) String sStartDate,
                                         @RequestParam(value = "endDate", required = false) String sEndDate,
                                         @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                        @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate,
                                         @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                         @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                         @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
@@ -71,7 +72,7 @@ public class SessionApi extends AbstractAuthorizedController {
         } catch (Exception ignored) {
         }
 
-        EntityListResponse<UserSessionDTO> sessions = userService.getSessionsPaged(userId, authIp, startDate, endDate, enrich, count, null, start, sortField, sortDir);
+        EntityListResponse<UserSessionDTO> sessions = userService.getSessionsPaged(userId, authIp, startDate, endDate, enrich, calculate, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<UserSessionDTO>>(sessions, HttpStatus.OK);
 
     }

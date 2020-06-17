@@ -795,7 +795,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EntityListResponse<UserSessionDTO> getSessionsPaged(UUID userId, String authIp, Date startDate, Date endDate, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<UserSessionDTO> getSessionsPaged(UUID userId, String authIp, Date startDate, Date endDate, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? "left join fetch el.user" : "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -821,7 +821,7 @@ public class UserServiceImpl implements UserService {
             params.put("endDate", endDate);
         }
 
-        int totalCount = idObjectService.getCount(UserSession.class, null, countFetches, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(UserSession.class, null, countFetches, cause, params) : null;
 
         EntityListResponse<UserSessionDTO> entityListResponse = new EntityListResponse<UserSessionDTO>(totalCount, count, page, start);
 
@@ -1195,7 +1195,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EntityListResponse<PassphraseTypeDTO> getPassphraseTypePaged(String name, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<PassphraseTypeDTO> getPassphraseTypePaged(String name, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
         if (!StringUtils.isEmpty(name)) {
@@ -1203,7 +1203,7 @@ public class UserServiceImpl implements UserService {
             cause += " and lower(el.name) like :name";
         }
 
-        int totalCount = idObjectService.getCount(PassphraseType.class, null, null, cause, params);
+        Integer totalCount = calculate ? idObjectService.getCount(PassphraseType.class, null, null, cause, params) : null;
 
         EntityListResponse<PassphraseTypeDTO> entityListResponse = new EntityListResponse<PassphraseTypeDTO>(totalCount, count, page, start);
 

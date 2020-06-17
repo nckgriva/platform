@@ -62,40 +62,41 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
                                              @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                              @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                              @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                             @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                             @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                             @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
 
 
-        EntityListResponse<SurveyQuestionDTO> properties = surveyService.getSurveyQuestionsPaged(surveyId, surveyPageId, null, text, withVariants, count, null, start, sortField, sortDir);
+        EntityListResponse<SurveyQuestionDTO> properties = surveyService.getSurveyQuestionsPaged(surveyId, surveyPageId, null, text, withVariants, count, null, start, sortField, sortDir, calculate);
         return new ResponseEntity<EntityListResponse<SurveyQuestionDTO>>(properties, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getSurveyQuestions",
-            notes = "Get list of survey questions",
-            response = EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
-    @PreAuthorize("hasAuthority('SURVEY:SHOW')")
-    @RequestMapping(method = RequestMethod.POST)
-    @ResponseBody
-    public ResponseEntity getSurveyQuestions(@RequestBody GetSurveyQuestionsRequest request) {
-
-        if (request.getWithVariants() == null) request.setWithVariants(false);
-        if (request.getStart() == null) request.setStart(0);
-        if (request.getCount() == null) request.setStart(10);
-        if (request.getSortField() == null) request.setSortField("el.created");
-        if (request.getSortDir() == null) request.setSortDir("desc");
-
-        EntityListResponse<SurveyQuestionDTO> properties =
-                surveyService.getSurveyQuestionsPaged(request.getSurveyId(), request.getSurveyPageId(),
-                        request.getSurveyQuestionTypes(),
-                        request.getText(), request.getWithVariants(), request.getCount(), null,
-                        request.getStart(), request.getSortField(), request.getSortDir());
-        return new ResponseEntity<>(properties, HttpStatus.OK);
-    }
+//    @ApiOperation(
+//            value = "getSurveyQuestions",
+//            notes = "Get list of survey questions",
+//            response = EntityListResponse.class
+//    )
+//    @ApiResponses({
+//            @ApiResponse(code = 200, message = "OK"),
+//            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+//            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
+//    @PreAuthorize("hasAuthority('SURVEY:SHOW')")
+//    @RequestMapping(method = RequestMethod.POST)
+//    @ResponseBody
+//    public ResponseEntity getSurveyQuestions(@RequestBody GetSurveyQuestionsRequest request) {
+//
+//        if (request.getWithVariants() == null) request.setWithVariants(false);
+//        if (request.getStart() == null) request.setStart(0);
+//        if (request.getCount() == null) request.setStart(10);
+//        if (request.getSortField() == null) request.setSortField("el.created");
+//        if (request.getSortDir() == null) request.setSortDir("desc");
+//
+//        EntityListResponse<SurveyQuestionDTO> properties =
+//                surveyService.getSurveyQuestionsPaged(request.getSurveyId(), request.getSurveyPageId(),
+//                        request.getSurveyQuestionTypes(),
+//                        request.getText(), request.getWithVariants(), request.getCount(), null,
+//                        request.getStart(), request.getSortField(), request.getSortDir());
+//        return new ResponseEntity<>(properties, HttpStatus.OK);
+//    }
 
     @ApiOperation(
             value = "getSurveyQuestion",

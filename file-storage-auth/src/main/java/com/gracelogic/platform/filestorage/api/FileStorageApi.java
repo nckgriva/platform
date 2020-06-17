@@ -201,9 +201,10 @@ public class FileStorageApi extends AbstractAuthorizedController {
                                          @ApiParam(name = "page", value = "page") @RequestParam(value = "page", required = false) Integer page,
                                          @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
                                          @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                         @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+                                         @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                         @ApiParam(name = "calculate", value = "calculate") @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
 
-        EntityListResponse<StoredFileDTO> storedFiles = fileStorageService.getStoredFilesPaged(referenceObjectId, dataAvailable, storeModeId != null ? Collections.singletonList(storeModeId) : null, enrich, length, page, start, sortField, sortDir);
+        EntityListResponse<StoredFileDTO> storedFiles = fileStorageService.getStoredFilesPaged(referenceObjectId, dataAvailable, storeModeId != null ? Collections.singletonList(storeModeId) : null, enrich, length, page, start, sortField, sortDir, calculate);
 
         return new ResponseEntity<>(storedFiles, HttpStatus.OK);
     }
