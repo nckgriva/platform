@@ -58,12 +58,12 @@ public class SurveyAnswerVariantCatalogApi {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getCatalogs(@RequestParam(value = "name", required = false) String name,
+                                      @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate,
                                       @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                       @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                       @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                      @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
-                                      @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
-        EntityListResponse<SurveyAnswerVariantCatalogDTO> properties = surveyService.getCatalogsPaged(name, count, null, start, sortField, sortDir, calculate);
+                                      @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+        EntityListResponse<SurveyAnswerVariantCatalogDTO> properties = surveyService.getCatalogsPaged(name, calculate, count, null, start, sortField, sortDir);
         return new ResponseEntity<>(properties, HttpStatus.OK);
     }
 

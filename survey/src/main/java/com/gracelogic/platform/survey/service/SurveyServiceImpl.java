@@ -1138,7 +1138,7 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyDTO> getSurveysPaged(String name, Boolean getExpired, Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate) {
+    public EntityListResponse<SurveyDTO> getSurveysPaged(String name, Boolean getExpired, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
@@ -1296,8 +1296,8 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyAnswerVariantDTO> getSurveyAnswerVariantsPaged(UUID surveyQuestionId, String description, Integer count, Integer page,
-                                                                                   Integer start, String sortField, String sortDir, boolean calculate) {
+    public EntityListResponse<SurveyAnswerVariantDTO> getSurveyAnswerVariantsPaged(UUID surveyQuestionId, String description, boolean calculate, Integer count, Integer page,
+                                                                                   Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
 
@@ -1359,8 +1359,8 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyPageDTO> getSurveyPagesPaged(UUID surveyId, String description, Integer count, Integer page,
-                                                                 Integer start, String sortField, String sortDir, boolean calculate) {
+    public EntityListResponse<SurveyPageDTO> getSurveyPagesPaged(UUID surveyId, String description, boolean calculate, Integer count, Integer page,
+                                                                 Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
@@ -1421,8 +1421,8 @@ public class SurveyServiceImpl implements SurveyService {
     @Override
     public EntityListResponse<SurveyQuestionDTO> getSurveyQuestionsPaged(UUID surveyId, UUID surveyPageId,
                                                                          Set<UUID> questionTypes, String text,
-                                                                         boolean withVariants, Integer count, Integer page,
-                                                                         Integer start, String sortField, String sortDir, boolean calculate) {
+                                                                         boolean withVariants, boolean calculate, Integer count, Integer page,
+                                                                         Integer start, String sortField, String sortDir) {
         String countFetches = "left join el.surveyPage sp ";
         String fetches = "left join el.surveyPage sp left join fetch el.catalog";
         String cause = "1=1 ";
@@ -1554,8 +1554,8 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyLogicTriggerDTO> getSurveyLogicTriggersPaged(UUID surveyQuestionId, UUID surveyPageId, UUID surveyAnswerVariantId, Integer count, Integer page,
-                                                                                 Integer start, String sortField, String sortDir, boolean calculate) {
+    public EntityListResponse<SurveyLogicTriggerDTO> getSurveyLogicTriggersPaged(UUID surveyQuestionId, UUID surveyPageId, UUID surveyAnswerVariantId, boolean calculate, Integer count, Integer page,
+                                                                                 Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
@@ -1627,9 +1627,8 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveySessionDTO> getSurveySessionsPaged(UUID surveyId, UUID userId, String lastVisitIP,
-                                                                       Integer count, Integer page, Integer start,
-                                                                       String sortField, String sortDir, boolean calculate) {
+    public EntityListResponse<SurveySessionDTO> getSurveySessionsPaged(UUID surveyId, UUID userId, String lastVisitIP, boolean calculate,
+                                                                       Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
@@ -1697,9 +1696,9 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyQuestionAnswerDTO> getSurveyQuestionAnswersPaged(UUID surveySessionId,
+    public EntityListResponse<SurveyQuestionAnswerDTO> getSurveyQuestionAnswersPaged(UUID surveySessionId, boolean calculate,
                                                                                      Integer count, Integer page, Integer start,
-                                                                                     String sortField, String sortDir, boolean calculate) {
+                                                                                     String sortField, String sortDir) {
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
@@ -1895,8 +1894,8 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyAnswerVariantCatalogDTO> getCatalogsPaged(String name, Integer count, Integer page,
-                                                                              Integer start, String sortField, String sortDir, boolean calculate) {
+    public EntityListResponse<SurveyAnswerVariantCatalogDTO> getCatalogsPaged(String name, boolean calculate, Integer count, Integer page,
+                                                                              Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
 
@@ -1984,8 +1983,8 @@ public class SurveyServiceImpl implements SurveyService {
     }
 
     @Override
-    public EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getCatalogItemsPaged(UUID catalogId, String text, Integer count, Integer page,
-                                                                                      Integer start, String sortField, String sortDir, boolean calculate) {
+    public EntityListResponse<SurveyAnswerVariantCatalogItemDTO> getCatalogItemsPaged(UUID catalogId, String text, boolean calculate, Integer count, Integer page,
+                                                                                      Integer start, String sortField, String sortDir) {
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<>();
 

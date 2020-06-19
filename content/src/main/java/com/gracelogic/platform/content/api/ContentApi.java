@@ -93,8 +93,8 @@ public class ContentApi extends AbstractAuthorizedController {
                                                                       @ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
                                                                       @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false) Boolean active,
                                                                       @ApiParam(name = "validOnDate", value = "validOnDate") @RequestParam(value = "validOnDate", required = false) String sValidOnDate,
-                                                                      @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                                                       @ApiParam(name = "calculate", value = "calculate") @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
+                                                                      @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                                                       @ApiParam(name = "page", value = "page") @RequestParam(value = "page", required = false) Integer page,
                                                                       @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
                                                                       @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
@@ -140,7 +140,7 @@ public class ContentApi extends AbstractAuthorizedController {
         }
 
         EntityListResponse<ElementDTO> elements = contentService.getElementsPaged(query, queryFields, sectionIds, active, validOnDate,
-                fields, length, page, start, calculate, sortField, sortDir);
+                fields, calculate, length, page, start, sortField, sortDir);
 
         return ResponseEntity.ok(elements);
     }

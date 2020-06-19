@@ -249,19 +249,19 @@ public class OrderApi extends AbstractAuthorizedController {
             @RequestParam(value = "totalAmountGreatThan", required = false) Double totalAmountGreatThan,
             @RequestParam(value = "onlyEmptyParentOrder", required = false, defaultValue = "false") Boolean onlyEmptyParentOrder,
             @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+            @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate,
             @RequestParam(value = "withProducts", required = false, defaultValue = "false") Boolean withProducts,
             @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
             @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
             @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-            @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
-            @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
+            @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
         try {
             AuthorizedUser authorizedUser = getUser();
             if (authorizedUser == null || !authorizedUser.getGrants().contains("ORDER:SHOW") && (userId == null || !userId.equals(authorizedUser.getId()))) {
                 throw new ForbiddenException();
             }
 
-            EntityListResponse<OrderDTO> orders = marketService.getOrdersPaged(userId, orderStateId, discountId, totalAmountGreatThan, onlyEmptyParentOrder, enrich, withProducts, length, null, start, sortField, sortDir, calculate);
+            EntityListResponse<OrderDTO> orders = marketService.getOrdersPaged(userId, orderStateId, discountId, totalAmountGreatThan, onlyEmptyParentOrder, enrich, calculate, withProducts, length, null, start, sortField, sortDir);
             return new ResponseEntity<EntityListResponse<OrderDTO>>(orders, HttpStatus.OK);
         } catch (ForbiddenException e) {
             return new ResponseEntity<>(new ErrorResponse("auth.FORBIDDEN", userMessageSource.getMessage("auth.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);

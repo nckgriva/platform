@@ -34,12 +34,12 @@ public interface MarketService {
 
     OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts, AuthorizedUser authorizedUser) throws ObjectNotFoundException, ForbiddenException;
 
-    EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, Double totalAmountGreatThan, boolean onlyEmptyParentOrder, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate);
+    EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, Double totalAmountGreatThan, boolean onlyEmptyParentOrder, boolean enrich, boolean calculate, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     //Product
     ProductDTO getProduct(UUID id, boolean enrich) throws ObjectNotFoundException;
 
-    EntityListResponse<ProductDTO> getProductsPaged(String name, UUID productTypeId, Boolean active, boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate);
+    EntityListResponse<ProductDTO> getProductsPaged(String name, UUID productTypeId, Boolean active, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     Product saveProduct(ProductDTO dto) throws ObjectNotFoundException, PrimaryProductException, ProductSubscriptionException;
 
@@ -49,7 +49,7 @@ public interface MarketService {
     //Discount
     DiscountDTO getDiscount(UUID id, boolean enrich, boolean withProducts) throws ObjectNotFoundException;
 
-    EntityListResponse<DiscountDTO> getDiscountsPaged(String name, UUID usedForOrderId, UUID discountTypeId, boolean enrich, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate);
+    EntityListResponse<DiscountDTO> getDiscountsPaged(String name, UUID usedForOrderId, UUID discountTypeId, boolean enrich, boolean calculate, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     Discount saveDiscount(DiscountDTO dto) throws ObjectNotFoundException, CurrencyMismatchException;
 

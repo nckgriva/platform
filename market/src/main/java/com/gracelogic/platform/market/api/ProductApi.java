@@ -131,12 +131,12 @@ public class ProductApi extends AbstractAuthorizedController {
             @RequestParam(value = "productTypeId", required = false) UUID productTypeId,
             @RequestParam(value = "active", required = false) Boolean active,
             @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+            @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate,
             @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
             @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
             @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-            @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
-            @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
-        EntityListResponse<ProductDTO> docs = marketService.getProductsPaged(name, productTypeId, active, enrich, length, null, start, sortField, sortDir, calculate);
+            @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+        EntityListResponse<ProductDTO> docs = marketService.getProductsPaged(name, productTypeId, active, enrich, calculate, length, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<ProductDTO>>(docs, HttpStatus.OK);
     }
 }

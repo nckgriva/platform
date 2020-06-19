@@ -190,8 +190,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public EntityListResponse<TaskDTO> getTasksPaged(String name, String serviceName, Boolean active, boolean enrich,
-                                                     Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate) {
+    public EntityListResponse<TaskDTO> getTasksPaged(String name, String serviceName, Boolean active, boolean enrich, boolean calculate,
+                                                     Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -227,7 +227,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public EntityListResponse<TaskExecutionLogDTO> getTaskExecutionLogsPaged(UUID taskId, Collection<UUID> methodIds, Collection<UUID> stateIds, String parameter, Date startDate, Date endDate,
-                                                                             boolean enrich, Integer count, Integer page, Integer start, String sortField, String sortDir, boolean calculate) {
+                                                                             boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? "left join fetch el.task left join fetch el.method left join fetch el.state" : "";
         String countFetches = "";
         String cause = "1=1 ";

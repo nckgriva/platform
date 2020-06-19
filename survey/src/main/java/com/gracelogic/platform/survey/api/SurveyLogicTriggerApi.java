@@ -58,14 +58,14 @@ public class SurveyLogicTriggerApi extends AbstractAuthorizedController {
             @RequestParam(value = "surveyQuestionId", required = false) UUID surveyQuestionId,
             @RequestParam(value = "surveyPageId", required = false) UUID surveyPageId,
             @RequestParam(value = "surveyAnswerVariantId", required = false) UUID surveyAnswerVariantId,
+            @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate,
             @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
             @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
             @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-            @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
-            @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
+            @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
 
-        EntityListResponse<SurveyLogicTriggerDTO> properties = surveyService.getSurveyLogicTriggersPaged(surveyQuestionId, surveyPageId, surveyAnswerVariantId, count, null, start, sortField, sortDir, calculate);
+        EntityListResponse<SurveyLogicTriggerDTO> properties = surveyService.getSurveyLogicTriggersPaged(surveyQuestionId, surveyPageId, surveyAnswerVariantId, calculate, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<SurveyLogicTriggerDTO>>(properties, HttpStatus.OK);
     }
 

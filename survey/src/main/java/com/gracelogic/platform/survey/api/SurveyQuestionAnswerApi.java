@@ -48,14 +48,14 @@ public class SurveyQuestionAnswerApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getSurveyQuestionAnswers(@RequestParam(value = "surveyPassingId", required = false) UUID surveyPassingId,
-                                             @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                             @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
-                                             @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                             @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
-                                             @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
+                                                   @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate,
+                                                   @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                                   @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
+                                                   @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                                   @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
 
-        EntityListResponse<SurveyQuestionAnswerDTO> properties = surveyService.getSurveyQuestionAnswersPaged(surveyPassingId, count, null, start, sortField, sortDir, calculate);
+        EntityListResponse<SurveyQuestionAnswerDTO> properties = surveyService.getSurveyQuestionAnswersPaged(surveyPassingId, calculate, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<SurveyQuestionAnswerDTO>>(properties, HttpStatus.OK);
     }
 

@@ -50,14 +50,14 @@ public class NotificationApi extends AbstractAuthorizedController {
                                            @RequestParam(value = "notificationMethodId", required = false) UUID notificationMethodId,
                                            @RequestParam(value = "notificationStateId", required = false) UUID notificationStateId,
                                            @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                           @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate,
                                            @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                            @RequestParam(value = "page", required = false) Integer page,
                                            @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                            @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                           @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
-                                           @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate) {
+                                           @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<NotificationDTO> notifications = notificationService.getNotificationsPaged(name, destination, notificationMethodId, notificationStateId, enrich, count, null, start, sortField, sortDir, calculate);
+        EntityListResponse<NotificationDTO> notifications = notificationService.getNotificationsPaged(name, destination, notificationMethodId, notificationStateId, enrich, calculate, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<NotificationDTO>>(notifications, HttpStatus.OK);
     }
 }
