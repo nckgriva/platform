@@ -50,6 +50,7 @@ public class PropertyServiceImpl implements PropertyService {
         entity.setValue(dto.getValue());
         entity.setVisible(dto.getVisible());
         entity.setDescription(dto.getDescription());
+        entity.setDeleted(false);
 
         return idObjectService.save(entity);
     }
@@ -69,6 +70,9 @@ public class PropertyServiceImpl implements PropertyService {
             cause += " and el.visible = :visible";
             params.put("visible", visible);
         }
+
+        cause += " and el.deleted = :deleted";
+        params.put("deleted", false);
 
         Integer totalCount = calculate ? idObjectService.getCount(Property.class, null, countFetches, cause, params) : null;
 
@@ -115,8 +119,16 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteProperty(UUID id) {
-        idObjectService.delete(Property.class, id);
+    public void deleteProperty(UUID id) throws ObjectNotFoundException {
+
+        Property property = idObjectService.getObjectById(Property.class, id);
+
+        if (property == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        property.setDeleted(true);
+        idObjectService.save(property);
     }
 
     @Override

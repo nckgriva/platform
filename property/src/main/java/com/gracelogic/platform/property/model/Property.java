@@ -38,6 +38,9 @@ public class Property extends IdObject<UUID> {
     @Column(name = "DESCRIPTION", nullable = true, length = 4000)
     private String description;
 
+    @Column(name = "IS_DELETED", nullable = true)
+    private Boolean deleted;
+
     @Override
     public UUID getId() {
         return id;
@@ -94,5 +97,13 @@ public class Property extends IdObject<UUID> {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 }

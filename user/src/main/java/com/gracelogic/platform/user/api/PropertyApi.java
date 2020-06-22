@@ -120,6 +120,8 @@ public class PropertyApi extends AbstractAuthorizedController {
         try {
             propertyService.deleteProperty(id);
             return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
