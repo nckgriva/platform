@@ -26,7 +26,7 @@ public interface PropertyService {
 
     PropertyDTO getProperty(UUID id) throws ObjectNotFoundException;
 
-    void deleteProperty(UUID id) throws ObjectNotFoundException;
+    void deleteProperty(UUID id);
 
     EntityListResponse<PropertyDTO> getPropertiesPaged(String name, Boolean visible, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
