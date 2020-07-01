@@ -38,7 +38,7 @@ public class Account extends IdObject<UUID> {
     @JoinColumn(name = "CURRENCY_ID", nullable = false)
     private Currency currency;
 
-    @Column(name = "OWNER_ID", nullable = false)
+    @Column(name = "OWNER_ID", nullable = true)
     @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     private UUID ownerId;
 
