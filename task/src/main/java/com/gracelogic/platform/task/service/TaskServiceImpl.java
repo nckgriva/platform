@@ -186,6 +186,10 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteTask(UUID id) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("taskId", id);
+
+        idObjectService.delete(TaskExecutionLog.class, "el.task.id=:taskId", params);
         idObjectService.delete(Task.class, id);
     }
 
