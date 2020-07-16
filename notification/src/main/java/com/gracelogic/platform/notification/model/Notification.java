@@ -57,6 +57,10 @@ public class Notification extends IdObject<UUID> {
     @Column(name = "ERROR_DESCRIPTION", nullable = true)
     private String errorDescription;
 
+    @Column(name = "REFERENCE_OBJECT_ID", nullable = true)
+    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
+    private UUID referenceObjectId; //userId or other custom group field
+
     @Override
     public UUID getId() {
         return id;
@@ -157,5 +161,13 @@ public class Notification extends IdObject<UUID> {
 
     public void setErrorDescription(String errorDescription) {
         this.errorDescription = errorDescription;
+    }
+
+    public UUID getReferenceObjectId() {
+        return referenceObjectId;
+    }
+
+    public void setReferenceObjectId(UUID referenceObjectId) {
+        this.referenceObjectId = referenceObjectId;
     }
 }

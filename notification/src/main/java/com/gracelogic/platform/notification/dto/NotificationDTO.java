@@ -19,6 +19,7 @@ public class NotificationDTO extends IdObjectDTO {
     private String notificationStateName;
     private UUID notificationMethodId;
     private String notificationMethodName;
+    private UUID referenceObjectId;
 
     public UUID getNotificationStateId() {
         return notificationStateId;
@@ -100,6 +101,14 @@ public class NotificationDTO extends IdObjectDTO {
         this.notificationMethodName = notificationMethodName;
     }
 
+    public UUID getReferenceObjectId() {
+        return referenceObjectId;
+    }
+
+    public void setReferenceObjectId(UUID referenceObjectId) {
+        this.referenceObjectId = referenceObjectId;
+    }
+
     public static NotificationDTO prepare(Notification model) {
         NotificationDTO dto = new NotificationDTO();
         IdObjectDTO.prepare(dto, model);
@@ -116,6 +125,7 @@ public class NotificationDTO extends IdObjectDTO {
         dto.setTitle(model.getTitle());
         dto.setFields(JsonUtils.jsonToMap(model.getFields()));
         dto.setPriority(model.getPriority());
+        dto.setReferenceObjectId(model.getReferenceObjectId());
         return dto;
     }
 

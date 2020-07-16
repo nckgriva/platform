@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 @Service
-public class NotificationServiceImpl implements NotificationService{
+public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private IdObjectService idObjectService;
 
@@ -58,7 +58,7 @@ public class NotificationServiceImpl implements NotificationService{
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
-    public Future<Notification> send(final UUID notificationMethodId, final String source, final String destination, final Content content, final Integer priority) {
+    public Future<Notification> send(final UUID notificationMethodId, final String source, final String destination, final Content content, final Integer priority, final UUID referenceObjectId) {
         return executorService.submit(new Callable<Notification>() {
             @Override
             public Notification call() throws Exception {
@@ -72,6 +72,7 @@ public class NotificationServiceImpl implements NotificationService{
                 notification.setSource(source);
                 notification.setDestination(destination);
                 notification.setPriority(priority);
+                notification.setReferenceObjectId(referenceObjectId);
                 notification = notificationService.saveNotification(notification);
 
                 //Send notification
@@ -110,7 +111,7 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
     @Override
-    public EntityListResponse<NotificationDTO> getNotificationsPaged(String name, String destination, UUID notificationMethodId, UUID notificationStateId, boolean enrich,
+    public EntityListResponse<NotificationDTO> getNotificationsPaged(String name, String destination, UUID notificationMethodId, UUID notificationStateId, UUID referenceObjectId, boolean enrich,
                                                                      boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? "left join fetch el.notificationState left join fetch el.notificationMethod" : "";
         String countFetches = "";
@@ -136,6 +137,11 @@ public class NotificationServiceImpl implements NotificationService{
         if (notificationStateId != null) {
             params.put("notificationStateId", notificationStateId);
             cause += " and el.notificationState.id=:notificationStateId";
+        }
+
+        if (referenceObjectId != null) {
+            params.put("referenceObjectId", referenceObjectId);
+            cause += " and el.referenceObjectId=:referenceObjectId";
         }
 
         Integer totalCount = calculate ? idObjectService.getCount(Notification.class, null, countFetches, cause, params) : null;

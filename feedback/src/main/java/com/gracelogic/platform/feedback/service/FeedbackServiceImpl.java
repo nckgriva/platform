@@ -66,7 +66,7 @@ public class FeedbackServiceImpl implements FeedbackService {
                 content.setBody(sb.toString());
                 content.setTitle(feedbackType.getName());
 
-                notificationService.send(DataConstants.NotificationMethods.EMAIL.getValue(), propertyService.getPropertyValue("notification:smtp_from"), feedbackType.getNotifyEmail(), content, 0);
+                notificationService.send(DataConstants.NotificationMethods.EMAIL.getValue(), propertyService.getPropertyValue("notification:smtp_from"), feedbackType.getNotifyEmail(), content, 0, null);
             } catch (Exception e) {
                 logger.error("Failed to send feedback", e);
             }

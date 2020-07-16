@@ -12,10 +12,10 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 
 public interface NotificationService {
-    Future<Notification> send(UUID notificationMethodId, String source, String destination, Content content, Integer priority);
+    Future<Notification> send(UUID notificationMethodId, String source, String destination, Content content, Integer priority, UUID referenceObjectId);
 
     Notification saveNotification(Notification notification);
 
-    EntityListResponse<NotificationDTO> getNotificationsPaged(String name, String destination, UUID notificationMethodId, UUID notificationStateId, boolean enrich,
+    EntityListResponse<NotificationDTO> getNotificationsPaged(String name, String destination, UUID notificationMethodId, UUID notificationStateId, UUID referenceObjectId, boolean enrich,
                                                               boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir);
 }

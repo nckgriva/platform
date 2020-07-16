@@ -193,7 +193,7 @@ public class UserServiceImpl implements UserService {
 
                         Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.SMS_REPAIRING.getValue(), LocaleHolder.getLocale(), templateParams);
                         notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.SMS.getValue(),
-                                propertyService.getPropertyValue("notification:sms_from"), identifierValue, content, 0);
+                                propertyService.getPropertyValue("notification:sms_from"), identifierValue, content, 0, identifier.getUser().getId());
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }
@@ -203,7 +203,7 @@ public class UserServiceImpl implements UserService {
 
                         Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.EMAIL_REPAIRING.getValue(), LocaleHolder.getLocale(), templateParams);
                         notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.EMAIL.getValue(),
-                                propertyService.getPropertyValue("notification:smtp_from"), identifierValue, content, 0);
+                                propertyService.getPropertyValue("notification:smtp_from"), identifierValue, content, 0, identifier.getUser().getId());
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }
@@ -365,7 +365,7 @@ public class UserServiceImpl implements UserService {
             try {
                 Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.EMAIL_VERIFICATION.getValue(), LocaleHolder.getLocale(), templateParams);
                 notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.EMAIL.getValue(),
-                        propertyService.getPropertyValue("notification:smtp_from"), identifier.getValue(), content, 0);
+                        propertyService.getPropertyValue("notification:smtp_from"), identifier.getValue(), content, 0, identifier.getUser().getId());
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
@@ -375,7 +375,7 @@ public class UserServiceImpl implements UserService {
                 Content content = templateService.buildFromTemplate(DataConstants.TemplateTypes.SMS_VERIFICATION.getValue(), LocaleHolder.getLocale(), templateParams);
 
                 notificationService.send(com.gracelogic.platform.notification.service.DataConstants.NotificationMethods.SMS.getValue(),
-                        propertyService.getPropertyValue("notification:sms_from"), identifier.getValue(), content, 0);
+                        propertyService.getPropertyValue("notification:sms_from"), identifier.getValue(), content, 0, identifier.getUser().getId());
 
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
