@@ -121,7 +121,7 @@ public class AuthApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity changeLocale(@RequestBody SingleValueDTO valueDTO, HttpServletRequest request) {
         try {
-            userService.changeLocale(request, getUser(), valueDTO.getValue());
+            userService.changeLocale(getUser(), valueDTO.getValue());
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         }
         catch (IllegalArgumentException e) {

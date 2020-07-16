@@ -50,7 +50,7 @@ public interface UserService {
 
     String translateUserSortFieldToNative(String sortFieldInJPAFormat);
 
-    void changeLocale(HttpServletRequest request, AuthorizedUser authorizedUser, String locale) throws IllegalArgumentException;
+    void changeLocale(AuthorizedUser authorizedUser, String locale) throws IllegalArgumentException;
 
     boolean isIdentifierValid(UUID identifierTypeId, String identifierValue, boolean checkAvailable);
 

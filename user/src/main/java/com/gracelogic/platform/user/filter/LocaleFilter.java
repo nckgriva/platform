@@ -3,16 +3,14 @@ package com.gracelogic.platform.user.filter;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.user.dto.AuthorizedUser;
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class LocaleFilter extends AbstractAuthorizedController implements Filter {
-    public static final String SESSION_ATTRIBUTE_LOCALE = "session_locale";
-
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
@@ -21,24 +19,22 @@ public class LocaleFilter extends AbstractAuthorizedController implements Filter
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         if (servletRequest instanceof HttpServletRequest) {
             final HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
+            String acceptLanguage = httpRequest.getHeader("Accept-Language");
             String locale = null;
 
             AuthorizedUser user = getUser();
-            HttpSession session = httpRequest.getSession(false);
             if (user != null && !StringUtils.isEmpty(user.getLocale())) {
                 locale = user.getLocale();
-            }
-            else if (session != null) {
+            } else if (!StringUtils.isEmpty(acceptLanguage)) {
                 try {
-                    locale = (String) session.getAttribute(SESSION_ATTRIBUTE_LOCALE);
+                    locale = LocaleUtils.toLocale(acceptLanguage).getLanguage();
+                } catch (Exception ignored) {
                 }
-                catch (Exception ignored) {}
             }
 
             if (!StringUtils.isEmpty(locale)) {
                 LocaleHolder.setLocale(locale);
-            }
-            else {
+            } else {
                 LocaleHolder.setLocale(LocaleHolder.defaultLocale);
             }
 

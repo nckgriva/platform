@@ -839,19 +839,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void changeLocale(HttpServletRequest request, AuthorizedUser authorizedUser, String locale) throws IllegalArgumentException {
+    public void changeLocale(AuthorizedUser authorizedUser, String locale) throws IllegalArgumentException {
         Locale l = LocaleUtils.toLocale(locale);
         if (l != null) {
             if (authorizedUser != null) {
-                User user = idObjectService.getObjectById(User.class, authorizedUser.getId());
-                user.setLocale(locale);
-                idObjectService.save(user);
                 authorizedUser.setLocale(locale);
-            }
 
-            try {
-                request.getSession(false).setAttribute(LocaleFilter.SESSION_ATTRIBUTE_LOCALE, locale);
-            } catch (Exception ignored) {
+                User user = idObjectService.getObjectById(User.class, authorizedUser.getId());
+                user.setLocale(l.getLanguage());
+                idObjectService.save(user);
             }
 
             LocaleHolder.setLocale(l);
