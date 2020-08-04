@@ -6,7 +6,8 @@ import com.gracelogic.platform.user.dto.AuthorizedUser;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface SuggestionService {
-    List<SuggestedVariant> process(String processorName, String query, Collection<String> flags, AuthorizedUser executor) throws SuggestionProcessorNotFoundException;
+    List<SuggestedVariant> process(String processorName, String query, Collection<String> flags, AuthorizedUser executor, Map parameterMap) throws SuggestionProcessorNotFoundException;
 }

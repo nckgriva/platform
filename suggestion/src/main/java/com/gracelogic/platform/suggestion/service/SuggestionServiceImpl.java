@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SuggestionServiceImpl implements SuggestionService {
@@ -17,10 +18,10 @@ public class SuggestionServiceImpl implements SuggestionService {
     private ApplicationContext applicationContext;
 
     @Override
-    public List<SuggestedVariant> process(String processorName, String query, Collection<String> flags, AuthorizedUser executor) throws SuggestionProcessorNotFoundException {
+    public List<SuggestedVariant> process(String processorName, String query, Collection<String> flags, AuthorizedUser executor, Map parameterMap) throws SuggestionProcessorNotFoundException {
         try {
             SuggestionProcessor processor = applicationContext.getBean(processorName, SuggestionProcessor.class);
-            return processor.process(query, flags, executor);
+            return processor.process(query, flags, executor, parameterMap);
         }
         catch (BeansException e) {
             throw new SuggestionProcessorNotFoundException();

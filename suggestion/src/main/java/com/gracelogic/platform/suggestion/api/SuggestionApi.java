@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,7 +42,8 @@ public class SuggestionApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity getSuggestedVariants(@PathVariable(value = "processorName") String processorName,
                                                @RequestParam(value = "query", required = true) String query,
-                                               @RequestParam(value = "flags", required = false) String sFlags) {
+                                               @RequestParam(value = "flags", required = false) String sFlags,
+                                               HttpServletRequest request) {
         List<String> flags = new LinkedList<>();
         if (!StringUtils.isEmpty(sFlags)) {
             for (String s : sFlags.split(",")) {
@@ -50,7 +52,7 @@ public class SuggestionApi extends AbstractAuthorizedController {
         }
 
         try {
-            List<SuggestedVariant> variants = suggestionService.process(processorName, query, flags, getUser());
+            List<SuggestedVariant> variants = suggestionService.process(processorName, query, flags, getUser(), request.getParameterMap());
             return new ResponseEntity<List<SuggestedVariant>>(variants, HttpStatus.OK);
         } catch (SuggestionProcessorNotFoundException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("PROCESSOR_NOT_FOUND", "Suggestion processor not found"), HttpStatus.BAD_REQUEST);
