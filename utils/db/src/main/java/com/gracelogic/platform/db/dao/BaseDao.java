@@ -36,9 +36,9 @@ public abstract class BaseDao {
         if (StringUtils.isEmpty(sortFieldWithDirection)) {
             sortFieldWithDirection = "el.created ASC";
         }
-        q.append("order by :sortFieldWithDirection ");
+        q.append("order by ").append(sortFieldWithDirection).append(" ");
 
-        Query query = entityManager.createQuery(q.toString()).setParameter("sortFieldWithDirection", sortFieldWithDirection);
+        Query query = entityManager.createQuery(q.toString());
         if (params != null) {
             for (String paramName : params.keySet()) {
                 query.setParameter(paramName, params.get(paramName));
