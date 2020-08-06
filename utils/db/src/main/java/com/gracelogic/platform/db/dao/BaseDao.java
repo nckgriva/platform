@@ -21,35 +21,30 @@ public abstract class BaseDao {
         CriteriaQuery<T> criteriaQuery = cb.createQuery(clazz);
         Root<T> root = criteriaQuery.from(clazz);
         criteriaQuery.select(root);
-        //criteriaQuery.where(getCasePredicate(filter, cb, root));
         TypedQuery<T> typedQuery = entityManager.createQuery(criteriaQuery);
         return typedQuery.getResultList();
     }
-
-
 
     public <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortFieldWithDirection, Integer startRecord, Integer maxResult) {
         if (fetches == null) {
             fetches = "";
         }
-        String queryStr = "select el from " + clazz.getSimpleName() + " el " + fetches + " ";
+        StringBuilder q = new StringBuilder("select el from ").append(clazz.getSimpleName()).append(" el ").append(fetches).append(" ");
         if (!StringUtils.isEmpty(cause)) {
-            queryStr += " where " + cause + " ";
+            q.append("where ").append(cause).append(" ");
         }
         if (StringUtils.isEmpty(sortFieldWithDirection)) {
-            sortFieldWithDirection = "el.id DESC";
+            sortFieldWithDirection = "el.created ASC";
         }
+        q.append("order by :sortFieldWithDirection ");
 
-
-        queryStr += " order by " + sortFieldWithDirection + " ";
-
-        Query query = entityManager.createQuery(queryStr);
+        Query query = entityManager.createQuery(q.toString()).setParameter("sortFieldWithDirection", sortFieldWithDirection);
         if (params != null) {
             for (String paramName : params.keySet()) {
-                Object paramValue = params.get(paramName);
-                query.setParameter(paramName, paramValue);
+                query.setParameter(paramName, params.get(paramName));
             }
         }
+
         if (startRecord != null) {
             query.setFirstResult(startRecord);
         }
