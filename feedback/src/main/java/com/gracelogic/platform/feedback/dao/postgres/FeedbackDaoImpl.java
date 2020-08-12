@@ -3,6 +3,7 @@ package com.gracelogic.platform.feedback.dao.postgres;
 import com.gracelogic.platform.db.condition.OnPostgreSQLConditional;
 import com.gracelogic.platform.feedback.dao.AbstractFeedbackDaoImpl;
 import com.gracelogic.platform.feedback.model.Feedback;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Conditional;
@@ -10,12 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.Query;
 import java.math.BigInteger;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 @Conditional(OnPostgreSQLConditional.class)
@@ -41,8 +37,12 @@ public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
             params.put("endDate", endDate);
         }
         if (fields != null && !fields.isEmpty()) {
+            int i = 0;
             for (String key : fields.keySet()) {
-                queryStr.append(String.format("and el.fields ->> '%s' ~ '%s' ", key, fields.get(key)));
+                i++;
+                queryStr.append(String.format("and el.fields ->> :key_%d = :val_%d ", i, i));
+                params.put("key_" + i, key);
+                params.put("val_" + i, fields.get(key));
             }
         }
 
@@ -63,6 +63,11 @@ public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
 
     @Override
     public List<Feedback> getFeedbacks(UUID feedbackTypeId, Date startDate, Date endDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
+        List<String> availableSortingFields = Arrays.asList("el.id", "el.created_dt", "el.changed_dt", "el.feedback_type_id");
+        if (!availableSortingFields.contains(StringUtils.lowerCase(sortField))) {
+            throw new RuntimeException("Required sort field is unavailable");
+        }
+
         List<Feedback> feedbacks = Collections.emptyList();
         StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_feedback el where 1=1 ");
 
@@ -80,8 +85,12 @@ public class FeedbackDaoImpl extends AbstractFeedbackDaoImpl {
             params.put("endDate", endDate);
         }
         if (fields != null && !fields.isEmpty()) {
+            int i = 0;
             for (String key : fields.keySet()) {
-                queryStr.append(String.format("and el.fields ->> '%s' ~ '%s' ", key, fields.get(key)));
+                i++;
+                queryStr.append(String.format("and el.fields ->> :key_%d = :val_%d ", i, i));
+                params.put("key_" + i, key);
+                params.put("val_" + i, fields.get(key));
             }
         }
 

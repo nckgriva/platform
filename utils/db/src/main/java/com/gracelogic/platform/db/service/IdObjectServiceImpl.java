@@ -101,8 +101,11 @@ public class IdObjectServiceImpl implements IdObjectService {
     public <T> List<T> getList(Class<T> clazz, String fetches, String cause, Map<String, Object> params, String sortField, String sortDirection, Integer startRecord, Integer maxResult) {
         String sortFieldWithDirection = null;
         if (!StringUtils.isEmpty(sortField)) {
-            if (StringUtils.isEmpty(sortDirection)) {
-                sortDirection = "ASC";
+            if (StringUtils.equalsIgnoreCase(sortDirection, "asc")) {
+                sortDirection = "asc";
+            }
+            else {
+                sortDirection = "desc";
             }
             sortFieldWithDirection = sortField + " " + sortDirection;
         }

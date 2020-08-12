@@ -80,16 +80,16 @@ public class FeedbackServiceImpl implements FeedbackService {
     public EntityListResponse<FeedbackDTO> getFeedbacksPaged(UUID feedbackTypeId, Date startDate, Date endDate, Map<String, String> fields, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         if (!StringUtils.isEmpty(sortField)) {
             if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
-                sortField = "id";
+                sortField = "el.id";
             }
             if (StringUtils.equalsIgnoreCase(sortField, "el.created")) {
-                sortField = "created_dt";
+                sortField = "el.created_dt";
             }
             if (StringUtils.equalsIgnoreCase(sortField, "el.changed")) {
-                sortField = "changed_dt";
+                sortField = "el.changed_dt";
             }
             if (StringUtils.equalsIgnoreCase(sortField, "el.feedbackType.id")) {
-                sortField = "feedback_type_id";
+                sortField = "el.feedback_type_id";
             }
         }
 

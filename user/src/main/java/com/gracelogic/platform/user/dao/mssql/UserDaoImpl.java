@@ -10,10 +10,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Query;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Conditional(OnMSSQLServerConditional.class)
@@ -40,10 +37,14 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
             params.put("blocked", blocked);
         }
         if (fields != null && !fields.isEmpty()) {
+            int i = 0;
             for (String key : fields.keySet()) {
-                String param = "param_" + key;
-                queryStr.append(String.format("and JSON_VALUE(el.fields, '$.%s') like :%s ", key, param));
-                params.put(param, "%%" + fields.get(key) + "%%");
+                i++;
+                queryStr.append(String.format("and JSON_VALUE(el.fields, :key_%d) like val_%d ", i, i));
+//                queryStr.append(String.format("and JSON_VALUE(el.fields,'$.%s') like '%s' ", key, fields.get(key)));
+
+                params.put("key_" + i, "$." + key);
+                params.put("val_" + i, fields.get(key));
             }
         }
         try {
@@ -64,6 +65,10 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
     @Override
     //public List<User> getUsers(String phone, String email, Boolean approved, Boolean blocked, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
     public List<User> getUsers(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
+        List<String> availableSortingFields = Arrays.asList("el.id", "el.created_dt", "el.changed_dt", "el.is_active", "el.is_blocked", "el.is_approved", "el.blocked_dt", "el.blocked_by_user_id", "el.last_visit_dt", "el.last_visit_ip");
+        if (!availableSortingFields.contains(StringUtils.lowerCase(sortField))) {
+            throw new RuntimeException("Required sort field is unavailable");
+        }
 
         List<User> users = Collections.emptyList();
         StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_user el " +
@@ -83,10 +88,14 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
             params.put("blocked", blocked);
         }
         if (fields != null && !fields.isEmpty()) {
+            int i = 0;
             for (String key : fields.keySet()) {
-                String param = "param_" + key;
-                queryStr.append(String.format("and JSON_VALUE(el.fields, '$.%s') like :%s ", key, param));
-                params.put(param, "%%" + fields.get(key) + "%%");
+                i++;
+                queryStr.append(String.format("and JSON_VALUE(el.fields, :key_%d) like val_%d ", i, i));
+//                queryStr.append(String.format("and JSON_VALUE(el.fields,'$.%s') like '%s' ", key, fields.get(key)));
+
+                params.put("key_" + i, "$." + key);
+                params.put("val_" + i, fields.get(key));
             }
         }
 

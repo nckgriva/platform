@@ -159,41 +159,41 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public EntityListResponse<ElementDTO> getElementsPaged(String query, Collection<String> queryFields, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<ElementDTO> getElementsPaged(String query, Collection<String> queryFields, Collection<String> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         if (!StringUtils.isEmpty(sortField)) {
             //Т.к. в данном методе запрос используется нативный и требуется сохранить единообразие - транслируем название jpa полей в нативные sql
             if (StringUtils.equalsIgnoreCase(sortField, "el.id")) {
-                sortField = "id";
+                sortField = "el.id";
             }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.created")) {
-                sortField = "created_dt";
+                sortField = "el.created_dt";
             }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.changed")) {
-                sortField = "changed_dt";
+                sortField = "el.changed_dt";
             }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.elementDt")) {
-                sortField = "element_dt";
+                sortField = "el.element_dt";
             }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.startDt")) {
-                sortField = "start_dt";
+                sortField = "el.start_dt";
             }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.endDt")) {
-                sortField = "end_dt";
+                sortField = "el.end_dt";
             }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.name")) {
-                sortField = "name";
+                sortField = "el.name";
             }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.sortOrder")) {
-                sortField = "sort_order";
+                sortField = "el.sort_order";
             }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.section.id")) {
-                sortField = "section_id";
+                sortField = "el.section_id";
             }
             else if (StringUtils.equalsIgnoreCase(sortField, "el.active")) {
-                sortField = "is_active";
+                sortField = "el.is_active";
             }
             else if (StringUtils.startsWithIgnoreCase(sortField, "el.fields")) {
-                sortField = sortField.substring("el.".length());
+                //Nothing to do
             }
         }
 

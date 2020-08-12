@@ -127,11 +127,9 @@ public class ContentApi extends AbstractAuthorizedController {
         } catch (Exception ignored) {
         }
 
-        List<UUID> sectionIds = new LinkedList<>();
+        List<String> sectionIds = new LinkedList<>();
         if (!StringUtils.isEmpty(sSectionIds)) {
-            for (String s : sSectionIds.split(",")) {
-                sectionIds.add(UUID.fromString(s));
-            }
+            sectionIds.addAll(Arrays.asList(sSectionIds.split(",")));
         }
 
         List<String> queryFields = Collections.emptyList();

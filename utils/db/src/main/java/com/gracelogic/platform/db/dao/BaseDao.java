@@ -71,9 +71,9 @@ public abstract class BaseDao {
 
     protected void appendSortClause(StringBuilder queryStr, String sortField, String sortDir) {
         if (!StringUtils.isEmpty(sortField)) {
-            queryStr.append(String.format("order by %s ", sortField));
+            queryStr.append("order by ").append(sortField).append(" ");
             if (!StringUtils.isEmpty(sortDir)) {
-                queryStr.append(String.format("%s ", sortDir));
+                queryStr.append(StringUtils.equalsIgnoreCase(sortDir, "asc") ? "asc" : "desc").append(" ");
             }
         }
     }

@@ -12,13 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.Query;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 @Conditional(OnMSSQLServerConditional.class)
@@ -26,33 +20,40 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
     private static Logger logger = LoggerFactory.getLogger(ContentDaoImpl.class);
 
     @Override
-    public Integer getElementsCount(String query, Collection<String> queryFields, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields) {
+    public Integer getElementsCount(String query, Collection<String> queryFields, Collection<String> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields) {
         BigInteger count = null;
-        StringBuilder queryStr = new StringBuilder("select count(ID) from {h-schema}cmn_element where 1=1 ");
+        StringBuilder queryStr = new StringBuilder("select count(el.ID) from {h-schema}cmn_element el where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
         if (active != null) {
-            queryStr.append("and is_active = :active ");
+            queryStr.append("and el.is_active = :active ");
             params.put("active", active);
         }
         if (sectionIds != null && !sectionIds.isEmpty()) {
-            queryStr.append(String.format("and section_id in (%s) ", IdObjectServiceImpl.valuesAsString(sectionIds)));
+            queryStr.append(String.format("and el.section_id in (%s) ", IdObjectServiceImpl.valuesAsString(sectionIds)));
         }
         if (validOnDate != null) {
-            queryStr.append("and start_dt <= :validOnDate and end_dt >= :validOnDate ");
+            queryStr.append("and el.start_dt <= :validOnDate and el.end_dt >= :validOnDate ");
             params.put("validOnDate", validOnDate);
         }
 
         if (fields != null && !fields.isEmpty()) {
+            int i = 0;
             for (String key : fields.keySet()) {
-                queryStr.append(String.format("and JSON_VALUE(fields, '$.%s') like '%%%s%%' ", key, fields.get(key)));
+                i++;
+                queryStr.append(String.format("and JSON_VALUE(el.fields, :key_%d) like :val_%d ", i, i));
+                params.put("key_" + i, "$." + key);
+                params.put("val_" + i, fields.get(key));
             }
         }
         if (query != null && !StringUtils.isEmpty(query)) {
-            queryStr.append("and ( lower(name) like :query ");
+            queryStr.append("and ( lower(el.name) like :query ");
             if (queryFields != null && !queryFields.isEmpty()) {
+                int i = 0;
                 for (String key : queryFields) {
-                    queryStr.append(String.format("or lower(JSON_VALUE(fields, '$.%s')) like :query ", key));
+                    i++;
+                    queryStr.append(String.format("or lower(JSON_VALUE(el.fields, :q_%d)) like :query ", i));
+                    params.put("q_" + i, "$." + key);
                 }
             }
             queryStr.append(") ");
@@ -75,33 +76,47 @@ public class ContentDaoImpl extends AbstractContentDaoImpl {
     }
 
     @Override
-    public List<Element> getElements(String query, Collection<String> queryFields, Collection<UUID> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
+    public List<Element> getElements(String query, Collection<String> queryFields, Collection<String> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields, String sortField, String sortDir, Integer startRecord, Integer recordsOnPage) {
+        List<String> availableSortingFields = Arrays.asList("el.id", "el.created_dt", "el.changed_dt", "el.section_id", "el.is_active", "el.start_dt", "el.end_dt", "el.element_dt", "el.name", "el.sort_order", "el.external_id");
+        if (!availableSortingFields.contains(StringUtils.lowerCase(sortField))) {
+            throw new RuntimeException("Required sort field is unavailable");
+        }
+
         List<Element> elements = Collections.emptyList();
-        StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_element where 1=1 ");
+        StringBuilder queryStr = new StringBuilder("select * from {h-schema}cmn_element el where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();
         if (active != null) {
-            queryStr.append("and is_active = :active ");
+            queryStr.append("and el.is_active = :active ");
             params.put("active", active);
         }
         if (sectionIds != null && !sectionIds.isEmpty()) {
-            queryStr.append(String.format("and section_id in (%s) ", IdObjectServiceImpl.valuesAsString(sectionIds)));
+            queryStr.append("and convert(nvarchar(50), el.section_id) in (:sectionIds) ");
+            params.put("sectionIds", sectionIds);
         }
+
         if (validOnDate != null) {
-            queryStr.append("and start_dt <= :validOnDate and end_dt >= :validOnDate ");
+            queryStr.append("and el.start_dt <= :validOnDate and el.end_dt >= :validOnDate ");
             params.put("validOnDate", validOnDate);
         }
 
         if (fields != null && !fields.isEmpty()) {
+            int i = 0;
             for (String key : fields.keySet()) {
-                queryStr.append(String.format("and JSON_VALUE(fields, '$.%s') like '%%%s%%' ", key, fields.get(key)));
+                i++;
+                queryStr.append(String.format("and JSON_VALUE(el.fields, :key_%d) like :val_%d ", i, i));
+                params.put("key_" + i, "$." + key);
+                params.put("val_" + i, fields.get(key));
             }
         }
         if (query != null && !StringUtils.isEmpty(query)) {
-            queryStr.append("and ( lower(name) like :query ");
+            queryStr.append("and ( lower(el.name) like :query ");
             if (queryFields != null && !queryFields.isEmpty()) {
+                int i = 0;
                 for (String key : queryFields) {
-                    queryStr.append(String.format("or lower(JSON_VALUE(fields, '$.%s')) like :query ", key));
+                    i++;
+                    queryStr.append(String.format("or lower(JSON_VALUE(el.fields, :q_%d)) like :query ", i));
+                    params.put("q_" + i, "$." + key);
                 }
             }
             queryStr.append(") ");
