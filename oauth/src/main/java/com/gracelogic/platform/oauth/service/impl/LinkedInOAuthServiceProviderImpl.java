@@ -56,8 +56,8 @@ public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider impl
         OAuthDTO.setAccessToken(response.get("access_token") != null ? (String) response.get("access_token") : null);
         response = OAuthUtils.getQueryReturnJson(String.format(INFO_ENDPOINT, OAuthDTO.getAccessToken()));
         OAuthDTO.setUserId(response.get("id") != null ? (String) response.get("id") : null);
-        OAuthDTO.setFirstName(response.get("firstName") != null ? (String) response.get("firstName") : null);
-        OAuthDTO.setLastName(response.get("lastName") != null ? (String) response.get("lastName") : null);
+        OAuthDTO.setFirstName(response.get("localizedFirstName") != null ? (String) response.get("localizedFirstName") : null);
+        OAuthDTO.setLastName(response.get("localizedLastName") != null ? (String) response.get("localizedLastName") : null);
         OAuthDTO.setEmail(response.get("emailAddress") != null ? (String) response.get("emailAddress") : null);
 
         return processAuthorization(DataConstants.OAuthProviders.LINKEDIN.getValue(), OAuthDTO);
@@ -67,7 +67,7 @@ public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider impl
     public String buildAuthRedirect() {
         String sRedirectUri = buildRedirectUri(null);
 
-        return String.format("https://www.linkedin.com/oauth/v2/authorization?response_type=code&state=987654321&scope=r_basicprofile%%20r_emailaddress&client_id=%s&redirect_uri=%s",CLIENT_ID, sRedirectUri);
+        return String.format("https://www.linkedin.com/oauth/v2/authorization?response_type=code&state=987654321&scope=r_liteprofile%%20r_emailaddress&client_id=%s&redirect_uri=%s",CLIENT_ID, sRedirectUri);
     }
 
     @Override
