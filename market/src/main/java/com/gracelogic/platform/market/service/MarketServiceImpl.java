@@ -92,6 +92,7 @@ public class MarketServiceImpl implements MarketService {
             entity.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.DRAFT.getValue()));
             entity.setUser(idObjectService.getObjectById(User.class, authorizedUser.getId()));
             entity.setPaid(0L);
+            entity.setOwnerId(dto.getOwnerId() != null ? dto.getOwnerId() : authorizedUser.getId());
         }
 
         Set<UUID> productIds = new HashSet<>();
@@ -333,8 +334,8 @@ public class MarketServiceImpl implements MarketService {
                     Map<String, Object> p = new HashMap<>();
                     p.put("discountId", discount.getId());
                     p.put("orderStateId", DataConstants.OrderStates.PAID.getValue());
-                    p.put("userId", authorizedUser.getId());
-                    Integer cnt = idObjectService.checkExist(Order.class, null, "el.discount.id=:discountId and el.orderState.id=:orderStateId and el.user.id=:userId", p, 1);
+                    p.put("ownerId", order.getOwnerId());
+                    Integer cnt = idObjectService.checkExist(Order.class, null, "el.discount.id=:discountId and el.orderState.id=:orderStateId and el.ownerId=:ownerId", p, 1);
                     if (cnt > 0) {
                         throw new InvalidDiscountException("This discount may be used only once for user");
                     }
@@ -348,7 +349,7 @@ public class MarketServiceImpl implements MarketService {
         Long amountToPay = order.getTotalAmount() - order.getPaid();
         //Пытаемся оплатить с помощью внутреннего счёта (только для случая единоразовой покупки, подписка так не работает)
         if (order.getOwnershipType().getId().equals(DataConstants.OwnershipTypes.FULL.getValue())) {
-            Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, ds.get(Currency.class, order.getTargetCurrency().getId()).getCode());
+            Account userAccount = accountResolver.getTargetAccount(order.getOwnerId(), null, null, ds.get(Currency.class, order.getTargetCurrency().getId()).getCode());
             if (userAccount.getBalance() >= amountToPay) {
                 order = payOrder(order, amountToPay, userAccount.getId());
                 amountToPay = order.getTotalAmount() - order.getPaid();
@@ -421,8 +422,8 @@ public class MarketServiceImpl implements MarketService {
 
         Long amountToReturn = order.getPaid();
 
-        //Transfer money from organization to user
-        Account userAccount = accountResolver.getTargetAccount(order.getUser(), null, null, ds.get(Currency.class, order.getTargetCurrency().getId()).getCode());
+        //Transfer money from organization to owner
+        Account userAccount = accountResolver.getTargetAccount(order.getOwnerId(), null, null, ds.get(Currency.class, order.getTargetCurrency().getId()).getCode());
         UUID merchantAccountId = getMerchantAccountId(order.getTargetCurrency().getId());
 
         accountService.processTransfer(merchantAccountId, com.gracelogic.platform.payment.DataConstants.TransactionTypes.MARKET_SELL_CANCEL.getValue(),
@@ -471,6 +472,7 @@ public class MarketServiceImpl implements MarketService {
         newOrder.setPaid(0L);
         newOrder.setUser(order.getUser());
         newOrder.setOrderState(ds.get(OrderState.class, DataConstants.OrderStates.PENDING.getValue()));
+        newOrder.setOwnerId(order.getOwnerId());
         return idObjectService.save(newOrder);
     }
 
@@ -519,17 +521,17 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public void checkAtLeastOneProductPurchased(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkOnDate) throws ProductNotPurchasedException {
-        if (!marketDao.existAtLeastOneProductIsPurchased(userId, referenceObjectIdsAndProductTypeIds.keySet(), checkOnDate)) {
+    public void checkAtLeastOneProductPurchased(UUID ownerId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkOnDate) throws ProductNotPurchasedException {
+        if (!marketDao.existAtLeastOneProductIsPurchased(ownerId, referenceObjectIdsAndProductTypeIds.keySet(), checkOnDate)) {
             throw new ProductNotPurchasedException();
         }
     }
 
     @Override
-    public Map<UUID, List<PurchasedProductDTO>> getProductsPurchaseState(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate) {
+    public Map<UUID, List<PurchasedProductDTO>> getProductsPurchaseState(UUID ownerId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate) {
         Map<UUID, List<PurchasedProductDTO>> result = new HashMap<>();
 
-        List<OrderProduct> orderProducts = marketDao.getPurchasedProducts(userId, referenceObjectIdsAndProductTypeIds.keySet(), checkDate);
+        List<OrderProduct> orderProducts = marketDao.getPurchasedProducts(ownerId, referenceObjectIdsAndProductTypeIds.keySet(), checkDate);
 
         for (UUID referenceObjectId : referenceObjectIdsAndProductTypeIds.keySet()) {
             UUID productTypeId = referenceObjectIdsAndProductTypeIds.get(referenceObjectId);
@@ -568,7 +570,7 @@ public class MarketServiceImpl implements MarketService {
         return result;
     }
 
-    public void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedUserId, Date checkOnDate, boolean onlyPrimary) {
+    public void enrichMarketInfo(UUID productTypeId, Collection<MarketAwareObjectDTO> objects, UUID relatedOwnerId, Date checkOnDate, boolean onlyPrimary) {
         if (objects == null || objects.isEmpty()) {
             return;
         }
@@ -582,8 +584,8 @@ public class MarketServiceImpl implements MarketService {
         }
 
         Map<UUID, List<PurchasedProductDTO>> purchased = Collections.emptyMap();
-        if (relatedUserId != null) {
-            purchased = getProductsPurchaseState(relatedUserId, referenceObjectIdsAndProductTypeIds, checkOnDate);
+        if (relatedOwnerId != null) {
+            purchased = getProductsPurchaseState(relatedOwnerId, referenceObjectIdsAndProductTypeIds, checkOnDate);
         }
 
         Map<UUID, List<Product>> products = findProducts(referenceObjectIdsAndProductTypeIds, onlyPrimary);
@@ -690,7 +692,7 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID orderStateId, UUID discountId, Double totalAmountGreatThan, boolean onlyEmptyParentOrder, boolean enrich, boolean calculate, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
+    public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID ownerId, UUID orderStateId, UUID discountId, Double totalAmountGreatThan, boolean onlyEmptyParentOrder, boolean enrich, boolean calculate, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
         String fetches = enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "";
         String countFetches = "";
         String cause = "1=1 ";
@@ -699,6 +701,11 @@ public class MarketServiceImpl implements MarketService {
         if (userId != null) {
             cause += "and el.user.id=:userId ";
             params.put("userId", userId);
+        }
+
+        if (ownerId != null) {
+            cause += "and el.ownerId=:ownerId ";
+            params.put("ownerId", ownerId);
         }
 
         if (orderStateId != null) {

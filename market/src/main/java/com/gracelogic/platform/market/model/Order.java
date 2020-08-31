@@ -33,6 +33,10 @@ public class Order extends IdObject<UUID> {
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
+    @Column(name = "OWNER_ID", nullable = false)
+    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
+    private UUID ownerId;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ORDER_STATE_ID", nullable = false)
     private OrderState orderState;
@@ -207,5 +211,13 @@ public class Order extends IdObject<UUID> {
 
     public void setPeriodicity(Long periodicity) {
         this.periodicity = periodicity;
+    }
+
+    public UUID getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 }

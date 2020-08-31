@@ -30,6 +30,7 @@ public class OrderDTO extends IdObjectDTO {
     private UUID ownershipTypeId;
     private String ownershipName;
     private UUID parentOrderId;
+    private UUID ownerId;
 
     //Transient value for user order creation
     private String discountSecretCode;
@@ -254,6 +255,14 @@ public class OrderDTO extends IdObjectDTO {
         this.parentOrderId = parentOrderId;
     }
 
+    public UUID getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
+    }
+
     public static OrderDTO prepare(Order model) {
         OrderDTO dto = new OrderDTO();
         IdObjectDTO.prepare(dto, model);
@@ -285,6 +294,7 @@ public class OrderDTO extends IdObjectDTO {
         dto.setDiscountAmount(model.getDiscountAmount());
         dto.setPeriodicity(model.getPeriodicity());
         dto.setExternalIdentifier(model.getExternalIdentifier());
+        dto.setOwnerId(model.getOwnerId());
 
         return dto;
     }

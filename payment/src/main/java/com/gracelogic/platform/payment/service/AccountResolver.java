@@ -6,8 +6,10 @@ import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.user.model.User;
 
+import java.util.UUID;
+
 public interface AccountResolver {
-    Account getTargetAccount(User user, String accountNumber, PaymentSystem paymentSystem, String currencyCode) throws AccountNotFoundException;
+    Account getTargetAccount(UUID ownerId, String accountNumber, PaymentSystem paymentSystem, String currencyCode) throws AccountNotFoundException;
 
     void notifyPaymentReceived(Payment payment); //Событие поступления средств на счёт
 

@@ -244,6 +244,7 @@ public class OrderApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity getOrders(
             @RequestParam(value = "userId", required = false) UUID userId,
+            @RequestParam(value = "ownerId", required = false) UUID ownerId,
             @RequestParam(value = "orderStateId", required = false) UUID orderStateId,
             @RequestParam(value = "discountId", required = false) UUID discountId,
             @RequestParam(value = "totalAmountGreatThan", required = false) Double totalAmountGreatThan,
@@ -261,7 +262,7 @@ public class OrderApi extends AbstractAuthorizedController {
                 throw new ForbiddenException();
             }
 
-            EntityListResponse<OrderDTO> orders = marketService.getOrdersPaged(userId, orderStateId, discountId, totalAmountGreatThan, onlyEmptyParentOrder, enrich, calculate, withProducts, length, null, start, sortField, sortDir);
+            EntityListResponse<OrderDTO> orders = marketService.getOrdersPaged(userId, ownerId, orderStateId, discountId, totalAmountGreatThan, onlyEmptyParentOrder, enrich, calculate, withProducts, length, null, start, sortField, sortDir);
             return new ResponseEntity<EntityListResponse<OrderDTO>>(orders, HttpStatus.OK);
         } catch (ForbiddenException e) {
             return new ResponseEntity<>(new ErrorResponse("auth.FORBIDDEN", userMessageSource.getMessage("auth.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
