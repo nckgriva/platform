@@ -263,7 +263,7 @@ public class ContentServiceImpl implements ContentService {
 
         Map<String, Object> params = new HashMap<>();
         params.put("sectionPatternId", sectionPatternId);
-        List<SectionPatternField> fields = idObjectService.getList(SectionPatternField.class, null, "el.sectionPattern.id=:sectionPatternId", params, null, null, null, null);
+        List<SectionPatternField> fields = idObjectService.getList(SectionPatternField.class, null, "el.sectionPattern.id=:sectionPatternId", params, "sortOrder", "ASC", null, null);
         for (SectionPatternField field : fields) {
             dto.getFields().add(SectionPatternFieldDTO.prepare(field));
         }

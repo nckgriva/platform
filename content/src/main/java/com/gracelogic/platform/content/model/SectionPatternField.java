@@ -47,6 +47,9 @@ public class SectionPatternField extends IdObject<UUID> {
     @JoinColumn(name = "ELEMENT_FIELD_TYPE_ID", nullable = false)
     private ElementFieldType elementFieldType;
 
+    @Column(name = "SORT_ORDER", nullable = true)
+    private Integer sortOrder;
+
     @Override
     public UUID getId() {
         return id;
@@ -123,5 +126,13 @@ public class SectionPatternField extends IdObject<UUID> {
 
     public void setDictionaryServiceName(String dictionaryServiceName) {
         this.dictionaryServiceName = dictionaryServiceName;
+    }
+
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 }
