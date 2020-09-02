@@ -2,6 +2,7 @@ package com.gracelogic.platform.feedback.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
+import com.gracelogic.platform.dictionary.model.Dictionary;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "FEEDBACK_TYPE")
-public class FeedbackType extends IdObject<UUID> {
+public class FeedbackType extends IdObject<UUID> implements Dictionary {
     @Id
     @Access(AccessType.PROPERTY)
     @Column(name = ID)
@@ -31,6 +32,9 @@ public class FeedbackType extends IdObject<UUID> {
 
     @Column(name = "NOTIFY_EMAIL", nullable = true)
     private String notifyEmail;
+
+    @Column(name = "SORT_ORDER", nullable = true)
+    private Integer sortOrder;
 
     @Override
     public UUID getId() {
@@ -76,5 +80,18 @@ public class FeedbackType extends IdObject<UUID> {
 
     public void setNotifyEmail(String notifyEmail) {
         this.notifyEmail = notifyEmail;
+    }
+
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
+
+    @Override
+    public String getCode() {
+        return null;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 }
