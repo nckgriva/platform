@@ -1,5 +1,6 @@
 package com.gracelogic.platform.feedback.service;
 
+import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.feedback.dao.FeedbackDao;
 import com.gracelogic.platform.feedback.dto.FeedbackDTO;
 import com.gracelogic.platform.feedback.model.Feedback;
@@ -11,6 +12,7 @@ import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationService;
 import com.gracelogic.platform.property.service.PropertyService;
 import com.gracelogic.platform.db.JsonUtils;
+import com.gracelogic.platform.user.dto.AuthorizedUser;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +76,19 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
 
         return feedback;
+    }
+
+    @Override
+    public FeedbackDTO getFeedback(UUID id, AuthorizedUser user) throws ObjectNotFoundException {
+        Feedback entity = idObjectService.getObjectById(Feedback.class, id);
+
+        if (entity == null) {
+            throw new ObjectNotFoundException();
+        }
+
+        FeedbackDTO dto = FeedbackDTO.prepare(entity);
+
+        return dto;
     }
 
     @Override
