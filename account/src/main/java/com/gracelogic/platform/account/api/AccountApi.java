@@ -55,7 +55,7 @@ public class AccountApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity getAccounts( @RequestParam(value = "accountTypeId", required = false) UUID accountTypeId,
                                        @RequestParam(value = "currencyId", required = false) UUID currencyId,
-                                       @RequestParam(value = "userId", required = false) UUID userId,
+                                       @RequestParam(value = "ownerId", required = false) UUID ownerId,
                                        @RequestParam(value = "externalIdentifier", required = false) String externalIdentifier,
                                        @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
                                        @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
@@ -64,7 +64,7 @@ public class AccountApi extends AbstractAuthorizedController {
                                        @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                        @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
-        EntityListResponse<AccountDTO> docs = accountService.getAccountsPaged(accountTypeId, currencyId, userId, externalIdentifier, enrich, calculate, length, null, start, sortField, sortDir);
+        EntityListResponse<AccountDTO> docs = accountService.getAccountsPaged(accountTypeId, currencyId, ownerId, externalIdentifier, enrich, calculate, length, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<AccountDTO>>(docs, HttpStatus.OK);
     }
 

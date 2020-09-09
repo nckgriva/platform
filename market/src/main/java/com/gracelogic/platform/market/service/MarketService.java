@@ -58,7 +58,7 @@ public interface MarketService {
 
     void checkAtLeastOneProductPurchased(UUID ownerId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkOnDate) throws ProductNotPurchasedException;
 
-    Map<UUID, List<PurchasedProductDTO>> getProductsPurchaseState(UUID userId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate);
+    Map<UUID, List<PurchasedProductDTO>> getProductsPurchaseState(UUID ownerId, Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, Date checkDate);
 
     Map<UUID, List<Product>> findProducts(Map<UUID, UUID> referenceObjectIdsAndProductTypeIds, boolean onlyPrimary);
 

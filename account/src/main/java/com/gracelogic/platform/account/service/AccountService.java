@@ -21,7 +21,7 @@ public interface AccountService {
 
     EntityListResponse<TransactionDTO> getTransactionsPaged(UUID userId, UUID accountId, Collection<UUID> transactionTypeIds, Date startDate, Date endDate, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir);
     
-    EntityListResponse<AccountDTO> getAccountsPaged(UUID accountTypeId, UUID currencyId, UUID userId, String externalIdentifier, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir);
+    EntityListResponse<AccountDTO> getAccountsPaged(UUID accountTypeId, UUID currencyId, UUID ownerId, String externalIdentifier, boolean enrich, boolean calculate, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
     AccountDTO getAccount(UUID id, boolean enrich) throws ObjectNotFoundException;
 
