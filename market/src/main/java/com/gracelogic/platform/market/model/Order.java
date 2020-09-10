@@ -79,6 +79,9 @@ public class Order extends IdObject<UUID> {
     @Column(name = "PERIODICITY", nullable = true)
     private Long periodicity; //Периодичность для подписки
 
+    @Column(name = "IS_SUBSCRIPTION_CANCELLED", nullable = true)
+    private Boolean subscriptionCancelled; //Подписка отменена
+
     @Override
     public UUID getId() {
         return id;
@@ -219,5 +222,13 @@ public class Order extends IdObject<UUID> {
 
     public void setOwnerId(UUID ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public Boolean getSubscriptionCancelled() {
+        return subscriptionCancelled;
+    }
+
+    public void setSubscriptionCancelled(Boolean subscriptionCancelled) {
+        this.subscriptionCancelled = subscriptionCancelled;
     }
 }

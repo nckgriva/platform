@@ -93,6 +93,7 @@ public class MarketServiceImpl implements MarketService {
             entity.setUser(idObjectService.getObjectById(User.class, authorizedUser.getId()));
             entity.setPaid(0L);
             entity.setOwnerId(dto.getOwnerId() != null ? dto.getOwnerId() : authorizedUser.getId());
+            entity.setSubscriptionCancelled(null);
         }
 
         Set<UUID> productIds = new HashSet<>();
@@ -138,6 +139,7 @@ public class MarketServiceImpl implements MarketService {
         Long minCommonPeriodicity = null;
         if (commonOwnershipTypeId.equals(DataConstants.OwnershipTypes.SUBSCRIPTION.getValue())) {
             minCommonPeriodicity = calculateMinSubscriptionPeriodicity(products);
+            entity.setSubscriptionCancelled(false);
         }
 
         //Calculate total amount
