@@ -669,7 +669,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts, AuthorizedUser authorizedUser) throws ObjectNotFoundException, ForbiddenException {
-        Order entity = idObjectService.getObjectById(Order.class, enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "", id);
+        Order entity = idObjectService.getObjectById(Order.class, enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.ownershipType left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
@@ -695,7 +695,7 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID ownerId, UUID orderStateId, UUID discountId, Double totalAmountGreatThan, boolean onlyEmptyParentOrder, boolean enrich, boolean calculate, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir) {
-        String fetches = enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "";
+        String fetches = enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.ownershipType left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "";
         String countFetches = "";
         String cause = "1=1 ";
         HashMap<String, Object> params = new HashMap<String, Object>();

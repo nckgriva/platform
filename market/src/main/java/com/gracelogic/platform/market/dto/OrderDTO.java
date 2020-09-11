@@ -293,6 +293,7 @@ public class OrderDTO extends IdObjectDTO {
         }
         if (model.getOwnershipType() != null) {
             dto.setOwnershipTypeId(model.getOwnershipType().getId());
+            dto.setOwnershipName(model.getOwnershipType().getName());
         }
         if (model.getParentOrder() != null) {
             dto.setParentOrderId(model.getParentOrder().getId());
