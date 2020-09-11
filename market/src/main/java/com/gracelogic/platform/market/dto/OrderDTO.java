@@ -293,7 +293,6 @@ public class OrderDTO extends IdObjectDTO {
         }
         if (model.getOwnershipType() != null) {
             dto.setOwnershipTypeId(model.getOwnershipType().getId());
-            dto.setOwnershipName(model.getOwnershipType().getName());
         }
         if (model.getParentOrder() != null) {
             dto.setParentOrderId(model.getParentOrder().getId());
@@ -325,6 +324,9 @@ public class OrderDTO extends IdObjectDTO {
         }
         if (model.getTargetCurrency() != null) {
             dto.setTargetCurrencyName(model.getTargetCurrency().getName());
+        }
+        if (model.getOwnershipType() != null) {
+            dto.setOwnershipName(model.getOwnershipType().getName());
         }
 
         return dto;
