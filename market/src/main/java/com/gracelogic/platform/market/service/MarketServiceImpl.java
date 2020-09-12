@@ -105,9 +105,10 @@ public class MarketServiceImpl implements MarketService {
             if (discount == null) {
                 throw new InvalidDiscountException();
             }
-        } else if (dto.getDiscountId() != null) {
+        } else {
             discount = idObjectService.getObjectById(Discount.class, dto.getDiscountId());
         }
+
         if (discount != null && discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.GIFT_PRODUCT.getValue())) {
             Map<String, Object> params = new HashMap<>();
             params.put("discountId", discount.getId());
