@@ -22,17 +22,17 @@ import com.gracelogic.platform.user.exception.ForbiddenException;
 import java.util.*;
 
 public interface MarketService {
-    Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException, NoActualExchangeRateException, ProductSubscriptionException, EmptyOrderException, InvalidCurrencyException, InvalidProductException;
+    Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser, boolean trust) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException, NoActualExchangeRateException, ProductSubscriptionException, EmptyOrderException, InvalidCurrencyException, InvalidProductException;
 
-    PaymentExecutionResultDTO executeOrder(UUID orderId, UUID paymentSystemId, Map<String, String> params, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException, ObjectNotFoundException, PaymentExecutionException, CurrencyMismatchException;
+    PaymentExecutionResultDTO executeOrder(UUID orderId, UUID paymentSystemId, Map<String, String> params, AuthorizedUser authorizedUser, boolean trust) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException, ObjectNotFoundException, PaymentExecutionException, CurrencyMismatchException;
 
     void cancelOrder(UUID orderId) throws InvalidOrderStateException, ObjectNotFoundException, InsufficientFundsException, AccountNotFoundException, CurrencyMismatchException;
 
     void processPayment(Payment payment) throws InvalidOrderStateException, AccountNotFoundException, InsufficientFundsException, CurrencyMismatchException;
 
-    void deleteOrder(UUID orderId, AuthorizedUser authorizedUser) throws InvalidOrderStateException, ObjectNotFoundException, ForbiddenException;
+    void deleteOrder(UUID orderId, AuthorizedUser authorizedUser, boolean trust) throws InvalidOrderStateException, ObjectNotFoundException, ForbiddenException;
 
-    OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts, AuthorizedUser authorizedUser) throws ObjectNotFoundException, ForbiddenException;
+    OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts, AuthorizedUser authorizedUser, boolean trust) throws ObjectNotFoundException, ForbiddenException;
 
     EntityListResponse<OrderDTO> getOrdersPaged(UUID userId, UUID ownerId, UUID orderStateId, UUID discountId, Double totalAmountGreatThan, boolean onlyEmptyParentOrder, boolean enrich, boolean calculate, boolean withProducts, Integer count, Integer page, Integer start, String sortField, String sortDir);
 
@@ -69,4 +69,6 @@ public interface MarketService {
 
 
     void queueCashierVoucher(UUID cashierVoucherTypeId, Order order);
+
+    void cancelSubscription(UUID orderId, AuthorizedUser authorizedUser, boolean trust) throws ObjectNotFoundException, ProductSubscriptionException, InvalidOrderStateException, ForbiddenException;
 }

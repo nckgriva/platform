@@ -69,14 +69,14 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException, NoActualExchangeRateException, ProductSubscriptionException, EmptyOrderException, InvalidCurrencyException, InvalidProductException {
+    public Order saveOrder(OrderDTO dto, AuthorizedUser authorizedUser, boolean trust) throws InvalidOrderStateException, OrderNotConsistentException, ObjectNotFoundException, ForbiddenException, InvalidDiscountException, NoActualExchangeRateException, ProductSubscriptionException, EmptyOrderException, InvalidCurrencyException, InvalidProductException {
         Order entity;
         if (dto.getId() != null) {
             entity = idObjectService.getObjectById(Order.class, dto.getId());
             if (entity == null) {
                 throw new ObjectNotFoundException();
             }
-            if (!authorizedUser.getGrants().contains("ORDER:SAVE") && !entity.getUser().getId().equals(authorizedUser.getId())) {
+            if (!trust && !authorizedUser.getGrants().contains("ORDER:SAVE") && !entity.getUser().getId().equals(authorizedUser.getId())) {
                 throw new ForbiddenException();
             }
             if (!entity.getOrderState().getId().equals(DataConstants.OrderStates.DRAFT.getValue())) {
@@ -299,13 +299,13 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public PaymentExecutionResultDTO executeOrder(UUID orderId, UUID paymentSystemId, Map<String, String> params, AuthorizedUser authorizedUser) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException, ObjectNotFoundException, PaymentExecutionException, CurrencyMismatchException {
+    public PaymentExecutionResultDTO executeOrder(UUID orderId, UUID paymentSystemId, Map<String, String> params, AuthorizedUser authorizedUser, boolean trust) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException, ObjectNotFoundException, PaymentExecutionException, CurrencyMismatchException {
         Order order = idObjectService.getObjectById(Order.class, orderId);
         if (order == null) {
             throw new ObjectNotFoundException();
         }
 
-        if (!authorizedUser.getGrants().contains("ORDER:EXECUTE") && !order.getUser().getId().equals(authorizedUser.getId())) {
+        if (!trust && !authorizedUser.getGrants().contains("ORDER:EXECUTE") && !order.getUser().getId().equals(authorizedUser.getId())) {
             throw new ForbiddenException();
         }
 
@@ -488,7 +488,7 @@ public class MarketServiceImpl implements MarketService {
         params.put("pendingOrderStateId", DataConstants.OrderStates.PENDING.getValue());
         params.put("paidOrderStateId", DataConstants.OrderStates.PAID.getValue());
         params.put("subscriptionOwnershipTypeId", DataConstants.OwnershipTypes.SUBSCRIPTION.getValue());
-        List<Order> orders = idObjectService.getList(Order.class, null, "el.externalIdentifier=:externalIdentifier and (el.orderState.id=:pendingOrderStateId or (el.orderState.id=:paidOrderStateId and el.ownershipType.id=:subscriptionOwnershipTypeId and el.parentOrder is null))", params, "el.created", "DESC", null, 1);
+        List<Order> orders = idObjectService.getList(Order.class, null, "el.externalIdentifier=:externalIdentifier and (el.orderState.id=:pendingOrderStateId or (el.orderState.id=:paidOrderStateId and el.ownershipType.id=:subscriptionOwnershipTypeId and el.parentOrder is null and el.subscriptionCancelled != true))", params, "el.created", "DESC", null, 1);
         if (!orders.isEmpty()) {
             Order order = orders.iterator().next();
             if (order.getOrderState().getId().equals(DataConstants.OrderStates.PAID.getValue())) {
@@ -508,9 +508,9 @@ public class MarketServiceImpl implements MarketService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void deleteOrder(UUID orderId, AuthorizedUser authorizedUser) throws InvalidOrderStateException, ObjectNotFoundException, ForbiddenException {
+    public void deleteOrder(UUID orderId, AuthorizedUser authorizedUser, boolean trust) throws InvalidOrderStateException, ObjectNotFoundException, ForbiddenException {
         Order order = idObjectService.getObjectById(Order.class, orderId);
-        if (!authorizedUser.getGrants().contains("ORDER:DELETE") && !order.getUser().getId().equals(authorizedUser.getId())) {
+        if (!trust && !authorizedUser.getGrants().contains("ORDER:DELETE") && !order.getUser().getId().equals(authorizedUser.getId())) {
             throw new ForbiddenException();
         }
         if (!order.getOrderState().getId().equals(DataConstants.OrderStates.DRAFT.getValue())) {
@@ -669,12 +669,12 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
-    public OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts, AuthorizedUser authorizedUser) throws ObjectNotFoundException, ForbiddenException {
+    public OrderDTO getOrder(UUID id, boolean enrich, boolean withProducts, AuthorizedUser authorizedUser, boolean trust) throws ObjectNotFoundException, ForbiddenException {
         Order entity = idObjectService.getObjectById(Order.class, enrich ? "left join fetch el.user left join fetch el.orderState left join fetch el.ownershipType left join fetch el.discount left join fetch el.paymentSystem left join fetch el.targetCurrency" : "", id);
         if (entity == null) {
             throw new ObjectNotFoundException();
         }
-        if (!authorizedUser.getGrants().contains("ORDER:SHOW") && !entity.getUser().getId().equals(authorizedUser.getId())) {
+        if (!trust && !authorizedUser.getGrants().contains("ORDER:SHOW") && !entity.getUser().getId().equals(authorizedUser.getId())) {
             throw new ForbiddenException();
         }
         OrderDTO dto = OrderDTO.prepare(entity);
@@ -986,5 +986,31 @@ public class MarketServiceImpl implements MarketService {
         params.put("discountId", id);
         idObjectService.delete(DiscountProduct.class, "el.discount.id=:discountId", params);
         idObjectService.delete(Discount.class, id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void cancelSubscription(UUID orderId, AuthorizedUser authorizedUser, boolean trust) throws ObjectNotFoundException, ProductSubscriptionException, InvalidOrderStateException, ForbiddenException {
+        Order order = idObjectService.getObjectById(Order.class, "left join fetch el.parentOrder", orderId);
+        if (order == null) {
+            throw new ObjectNotFoundException();
+        }
+        if (order.getParentOrder() != null) {
+            order = order.getParentOrder();
+        }
+        if (!trust && !authorizedUser.getGrants().contains("ORDER:SAVE") && !order.getUser().getId().equals(authorizedUser.getId())) {
+            throw new ForbiddenException();
+        }
+        if (!order.getOrderState().getId().equals(DataConstants.OrderStates.PAID.getValue())) {
+            throw new InvalidOrderStateException();
+        }
+        if (!order.getOwnershipType().getId().equals(DataConstants.OwnershipTypes.SUBSCRIPTION.getValue()) || order.getSubscriptionCancelled()) {
+            throw new ProductSubscriptionException();
+        }
+
+        order.setSubscriptionCancelled(true);
+        idObjectService.save(order);
+
+        //TODO: cancel subscription in payment systems
     }
 }

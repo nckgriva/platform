@@ -80,7 +80,7 @@ public class OrderApi extends AbstractAuthorizedController {
                                    @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
                                    @RequestParam(value = "withProducts", required = false, defaultValue = "false") Boolean withProducts) {
         try {
-            OrderDTO orderDTO = marketService.getOrder(id, enrich, withProducts, getUser());
+            OrderDTO orderDTO = marketService.getOrder(id, enrich, withProducts, getUser(), false);
             return new ResponseEntity<OrderDTO>(orderDTO, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -107,7 +107,7 @@ public class OrderApi extends AbstractAuthorizedController {
                 return new ResponseEntity<>(new ErrorResponse("auth.FORBIDDEN", userMessageSource.getMessage("auth.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
             }
 
-            Order order = marketService.saveOrder(orderDTO, getUser());
+            Order order = marketService.saveOrder(orderDTO, getUser(), false);
             return new ResponseEntity<IDResponse>(new IDResponse(order.getId()), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.NOT_FOUND);
@@ -146,7 +146,7 @@ public class OrderApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity executeOrder(@RequestBody ExecuteOrderRequestDTO executeOrderRequestDTO) {
         try {
-            PaymentExecutionResultDTO response = marketService.executeOrder(executeOrderRequestDTO.getOrderId(), executeOrderRequestDTO.getPaymentSystemId(), executeOrderRequestDTO.getParams(), getUser());
+            PaymentExecutionResultDTO response = marketService.executeOrder(executeOrderRequestDTO.getOrderId(), executeOrderRequestDTO.getPaymentSystemId(), executeOrderRequestDTO.getParams(), getUser(), false);
             return new ResponseEntity<PaymentExecutionResultDTO>(response, HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -218,7 +218,7 @@ public class OrderApi extends AbstractAuthorizedController {
     public ResponseEntity deleteOrder(@PathVariable(value = "id") UUID id) {
         try {
 
-            marketService.deleteOrder(id, getUser());
+            marketService.deleteOrder(id, getUser(), false);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (ObjectNotFoundException e) {
             return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
@@ -226,6 +226,35 @@ public class OrderApi extends AbstractAuthorizedController {
             return new ResponseEntity<>(new ErrorResponse("auth.FORBIDDEN", userMessageSource.getMessage("auth.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
         } catch (InvalidOrderStateException e) {
             return new ResponseEntity<>(new ErrorResponse("market.INVALID_ORDER_STATE", marketMessageSource.getMessage("market.INVALID_ORDER_STATE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @ApiOperation(
+            value = "cancelSubscription",
+            notes = "Cancel subscription",
+            response = EmptyResponse.class
+    )
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
+    @RequestMapping(method = RequestMethod.POST, value = "/{id}/cancel-subscription")
+    @ResponseBody
+    public ResponseEntity cancelSubscription(@PathVariable(value = "id") UUID id) {
+        try {
+            marketService.cancelSubscription(id, getUser(), false);
+            return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
+        } catch (ObjectNotFoundException e) {
+            return new ResponseEntity<>(new ErrorResponse("db.NOT_FOUND", dbMessageSource.getMessage("db.NOT_FOUND", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ForbiddenException e) {
+            return new ResponseEntity<>(new ErrorResponse("auth.FORBIDDEN", userMessageSource.getMessage("auth.FORBIDDEN", null, LocaleHolder.getLocale())), HttpStatus.FORBIDDEN);
+        } catch (InvalidOrderStateException e) {
+            return new ResponseEntity<>(new ErrorResponse("market.INVALID_ORDER_STATE", marketMessageSource.getMessage("market.INVALID_ORDER_STATE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
+        } catch (ProductSubscriptionException e) {
+            return new ResponseEntity<>(new ErrorResponse("market.PRODUCT_SUBSCRIPTION", marketMessageSource.getMessage("market.PRODUCT_SUBSCRIPTION", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
