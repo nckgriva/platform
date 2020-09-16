@@ -125,19 +125,4 @@ public class PropertyApi extends AbstractAuthorizedController {
         }
 
     }
-
-//    @ApiOperation(
-//            value = "getProperties",
-//            notes = "Get properties",
-//            response = ResponseEntity.class
-//    )
-//    @ApiResponses({
-//            @ApiResponse(code = 200, message = "OK"),
-//            @ApiResponse(code = 401, message = "Unauthorized"),
-//            @ApiResponse(code = 500, message = "Internal Server Error")})
-//    @RequestMapping(method = RequestMethod.POST, value = "/list")
-//    @ResponseBody
-//    public ResponseEntity<?> getPropertiesMap(@RequestBody ArrayList<String> names) {
-//        return new ResponseEntity<>(propertyService.getPropertiesMap(names), HttpStatus.OK);
-//    }
 }

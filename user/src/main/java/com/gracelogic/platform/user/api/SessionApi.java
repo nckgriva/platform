@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,27 +51,14 @@ public class SessionApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity getSessions(  @RequestParam(value = "userId", required = false) UUID userId,
                                         @RequestParam(value = "authIp", required = false) String authIp,
-                                        @RequestParam(value = "startDate", required = false) String sStartDate,
-                                        @RequestParam(value = "endDate", required = false) String sEndDate,
+                                        @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startDate,
+                                        @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endDate,
                                         @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
                                         @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate,
                                         @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                         @RequestParam(value = "count", required = false, defaultValue = "10") Integer count,
                                         @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                         @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
-
-        Date startDate = null;
-        Date endDate = null;
-
-        try {
-            if (!StringUtils.isEmpty(sStartDate)) {
-                startDate = DateFormatConstants.DEFAULT_DATE_FORMAT.get().parse(sStartDate);
-            }
-            if (!StringUtils.isEmpty(sEndDate)) {
-                endDate = DateFormatConstants.DEFAULT_DATE_FORMAT.get().parse(sEndDate);
-            }
-        } catch (Exception ignored) {
-        }
 
         EntityListResponse<UserSessionDTO> sessions = userService.getSessionsPaged(userId, authIp, startDate, endDate, enrich, calculate, count, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<UserSessionDTO>>(sessions, HttpStatus.OK);

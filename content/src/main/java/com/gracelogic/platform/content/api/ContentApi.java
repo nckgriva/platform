@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -92,7 +93,7 @@ public class ContentApi extends AbstractAuthorizedController {
                                                                       @ApiParam(name = "queryFields", value = "queryFields") @RequestParam(value = "queryFields", required = false) String sQueryFields,
                                                                       @ApiParam(name = "sectionIds", value = "sectionIds") @RequestParam(value = "sectionIds", required = false) String sSectionIds,
                                                                       @ApiParam(name = "active", value = "active") @RequestParam(value = "active", required = false) Boolean active,
-                                                                      @ApiParam(name = "validOnDate", value = "validOnDate") @RequestParam(value = "validOnDate", required = false) String sValidOnDate,
+                                                                      @ApiParam(name = "validOnDate", value = "validOnDate") @RequestParam(value = "validOnDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date validOnDate,
                                                                       @ApiParam(name = "calculate", value = "calculate") @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
                                                                       @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                                                       @ApiParam(name = "page", value = "page") @RequestParam(value = "page", required = false) Integer page,
@@ -116,15 +117,6 @@ public class ContentApi extends AbstractAuthorizedController {
                     }
                 }
             }
-        }
-
-        Date validOnDate = null;
-
-        try {
-            if (!StringUtils.isEmpty(sValidOnDate)) {
-                validOnDate = DateFormatConstants.DEFAULT_DATE_FORMAT.get().parse(sValidOnDate);
-            }
-        } catch (Exception ignored) {
         }
 
         List<String> sectionIds = new LinkedList<>();
