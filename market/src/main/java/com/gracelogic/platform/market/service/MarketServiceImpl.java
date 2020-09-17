@@ -268,9 +268,9 @@ public class MarketServiceImpl implements MarketService {
     @Override
     public List<CurrencyDTO> getAvailableCurrencies() {
         List<CurrencyDTO> currencyDTOs = new LinkedList<>();
-        List<MerchantAccount> merchantAccounts = idObjectService.getList(MerchantAccount.class, "left join fetch el.currency", null, null, null, null, null, null);
+        List<MerchantAccount> merchantAccounts = idObjectService.getList(MerchantAccount.class, "left join fetch el.account a left join fetch a.currency", null, null, null, null, null, null);
         for (MerchantAccount merchantAccount : merchantAccounts) {
-            CurrencyDTO dto = CurrencyDTO.prepare(merchantAccount.getCurrency());
+            CurrencyDTO dto = CurrencyDTO.prepare(merchantAccount.getAccount().getCurrency());
             currencyDTOs.add(dto);
         }
 
@@ -452,7 +452,7 @@ public class MarketServiceImpl implements MarketService {
     private UUID getMerchantAccountId(UUID currencyId) throws AccountNotFoundException {
         Map<String, Object> params = new HashMap<>();
         params.put("currencyId", currencyId);
-        List<MerchantAccount> accounts = idObjectService.getList(MerchantAccount.class, null, "el.currency.id=:currencyId", params, null, null, null, 1);
+        List<MerchantAccount> accounts = idObjectService.getList(MerchantAccount.class, "left join el.account a", "a.currency.id=:currencyId", params, null, null, null, 1);
         if (accounts.isEmpty()) {
             throw new AccountNotFoundException();
         } else {
