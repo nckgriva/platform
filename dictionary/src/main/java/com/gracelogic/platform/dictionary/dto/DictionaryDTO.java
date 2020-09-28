@@ -1,6 +1,8 @@
 package com.gracelogic.platform.dictionary.dto;
 
 import com.gracelogic.platform.dictionary.model.Dictionary;
+import com.gracelogic.platform.localization.service.LocaleHolder;
+import com.gracelogic.platform.localization.service.StringConverter;
 
 public class DictionaryDTO {
     private Object id;
@@ -38,6 +40,10 @@ public class DictionaryDTO {
 
     public void setSortOrder(Integer sortOrder) {
         this.sortOrder = sortOrder;
+    }
+
+    public String getNameLocalized() {
+        return StringConverter.getInstance().process(name, LocaleHolder.getLocale());
     }
 
     public static DictionaryDTO prepare(Dictionary dictionary) {
