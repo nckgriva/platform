@@ -1,14 +1,8 @@
 package com.gracelogic.platform.dictionary.dto;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gracelogic.platform.dictionary.model.Dictionary;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.localization.service.StringConverter;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class DictionaryDTO {
     private Object id;
@@ -48,17 +42,8 @@ public class DictionaryDTO {
         this.sortOrder = sortOrder;
     }
 
-    public Map<String, String> getNameLocalized() { //todo вроде, работает
-        Map<String, String> nameLocalized = null;
-        if (name != null) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                nameLocalized = mapper.readValue(name, Map.class);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return nameLocalized;
+    public String getNameLocalized() {
+        return StringConverter.getInstance().process(name, LocaleHolder.getLocale());
     }
 
     public static DictionaryDTO prepare(Dictionary dictionary) {
