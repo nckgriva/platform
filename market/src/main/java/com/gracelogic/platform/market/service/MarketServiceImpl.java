@@ -149,6 +149,7 @@ public class MarketServiceImpl implements MarketService {
         Long discountAmount = 0L;
 
         //Apply discount
+        Long discountDefermentIncrease = null;
         if (discount != null) {
             if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.FIX_AMOUNT_DISCOUNT.getValue())) {
                 if (discount.getAmount() == null || discount.getCurrency() == null) {
@@ -179,6 +180,11 @@ public class MarketServiceImpl implements MarketService {
                     }
                 }
                 discountAmount = calculateOrderTotalAmount(onlyDiscountedProducts, targetCurrencyId, minCommonPeriodicity);
+            } else if (discount.getDiscountType().getId().equals(DataConstants.DiscountTypes.DEFERMENT_INCREASE.getValue())) {
+                if (discount.getAmount() == null) {
+                    throw new InvalidDiscountException();
+                }
+                discountDefermentIncrease = FinanceUtils.toFractional(discount.getAmount()).longValue();
             }
         }
 
@@ -208,6 +214,16 @@ public class MarketServiceImpl implements MarketService {
             OrderProduct orderProduct = new OrderProduct();
             orderProduct.setOrder(entity);
             orderProduct.setProduct(product);
+            if (product.getDeferment() != null || discountDefermentIncrease != null) {
+                long deferment = entity.getCreated().getTime();
+                if (product.getDeferment() != null) {
+                    deferment += product.getDeferment();
+                }
+                if (discountDefermentIncrease != null) {
+                    deferment += discountDefermentIncrease;
+                }
+                orderProduct.setDefermentExpiration(new Date(deferment));
+            }
             idObjectService.save(orderProduct);
         }
 
@@ -297,6 +313,37 @@ public class MarketServiceImpl implements MarketService {
         return discounts.isEmpty() ? null : discounts.iterator().next();
     }
 
+    private void checkDiscount(Order order) throws InvalidDiscountException {
+        if (order.getDiscount() != null) {
+            Discount discount = idObjectService.getObjectById(Discount.class, order.getDiscount().getId());
+            if (!discount.getActive()) {
+                throw new InvalidDiscountException("Discount is not active");
+            }
+            if (!discount.getReusable()) {
+                if (discount.getUsed()) {
+                    if (discount.getUsedForOrder() != null && !discount.getUsedForOrder().getId().equals(order.getId())) {
+                        throw new InvalidDiscountException("This discount already used");
+                    }
+                } else {
+                    discount.setUsed(true);
+                    discount.setUsedForOrder(order);
+                    idObjectService.save(discount);
+                }
+            }
+            if (discount.getOnceForUser()) {
+                Map<String, Object> p = new HashMap<>();
+                p.put("discountId", discount.getId());
+                p.put("canceledOrderStateId", DataConstants.OrderStates.CANCELED.getValue());
+                p.put("ownerId", order.getOwnerId());
+                p.put("currentOrderId", order.getId());
+                Integer cnt = idObjectService.checkExist(Order.class, null, "el.discount.id=:discountId and el.orderState.id!=:canceledOrderStateId and el.ownerId=:ownerId and el.id!=:currentOrderId", p, 1);
+                if (cnt > 0) {
+                    throw new InvalidDiscountException("This discount may be used only once for user");
+                }
+            }
+        }
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public PaymentExecutionResultDTO executeOrder(UUID orderId, UUID paymentSystemId, Map<String, String> params, AuthorizedUser authorizedUser, boolean trust) throws InvalidOrderStateException, OrderNotConsistentException, ForbiddenException, InvalidPaymentSystemException, AccountNotFoundException, InsufficientFundsException, InvalidDiscountException, ObjectNotFoundException, PaymentExecutionException, CurrencyMismatchException {
@@ -322,28 +369,7 @@ public class MarketServiceImpl implements MarketService {
             order = idObjectService.save(order);
 
             //Check and process discount
-            if (order.getDiscount() != null) {
-                Discount discount = idObjectService.getObjectById(Discount.class, order.getDiscount().getId());
-                if (!discount.getReusable()) {
-                    if (discount.getUsed()) {
-                        throw new InvalidDiscountException("This discount already used");
-                    } else {
-                        discount.setUsed(true);
-                        discount.setUsedForOrder(order);
-                        idObjectService.save(discount);
-                    }
-                }
-                if (discount.getOnceForUser()) {
-                    Map<String, Object> p = new HashMap<>();
-                    p.put("discountId", discount.getId());
-                    p.put("orderStateId", DataConstants.OrderStates.PAID.getValue());
-                    p.put("ownerId", order.getOwnerId());
-                    Integer cnt = idObjectService.checkExist(Order.class, null, "el.discount.id=:discountId and el.orderState.id=:orderStateId and el.ownerId=:ownerId", p, 1);
-                    if (cnt > 0) {
-                        throw new InvalidDiscountException("This discount may be used only once for user");
-                    }
-                }
-            }
+            checkDiscount(order);
 
             //Update lifetime expiration
             recalculateOrderProductLifetimeExpiration(order, System.currentTimeMillis(), null);
@@ -439,9 +465,13 @@ public class MarketServiceImpl implements MarketService {
         queueCashierVoucher(DataConstants.CashierVoucherTypes.INCOME_RETURN.getValue(), order);
 
         //Return discount
+        returnDiscount(order);
+    }
+
+    private void returnDiscount(Order order) {
         if (order.getDiscount() != null) {
             Discount discount = idObjectService.getObjectById(Discount.class, order.getDiscount().getId());
-            if (!discount.getReusable() && discount.getUsed() && discount.getUsedForOrder().getId().equals(orderId)) {
+            if (!discount.getReusable() && discount.getUsed() && discount.getUsedForOrder().getId().equals(order.getId())) {
                 discount.setUsed(false);
                 discount.setUsedForOrder(null);
                 idObjectService.save(discount);
@@ -509,7 +539,7 @@ public class MarketServiceImpl implements MarketService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteOrder(UUID orderId, AuthorizedUser authorizedUser, boolean trust) throws InvalidOrderStateException, ObjectNotFoundException, ForbiddenException {
-        Order order = idObjectService.getObjectById(Order.class, orderId);
+        Order order = idObjectService.getObjectById(Order.class, "left join fetch el.discount", orderId);
         if (!trust && !authorizedUser.getGrants().contains("ORDER:DELETE") && !order.getUser().getId().equals(authorizedUser.getId())) {
             throw new ForbiddenException();
         }
@@ -517,6 +547,9 @@ public class MarketServiceImpl implements MarketService {
             throw new InvalidOrderStateException();
         }
 
+        if (order.getDiscount() != null && !order.getDiscount().getReusable()) {
+            returnDiscount(order);
+        }
         Map<String, Object> params = new HashMap<>();
         params.put("orderId", orderId);
         idObjectService.delete(OrderProduct.class, "el.order.id=:orderId", params);
@@ -758,6 +791,7 @@ public class MarketServiceImpl implements MarketService {
                     if (orderProduct.getOrder().getId().equals(e.getId())) {
                         ProductDTO productDTO = ProductDTO.prepare(orderProduct.getProduct());
                         productDTO.setLifetimeExpiration(orderProduct.getLifetimeExpiration());
+                        productDTO.setDefermentExpiration(orderProduct.getDefermentExpiration());
                         el.getProducts().add(productDTO);
                     }
                 }
@@ -839,6 +873,7 @@ public class MarketServiceImpl implements MarketService {
         entity.setProductType(ds.get(ProductType.class, dto.getProductTypeId()));
         entity.setReferenceObjectId(dto.getReferenceObjectId());
         entity.setLifetime(dto.getLifetime());
+        entity.setDeferment(dto.getDeferment());
         entity.setPrice(dto.getPrice());
         entity.setPrimary(dto.getPrimary());
         entity.setCurrency(ds.get(Currency.class, dto.getCurrencyId()));

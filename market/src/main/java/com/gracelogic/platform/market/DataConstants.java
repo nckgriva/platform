@@ -23,7 +23,8 @@ public class DataConstants {
     public enum DiscountTypes {
         FIX_AMOUNT_DISCOUNT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e71")),
         FIX_PERCENT_DISCOUNT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e72")),
-        GIFT_PRODUCT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73"));
+        GIFT_PRODUCT(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e73")),
+        DEFERMENT_INCREASE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e74"));
 
         private UUID value;
 
