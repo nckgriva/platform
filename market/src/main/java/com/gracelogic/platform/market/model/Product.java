@@ -48,6 +48,9 @@ public class Product extends IdObject<UUID> {
     @Column(name = "LIFETIME", nullable = true)
     private Long lifetime; //Проставляется если продукт ограничен по времени использования
 
+    @Column(name = "DEFERMENT", nullable = true)
+    private Long deferment; //Проставляется если доступна отсрочка платежа (тестовый период)
+
     @Column(name = "PRICE", nullable = true)
     private Long price;
 
@@ -158,5 +161,13 @@ public class Product extends IdObject<UUID> {
 
     public void setOwnershipType(OwnershipType ownershipType) {
         this.ownershipType = ownershipType;
+    }
+
+    public Long getDeferment() {
+        return deferment;
+    }
+
+    public void setDeferment(Long deferment) {
+        this.deferment = deferment;
     }
 }

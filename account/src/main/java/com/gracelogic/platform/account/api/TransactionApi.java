@@ -11,6 +11,7 @@ import com.gracelogic.platform.web.dto.ErrorResponse;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,25 +50,12 @@ public class TransactionApi extends AbstractAuthorizedController {
                                        @RequestParam(value = "transactionTypeId", required = false) UUID transactionTypeId,
                                        @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
                                        @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
-                                       @RequestParam(value = "startDate", required = false) String sStartDate,
-                                       @RequestParam(value = "endDate", required = false) String sEndDate,
+                                       @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startDate,
+                                       @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endDate,
                                        @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                        @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
                                        @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                        @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
-
-        Date startDate = null;
-        Date endDate = null;
-
-        try {
-            if (!StringUtils.isEmpty(sStartDate)) {
-                startDate = DateFormatConstants.DEFAULT_DATE_FORMAT.get().parse(sStartDate);
-            }
-            if (!StringUtils.isEmpty(sEndDate)) {
-                endDate = DateFormatConstants.DEFAULT_DATE_FORMAT.get().parse(sEndDate);
-            }
-        } catch (Exception ignored) {
-        }
 
         EntityListResponse<TransactionDTO> transactions = accountService.getTransactionsPaged(userId, accountId, transactionTypeId != null ? Collections.singletonList(transactionTypeId) : null, startDate, endDate, enrich, calculate, length, null, start, sortField, sortDir);
         return new ResponseEntity<EntityListResponse<TransactionDTO>>(transactions, HttpStatus.OK);

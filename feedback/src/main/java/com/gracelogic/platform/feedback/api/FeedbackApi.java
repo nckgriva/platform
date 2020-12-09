@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -60,26 +61,13 @@ public class FeedbackApi extends AbstractAuthorizedController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity feedbacks(@RequestParam(value = "feedbackTypeId", required = false) UUID feedbackTypeId,
-                                    @RequestParam(value = "startDate", required = false) String sStartDate,
-                                    @RequestParam(value = "endDate", required = false) String sEndDate,
+                                    @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startDate,
+                                    @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endDate,
                                     @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
                                     @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
                                     @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
                                     @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
                                     @RequestParam Map<String, String> allRequestParams) {
-
-        Date startDate = null;
-        Date endDate = null;
-
-        try {
-            if (!StringUtils.isEmpty(sStartDate)) {
-                startDate = DateFormatConstants.DEFAULT_DATE_FORMAT.get().parse(sStartDate);
-            }
-            if (!StringUtils.isEmpty(sEndDate)) {
-                endDate = DateFormatConstants.DEFAULT_DATE_FORMAT.get().parse(sEndDate);
-            }
-        } catch (Exception ignored) {
-        }
 
         Map<String, String> fields = new HashMap<String, String>();
         if (allRequestParams != null) {

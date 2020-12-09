@@ -29,10 +29,6 @@ public class MerchantAccount extends IdObject<UUID> {
     private Date changed;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "CURRENCY_ID", nullable = false)
-    private Currency currency;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ACCOUNT_ID", nullable = false)
     private Account account;
 
@@ -72,13 +68,5 @@ public class MerchantAccount extends IdObject<UUID> {
 
     public void setAccount(Account account) {
         this.account = account;
-    }
-
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
     }
 }

@@ -15,9 +15,10 @@ public abstract class AbstractMarketDaoImpl extends BaseDao implements MarketDao
     private IdObjectService idObjectService;
 
     private String buildCheckPurchasingQuery() {
-        return "ord.ownerId=:ownerId and ord.orderState.id=:orderStateId " +
-                "and (el.lifetimeExpiration is null or el.lifetimeExpiration >= :checkOnDate) " +
-                "and el.product.referenceObjectId in (:referenceObjectIds) ";
+        return "ord.ownerId=:ownerId and el.product.referenceObjectId in (:referenceObjectIds) and (" +
+                    "(ord.orderState.id=:paidOrderStateId and (el.lifetimeExpiration is null or el.lifetimeExpiration >= :checkOnDate)) or " +
+                    "(ord.orderState.id!=:cancelledOrderStateId and el.defermentExpiration is not null and el.defermentExpiration >= :checkOnDate) " +
+                ") ";
     }
 
     private Map<String, Object> buildCheckPurchasingParams(UUID ownerId, Collection<UUID> referenceObjectIds, Date checkOnDate) {
@@ -25,7 +26,8 @@ public abstract class AbstractMarketDaoImpl extends BaseDao implements MarketDao
         params.put("ownerId", ownerId);
         params.put("referenceObjectIds", referenceObjectIds);
         params.put("checkOnDate", checkOnDate);
-        params.put("orderStateId", DataConstants.OrderStates.PAID.getValue());
+        params.put("paidOrderStateId", DataConstants.OrderStates.PAID.getValue());
+        params.put("cancelledOrderStateId", DataConstants.OrderStates.CANCELED.getValue());
 
         return params;
     }

@@ -37,6 +37,9 @@ public class OrderProduct extends IdObject<UUID> {
     @Column(name = "LIFETIME_EXPIRATION_DT", nullable = true)
     private Date lifetimeExpiration;
 
+    @Column(name = "DEFERMENT_EXPIRATION_DT", nullable = true)
+    private Date defermentExpiration;
+
     @Override
     public UUID getId() {
         return id;
@@ -89,5 +92,13 @@ public class OrderProduct extends IdObject<UUID> {
 
     public void setLifetimeExpiration(Date lifetimeExpiration) {
         this.lifetimeExpiration = lifetimeExpiration;
+    }
+
+    public Date getDefermentExpiration() {
+        return defermentExpiration;
+    }
+
+    public void setDefermentExpiration(Date defermentExpiration) {
+        this.defermentExpiration = defermentExpiration;
     }
 }

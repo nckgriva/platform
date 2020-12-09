@@ -18,6 +18,7 @@ public class ProductDTO extends IdObjectDTO {
     private String productTypeName;
     private Boolean active;
     private Long lifetime;
+    private Long deferment;
     private Long price;
     private Boolean primary;
     private UUID currencyId;
@@ -27,6 +28,7 @@ public class ProductDTO extends IdObjectDTO {
 
     //Transient value
     private Date lifetimeExpiration;
+    private Date defermentExpiration;
 
     public String getName() {
         return name;
@@ -72,6 +74,14 @@ public class ProductDTO extends IdObjectDTO {
     public Long getLifetime() { return lifetime; }
 
     public void setLifetime(Long lifetime) { this.lifetime = lifetime; }
+
+    public Long getDeferment() {
+        return deferment;
+    }
+
+    public void setDeferment(Long deferment) {
+        this.deferment = deferment;
+    }
 
     public Long getPrice() { return price; }
 
@@ -140,6 +150,16 @@ public class ProductDTO extends IdObjectDTO {
         this.lifetimeExpiration = lifetimeExpiration;
     }
 
+    @JsonSerialize(using = JsonDateSerializer.class, include=JsonSerialize.Inclusion.ALWAYS)
+    @JsonDeserialize(using = JsonDateDeserializer.class)
+    public Date getDefermentExpiration() {
+        return defermentExpiration;
+    }
+
+    public void setDefermentExpiration(Date defermentExpiration) {
+        this.defermentExpiration = defermentExpiration;
+    }
+
     public static ProductDTO prepare(Product model) {
         ProductDTO dto = new ProductDTO();
         return prepare(dto, model);
@@ -161,6 +181,7 @@ public class ProductDTO extends IdObjectDTO {
         dto.setActive(model.getActive());
         dto.setReferenceObjectId(model.getReferenceObjectId());
         dto.setLifetime(model.getLifetime());
+        dto.setDeferment(model.getDeferment());
         dto.setPrice(model.getPrice());
         dto.setPrimary(model.getPrimary());
         return dto;
