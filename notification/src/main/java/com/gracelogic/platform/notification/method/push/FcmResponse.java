@@ -15,6 +15,9 @@ public class FcmResponse {
 	@JsonProperty("failure")
 	private int failure;
 
+	@JsonProperty("canonical_ids")
+	private int canonicalIds;
+
 	@JsonProperty("results")
 	private List<FcmResult> results ;
 
@@ -48,5 +51,13 @@ public class FcmResponse {
 
 	public void setResults(List<FcmResult> results) {
 		this.results = results;
+	}
+
+	public int getCanonicalIds() {
+		return canonicalIds;
+	}
+
+	public void setCanonicalIds(int canonicalIds) {
+		this.canonicalIds = canonicalIds;
 	}
 }
