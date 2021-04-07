@@ -9,6 +9,7 @@ import com.gracelogic.platform.user.dto.ChangePasswordViaVerificationCodeRequest
 import com.gracelogic.platform.user.dto.IdentifierRequestDTO;
 import com.gracelogic.platform.user.dto.PasswordExpirationDateDTO;
 import com.gracelogic.platform.user.exception.*;
+import com.gracelogic.platform.user.service.UserExtensionService;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
@@ -39,6 +40,9 @@ public class AuthApi extends AbstractAuthorizedController {
     @Autowired
     private UserService userService;
 
+    @Autowired(required = false)
+    private UserExtensionService userExtensionService;
+
     @Autowired
     @Qualifier("userMessageSource")
     private ResourceBundleMessageSource messageSource;
@@ -60,7 +64,8 @@ public class AuthApi extends AbstractAuthorizedController {
     @ResponseBody
     public ResponseEntity info() {
         if (getUser() != null) {
-            return new ResponseEntity<AuthorizedUser>(getUser(), HttpStatus.OK);
+            AuthorizedUser user = userExtensionService != null ? userExtensionService.extendUser(getUser()) : getUser();
+            return new ResponseEntity<AuthorizedUser>(user, HttpStatus.OK);
         } else {
             return new ResponseEntity<ErrorResponse>(new ErrorResponse("common.NOT_AUTHORIZED", messageSource.getMessage("common.NOT_AUTHORIZED", null, LocaleHolder.getLocale())), HttpStatus.UNAUTHORIZED);
         }
