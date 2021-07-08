@@ -6,6 +6,8 @@ import com.gracelogic.platform.db.dto.IdObjectDTO;
 import com.gracelogic.platform.db.dto.JsonDateDeserializer;
 import com.gracelogic.platform.db.dto.JsonDateSerializer;
 import com.gracelogic.platform.finance.FinanceUtils;
+import com.gracelogic.platform.localization.service.LocaleHolder;
+import com.gracelogic.platform.localization.service.StringConverter;
 import com.gracelogic.platform.market.model.Product;
 
 import java.util.Date;
@@ -32,6 +34,10 @@ public class ProductDTO extends IdObjectDTO {
 
     public String getName() {
         return name;
+    }
+
+    public String getNameLocalized() {
+        return StringConverter.getInstance().process(name, LocaleHolder.getLocale());
     }
 
     public void setName(String name) {
