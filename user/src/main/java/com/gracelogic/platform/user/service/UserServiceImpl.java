@@ -56,9 +56,6 @@ public class UserServiceImpl implements UserService {
     private PropertyService propertyService;
 
     @Autowired
-    private UserLifecycleService lifecycleService;
-
-    @Autowired
     private TemplateService templateService;
 
 
@@ -87,7 +84,6 @@ public class UserServiceImpl implements UserService {
         if (!StringUtils.isEmpty(defaultLocale)) {
             try {
                 LocaleHolder.defaultLocale = LocaleUtils.toLocale(defaultLocale);
-                ;
             } catch (Exception e) {
                 logger.error("Failed to override default locale", e);
             }

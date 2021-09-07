@@ -27,7 +27,7 @@ public abstract class IdObject<E extends Comparable> implements Serializable {
     @Override
     public int hashCode() {
         int result = 17;
-        result = (int) (37 * result + (getId() == null ? 0 : (getId().hashCode() + 0)));
+        result = 37 * result + (getId() == null ? 0 : (getId().hashCode()));
         return result;
     }
 

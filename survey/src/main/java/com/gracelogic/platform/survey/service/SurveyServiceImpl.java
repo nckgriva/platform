@@ -1000,7 +1000,7 @@ public class SurveyServiceImpl implements SurveyService {
 
                 if (!isMatrixQuestion) {
                     completelyAnsweredQuestions.add(question.getId());
-                } else if (isMatrixQuestion && question.getRequired()) {
+                } else if (question.getRequired()) {
                     // matrix question requirements will be checked later
                     matrixQuestionIds.add(question.getId());
                 }

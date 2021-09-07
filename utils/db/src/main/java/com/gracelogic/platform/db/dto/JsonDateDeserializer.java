@@ -14,7 +14,7 @@ import java.util.Date;
 @Component
 public class JsonDateDeserializer extends JsonDeserializer<Date> {
     @Override
-    public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         String date = jsonParser.getText();
         try {
             return DateFormatConstants.DEFAULT_DATE_FORMAT.get().parse(date);
