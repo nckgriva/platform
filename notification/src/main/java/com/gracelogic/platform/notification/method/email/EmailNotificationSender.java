@@ -57,6 +57,7 @@ public class EmailNotificationSender implements NotificationSender {
 
             Transport.send(msg);
         } catch (Exception e) {
+            logger.error("send email exception", e);
             return new NotificationSenderResult(false, e.getMessage());
         }
         return new NotificationSenderResult(true, null);
