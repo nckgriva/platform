@@ -34,9 +34,6 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
     @Column(name = "DESCRIPTION", nullable = true, length = 4000)
     private String description;
 
-    @Column(name = "SECURITY_KEY", nullable = true, length = 4000)
-    private String securityKey;
-
     @Column(name = "ALLOWED_ADDRESSES", nullable = true)
     private String allowedAddresses;
 
@@ -120,14 +117,6 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getSecurityKey() {
-        return securityKey;
-    }
-
-    public void setSecurityKey(String securityKey) {
-        this.securityKey = securityKey;
     }
 
     public Boolean getActive() {

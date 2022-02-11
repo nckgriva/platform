@@ -1,6 +1,7 @@
 package com.gracelogic.platform.payment.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gracelogic.platform.db.JsonUtils;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.payment.Utils;
 import com.gracelogic.platform.payment.dto.PaymentExecutionRequestDTO;
@@ -8,6 +9,7 @@ import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.dto.yandex.kassa.*;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
+import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.property.service.PropertyService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,26 +30,54 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.apache.http.entity.ContentType.APPLICATION_JSON;
+
+/*
+ Integration with payment services like: Yandex.Kassa, YooKassa
+ https://yookassa.ru
+*/
 public class YandexKassaPaymentExecutor implements PaymentExecutor {
     private static final String API_URL = "https://payment.yandex.net";
     private static final ObjectMapper mapper = new ObjectMapper();
     private static Logger logger = LoggerFactory.getLogger(YandexKassaPaymentExecutor.class);
 
     @Override
-    public PaymentExecutionResultDTO execute(PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
-        PropertyService propertyService;
-        try {
-            propertyService = context.getBean(PropertyService.class);
-        } catch (Exception e) {
-            throw new PaymentExecutionException(e.getMessage());
-        }
+    public PaymentExecutionResultDTO execute(PaymentSystem paymentSystem, PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
+        Map<String, String> params = JsonUtils.jsonToMap(paymentSystem.getFields());
 
         YandexKassaCreatePaymentDTO paymentDTO = new YandexKassaCreatePaymentDTO();
         paymentDTO.setAmount(new YandexKassaAmountDTO(FinanceUtils.toFractional2Rounded(request.getAmount()), request.getCurrencyCode()));
         paymentDTO.setCapture(true);
-        paymentDTO.setConfirmation(new YandexKassaConfirmationDTO("redirect", propertyService.getPropertyValue("payment:yandex_kassa_redirect_url")));
+        String paymentToken = request.getParams().get("payment_token");
+        if (!StringUtils.isEmpty(paymentToken)) {
+            //Payment was created on the client (e.g. mobile application)
+            paymentDTO.setPayment_token(paymentToken);
+        }
+        else {
+            //Create payment on the back-end
+            paymentDTO.setConfirmation(new YandexKassaConfirmationDTO("redirect", params.get(PARAMETER_REDIRECT_URL)));
+        }
+
+        if (!StringUtils.isEmpty(request.getDescription()) && StringUtils.equalsIgnoreCase(params.get(PARAMETER_IS_INCLUDE_RECEIPT), "true")) {
+            YandexKassaReceiptDTO receiptDTO = new YandexKassaReceiptDTO();
+            paymentDTO.setReceipt(receiptDTO);
+
+            YandexKassaReceiptItemDTO itemDTO = new YandexKassaReceiptItemDTO();
+            itemDTO.setAmount(paymentDTO.getAmount());
+            itemDTO.setQuantity(1D);
+            itemDTO.setDescription(request.getDescription());
+            receiptDTO.getItems().add(itemDTO);
+
+            YandexKassaReceiptCustomerDTO customerDTO = new YandexKassaReceiptCustomerDTO();
+            customerDTO.setEmail(request.getParams().get("customer_full_name"));
+            customerDTO.setEmail(request.getParams().get("customer_email"));
+            receiptDTO.setCustomer(customerDTO);
+        }
+
         try {
-            YandexKassaPaymentDTO result = createPayment(paymentDTO, propertyService.getPropertyValue("payment:yandex_kassa_shop_id"), propertyService.getPropertyValue("payment:yandex_kassa_secret"));
+            YandexKassaPaymentDTO result = createPayment(paymentDTO, params.get(PARAMETER_CLIENT_ID), params.get(PARAMETER_SECRET_KEY));
+
+            Map<String, String> responseParams = new HashMap<>();
             request.getParams().put("confirmation_url", result.getConfirmation().getConfirmation_url());
             return new PaymentExecutionResultDTO(false, result.getId(), request.getParams());
         } catch (Exception e) {
@@ -58,7 +88,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
     }
 
     @Override
-    public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) throws PaymentExecutionException {
+    public void processCallback(PaymentSystem paymentSystem, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) throws PaymentExecutionException {
         logger.info("Yandex.Kassa callback accepted");
         PropertyService propertyService;
         PaymentService paymentService;
@@ -82,7 +112,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
                     req.setRegisteredAmount(Double.parseDouble(payment.getAmount().getValue()));
                     req.setPaymentUID(payment.getId());
                     req.setCurrency(payment.getAmount().getCurrency());
-                    paymentService.processPayment(paymentSystemId, req, null);
+                    paymentService.processPayment(paymentSystem.getId(), req, null);
                 }
                 else {
                     logger.warn("Payment not succeed, but event accepted: {}", notification.getObject().getId());
@@ -110,7 +140,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
         sendMethod.addHeader("Idempotence-Key", UUID.randomUUID().toString());
         String requestBody = mapper.writeValueAsString(request);
         logger.debug("request body: {}", requestBody);
-        sendMethod.setEntity(new StringEntity(requestBody));
+        sendMethod.setEntity(new StringEntity(requestBody, APPLICATION_JSON));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
         logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();

@@ -60,7 +60,7 @@ public class PaymentController {
         PaymentExecutor paymentExecutor = null;
         try {
             paymentExecutor = initializePaymentExecutor(paymentSystem.getPaymentExecutorClass());
-            paymentExecutor.processCallback(paymentSystemId, applicationContext, request, response);
+            paymentExecutor.processCallback(paymentSystem, applicationContext, request, response);
         } catch (Exception e) {
             logger.error("Failed to process payment", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
