@@ -552,6 +552,13 @@ public class MarketServiceImpl implements MarketService {
         }
         Map<String, Object> params = new HashMap<>();
         params.put("orderId", orderId);
+
+        try {
+            marketResolver.orderDeleted(order, authorizedUser);
+        } catch (Exception e) {
+            logger.warn("Failed to transmit order deleted event", e);
+        }
+
         idObjectService.delete(OrderProduct.class, "el.order.id=:orderId", params);
         idObjectService.delete(Order.class, orderId);
     }
