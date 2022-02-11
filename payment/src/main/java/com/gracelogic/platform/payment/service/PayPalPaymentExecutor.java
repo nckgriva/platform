@@ -1,6 +1,7 @@
 package com.gracelogic.platform.payment.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gracelogic.platform.db.JsonUtils;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.payment.Utils;
 import com.gracelogic.platform.payment.dto.PaymentExecutionRequestDTO;
@@ -8,9 +9,7 @@ import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.dto.paypal.*;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
-import com.gracelogic.platform.property.service.PropertyService;
-import com.gracelogic.platform.web.dto.EmptyResponse;
-import org.apache.commons.io.IOUtils;
+import com.gracelogic.platform.payment.model.PaymentSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,11 +24,16 @@ import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.http.entity.ContentType.APPLICATION_JSON;
+
+/*
+ Integration with payment service PayPal
+ https://www.paypal.com
+*/
 public class PayPalPaymentExecutor implements PaymentExecutor {
     private static final String ACTION_CREATE = "create";
     private static final String ACTION_EXECUTE = "execute";
@@ -47,22 +51,22 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
 
 
     @Override
-    public PaymentExecutionResultDTO execute(PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(PaymentSystem paymentSystem, PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
+        Map<String, String> params = JsonUtils.jsonToMap(paymentSystem.getFields());
+
         //Initilaize
-        PropertyService propertyService = null;
         PaymentService paymentService = null;
         try {
-            propertyService = context.getBean(PropertyService.class);
             paymentService = context.getBean(PaymentService.class);
         } catch (Exception e) {
             throw new PaymentExecutionException(e.getMessage());
         }
-        String apiUrl = propertyService.getPropertyValueAsBoolean("payment:paypal_is_production") ? PRODUCTION_API_URL : SANDBOX_API_URL;
+        String apiUrl = StringUtils.equalsIgnoreCase(params.get(PARAMETER_IS_PRODUCTION), "true") ? PRODUCTION_API_URL : SANDBOX_API_URL;
 
         //Get access token
         PayPalOAuthResponseDTO accessToken = null;
         try {
-            accessToken = token(apiUrl, propertyService.getPropertyValue("payment:paypal_client_id"), propertyService.getPropertyValue("payment:paypal_secret"));
+            accessToken = token(apiUrl, params.get(PARAMETER_CLIENT_ID), params.get(PARAMETER_SECRET_KEY));
             if (accessToken == null || StringUtils.isEmpty(accessToken.getAccess_token())) {
                 throw new PaymentExecutionException("Access token is null");
             }
@@ -73,14 +77,14 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
 
         Boolean useBillingAgreement = request.getParams().get(USE_BILLING_AGREEMENT) != null ? Boolean.parseBoolean(request.getParams().get(USE_BILLING_AGREEMENT)) : null;
         if (request.getPeriodicity() == null || (useBillingAgreement != null && !useBillingAgreement)) {
-            return executePayment(request, accessToken, apiUrl, propertyService, paymentService);
+            return executePayment(request, accessToken, apiUrl, params, paymentService);
         } else {
-            return executeBillingAgreement(request, accessToken, apiUrl, propertyService, paymentService);
+            return executeBillingAgreement(request, accessToken, apiUrl, params);
         }
     }
 
     @Override
-    public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) {
+    public void processCallback(PaymentSystem paymentSystem, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) {
         try {
             logger.info("PayPal callback query: {}", request.getQueryString());
 //            logger.info(IOUtils.toString(request.getReader()));
@@ -103,7 +107,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
                     req.setPaymentUID(transactionId);
                     req.setCurrency(currency);
                     try {
-                        paymentService.processPayment(paymentSystemId, req, null);
+                        paymentService.processPayment(paymentSystem.getId(), req, null);
                     } catch (Exception e) {
                         throw new PaymentExecutionException(e.getMessage());
                     }
@@ -120,7 +124,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         return true;
     }
 
-    private PaymentExecutionResultDTO executePayment(PaymentExecutionRequestDTO request, PayPalOAuthResponseDTO accessToken, String apiUrl, PropertyService propertyService, PaymentService paymentService) throws PaymentExecutionException {
+    private PaymentExecutionResultDTO executePayment(PaymentExecutionRequestDTO request, PayPalOAuthResponseDTO accessToken, String apiUrl, Map<String, String> params, PaymentService paymentService) throws PaymentExecutionException {
         String action = request.getParams().get(ACTION);
         if (request.getParams() == null || !request.getParams().containsKey(ACTION)) {
             throw new PaymentExecutionException("Not specified action");
@@ -131,8 +135,8 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
             createRequestDTO.setIntent("sale");
 
             PayPalRedirectUrlsDTO payPalRedirectUrlsDTO = new PayPalRedirectUrlsDTO();
-            payPalRedirectUrlsDTO.setReturn_url(propertyService.getPropertyValue("payment:paypal_return_url"));
-            payPalRedirectUrlsDTO.setCancel_url(propertyService.getPropertyValue("payment:paypal_cancel_url"));
+            payPalRedirectUrlsDTO.setReturn_url(params.get(PARAMETER_REDIRECT_URL));
+            payPalRedirectUrlsDTO.setCancel_url(params.get(PARAMETER_FAIL_REDIRECT_URL));
             createRequestDTO.setRedirect_urls(payPalRedirectUrlsDTO);
 
             PayPalPayerDTO payPalPayerDTO = new PayPalPayerDTO();
@@ -188,7 +192,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
     }
 
 
-    private PaymentExecutionResultDTO executeBillingAgreement(PaymentExecutionRequestDTO request, PayPalOAuthResponseDTO accessToken, String apiUrl, PropertyService propertyService, PaymentService paymentService) throws PaymentExecutionException {
+    private PaymentExecutionResultDTO executeBillingAgreement(PaymentExecutionRequestDTO request, PayPalOAuthResponseDTO accessToken, String apiUrl, Map<String, String> params) throws PaymentExecutionException {
         if (request.getParams() == null || !request.getParams().containsKey(ACTION)) {
             throw new PaymentExecutionException("Not specified action");
         }
@@ -214,8 +218,8 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
             PayPalMerchantPreferencesDTO merchantPreferencesDTO = new PayPalMerchantPreferencesDTO();
             merchantPreferencesDTO.setAuto_bill_amount("YES");
             merchantPreferencesDTO.setInitial_fail_amount_action("CONTINUE");
-            merchantPreferencesDTO.setReturn_url(propertyService.getPropertyValue("payment:paypal_return_url"));
-            merchantPreferencesDTO.setCancel_url(propertyService.getPropertyValue("payment:paypal_cancel_url"));
+            merchantPreferencesDTO.setReturn_url(params.get(PARAMETER_REDIRECT_URL));
+            merchantPreferencesDTO.setCancel_url(params.get(PARAMETER_FAIL_REDIRECT_URL));
             merchantPreferencesDTO.setMax_fail_attempts(0);
             planDTO.setMerchant_preferences(merchantPreferencesDTO);
             try {
@@ -294,7 +298,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         sendMethod.addHeader("Accept", "application/json");
         String requestBody = "grant_type=client_credentials";
         logger.debug("request body: {}", requestBody);
-        sendMethod.setEntity(new StringEntity(requestBody));
+        sendMethod.setEntity(new StringEntity(requestBody, APPLICATION_JSON));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
         logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
@@ -313,7 +317,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         sendMethod.addHeader("Content-Type", "application/json");
         String requestBody = mapper.writeValueAsString(requestDTO);
         logger.debug("request body: {}", requestBody);
-        sendMethod.setEntity(new StringEntity(requestBody));
+        sendMethod.setEntity(new StringEntity(requestBody, APPLICATION_JSON));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
         logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
@@ -332,7 +336,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         sendMethod.addHeader("Content-Type", "application/json");
         String requestBody = mapper.writeValueAsString(requestDTO);
         logger.debug("request body: {}", requestBody);
-        sendMethod.setEntity(new StringEntity(requestBody));
+        sendMethod.setEntity(new StringEntity(requestBody, APPLICATION_JSON));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
         logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
@@ -351,7 +355,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         sendMethod.addHeader("Content-Type", "application/json");
         String requestBody = mapper.writeValueAsString(requestDTO);
         logger.debug("request body: {}", requestBody);
-        sendMethod.setEntity(new StringEntity(requestBody));
+        sendMethod.setEntity(new StringEntity(requestBody, APPLICATION_JSON));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
         logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
@@ -376,7 +380,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         list.add(payPalPathDTO);
         String requestBody = mapper.writeValueAsString(list);
         logger.debug("request body: {}", requestBody);
-        sendMethod.setEntity(new StringEntity(requestBody));
+        sendMethod.setEntity(new StringEntity(requestBody, APPLICATION_JSON));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
         logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();
@@ -394,7 +398,7 @@ public class PayPalPaymentExecutor implements PaymentExecutor {
         sendMethod.addHeader("Content-Type", "application/json");
         String requestBody = mapper.writeValueAsString(requestDTO);
         logger.debug("request body: {}", requestBody);
-        sendMethod.setEntity(new StringEntity(requestBody));
+        sendMethod.setEntity(new StringEntity(requestBody, APPLICATION_JSON));
         CloseableHttpResponse result = httpClient.execute(sendMethod);
         logger.debug("response status: {}", result.getStatusLine().getStatusCode());
         HttpEntity entity = result.getEntity();

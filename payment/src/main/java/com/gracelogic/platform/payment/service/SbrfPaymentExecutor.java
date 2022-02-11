@@ -9,6 +9,7 @@ import com.gracelogic.platform.payment.exception.InvalidPaymentSystemException;
 import com.gracelogic.platform.payment.exception.PaymentAlreadyExistException;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.payment.model.Payment;
+import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.web.ServletUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,9 +22,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.UUID;
 
-//TODO: Проверить безопасность этого способа оплаты
+/*
+ Integration with SberBank payments via ATM
+*/
 public class SbrfPaymentExecutor implements PaymentExecutor {
     private static Logger logger = LoggerFactory.getLogger(SbrfPaymentExecutor.class);
 
@@ -37,12 +39,12 @@ public class SbrfPaymentExecutor implements PaymentExecutor {
             "</response>\n ";
 
     @Override
-    public PaymentExecutionResultDTO execute(PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(PaymentSystem paymentSystem, PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) throws PaymentExecutionException {
+    public void processCallback(PaymentSystem paymentSystem, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) throws PaymentExecutionException {
         PaymentService paymentService = null;
         try {
             paymentService = context.getBean(PaymentService.class);
@@ -83,7 +85,7 @@ public class SbrfPaymentExecutor implements PaymentExecutor {
         if (StringUtils.equalsIgnoreCase(action, ACTION_CHECK)) {
             Account result = null;
             try {
-                result = paymentService.checkPaymentAbility(paymentSystemId, account, "RUR");
+                result = paymentService.checkPaymentAbility(paymentSystem.getId(), account, "RUR");
             } catch (Exception ignored) {
             }
 
@@ -102,7 +104,7 @@ public class SbrfPaymentExecutor implements PaymentExecutor {
             paymentModel.setExternalTypeUID(null);
 
             try {
-                Payment result = paymentService.processPayment(paymentSystemId, paymentModel, null);
+                Payment result = paymentService.processPayment(paymentSystem.getId(), paymentModel, null);
                 resp = String.format(RESPONSE_TEMPLATE, String.format("<CODE>0</CODE><MESSAGE>OK</MESSAGE><REG_DATE>%s</REG_DATE>", DATE_FORMAT.format(new Date())));
 
             } catch (PaymentAlreadyExistException e) {

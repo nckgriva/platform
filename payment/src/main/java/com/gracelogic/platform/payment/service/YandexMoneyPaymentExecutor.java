@@ -1,7 +1,7 @@
 package com.gracelogic.platform.payment.service;
 
 import com.gracelogic.platform.account.model.Account;
-import com.gracelogic.platform.db.service.IdObjectService;
+import com.gracelogic.platform.db.JsonUtils;
 import com.gracelogic.platform.payment.dto.PaymentExecutionRequestDTO;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
@@ -20,8 +20,11 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.UUID;
 
+/*
+ Integration with payment services like: Yandex.Money, YooMoney
+ https://yoomoney.ru/
+*/
 public class YandexMoneyPaymentExecutor implements PaymentExecutor {
     private static Logger logger = LoggerFactory.getLogger(YandexMoneyPaymentExecutor.class);
 
@@ -37,17 +40,18 @@ public class YandexMoneyPaymentExecutor implements PaymentExecutor {
 
 
     @Override
-    public PaymentExecutionResultDTO execute(PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(PaymentSystem paymentSystem, PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) throws PaymentExecutionException {
+    public void processCallback(PaymentSystem paymentSystem, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) throws PaymentExecutionException {
+        Map<String, String> params = JsonUtils.jsonToMap(paymentSystem.getFields());
+
         PaymentService paymentService;
-        IdObjectService idObjectService;
+
         try {
             paymentService = context.getBean(PaymentService.class);
-            idObjectService = context.getBean(IdObjectService.class);
         }
         catch (Exception e) {
             throw new PaymentExecutionException(e.getMessage());
@@ -77,7 +81,7 @@ public class YandexMoneyPaymentExecutor implements PaymentExecutor {
         logger.info("orderSumBankPaycash: {}", orderSumBankPaycash);
         logger.info("orderCreatedDatetime: {}", payDate);
 
-        String calcString = String.format("%s;%s;%s;%s;%s;%s;%s;%s", action, amount, orderSumCurrencyPaycash, orderSumBankPaycash, shopId, payId, account, idObjectService.getObjectById(PaymentSystem.class, paymentSystemId).getSecurityKey());
+        String calcString = String.format("%s;%s;%s;%s;%s;%s;%s;%s", action, amount, orderSumCurrencyPaycash, orderSumBankPaycash, shopId, payId, account, params.get(PARAMETER_SECRET_KEY));
 
         String resp;
         if (action.equalsIgnoreCase(ACTION_CHECK)) {
@@ -87,7 +91,7 @@ public class YandexMoneyPaymentExecutor implements PaymentExecutor {
             } else {
                 Account result = null;
                 try {
-                    result = paymentService.checkPaymentAbility(paymentSystemId, account, orderSumCurrencyPaycash);
+                    result = paymentService.checkPaymentAbility(paymentSystem.getId(), account, orderSumCurrencyPaycash);
                 }
                 catch (Exception ignored) {}
 
@@ -115,7 +119,7 @@ public class YandexMoneyPaymentExecutor implements PaymentExecutor {
 
                     Payment result = null;
                     try {
-                        result = paymentService.processPayment(paymentSystemId, paymentModel, null);
+                        result = paymentService.processPayment(paymentSystem.getId(), paymentModel, null);
                     } catch (Exception ignored) {
                     }
 

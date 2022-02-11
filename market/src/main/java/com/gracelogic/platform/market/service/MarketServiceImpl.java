@@ -411,7 +411,7 @@ public class MarketServiceImpl implements MarketService {
                 request.setDescription("Content");
                 request.setRecurringCycles(null);
 
-                result = paymentExecutor.execute(request, applicationContext);
+                result = paymentExecutor.execute(paymentSystem, request, applicationContext);
                 if (!StringUtils.isEmpty(result.getExternalIdentifier()) && !StringUtils.equals(order.getExternalIdentifier(), result.getExternalIdentifier())) {
                     order.setExternalIdentifier(result.getExternalIdentifier());
                     orderModified = true;

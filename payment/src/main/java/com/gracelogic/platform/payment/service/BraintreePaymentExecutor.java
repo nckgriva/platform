@@ -1,12 +1,13 @@
 package com.gracelogic.platform.payment.service;
 
 import com.braintreegateway.*;
+import com.gracelogic.platform.db.JsonUtils;
 import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.payment.dto.PaymentExecutionRequestDTO;
 import com.gracelogic.platform.payment.dto.PaymentExecutionResultDTO;
 import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
-import com.gracelogic.platform.property.service.PropertyService;
+import com.gracelogic.platform.payment.model.PaymentSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +18,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
+/*
+ Integration with payment service BrainTree
+ https://www.braintreepayments.com/
+*/
 public class BraintreePaymentExecutor implements PaymentExecutor {
     private static final String ACTION_TOKEN = "token";
     private static final String ACTION_CHECKOUT = "checkout";
@@ -27,15 +31,16 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
     private static Logger logger = LoggerFactory.getLogger(BraintreePaymentExecutor.class);
 
     @Override
-    public PaymentExecutionResultDTO execute(PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
+    public PaymentExecutionResultDTO execute(PaymentSystem paymentSystem, PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
+        Map<String, String> params = JsonUtils.jsonToMap(paymentSystem.getFields());
+
+
         if (request.getParams() == null || !request.getParams().containsKey(ACTION)) {
             throw new PaymentExecutionException("Not specified action");
         }
 
-        PropertyService propertyService = null;
         PaymentService paymentService = null;
         try {
-            propertyService = context.getBean(PropertyService.class);
             paymentService = context.getBean(PaymentService.class);
         }
         catch (Exception e) {
@@ -45,10 +50,10 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
         String action = request.getParams().get(ACTION);
         logger.info("action: {}", action);
         BraintreeGateway gateway = new BraintreeGateway(
-                propertyService.getPropertyValueAsBoolean("payment:braintree_is_production") ? Environment.PRODUCTION : Environment.SANDBOX,
-                propertyService.getPropertyValue("payment:braintree_merchant_id"),
-                propertyService.getPropertyValue("payment:braintree_public_key"),
-                propertyService.getPropertyValue("payment:braintree_private_key")
+                StringUtils.equalsIgnoreCase(params.get(PARAMETER_IS_PRODUCTION), "true") ? Environment.PRODUCTION : Environment.SANDBOX,
+                params.get(PARAMETER_CLIENT_ID),
+                params.get(PARAMETER_PUBLIC_KEY),
+                params.get(PARAMETER_SECRET_KEY)
         );
 
         if (StringUtils.equalsIgnoreCase(action, ACTION_TOKEN)) {
@@ -94,7 +99,7 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
     }
 
     @Override
-    public void processCallback(UUID paymentSystemId, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) {
+    public void processCallback(PaymentSystem paymentSystem, ApplicationContext context, HttpServletRequest request, HttpServletResponse response) {
         throw new RuntimeException("Not implemented");
     }
 

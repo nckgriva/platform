@@ -11,7 +11,6 @@ import java.util.Map;
 public class PaymentSystemDTO extends IdObjectDTO {
     private String name;
     private String description;
-    private String securityKey;
     private String allowedAddresses;
     private String paymentExecutorClass;
     private Boolean active;
@@ -34,14 +33,6 @@ public class PaymentSystemDTO extends IdObjectDTO {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getSecurityKey() {
-        return securityKey;
-    }
-
-    public void setSecurityKey(String securityKey) {
-        this.securityKey = securityKey;
     }
 
     public String getAllowedAddresses() {
@@ -103,7 +94,6 @@ public class PaymentSystemDTO extends IdObjectDTO {
         dto.setFee(model.getFee());
         dto.setFeeIncluded(model.getFeeIncluded());
         dto.setPaymentExecutorClass(model.getPaymentExecutorClass());
-        dto.setSecurityKey(model.getSecurityKey());
 
         if (!StringUtils.isEmpty(model.getFields())) {
             dto.setFields(JsonUtils.jsonToMap(model.getFields()));
