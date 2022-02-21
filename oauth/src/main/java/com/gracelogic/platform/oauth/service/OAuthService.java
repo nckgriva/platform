@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface OAuthService {
-    List<AuthProviderDTO> getAuthProviders();
+    List<AuthProviderDTO> getAuthProviders(String redirectUri);
 
     UUID getIdentifierTypeForAuthProvider(UUID authProviderId);
 
-    Token tokenByCode(UUID authProviderId, String code, String accessToken, String remoteAddress) throws ObjectNotFoundException, UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException, CustomLocalizedException;
+    Token tokenByCode(UUID authProviderId, String code, String accessToken, String redirectUri, String remoteAddress) throws ObjectNotFoundException, UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException, CustomLocalizedException;
 }

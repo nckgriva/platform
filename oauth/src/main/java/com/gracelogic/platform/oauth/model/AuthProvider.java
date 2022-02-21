@@ -47,10 +47,10 @@ public class AuthProvider extends IdObject<UUID> {
     @Column(name = "CLIENT_PUBLIC_KEY", nullable = true)
     private String clientPublicKey;
 
-    @Column(name = "IS_IMPORT_EMAIL", nullable = false)
+    @Column(name = "IMPORT_EMAIL", nullable = false)
     private Boolean importEmail;
 
-    @Column(name = "IS_IMPORT_PHONE", nullable = false)
+    @Column(name = "IMPORT_PHONE", nullable = false)
     private Boolean importPhone;
 
     @Override

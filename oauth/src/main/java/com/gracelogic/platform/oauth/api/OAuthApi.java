@@ -61,8 +61,8 @@ public class OAuthApi extends AbstractAuthorizedController {
     )
     @RequestMapping(value = "providers", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity providers() {
-        List<AuthProviderDTO> providers = oAuthService.getAuthProviders();
+    public ResponseEntity providers(@RequestParam(value = "redirectUri", required = false) String redirectUri) {
+        List<AuthProviderDTO> providers = oAuthService.getAuthProviders(redirectUri);
         return new ResponseEntity<List<AuthProviderDTO>>(providers, HttpStatus.OK);
     }
 
@@ -82,7 +82,7 @@ public class OAuthApi extends AbstractAuthorizedController {
     @RequestMapping(value = "/token-by-code", method = RequestMethod.POST)
     public ResponseEntity tokenByCode(HttpServletRequest request, HttpServletResponse response, @RequestBody TokenByCodeRequestDTO dto) {
         try {
-            Token token = oAuthService.tokenByCode(dto.getAuthProviderId(), dto.getCode(), dto.getAccessToken(), ServletUtils.getRemoteAddress(request));
+            Token token = oAuthService.tokenByCode(dto.getAuthProviderId(), dto.getCode(), dto.getAccessToken(), dto.getRedirectUri(), ServletUtils.getRemoteAddress(request));
             if (token != null) {
                 User user = token.getIdentifier().getUser();
                 AuthorizedUser authorizedUser = AuthorizedUser.prepare(user);

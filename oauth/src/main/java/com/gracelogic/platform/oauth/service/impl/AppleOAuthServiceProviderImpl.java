@@ -87,15 +87,15 @@ public class AppleOAuthServiceProviderImpl extends AbstractOauthProvider impleme
     }
 
     @Override
-    public String buildAuthRedirect() {
-        String sRedirectUri = buildRedirectUri(null);
+    public String buildAuthRedirect(String redirectUri) {
+        String sRedirectUri = buildRedirectUri(null, redirectUri);
 
         return String.format("https://appleid.apple.com/auth/authorize?response_type=code&scope=email%%20profile&client_id=%s&redirect_uri=%s", CLIENT_ID, sRedirectUri);
     }
 
     @Override
-    public String buildRedirectUri(String additionalParameters) {
-        String sRedirectUri = getRedirectUrl(DataConstants.OAuthProviders.APPLE.name());
+    public String buildRedirectUri(String additionalParameters, String redirectUri) {
+        String sRedirectUri = redirectUri != null ? redirectUri : getRedirectUrl(DataConstants.OAuthProviders.APPLE.name());
         if (!StringUtils.isEmpty(additionalParameters)) {
             sRedirectUri = sRedirectUri + additionalParameters;
         }
@@ -109,7 +109,7 @@ public class AppleOAuthServiceProviderImpl extends AbstractOauthProvider impleme
 
     @PostConstruct
     public void init() {
-        AuthProvider authProvider = idObjectService.getObjectById(AuthProvider.class, DataConstants.OAuthProviders.GOOGLE.getValue());
+        AuthProvider authProvider = idObjectService.getObjectById(AuthProvider.class, DataConstants.OAuthProviders.APPLE.getValue());
         if (authProvider != null) {
             if (authProvider.getAccessTokenEndpoint() != null) {
                 ACCESS_TOKEN_ENDPOINT = authProvider.getAccessTokenEndpoint();

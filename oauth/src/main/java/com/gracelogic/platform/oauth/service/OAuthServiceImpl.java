@@ -59,26 +59,26 @@ public class OAuthServiceImpl implements OAuthService {
     private UserService userService;
 
     @Override
-    public List<AuthProviderDTO> getAuthProviders() {
+    public List<AuthProviderDTO> getAuthProviders(String redirectUri) {
         List<AuthProvider> providers = idObjectService.getList(AuthProvider.class);
         List<AuthProviderDTO> dtos = new LinkedList<>();
         for (AuthProvider provider : providers) {
             AuthProviderDTO dto = AuthProviderDTO.prepare(provider);
             dto.setClientId(provider.getClientId());
             if (dto.getId().equals(DataConstants.OAuthProviders.VK.getValue())) {
-                dto.setUrl(vk.buildAuthRedirect());
+                dto.setUrl(vk.buildAuthRedirect(redirectUri));
             } else if (dto.getId().equals(DataConstants.OAuthProviders.OK.getValue())) {
-                dto.setUrl(ok.buildAuthRedirect());
+                dto.setUrl(ok.buildAuthRedirect(redirectUri));
             } else if (dto.getId().equals(DataConstants.OAuthProviders.INSTAGRAM.getValue())) {
-                dto.setUrl(instagram.buildAuthRedirect());
+                dto.setUrl(instagram.buildAuthRedirect(redirectUri));
             } else if (dto.getId().equals(DataConstants.OAuthProviders.FACEBOOK.getValue())) {
-                dto.setUrl(facebook.buildAuthRedirect());
+                dto.setUrl(facebook.buildAuthRedirect(redirectUri));
             } else if (dto.getId().equals(DataConstants.OAuthProviders.GOOGLE.getValue())) {
-                dto.setUrl(google.buildAuthRedirect());
+                dto.setUrl(google.buildAuthRedirect(redirectUri));
             } else if (dto.getId().equals(DataConstants.OAuthProviders.LINKEDIN.getValue())) {
-                dto.setUrl(linkedin.buildAuthRedirect());
+                dto.setUrl(linkedin.buildAuthRedirect(redirectUri));
             } else if (dto.getId().equals(DataConstants.OAuthProviders.ESIA.getValue())) {
-                dto.setUrl(esia.buildAuthRedirect());
+                dto.setUrl(esia.buildAuthRedirect(redirectUri));
             }
 
             dtos.add(dto);
@@ -115,25 +115,25 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     @Override
-    public Token tokenByCode(UUID authProviderId, String code, String accessToken, String remoteAddress) throws ObjectNotFoundException, UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException, InvalidPassphraseException, CustomLocalizedException {
+    public Token tokenByCode(UUID authProviderId, String code, String accessToken, String redirectUri, String remoteAddress) throws ObjectNotFoundException, UserBlockedException, TooManyAttemptsException, NotAllowedIPException, UserNotApprovedException, InvalidIdentifierException, InvalidPassphraseException, CustomLocalizedException {
         User user = null;
         
         if (authProviderId.equals(DataConstants.OAuthProviders.VK.getValue())) {
-            user = vk.processAuthorization(code, accessToken, null);
+            user = vk.processAuthorization(code, accessToken, redirectUri);
         } else if (authProviderId.equals(DataConstants.OAuthProviders.OK.getValue())) {
-            user = ok.processAuthorization(code, accessToken, null);
+            user = ok.processAuthorization(code, accessToken, redirectUri);
         } else if (authProviderId.equals(DataConstants.OAuthProviders.FACEBOOK.getValue())) {
-            user = facebook.processAuthorization(code, accessToken, null);
+            user = facebook.processAuthorization(code, accessToken, redirectUri);
         } else if (authProviderId.equals(DataConstants.OAuthProviders.LINKEDIN.getValue())) {
-            user = linkedin.processAuthorization(code, accessToken, null);
+            user = linkedin.processAuthorization(code, accessToken, redirectUri);
         } else if (authProviderId.equals(DataConstants.OAuthProviders.INSTAGRAM.getValue())) {
-            user = instagram.processAuthorization(code, accessToken, null);
+            user = instagram.processAuthorization(code, accessToken, redirectUri);
         } else if (authProviderId.equals(DataConstants.OAuthProviders.GOOGLE.getValue())) {
-            user = google.processAuthorization(code, accessToken, null);
+            user = google.processAuthorization(code, accessToken, redirectUri);
         } else if (authProviderId.equals(DataConstants.OAuthProviders.ESIA.getValue())) {
-            user = esia.processAuthorization(code, accessToken, null);
+            user = esia.processAuthorization(code, accessToken, redirectUri);
         } else if (authProviderId.equals(DataConstants.OAuthProviders.APPLE.getValue())) {
-            user = apple.processAuthorization(code, accessToken, null);
+            user = apple.processAuthorization(code, accessToken, redirectUri);
         }
 
         if (user == null) {
