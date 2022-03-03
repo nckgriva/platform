@@ -401,6 +401,7 @@ public class MarketServiceImpl implements MarketService {
             try {
                 PaymentExecutor paymentExecutor = initializePaymentExecutor(paymentSystem.getPaymentExecutorClass());
                 PaymentExecutionRequestDTO request = new PaymentExecutionRequestDTO();
+                request.setAuthorizedUserId(authorizedUser.getId());
                 request.setPaymentSystemId(paymentSystemId);
                 request.setUniquePaymentIdentifier(String.valueOf(order.getId()));
                 request.setAmount(amountToPay);

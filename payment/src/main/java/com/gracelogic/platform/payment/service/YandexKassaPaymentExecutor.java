@@ -79,7 +79,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
 
             Map<String, String> responseParams = new HashMap<>();
             request.getParams().put("confirmation_url", result.getConfirmation().getConfirmation_url());
-            return new PaymentExecutionResultDTO(false, result.getId(), request.getParams());
+            return new PaymentExecutionResultDTO(false, result.getId(), request.getParams()); // TODO: responseParams не используется, похоже на опечатку
         } catch (Exception e) {
             logger.error("Failed to execute payment with Yandex.Kassa", e);
             throw new PaymentExecutionException(e.getMessage());

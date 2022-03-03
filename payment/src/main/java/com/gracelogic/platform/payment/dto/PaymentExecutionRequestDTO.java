@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class PaymentExecutionRequestDTO {
+    private UUID authorizedUserId;
     private String uniquePaymentIdentifier;
     private UUID paymentSystemId;
     private Long amount;
@@ -84,5 +85,13 @@ public class PaymentExecutionRequestDTO {
 
     public void setRecurringCycles(Integer recurringCycles) {
         this.recurringCycles = recurringCycles;
+    }
+
+    public UUID getAuthorizedUserId() {
+        return authorizedUserId;
+    }
+
+    public void setAuthorizedUserId(UUID authorizedUserId) {
+        this.authorizedUserId = authorizedUserId;
     }
 }
