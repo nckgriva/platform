@@ -1,5 +1,8 @@
 package com.gracelogic.platform.payment.dto.alfabank;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AlfaBankRegisterOrderResponseDTO {
     private String errorCode;
     private String errorMessage;
