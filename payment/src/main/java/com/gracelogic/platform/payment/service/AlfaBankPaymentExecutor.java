@@ -45,7 +45,7 @@ public class AlfaBankPaymentExecutor implements PaymentExecutor {
         Map<String, String> paymentSystemFields = JsonUtils.jsonToMap(paymentSystem.getFields());
 
         AlfaBankRegisterOrderDTO registerOrderDTO = new AlfaBankRegisterOrderDTO();
-        registerOrderDTO.setToken("2hif0j5vs4mkim4i7tl60o70h6");
+        registerOrderDTO.setToken(paymentSystemFields.get("token"));
 
         AlfaBankOrderNumberService orderNumberService;
         try {
@@ -113,25 +113,28 @@ public class AlfaBankPaymentExecutor implements PaymentExecutor {
         }
 
         try {
-            String requestBody = IOUtils.toString(request.getInputStream()); // TODO: здесь приходят произвольные данные. Нужно узнать что пришлет альфа-банк в коллбэке
-            logger.info("raw request: {}", requestBody);
+            logger.info("raw request: {}", request.getQueryString());
+            if (StringUtils.equalsIgnoreCase(request.getParameter("operation"), "deposited")) {
+                AlfaBankOrderStatusRequestDTO statusRequest = new AlfaBankOrderStatusRequestDTO();
+                statusRequest.setOrderId(request.getParameter("mdOrder"));
+                statusRequest.setToken(paymentSystemFields.get("token"));
 
-            AlfaBankOrderStatusRequestDTO statusRequest = mapper.readValue(requestBody, AlfaBankOrderStatusRequestDTO.class);
-            statusRequest.setToken("2hif0j5vs4mkim4i7tl60o70h6");
+                AlfaBankOrderStatusResponseDTO orderStatus =
+                        getOrderStatus(statusRequest, paymentSystemFields.get("endpoint"));
+                logger.info(orderStatus.toString());
 
-            AlfaBankOrderStatusResponseDTO orderStatus =
-                    getOrderStatus(statusRequest, paymentSystemFields.get("endpoint"));
-            logger.info(orderStatus.toString());
-
-            if (orderStatus.getOrderStatus() != null && orderStatus.getOrderStatus() == 2) {
-                ProcessPaymentRequest req = new ProcessPaymentRequest();
-                req.setExternalIdentifier(statusRequest.getOrderId());
-                req.setRegisteredAmount((double) (orderStatus.getAmount()));
-                req.setPaymentUID(orderStatus.getOrderNumber());
-                req.setCurrency(getCurrencyCodeFromIso4217(orderStatus.getCurrency()));
-                paymentService.processPayment(paymentSystem.getId(), req, null);
+                if (orderStatus.getOrderStatus() != null && orderStatus.getOrderStatus() == 2) {
+                    ProcessPaymentRequest req = new ProcessPaymentRequest();
+                    req.setExternalIdentifier(statusRequest.getOrderId());
+                    req.setRegisteredAmount((double) (orderStatus.getAmount()));
+                    req.setPaymentUID(orderStatus.getOrderNumber());
+                    req.setCurrency(getCurrencyCodeFromIso4217(orderStatus.getCurrency()));
+                    paymentService.processPayment(paymentSystem.getId(), req, null);
+                } else {
+                    logger.warn("Payment not succeed, but event accepted: {}", orderStatus.getOrderNumber());
+                }
             } else {
-                logger.warn("Payment not succeed, but event accepted: {}", orderStatus.getOrderNumber());
+                logger.info("ignoring callback");
             }
 
         } catch (Exception e) {
@@ -180,19 +183,18 @@ public class AlfaBankPaymentExecutor implements PaymentExecutor {
     }
 
     private static Integer getCurrencyCodeAsIso4217(String code) throws PaymentExecutionException {
-        /*switch (code) {
+        switch (code) {
             case "RUB": return 643;
             case "USD": return 840;
             case "EUR": return 978;
-        }*/
-        return 810;
+        }
 
-        //throw new PaymentExecutionException("Unknown currency code");
+        throw new PaymentExecutionException("Unknown currency code");
     }
 
     private static String getCurrencyCodeFromIso4217(String code) throws PaymentExecutionException {
         switch (code) {
-            case "810": case "643": return "RUB"; // TODO: убрать 810, это RUR
+            case "643": return "RUB";
             case "840": return "USD";
             case "978": return "EUR";
         }
