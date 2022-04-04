@@ -69,7 +69,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
             receiptDTO.getItems().add(itemDTO);
 
             YandexKassaReceiptCustomerDTO customerDTO = new YandexKassaReceiptCustomerDTO();
-            customerDTO.setEmail(request.getParams().get("customer_full_name"));
+            customerDTO.setFull_name(request.getParams().get("customer_full_name"));
             customerDTO.setEmail(request.getParams().get("customer_email"));
             receiptDTO.setCustomer(customerDTO);
         }
@@ -78,8 +78,8 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
             YandexKassaPaymentDTO result = createPayment(paymentDTO, params.get(PARAMETER_CLIENT_ID), params.get(PARAMETER_SECRET_KEY));
 
             Map<String, String> responseParams = new HashMap<>();
-            request.getParams().put("confirmation_url", result.getConfirmation().getConfirmation_url());
-            return new PaymentExecutionResultDTO(false, result.getId(), request.getParams()); // TODO: responseParams не используется, похоже на опечатку
+            responseParams.put("confirmation_url", result.getConfirmation().getConfirmation_url());
+            return new PaymentExecutionResultDTO(false, result.getId(), responseParams);
         } catch (Exception e) {
             logger.error("Failed to execute payment with Yandex.Kassa", e);
             throw new PaymentExecutionException(e.getMessage());
