@@ -56,7 +56,7 @@ public class AlfaBankPaymentExecutor implements PaymentExecutor {
         String orderNumber = paymentSystemFields.get("order_prefix") + orderNumberService.getOrderNumber();
         registerOrderDTO.setOrderNumber(orderNumber);
         Double amount = FinanceUtils.toFractional2Rounded(request.getAmount());
-        registerOrderDTO.setAmount(Long.valueOf(amount.toString().replace(".", "")));
+        registerOrderDTO.setAmount((long)(amount * 100));
         registerOrderDTO.setCurrency(getCurrencyCodeAsIso4217(request.getCurrencyCode()));
 
         String returnUrl = request.getParams().containsKey(PARAMETER_REDIRECT_URL) ? request.getParams().get(PARAMETER_REDIRECT_URL) : null;
