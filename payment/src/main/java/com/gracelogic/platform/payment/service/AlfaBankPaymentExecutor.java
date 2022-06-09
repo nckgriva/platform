@@ -126,7 +126,7 @@ public class AlfaBankPaymentExecutor implements PaymentExecutor {
                 if (orderStatus.getOrderStatus() != null && orderStatus.getOrderStatus() == 2) {
                     ProcessPaymentRequest req = new ProcessPaymentRequest();
                     req.setExternalIdentifier(statusRequest.getOrderId());
-                    req.setRegisteredAmount(orderStatus.getAmount() / 10000.0d);
+                    req.setRegisteredAmount(orderStatus.getAmount() / 100.0d);
                     req.setPaymentUID(orderStatus.getOrderNumber());
                     req.setCurrency(getCurrencyCodeFromIso4217(orderStatus.getCurrency()));
                     paymentService.processPayment(paymentSystem.getId(), req, null);
