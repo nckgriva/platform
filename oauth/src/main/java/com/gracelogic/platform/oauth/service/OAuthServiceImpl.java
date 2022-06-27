@@ -51,6 +51,10 @@ public class OAuthServiceImpl implements OAuthService {
     @Autowired
     private OAuthServiceProvider esia;
 
+    @Qualifier("eais")
+    @Autowired
+    private OAuthServiceProvider eais;
+
     @Qualifier("apple")
     @Autowired
     private OAuthServiceProvider apple;
@@ -79,9 +83,11 @@ public class OAuthServiceImpl implements OAuthService {
                 dto.setUrl(linkedin.buildAuthRedirect(redirectUri));
             } else if (dto.getId().equals(DataConstants.OAuthProviders.ESIA.getValue())) {
                 dto.setUrl(esia.buildAuthRedirect(redirectUri));
+            } else if (dto.getId().equals(DataConstants.OAuthProviders.EAIS.getValue())) {
+                dto.setUrl(eais.buildAuthRedirect(redirectUri));
             }
 
-            dtos.add(dto);
+        dtos.add(dto);
         }
 
         return dtos;
@@ -107,6 +113,8 @@ public class OAuthServiceImpl implements OAuthService {
             return DataConstants.OAuthIdentifierTypes.GOOGLE.getValue();
         } else if (authProviderId.equals(DataConstants.OAuthProviders.ESIA.getValue())) {
             return DataConstants.OAuthIdentifierTypes.ESIA.getValue();
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.EAIS.getValue())) {
+            return DataConstants.OAuthIdentifierTypes.EAIS.getValue();
         } else if (authProviderId.equals(DataConstants.OAuthProviders.APPLE.getValue())) {
             return DataConstants.OAuthIdentifierTypes.APPLE.getValue();
         } else {
@@ -132,6 +140,8 @@ public class OAuthServiceImpl implements OAuthService {
             user = google.processAuthorization(code, accessToken, redirectUri);
         } else if (authProviderId.equals(DataConstants.OAuthProviders.ESIA.getValue())) {
             user = esia.processAuthorization(code, accessToken, redirectUri);
+        } else if (authProviderId.equals(DataConstants.OAuthProviders.EAIS.getValue())) {
+            user = eais.processAuthorization(code, accessToken, redirectUri);
         } else if (authProviderId.equals(DataConstants.OAuthProviders.APPLE.getValue())) {
             user = apple.processAuthorization(code, accessToken, redirectUri);
         }

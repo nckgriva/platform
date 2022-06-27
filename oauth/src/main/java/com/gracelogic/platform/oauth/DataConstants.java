@@ -13,7 +13,8 @@ public class DataConstants {
         GOOGLE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e76")),
         LINKEDIN(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e77")),
         ESIA(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e78")),
-        APPLE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e79"));
+        APPLE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e79")),
+        EAIS(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e7a"));
 
         private UUID value;
 
@@ -34,7 +35,8 @@ public class DataConstants {
         GOOGLE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e85")),
         LINKEDIN(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e86")),
         ESIA(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e87")),
-        APPLE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e88"));
+        APPLE(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e88")),
+        EAIS(UUID.fromString("54480ce1-00eb-4179-a2b6-f74daa6b9e75"));
 
         private UUID value;
 

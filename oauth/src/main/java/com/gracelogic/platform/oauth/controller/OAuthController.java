@@ -58,6 +58,10 @@ public class OAuthController extends AbstractAuthorizedController {
     @Autowired
     private OAuthServiceProvider esia;
 
+    @Qualifier("eais")
+    @Autowired
+    private OAuthServiceProvider eais;
+
     @Qualifier("apple")
     @Autowired
     private OAuthServiceProvider apple;
@@ -192,6 +196,19 @@ public class OAuthController extends AbstractAuthorizedController {
             } catch (Exception e) {
                 logger.error("Failed to process user via esia", e);
             }
+        } else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.EAIS.name())) {
+            try {
+                String additionalParameters = null;
+                if (fwd != null) {
+                    additionalParameters = "?fwd=" + fwd;
+                }
+                String requestUri = eais.buildRedirectUri(additionalParameters, null);
+                logger.info("REQUEST_URI: " + requestUri);
+
+                user = eais.processAuthorization(code, null, requestUri);
+            } catch (Exception e) {
+                logger.error("Failed to process user via eais", e);
+            }
         } else if (authProvider.equalsIgnoreCase(DataConstants.OAuthProviders.APPLE.name())) {
             try {
                 String additionalParameters = null;
@@ -224,7 +241,7 @@ public class OAuthController extends AbstractAuthorizedController {
         SessionBasedAuthentication authentication = null;
         try {
             authentication = (SessionBasedAuthentication) authenticationManager.authenticate(
-                    new SessionBasedAuthentication(user.getId(), null, ServletUtils.getRemoteAddress(request), com.gracelogic.platform.user.service.DataConstants.IdentifierTypes.USER_ID.getValue(), true)
+                    new SessionBasedAuthentication(user.getId().toString(), null, ServletUtils.getRemoteAddress(request), DataConstants.OAuthIdentifierTypes.valueOf(authProvider.toUpperCase()).getValue(), true)
             );
         } catch (Exception e) {
             exception = e;
