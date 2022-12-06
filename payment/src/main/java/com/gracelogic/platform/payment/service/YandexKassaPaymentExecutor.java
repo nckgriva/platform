@@ -131,7 +131,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
 
     private static YandexKassaPaymentDTO createPayment(YandexKassaCreatePaymentDTO request, String shopId, String secret) throws Exception {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
-        String uri = API_URL + "/api/v3/payments";
+        String uri = API_URL + "/v3/payments";
         logger.debug("request url: {}", uri);
         HttpPost sendMethod = new HttpPost(uri);
         sendMethod.addHeader("Authorization", "Basic " + Utils.getBase64Authorization(shopId, secret));
@@ -151,7 +151,7 @@ public class YandexKassaPaymentExecutor implements PaymentExecutor {
 
     private static YandexKassaPaymentDTO getPayment(String id, String shopId, String secret) throws Exception {
         CloseableHttpClient httpClient = HttpClientUtils.getMultithreadedUnsecuredClient();
-        String uri = API_URL + "/api/v3/payments/" + id;
+        String uri = API_URL + "/v3/payments/" + id;
         logger.debug("request url: {}", uri);
         HttpGet sendMethod = new HttpGet(uri);
         sendMethod.addHeader("Authorization", "Basic " + Utils.getBase64Authorization(shopId, secret));
