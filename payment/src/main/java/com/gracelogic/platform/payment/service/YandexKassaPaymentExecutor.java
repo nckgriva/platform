@@ -37,7 +37,7 @@ import static org.apache.http.entity.ContentType.APPLICATION_JSON;
  https://yookassa.ru
 */
 public class YandexKassaPaymentExecutor implements PaymentExecutor {
-    private static final String API_URL = "https://payment.yandex.net";
+    private static final String API_URL = "https://api.yookassa.ru";
     private static final ObjectMapper mapper = new ObjectMapper();
     private static Logger logger = LoggerFactory.getLogger(YandexKassaPaymentExecutor.class);
 
