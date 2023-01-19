@@ -1054,7 +1054,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Passphrase updatePassphrase(User user, String value, UUID passphraseTypeId, UUID referenceObjectId, boolean archiveOtherPassphrases) throws InvalidPassphraseException {
-        PassphraseType passphraseType = ds.get(PassphraseType.class, passphraseTypeId);
+        PassphraseType passphraseType = idObjectService.getObjectById(PassphraseType.class, passphraseTypeId);
         if (StringUtils.isEmpty(value)) {
             throw new InvalidPassphraseException();
         } else {
