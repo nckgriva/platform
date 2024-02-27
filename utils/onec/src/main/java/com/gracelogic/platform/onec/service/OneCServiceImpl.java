@@ -1,5 +1,6 @@
 package com.gracelogic.platform.onec.service;
 
+import com.gracelogic.platform.finance.FinanceUtils;
 import com.gracelogic.platform.onec.dto.BankPayment;
 import com.gracelogic.platform.onec.exception.*;
 import org.apache.commons.lang3.StringUtils;
@@ -202,6 +203,79 @@ public class OneCServiceImpl implements OneCService {
 
     @Override
     public String exportBankPayments(List<BankPayment> payments) {
-        return null;
+        StringBuilder sb = new StringBuilder();
+        sb.append("1CClientBankExchange\n" +
+                "ВерсияФормата=1.03\n" +
+                "Кодировка=Windows\n" +
+                "Отправитель=Контур.Бухгалтерия");
+        Date startDate = null;
+        Date endDate = null;
+        String accountNumber = null;
+        for (BankPayment payment : payments) {
+            if (startDate == null) {
+                startDate = payment.getCreateDate();
+            }
+            else if (startDate.getTime() > payment.getCreateDate().getTime()) {
+                startDate = payment.getCreateDate();
+            }
+            if (endDate == null) {
+                endDate = payment.getCreateDate();
+            }
+            else if (endDate.getTime() < payment.getCreateDate().getTime()) {
+                endDate = payment.getCreateDate();
+            }
+            if (StringUtils.isEmpty(accountNumber) && payment.getPayerBankAccount() != null) {
+                accountNumber = payment.getPayerBankAccount().getRaschAccount();
+            }
+        }
+
+        if (startDate == null || endDate == null || StringUtils.isEmpty(accountNumber)) {
+            return null;
+        }
+
+        sb.append("ДатаНачала=" + dateFormat.format(startDate) + "\n" +
+                "ДатаКонца=" + dateFormat.format(endDate) + "\n" +
+                "РасчСчет=" + accountNumber);
+
+        for (BankPayment payment : payments) {
+            sb.append("СекцияДокумент=Платежное поручение");
+
+            sb.append("Номер=" + payment.getNumber());
+            sb.append("Дата=" + payment.getCreateDate());
+            sb.append("Сумма=" + FinanceUtils.round(payment.getAmount(), 2));
+
+            if (payment.getPayerBankAccount() != null && payment.getPayerBankAccount().getOrganization() != null) {
+                sb.append("ПлательщикСчет=" + payment.getPayerBankAccount().getRaschAccount());
+                sb.append("Плательщик=" + payment.getPayerBankAccount().getOrganization().getInn() + " " + payment.getPayerBankAccount().getOrganization().getName());
+                sb.append("ПлательщикИНН=" + payment.getPayerBankAccount().getOrganization().getInn());
+                sb.append("ПлательщикКПП=" + payment.getPayerBankAccount().getOrganization().getKpp());
+                sb.append("Плательщик1=" + payment.getPayerBankAccount().getOrganization().getName());
+                sb.append("ПлательщикРасчСчет=" + payment.getPayerBankAccount().getRaschAccount());
+                sb.append("ПлательщикБанк1=" + payment.getPayerBankAccount().getBankName());
+                sb.append("ПлательщикБанк2=" + payment.getPayerBankAccount().getBankCity());
+                sb.append("ПлательщикБИК=" + payment.getPayerBankAccount().getBik());
+                sb.append("ПлательщикКорсчет=" + payment.getPayerBankAccount().getCorrAccount());
+            }
+            if (payment.getRecipientBankAccount() != null && payment.getRecipientBankAccount().getOrganization() != null) {
+                sb.append("ПолучательСчет=" + payment.getRecipientBankAccount().getRaschAccount());
+                sb.append("Получатель=" + payment.getRecipientBankAccount().getOrganization().getInn() + " " + payment.getPayerBankAccount().getOrganization().getName());
+                sb.append("ПолучательИНН=" + payment.getRecipientBankAccount().getOrganization().getInn());
+                sb.append("ПолучательКПП=" + payment.getRecipientBankAccount().getOrganization().getKpp());
+                sb.append("Получатель1=" + payment.getRecipientBankAccount().getOrganization().getName());
+                sb.append("ПолучательРасчСчет=" + payment.getRecipientBankAccount().getRaschAccount());
+                sb.append("ПолучательБанк1=" + payment.getRecipientBankAccount().getBankName());
+                sb.append("ПолучательБанк2=" + payment.getRecipientBankAccount().getBankCity());
+                sb.append("ПолучательБИК=" + payment.getRecipientBankAccount().getBik());
+                sb.append("ПолучательКорсчет=" + payment.getRecipientBankAccount().getCorrAccount());
+            }
+            sb.append("ВидПлатежа=");
+            sb.append("ВидОплаты=01");
+            sb.append("НазначениеПлатежа=" + payment.getDescription());
+            sb.append("Очередность=5");
+            sb.append("КонецДокумента");
+        }
+        sb.append("КонецФайла");
+
+        return sb.toString();
     }
 }

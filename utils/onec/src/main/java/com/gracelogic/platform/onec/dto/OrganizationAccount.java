@@ -12,6 +12,8 @@ public class OrganizationAccount {
 
     private String raschAccount;
 
+    private String bankCity;
+
     private Organization organization = new Organization();
 
     public String getBankName() {
@@ -54,6 +56,14 @@ public class OrganizationAccount {
         this.organization = organization;
     }
 
+    public String getBankCity() {
+        return bankCity;
+    }
+
+    public void setBankCity(String bankCity) {
+        this.bankCity = bankCity;
+    }
+
     @Override
     public String toString() {
         return "OrganizationAccount{" +
@@ -61,6 +71,7 @@ public class OrganizationAccount {
                 ", bik='" + bik + '\'' +
                 ", corrAccount='" + corrAccount + '\'' +
                 ", raschAccount='" + raschAccount + '\'' +
+                ", bankCity='" + bankCity + '\'' +
                 ", organization=" + organization +
                 '}';
     }
