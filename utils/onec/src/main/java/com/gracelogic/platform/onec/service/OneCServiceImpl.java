@@ -229,13 +229,11 @@ public class OneCServiceImpl implements OneCService {
             }
         }
 
-        if (startDate == null || endDate == null || StringUtils.isEmpty(accountNumber)) {
-            return null;
+        if (startDate != null && endDate != null && !StringUtils.isEmpty(accountNumber)) {
+            sb.append("ДатаНачала=" + dateFormat.format(startDate) + "\n" +
+                    "ДатаКонца=" + dateFormat.format(endDate) + "\n" +
+                    "РасчСчет=" + accountNumber);
         }
-
-        sb.append("ДатаНачала=" + dateFormat.format(startDate) + "\n" +
-                "ДатаКонца=" + dateFormat.format(endDate) + "\n" +
-                "РасчСчет=" + accountNumber);
 
         for (BankPayment payment : payments) {
             sb.append("СекцияДокумент=Платежное поручение");
