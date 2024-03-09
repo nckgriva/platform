@@ -123,15 +123,17 @@ public class TemplateServiceImpl implements TemplateService {
             bodyTemplate = sb.toString();
         }
 
+        Content content = new Content();
 
         MustacheFactory mf = new DefaultMustacheFactory();
-        Mustache bodyMustache = mf.compile(new StringReader(bodyTemplate), templateTypeId.toString() + locale.toString() + "body");
-        Mustache titleMustache = mf.compile(new StringReader(titleTemplate), templateTypeId.toString() + locale.toString() + "title");
-
-        Content content = new Content();
-        content.setBody(bodyMustache.execute(new StringWriter(), params).toString());
-        content.setTitle(titleMustache.execute(new StringWriter(), params).toString());
-
+        if (StringUtils.isEmpty(titleTemplate)) {
+            Mustache titleMustache = mf.compile(new StringReader(titleTemplate), templateTypeId.toString() + locale.toString() + "title");
+            content.setTitle(titleMustache.execute(new StringWriter(), params).toString());
+        }
+        if (!StringUtils.isEmpty(bodyTemplate)) {
+            Mustache bodyMustache = mf.compile(new StringReader(bodyTemplate), templateTypeId.toString() + locale.toString() + "body");
+            content.setBody(bodyMustache.execute(new StringWriter(), params).toString());
+        }
         return content;
     }
 }
