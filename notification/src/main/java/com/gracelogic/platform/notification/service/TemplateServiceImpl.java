@@ -126,7 +126,7 @@ public class TemplateServiceImpl implements TemplateService {
         Content content = new Content();
 
         MustacheFactory mf = new DefaultMustacheFactory();
-        if (StringUtils.isEmpty(titleTemplate)) {
+        if (!StringUtils.isEmpty(titleTemplate)) {
             Mustache titleMustache = mf.compile(new StringReader(titleTemplate), templateTypeId.toString() + locale.toString() + "title");
             content.setTitle(titleMustache.execute(new StringWriter(), params).toString());
         }

@@ -207,7 +207,7 @@ public class OneCServiceImpl implements OneCService {
         sb.append("1CClientBankExchange\n" +
                 "ВерсияФормата=1.03\n" +
                 "Кодировка=Windows\n" +
-                "Отправитель=Контур.Бухгалтерия");
+                "Отправитель=Контур.Бухгалтерия\n");
         Date startDate = null;
         Date endDate = null;
         String accountNumber = null;
@@ -232,47 +232,47 @@ public class OneCServiceImpl implements OneCService {
         if (startDate != null && endDate != null && !StringUtils.isEmpty(accountNumber)) {
             sb.append("ДатаНачала=" + dateFormat.format(startDate) + "\n" +
                     "ДатаКонца=" + dateFormat.format(endDate) + "\n" +
-                    "РасчСчет=" + accountNumber);
+                    "РасчСчет=" + accountNumber + "\n");
         }
 
         for (BankPayment payment : payments) {
-            sb.append("СекцияДокумент=Платежное поручение");
+            sb.append("СекцияДокумент=Платежное поручение\n");
 
-            sb.append("Номер=" + payment.getNumber());
-            sb.append("Дата=" + payment.getCreateDate());
-            sb.append("Сумма=" + FinanceUtils.round(payment.getAmount(), 2));
+            sb.append("Номер=" + payment.getNumber() + "\n");
+            sb.append("Дата=" + dateFormat.format(payment.getCreateDate()) + "\n");
+            sb.append("Сумма=" + FinanceUtils.round(payment.getAmount(), 2) + "\n");
 
             if (payment.getPayerBankAccount() != null && payment.getPayerBankAccount().getOrganization() != null) {
-                sb.append("ПлательщикСчет=" + payment.getPayerBankAccount().getRaschAccount());
-                sb.append("Плательщик=" + payment.getPayerBankAccount().getOrganization().getInn() + " " + payment.getPayerBankAccount().getOrganization().getName());
-                sb.append("ПлательщикИНН=" + payment.getPayerBankAccount().getOrganization().getInn());
-                sb.append("ПлательщикКПП=" + payment.getPayerBankAccount().getOrganization().getKpp());
-                sb.append("Плательщик1=" + payment.getPayerBankAccount().getOrganization().getName());
-                sb.append("ПлательщикРасчСчет=" + payment.getPayerBankAccount().getRaschAccount());
-                sb.append("ПлательщикБанк1=" + payment.getPayerBankAccount().getBankName());
-                sb.append("ПлательщикБанк2=" + payment.getPayerBankAccount().getBankCity());
-                sb.append("ПлательщикБИК=" + payment.getPayerBankAccount().getBik());
-                sb.append("ПлательщикКорсчет=" + payment.getPayerBankAccount().getCorrAccount());
+                sb.append("ПлательщикСчет=" + payment.getPayerBankAccount().getRaschAccount() + "\n");
+                sb.append("Плательщик=" + payment.getPayerBankAccount().getOrganization().getInn() + " " + payment.getPayerBankAccount().getOrganization().getName() + "\n");
+                sb.append("ПлательщикИНН=" + payment.getPayerBankAccount().getOrganization().getInn() + "\n");
+                sb.append("ПлательщикКПП=" + payment.getPayerBankAccount().getOrganization().getKpp() + "\n");
+                sb.append("Плательщик1=" + payment.getPayerBankAccount().getOrganization().getName() + "\n");
+                sb.append("ПлательщикРасчСчет=" + payment.getPayerBankAccount().getRaschAccount() + "\n");
+                sb.append("ПлательщикБанк1=" + payment.getPayerBankAccount().getBankName() + "\n");
+                sb.append("ПлательщикБанк2=" + payment.getPayerBankAccount().getBankCity() + "\n");
+                sb.append("ПлательщикБИК=" + payment.getPayerBankAccount().getBik() + "\n");
+                sb.append("ПлательщикКорсчет=" + payment.getPayerBankAccount().getCorrAccount() + "\n");
             }
             if (payment.getRecipientBankAccount() != null && payment.getRecipientBankAccount().getOrganization() != null) {
-                sb.append("ПолучательСчет=" + payment.getRecipientBankAccount().getRaschAccount());
-                sb.append("Получатель=" + payment.getRecipientBankAccount().getOrganization().getInn() + " " + payment.getPayerBankAccount().getOrganization().getName());
-                sb.append("ПолучательИНН=" + payment.getRecipientBankAccount().getOrganization().getInn());
-                sb.append("ПолучательКПП=" + payment.getRecipientBankAccount().getOrganization().getKpp());
-                sb.append("Получатель1=" + payment.getRecipientBankAccount().getOrganization().getName());
-                sb.append("ПолучательРасчСчет=" + payment.getRecipientBankAccount().getRaschAccount());
-                sb.append("ПолучательБанк1=" + payment.getRecipientBankAccount().getBankName());
-                sb.append("ПолучательБанк2=" + payment.getRecipientBankAccount().getBankCity());
-                sb.append("ПолучательБИК=" + payment.getRecipientBankAccount().getBik());
-                sb.append("ПолучательКорсчет=" + payment.getRecipientBankAccount().getCorrAccount());
+                sb.append("ПолучательСчет=" + payment.getRecipientBankAccount().getRaschAccount() + "\n");
+                sb.append("Получатель=" + payment.getRecipientBankAccount().getOrganization().getInn() + " " + payment.getPayerBankAccount().getOrganization().getName() + "\n");
+                sb.append("ПолучательИНН=" + payment.getRecipientBankAccount().getOrganization().getInn() + "\n");
+                sb.append("ПолучательКПП=" + payment.getRecipientBankAccount().getOrganization().getKpp() + "\n");
+                sb.append("Получатель1=" + payment.getRecipientBankAccount().getOrganization().getName() + "\n");
+                sb.append("ПолучательРасчСчет=" + payment.getRecipientBankAccount().getRaschAccount() + "\n");
+                sb.append("ПолучательБанк1=" + payment.getRecipientBankAccount().getBankName() + "\n");
+                sb.append("ПолучательБанк2=" + payment.getRecipientBankAccount().getBankCity() + "\n");
+                sb.append("ПолучательБИК=" + payment.getRecipientBankAccount().getBik() + "\n");
+                sb.append("ПолучательКорсчет=" + payment.getRecipientBankAccount().getCorrAccount() + "\n");
             }
-            sb.append("ВидПлатежа=");
-            sb.append("ВидОплаты=01");
-            sb.append("НазначениеПлатежа=" + payment.getDescription());
-            sb.append("Очередность=5");
-            sb.append("КонецДокумента");
+            sb.append("ВидПлатежа=" + "\n");
+            sb.append("ВидОплаты=01" + "\n");
+            sb.append("НазначениеПлатежа=" + payment.getDescription() + "\n");
+            sb.append("Очередность=5" + "\n");
+            sb.append("КонецДокумента" + "\n");
         }
-        sb.append("КонецФайла");
+        sb.append("КонецФайла" + "\n");
 
         return sb.toString();
     }
