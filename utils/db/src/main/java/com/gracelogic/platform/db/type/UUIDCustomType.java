@@ -18,24 +18,8 @@ public class UUIDCustomType extends AbstractSingleColumnStandardBasicType {
     private static final JavaTypeDescriptor TYPE_DESCRIPTOR;
 
     static {
-        Properties properties = new Properties();
-        try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            properties.load(loader.getResourceAsStream("/db.properties"));
-        } catch (IOException e) {
-            throw new RuntimeException("Could not load properties!", e);
-        }
-
-        String dialect = properties.getProperty("dialect");
-        if (dialect.equals("postgres")) {
-            SQL_DESCRIPTOR = PostgresUUIDType.PostgresUUIDSqlTypeDescriptor.INSTANCE;
-            System.err.println("UUID for: PostgreSQL");
-        } else if (dialect.equals("mssql")) {
-            SQL_DESCRIPTOR = VarcharTypeDescriptor.INSTANCE;
-            System.err.println("UUID for: MSSQL");
-        } else {
-            throw new UnsupportedOperationException("Unsupported database!");
-        }
+        SQL_DESCRIPTOR = PostgresUUIDType.PostgresUUIDSqlTypeDescriptor.INSTANCE;
+        System.err.println("UUID for: PostgreSQL");
 
         TYPE_DESCRIPTOR = UUIDTypeDescriptor.INSTANCE;
     }

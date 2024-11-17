@@ -18,22 +18,7 @@ public class StringJsonUserType implements UserType {
     private static int TYPE;
 
     static {
-        Properties properties = new Properties();
-        try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            properties.load(loader.getResourceAsStream("/db.properties"));
-        } catch (IOException e) {
-            throw new RuntimeException("Could not load properties!", e);
-        }
-
-        String dialect = properties.getProperty("dialect");
-        if (dialect.equals("postgres")) {
-            TYPE = Types.OTHER;
-        } else if (dialect.equals("mssql")) {
-            TYPE = Types.VARCHAR;
-        } else {
-            throw new UnsupportedOperationException("Unsupported database!");
-        }
+        TYPE = Types.OTHER;
     }
 
     /**
