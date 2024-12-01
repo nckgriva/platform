@@ -2,10 +2,15 @@ package com.gracelogic.platform.notification.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
+import com.gracelogic.platform.db.model.StringJsonUserType;
+import io.hypersistence.utils.hibernate.type.json.JsonStringType;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import org.hibernate.type.SqlTypes;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -16,7 +21,6 @@ public class Notification extends IdObject<UUID> {
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     @Access(AccessType.PROPERTY)
     private UUID id;
 
@@ -47,7 +51,7 @@ public class Notification extends IdObject<UUID> {
     @Column(name = "BODY", nullable = false)
     private String body;
 
-    @Type(type = "stringJsonObject")
+    @Type(JsonStringType.class)
     @Column(columnDefinition = "json", nullable = true, name = "FIELDS")
     private String fields;
 
@@ -58,7 +62,6 @@ public class Notification extends IdObject<UUID> {
     private String errorDescription;
 
     @Column(name = "REFERENCE_OBJECT_ID", nullable = true)
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     private UUID referenceObjectId; //userId or other custom group field
 
     @Override

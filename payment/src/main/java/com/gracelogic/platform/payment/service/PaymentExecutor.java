@@ -6,8 +6,8 @@ import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.payment.model.PaymentSystem;
 import org.springframework.context.ApplicationContext;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import java.util.UUID;
 

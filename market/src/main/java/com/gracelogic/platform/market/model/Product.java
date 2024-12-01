@@ -5,7 +5,7 @@ import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ public class Product extends IdObject<UUID> {
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
+    
     @Access(AccessType.PROPERTY)
     private UUID id;
 
@@ -42,7 +42,7 @@ public class Product extends IdObject<UUID> {
     private OwnershipType ownershipType; //Приобритается по подписке или разовым платежом
 
     @Column(name = "REFERENCE_OBJECT_ID", nullable = false)
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
+    
     private UUID referenceObjectId;
 
     @Column(name = "LIFETIME", nullable = true)

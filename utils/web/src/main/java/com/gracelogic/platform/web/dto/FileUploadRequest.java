@@ -1,15 +1,15 @@
 package com.gracelogic.platform.web.dto;
 
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 public class FileUploadRequest {
-    private CommonsMultipartFile content;
+    private MultipartFile content;
 
-    public CommonsMultipartFile getContent() {
+    public MultipartFile getContent() {
         return content;
     }
 
-    public void setContent(CommonsMultipartFile content) {
+    public void setContent(MultipartFile content) {
         this.content = content;
     }
 }

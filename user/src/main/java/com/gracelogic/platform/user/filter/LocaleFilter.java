@@ -6,8 +6,8 @@ import com.gracelogic.platform.user.dto.AuthorizedUser;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 public class LocaleFilter extends AbstractAuthorizedController implements Filter {

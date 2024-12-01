@@ -2,13 +2,10 @@ package com.gracelogic.platform.survey.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
@@ -16,19 +13,13 @@ import java.util.UUID;
 
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "SURVEY_QUESTION")
-@TypeDefs({
-        @TypeDef(
-                name = "string-array",
-                typeClass = StringArrayType.class
-        ),
-})
 public class SurveyQuestion extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @Access(AccessType.PROPERTY)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
+    
     private UUID id;
 
     @Column(name = CREATED, nullable = false)
@@ -83,11 +74,9 @@ public class SurveyQuestion extends IdObject<UUID> {
     @Column(name = "ATTACHMENT_EXTENSIONS", nullable = true, length = 4000)
     private String attachmentExtensions;
 
-    @Type(type = "string-array")
     @Column(name = "MATRIX_ROWS", nullable = true, length = 4000)
     private String[] matrixRows;
 
-    @Type(type = "string-array")
     @Column(name = "MATRIX_COLUMNS", nullable = true, length = 4000)
     private String[] matrixColumns;
 

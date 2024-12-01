@@ -5,7 +5,7 @@ import com.gracelogic.platform.task.DataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Query;
+import jakarta.persistence.Query;
 
 public abstract class AbstractTaskDaoImpl extends BaseDao implements TaskDao {
     private static Logger logger = LoggerFactory.getLogger(AbstractTaskDaoImpl.class);

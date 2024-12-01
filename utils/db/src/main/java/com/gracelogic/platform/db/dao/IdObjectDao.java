@@ -3,7 +3,7 @@ package com.gracelogic.platform.db.dao;
 
 import com.gracelogic.platform.db.model.IdObject;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;

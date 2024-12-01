@@ -2,10 +2,14 @@ package com.gracelogic.platform.feedback.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
+import io.hypersistence.utils.hibernate.type.json.JsonStringType;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import org.hibernate.type.SqlTypes;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -18,7 +22,7 @@ public class Feedback extends IdObject<UUID> {
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
+    
     private UUID id;
 
     @Column(name = CREATED, nullable = false)
@@ -32,7 +36,7 @@ public class Feedback extends IdObject<UUID> {
     @JoinColumn(name = "FEEDBACK_TYPE_ID", nullable = false)
     private FeedbackType feedbackType;
 
-    @Type(type = "stringJsonObject")
+    @Type(JsonStringType.class)
     @Column(columnDefinition = "json", nullable = true)
     private String fields;
 

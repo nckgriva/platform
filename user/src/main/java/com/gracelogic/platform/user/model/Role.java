@@ -5,7 +5,7 @@ import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.dictionary.model.Dictionary;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +18,6 @@ public class Role extends IdObject<UUID> implements Dictionary {
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     @Access(AccessType.PROPERTY)
     private UUID id;
 
