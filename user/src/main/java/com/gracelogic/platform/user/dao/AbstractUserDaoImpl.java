@@ -2,13 +2,13 @@ package com.gracelogic.platform.user.dao;
 
 import com.gracelogic.platform.db.dao.BaseDao;
 import com.gracelogic.platform.user.model.Identifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
 public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
-    private static Logger logger = LoggerFactory.getLogger(AbstractUserDaoImpl.class);
+    private static Log logger = LogFactory.getLog(AbstractUserDaoImpl.class);
 
     @Override
     public Identifier findIdentifier(UUID identifierTypeId, String identifierValue, boolean enrich) {
@@ -27,7 +27,7 @@ public abstract class AbstractUserDaoImpl extends BaseDao implements UserDao {
                 return null;
             }
         } catch (Exception e) {
-            logger.debug("Failed to get identifier by value: {}", identifierValue, e);
+            logger.debug("Failed to get identifier by value: %s".formatted(identifierValue), e);
         }
         return null;
     }

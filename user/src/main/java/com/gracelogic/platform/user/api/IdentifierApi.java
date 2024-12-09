@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping(value = Path.API_IDENTIFIER)
-@Secured(PlatformRole.ANONYMOUS)
 @Api(value = Path.API_IDENTIFIER, tags = {"Identifier API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class IdentifierApi extends AbstractAuthorizedController {

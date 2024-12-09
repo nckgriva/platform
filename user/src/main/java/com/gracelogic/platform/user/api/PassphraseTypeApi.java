@@ -28,7 +28,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_PASSPHRASE_TYPE)
-@Secured(PlatformRole.ANONYMOUS)
 @Api(value = Path.API_PASSPHRASE_TYPE, tags = {"PassphraseType API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class PassphraseTypeApi {

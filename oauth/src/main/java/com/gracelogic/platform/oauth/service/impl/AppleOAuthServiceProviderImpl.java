@@ -16,7 +16,8 @@ import com.gracelogic.platform.user.exception.InvalidPassphraseException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ import java.util.Map;
 
 @Service("apple")
 public class AppleOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
-    private static Logger logger = Logger.getLogger(AppleOAuthServiceProviderImpl.class);
+    private static Log logger = LogFactory.getLog(AppleOAuthServiceProviderImpl.class);
 
     private String ACCESS_TOKEN_ENDPOINT = "https://appleid.apple.com/auth/token";
     private String INFO_ENDPOINT = null;

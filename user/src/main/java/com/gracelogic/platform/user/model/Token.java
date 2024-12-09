@@ -47,7 +47,7 @@ public class Token extends IdObject<UUID> {
     private Identifier identifier;
 
     @Type(JsonType.class)
-    @Column(columnDefinition = "json", nullable = true)
+    @Column(name="additionalfields", columnDefinition = "json", nullable = true)
     private String additionalFields;
 
     @Override

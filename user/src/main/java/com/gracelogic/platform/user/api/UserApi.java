@@ -37,7 +37,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_USER)
-@Secured(PlatformRole.ANONYMOUS)
 @Api(value = Path.API_USER, tags = {"User API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class UserApi extends AbstractAuthorizedController {

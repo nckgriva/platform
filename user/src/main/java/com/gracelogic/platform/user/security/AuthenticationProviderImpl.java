@@ -7,10 +7,13 @@ import com.gracelogic.platform.user.exception.TokenExpiredException;
 import com.gracelogic.platform.user.exception.TokenNotFoundException;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.service.UserService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,9 +29,12 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
     @Autowired
     private IdObjectService idObjectService;
 
+    private final Log logger = LogFactory.getLog(this.getClass());
+
     @Override
-    public org.springframework.security.core.Authentication authenticate(org.springframework.security.core.Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         if (authentication instanceof SessionBasedAuthentication) {
+            logger.info("Initiate session based authentication");
             Identifier identifier = userService.processSignIn(((SessionBasedAuthentication) authentication).getIdentifierTypeId(), (String) authentication.getPrincipal(), (String) authentication.getCredentials(), ((SessionBasedAuthentication) authentication).getRemoteAddress(), false);
             if (identifier != null) {
                 User user = identifier.getUser();
@@ -45,6 +51,7 @@ public class AuthenticationProviderImpl implements AuthenticationProvider {
             return authentication;
 
         } else {
+            logger.info("Initiate token based authentication");
             TokenBasedAuthentication tokenBasedAuthentication = (TokenBasedAuthentication)authentication;
             Token token = idObjectService.getObjectById(Token.class, "left join fetch el.user " +
                     "left join fetch el.identifier", tokenBasedAuthentication.getToken());

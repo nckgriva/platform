@@ -10,8 +10,8 @@ import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentSystem;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ import java.util.Map;
  https://yoomoney.ru/
 */
 public class YandexMoneyPaymentExecutor implements PaymentExecutor {
-    private static Logger logger = LoggerFactory.getLogger(YandexMoneyPaymentExecutor.class);
+    private static Log logger = LogFactory.getLog(YandexMoneyPaymentExecutor.class);
 
     private static final String ACTION_CHECK = "checkOrder";
     private static final String ACTION_PAY = "paymentAviso";
@@ -70,16 +70,16 @@ public class YandexMoneyPaymentExecutor implements PaymentExecutor {
 
 
         logger.info("Yandex request");
-        logger.info("action: {}", action);
-        logger.info("customerNumber: {}", account);
-        logger.info("orderSumAmount: {}", amount);
-        logger.info("invoiceId: {}", payId);
-        logger.info("shopId: {}", shopId);
-        logger.info("md5: {}", hash);
-        logger.info("orderSumCurrencyPaycash: {}", orderSumCurrencyPaycash);
-        logger.info("paymentType: {}", paymentType);
-        logger.info("orderSumBankPaycash: {}", orderSumBankPaycash);
-        logger.info("orderCreatedDatetime: {}", payDate);
+        logger.info("action: %s".formatted(action));
+        logger.info("customerNumber: %s".formatted(account));
+        logger.info("orderSumAmount: %s".formatted(amount));
+        logger.info("invoiceId: %s".formatted(payId));
+        logger.info("shopId: %s".formatted(shopId));
+        logger.info("md5: %s".formatted(hash));
+        logger.info("orderSumCurrencyPaycash: %s".formatted(orderSumCurrencyPaycash));
+        logger.info("paymentType: %s".formatted(paymentType));
+        logger.info("orderSumBankPaycash: %s".formatted(orderSumBankPaycash));
+        logger.info("orderCreatedDatetime: %s".formatted(payDate));
 
         String calcString = String.format("%s;%s;%s;%s;%s;%s;%s;%s", action, amount, orderSumCurrencyPaycash, orderSumBankPaycash, shopId, payId, account, params.get(PARAMETER_SECRET_KEY));
 
@@ -136,7 +136,7 @@ public class YandexMoneyPaymentExecutor implements PaymentExecutor {
         }
 
         try {
-            logger.info("Response: {}", resp);
+            logger.info("Response: %s".formatted(resp));
             response.setCharacterEncoding("UTF-8");
             response.getWriter().print(resp);
             response.getWriter().flush();

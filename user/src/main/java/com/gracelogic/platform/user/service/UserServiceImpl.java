@@ -13,16 +13,15 @@ import com.gracelogic.platform.notification.service.TemplateService;
 import com.gracelogic.platform.user.dao.UserDao;
 import com.gracelogic.platform.user.dto.*;
 import com.gracelogic.platform.user.exception.*;
-import com.gracelogic.platform.user.filter.LocaleFilter;
 import com.gracelogic.platform.user.model.*;
 import com.gracelogic.platform.user.security.SessionBasedAuthentication;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.util.SubnetUtils;
-import org.slf4j.Logger;
 import org.quartz.CronExpression;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -38,7 +37,7 @@ import java.util.regex.Pattern;
 
 @Service("userService")
 public class UserServiceImpl implements UserService {
-    private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+    private static Log logger = LogFactory.getLog(UserServiceImpl.class);
 
     @Autowired
     private IdObjectService idObjectService;
@@ -70,7 +69,7 @@ public class UserServiceImpl implements UserService {
         Boolean oneSessionPerUser = propertyService.getPropertyValueAsBoolean("user:one_session_per_user");
         if (oneSessionPerUser != null && oneSessionPerUser) {
             List<Object[]> lastActiveUsersSession = userDao.getLastActiveUsersSessions();
-            logger.info("Loaded last users sessions: {}", lastActiveUsersSession.size());
+            logger.info("Loaded last users sessions: %s".formatted(lastActiveUsersSession.size()));
             for (Object[] obj : lastActiveUsersSession) {
                 UUID userId = UUID.fromString((String) obj[0]);
                 String sessionId = (String) obj[1];

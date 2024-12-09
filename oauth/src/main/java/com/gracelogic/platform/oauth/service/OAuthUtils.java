@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -14,7 +16,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OAuthUtils {
-    private static Logger logger = Logger.getLogger(OAuthUtils.class);
+    private static Log logger = LogFactory.getLog(OAuthUtils.class);
 
     public static Map<Object, Object> postJsonBodyReturnJson(String url, HashMap<String, String> params) {
         logger.info("Request to: " + url);

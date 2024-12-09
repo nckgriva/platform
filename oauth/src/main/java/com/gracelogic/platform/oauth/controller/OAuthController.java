@@ -12,7 +12,8 @@ import com.gracelogic.platform.user.security.SessionBasedAuthentication;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.ServletUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -75,7 +76,7 @@ public class OAuthController extends AbstractAuthorizedController {
     @Autowired
     private PropertyService propertyService;
 
-    private static Logger logger = Logger.getLogger(OAuthController.class);
+    private static Log logger = LogFactory.getLog(OAuthController.class);
 
     @RequestMapping(value = "/{authProvider}", method = RequestMethod.GET)
     public void process(HttpServletRequest request,

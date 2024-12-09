@@ -33,7 +33,6 @@ import java.util.Date;
 
 @Controller
 @RequestMapping(value = Path.API_AUTH)
-@Secured(PlatformRole.ANONYMOUS)
 @Api(value = Path.API_AUTH, tags = {"Auth API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class AuthApi extends AbstractAuthorizedController {

@@ -33,7 +33,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping(value = Path.API_AUTH_TOKEN)
-@Secured(PlatformRole.ANONYMOUS)
 @Api(value = Path.API_AUTH_TOKEN, tags = {"Token Auth API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class TokenAuthApi extends AbstractAuthorizedController {

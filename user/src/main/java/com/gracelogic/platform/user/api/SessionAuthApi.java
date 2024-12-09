@@ -37,7 +37,6 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping(value = Path.API_AUTH_SESSION)
-@Secured(PlatformRole.ANONYMOUS)
 @Api(value = Path.API_AUTH, tags = {"Session Auth API"},
         authorizations = @Authorization(value = "MybasicAuth"))
 public class SessionAuthApi extends AbstractAuthorizedController {

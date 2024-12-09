@@ -16,8 +16,8 @@ import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
 import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -54,7 +54,7 @@ public class FileStorageApi extends AbstractAuthorizedController {
     @Qualifier("filestorageMessageSource")
     private ResourceBundleMessageSource messageSource;
 
-    private static Logger logger = LoggerFactory.getLogger(FileStorageApi.class);
+    private static Log logger = LogFactory.getLog(FileStorageApi.class);
 
     @ApiOperation(
             value = "updateStoredFile",

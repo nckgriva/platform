@@ -36,7 +36,6 @@ import java.util.*;
 
 
 @Controller
-@Secured(PlatformRole.ANONYMOUS)
 @RequestMapping(value = Path.API_OAUTH)
 @Api(value = Path.API_OAUTH, tags = {"OAuth API"})
 public class OAuthApi extends AbstractAuthorizedController {
