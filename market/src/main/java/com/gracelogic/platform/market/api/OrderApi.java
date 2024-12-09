@@ -23,7 +23,6 @@ import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -38,8 +37,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_ORDER)
-@Api(value = Path.API_ORDER, tags = {"Order API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class OrderApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
@@ -64,16 +61,6 @@ public class OrderApi extends AbstractAuthorizedController {
     @Autowired
     private MarketService marketService;
 
-    @ApiOperation(
-            value = "getOrder",
-            notes = "Get Order",
-            response = OrderDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 400, message = "Object not found", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
     public ResponseEntity getOrder(@PathVariable(value = "id") UUID id,
@@ -89,16 +76,6 @@ public class OrderApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveOrder",
-            notes = "Save order",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
     public ResponseEntity saveOrder(@RequestBody OrderDTO orderDTO) {
@@ -132,16 +109,6 @@ public class OrderApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "executeOrder",
-            notes = "Execute order",
-            response = PaymentExecutionResultDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.POST, value = "/execute")
     @ResponseBody
     public ResponseEntity executeOrder(@RequestBody ExecuteOrderRequestDTO executeOrderRequestDTO) {
@@ -172,17 +139,6 @@ public class OrderApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "cancelOrder",
-            notes = "Cancel order",
-            response = PaymentExecutionResultDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not found"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('ORDER:CANCEL')")
     @RequestMapping(method = RequestMethod.POST, value = "/{orderId}/cancel")
     @ResponseBody
@@ -203,16 +159,6 @@ public class OrderApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "deleteOrder",
-            notes = "Delete order",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
     public ResponseEntity deleteOrder(@PathVariable(value = "id") UUID id) {
@@ -231,16 +177,6 @@ public class OrderApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "cancelSubscription",
-            notes = "Cancel subscription",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/cancel-subscription")
     @ResponseBody
     public ResponseEntity cancelSubscription(@PathVariable(value = "id") UUID id) {
@@ -260,15 +196,6 @@ public class OrderApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "getOrders",
-            notes = "Get list of orders",
-            response = EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity getOrders(
@@ -299,15 +226,6 @@ public class OrderApi extends AbstractAuthorizedController {
 
     }
 
-    @ApiOperation(
-            value = "getAvailableCurrencies",
-            notes = "Get list of available currencies",
-            response = List.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @RequestMapping(method = RequestMethod.GET, value = "/available-currencies")
     @ResponseBody
     public ResponseEntity getAvailableCurrencies() {

@@ -9,12 +9,8 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.feedback.Path;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
-import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -90,16 +86,6 @@ public class FeedbackApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<FeedbackDTO>>(feedbacks, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getFeedback",
-            notes = "Get feedback",
-            response = FeedbackDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 400, message = "Object not found", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('FEEDBACK:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody

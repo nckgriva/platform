@@ -17,7 +17,6 @@ import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,8 +36,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_USER)
-@Api(value = Path.API_USER, tags = {"User API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class UserApi extends AbstractAuthorizedController {
     @Autowired
     private UserService userService;
@@ -57,19 +54,9 @@ public class UserApi extends AbstractAuthorizedController {
     @Autowired
     private IdObjectService idObjectService;
 
-    @ApiOperation(
-            value = "signUp",
-            notes = "Sign up",
-            response = ResponseEntity.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/sign-up", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity signUp(@ApiParam(name = "signUpDTO", value = "signUpDTO")
-                                 @RequestBody SignUpDTO signUpDTO) {
+    public ResponseEntity signUp(@RequestBody SignUpDTO signUpDTO) {
         try {
             User user = lifecycleService.signUp(signUpDTO);
             return new ResponseEntity<>(new IDResponse(user.getId()), HttpStatus.OK);
@@ -84,29 +71,19 @@ public class UserApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "getUsers",
-            notes = "Change list of user with selected parameters",
-            response = ResponseEntity.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 403, message = "Forbidden"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('USER:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getUsers(@ApiParam(name = "identifierValue", value = "identifierValue") @RequestParam(value = "identifierValue", required = false) String identifierValue,
-                                   @ApiParam(name = "approved", value = "approved") @RequestParam(value = "approved", required = false) Boolean approved,
-                                   @ApiParam(name = "blocked", value = "blocked") @RequestParam(value = "blocked", required = false) Boolean blocked,
-                                   @ApiParam(name = "fetchRoles", value = "fetchRoles") @RequestParam(value = "fetchRoles", required = false) Boolean fetchRoles,
-                                   @ApiParam(name = "calculate", value = "calculate") @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
-                                   @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                   @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
-                                   @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                   @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
-                                   @ApiParam(name = "fields", value = "fields") @RequestParam Map<String, String> allRequestParams) {
+    public ResponseEntity getUsers(@RequestParam(value = "identifierValue", required = false) String identifierValue,
+                                   @RequestParam(value = "approved", required = false) Boolean approved,
+                                   @RequestParam(value = "blocked", required = false) Boolean blocked,
+                                   @RequestParam(value = "fetchRoles", required = false) Boolean fetchRoles,
+                                   @RequestParam(value = "calculate", defaultValue = "false") Boolean calculate,
+                                   @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                   @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
+                                   @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                   @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir,
+                                   @RequestParam Map<String, String> allRequestParams) {
 
         Map<String, String> fields = new HashMap<>();
         if (allRequestParams != null) {
@@ -129,19 +106,11 @@ public class UserApi extends AbstractAuthorizedController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getUser",
-            notes = "Get user",
-            response = UserDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
+
     @PreAuthorize("hasAuthority('USER:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
-    public ResponseEntity getUser(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
+    public ResponseEntity getUser(@PathVariable(value = "id") UUID id) {
         try {
             UserDTO userDTO = userService.getUser(id, true);
             return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
@@ -150,19 +119,10 @@ public class UserApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveUser",
-            notes = "Save user",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('USER:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
-    public ResponseEntity saveUser(@ApiParam(name = "user", value = "user") @RequestBody UserDTO userDTO) {
+    public ResponseEntity saveUser(@RequestBody UserDTO userDTO) {
         try {
             User user = lifecycleService.save(userDTO, true, true, getUser());
             return new ResponseEntity<>(new IDResponse(user.getId()), HttpStatus.OK);
@@ -177,20 +137,10 @@ public class UserApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "deleteUser",
-            notes = "Delete user",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 400, message = "Failed to delete user", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('USER:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
-    public ResponseEntity deleteUser(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id) {
+    public ResponseEntity deleteUser(@PathVariable(value = "id") UUID id) {
         try {
             lifecycleService.delete(idObjectService.getObjectById(User.class, id));
             return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);

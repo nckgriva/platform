@@ -13,8 +13,6 @@ import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -31,8 +29,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_TASK)
-@Api(value = Path.API_TASK, tags = {"Task API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class TaskApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
@@ -41,15 +37,6 @@ public class TaskApi extends AbstractAuthorizedController {
     @Autowired
     private  TaskService taskService;
 
-    @ApiOperation(
-            value = "getTaskExecutionLogs",
-            notes = "Get list of TaskExecutionLogs",
-            response =  EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/task-execution-log")
     @ResponseBody
@@ -72,15 +59,6 @@ public class TaskApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<TaskExecutionLogDTO>>(tels, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getTasks",
-            notes = "Get list of tasks",
-            response =  EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -98,15 +76,6 @@ public class TaskApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<TaskDTO>>(tasks, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getTask",
-            notes = "Get task",
-            response = TaskDTO .class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('TASK:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -119,15 +88,6 @@ public class TaskApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveTask",
-            notes = "Save task",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('TASK:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -141,15 +101,6 @@ public class TaskApi extends AbstractAuthorizedController {
 
     }
 
-    @ApiOperation(
-            value = "deleteTask",
-            notes = "Delete task",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
@@ -163,15 +114,6 @@ public class TaskApi extends AbstractAuthorizedController {
 
     }
 
-    @ApiOperation(
-            value = "resetTask",
-            notes = "Reset task execution",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TASK:RESET')")
     @RequestMapping(method = RequestMethod.POST, value = "/task-execution-log/{id}/reset")
     @ResponseBody

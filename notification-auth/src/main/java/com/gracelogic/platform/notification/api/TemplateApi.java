@@ -11,7 +11,6 @@ import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -25,8 +24,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_TEMPLATE)
-@Api(value = Path.API_TEMPLATE, tags = {"Template API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class TemplateApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
@@ -35,15 +32,6 @@ public class TemplateApi extends AbstractAuthorizedController {
     @Autowired
     private TemplateService templateService;
 
-    @ApiOperation(
-            value = "getTemplates",
-            notes = "Get list of templates",
-            response =  EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TEMPLATE:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -61,15 +49,6 @@ public class TemplateApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<TemplateDTO>>(templates, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getTemplate",
-            notes = "Get template",
-            response = TemplateDTO .class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('TEMPLATE:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -82,15 +61,6 @@ public class TemplateApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveTemplate",
-            notes = "Save template",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('TEMPLATE:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -104,15 +74,6 @@ public class TemplateApi extends AbstractAuthorizedController {
 
     }
 
-    @ApiOperation(
-            value = "deleteTemplate",
-            notes = "Delete template",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TEMPLATE:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
@@ -123,6 +84,5 @@ public class TemplateApi extends AbstractAuthorizedController {
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", messageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
     }
 }

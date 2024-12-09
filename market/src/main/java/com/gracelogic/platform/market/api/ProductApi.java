@@ -13,7 +13,6 @@ import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -27,8 +26,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_PRODUCT)
-@Api(value = Path.API_PRODUCT, tags = {"Product API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class ProductApi extends AbstractAuthorizedController {
 
     @Autowired
@@ -42,16 +39,6 @@ public class ProductApi extends AbstractAuthorizedController {
     @Autowired
     private MarketService marketService;
 
-    @ApiOperation(
-            value = "getProduct",
-            notes = "Get product",
-            response = ProductDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 400, message = "Object not found", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PRODUCT:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -65,16 +52,6 @@ public class ProductApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveProduct",
-            notes = "Save product",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('PRODUCT:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -92,16 +69,6 @@ public class ProductApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "deleteProduct",
-            notes = "Delete product",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 400, message = "Failed to delete product", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PRODUCT:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
@@ -114,15 +81,6 @@ public class ProductApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "getProducts",
-            notes = "Get list of products",
-            response =  EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PRODUCT:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody

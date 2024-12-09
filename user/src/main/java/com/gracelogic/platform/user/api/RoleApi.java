@@ -10,7 +10,6 @@ import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -24,8 +23,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_ROLE)
-@Api(value = Path.API_ROLE, tags = {"Role API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class RoleApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
@@ -34,15 +31,6 @@ public class RoleApi extends AbstractAuthorizedController {
     @Autowired
     private UserService userService;
 
-    @ApiOperation(
-            value = "getRoles",
-            notes = "Get list of roles, fetchGrants must be true",
-            response =  EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('ROLE:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -59,15 +47,6 @@ public class RoleApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<RoleDTO>>(roles, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getRole",
-            notes = "Get role",
-            response = RoleDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('ROLE:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -81,15 +60,6 @@ public class RoleApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveRole",
-            notes = "Save role",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('ROLE:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -103,26 +73,15 @@ public class RoleApi extends AbstractAuthorizedController {
 
     }
 
-    @ApiOperation(
-            value = "deleteRole",
-            notes = "Delete role",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('ROLE:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
     public ResponseEntity deleteRole(@PathVariable(value = "id") UUID id) {
         try {
-
             userService.deleteRole(id);
             return new ResponseEntity<EmptyResponse>(EmptyResponse.getInstance(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
     }
 }

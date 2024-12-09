@@ -15,7 +15,6 @@ import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_FILE_STORAGE)
-@Api(value = Path.API_FILE_STORAGE, tags = {"File Storage API"}, authorizations = @Authorization(value = "MybasicAuth"))
 public class FileStorageApi extends AbstractAuthorizedController {
     @Autowired
     private DownloadServiceImpl downloadService;
@@ -56,15 +54,6 @@ public class FileStorageApi extends AbstractAuthorizedController {
 
     private static Log logger = LogFactory.getLog(FileStorageApi.class);
 
-    @ApiOperation(
-            value = "updateStoredFile",
-            notes = "Update information about stored file",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/update")
     @ResponseBody
     public ResponseEntity updateStoredFile(@PathVariable(value = "id") UUID id,
@@ -91,15 +80,6 @@ public class FileStorageApi extends AbstractAuthorizedController {
         return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "uploadStoredFileData",
-            notes = "Update data of stored file",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/upload", consumes = "application/octet-stream")
     @ResponseBody
     public ResponseEntity uploadStoredFileData(@PathVariable(value = "id") UUID id,
@@ -125,15 +105,6 @@ public class FileStorageApi extends AbstractAuthorizedController {
         return new ResponseEntity<>(EmptyResponse.getInstance(), HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "downloadStoredFile",
-            notes = "Download stored file by id",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/{id}/download", method = RequestMethod.GET)
     public void downloadStoredFile(@PathVariable(value = "id") UUID id,
                                    HttpServletRequest request,
@@ -181,48 +152,30 @@ public class FileStorageApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "getStoredFiles",
-            notes = "Get list of stored files",
-            response = EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('FILE_STORAGE:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity getStoredFiles(@ApiParam(name = "referenceObjectId", value = "referenceObjectId") @RequestParam(value = "referenceObjectId", required = true) UUID referenceObjectId,
-                                         @ApiParam(name = "storeModeId", value = "storeModeId") @RequestParam(value = "storeModeId", required = false) UUID storeModeId,
-                                         @ApiParam(name = "dataAvailable", value = "dataAvailable") @RequestParam(value = "dataAvailable", required = false) Boolean dataAvailable,
-                                         @ApiParam(name = "enrich", value = "enrich") @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
-                                         @ApiParam(name = "calculate", value = "calculate") @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate,
-                                         @ApiParam(name = "start", value = "start") @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
-                                         @ApiParam(name = "page", value = "page") @RequestParam(value = "page", required = false) Integer page,
-                                         @ApiParam(name = "count", value = "count") @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
-                                         @ApiParam(name = "sortField", value = "sortField") @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
-                                         @ApiParam(name = "sortDir", value = "sortDir") @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
+    public ResponseEntity getStoredFiles(@RequestParam(value = "referenceObjectId", required = true) UUID referenceObjectId,
+                                         @RequestParam(value = "storeModeId", required = false) UUID storeModeId,
+                                         @RequestParam(value = "dataAvailable", required = false) Boolean dataAvailable,
+                                         @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich,
+                                         @RequestParam(value = "calculate", required = false, defaultValue = "false") Boolean calculate,
+                                         @RequestParam(value = "start", required = false, defaultValue = "0") Integer start,
+                                         @RequestParam(value = "page", required = false) Integer page,
+                                         @RequestParam(value = "count", required = false, defaultValue = "10") Integer length,
+                                         @RequestParam(value = "sortField", required = false, defaultValue = "el.created") String sortField,
+                                         @RequestParam(value = "sortDir", required = false, defaultValue = "desc") String sortDir) {
 
         EntityListResponse<StoredFileDTO> storedFiles = fileStorageService.getStoredFilesPaged(referenceObjectId, dataAvailable, storeModeId != null ? Collections.singletonList(storeModeId) : null, enrich, calculate, length, page, start, sortField, sortDir);
 
         return new ResponseEntity<>(storedFiles, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getStoredFile",
-            notes = "Get stored file",
-            response = StoredFileDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('FILE_STORAGE:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
-    public ResponseEntity getStoredFile(@ApiParam(name = "id", value = "id") @PathVariable(value = "id") UUID id,
-                                        @ApiParam(name = "enrich", value = "enrich") @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich) {
+    public ResponseEntity getStoredFile(@PathVariable(value = "id") UUID id,
+                                        @RequestParam(value = "enrich", required = false, defaultValue = "false") Boolean enrich) {
         try {
             StoredFileDTO storedFileDTO = fileStorageService.getStoredFile(id, enrich);
             return new ResponseEntity<>(storedFileDTO, HttpStatus.OK);
@@ -232,15 +185,6 @@ public class FileStorageApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "createStoredFile",
-            notes = "Create new stored file",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('FILE_STORAGE:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
