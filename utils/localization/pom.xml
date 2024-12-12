@@ -6,12 +6,12 @@
 
     <artifactId>platform-localization</artifactId>
     <name>localization</name>
-    <version>1.3</version>
+    <version>1.4</version>
     <packaging>jar</packaging>
     <parent>
         <groupId>com.gracelogic.platform</groupId>
         <artifactId>platform-parent</artifactId>
-        <version>1.3</version>
+        <version>1.4</version>
         <relativePath>../../parent</relativePath>
     </parent>
     <dependencies>
