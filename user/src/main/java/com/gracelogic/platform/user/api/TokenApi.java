@@ -13,7 +13,6 @@ import com.gracelogic.platform.user.service.token.TokenService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -27,8 +26,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_TOKEN)
-@Api(value = Path.API_TOKEN, tags = {"Token API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class TokenApi {
 
     @Autowired
@@ -42,15 +39,6 @@ public class TokenApi {
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource dbMessageSource;
 
-    @ApiOperation(
-            value = "getTokens",
-            notes = "Get list of tokens",
-            response =  EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TOKEN:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -67,15 +55,6 @@ public class TokenApi {
         return new ResponseEntity<EntityListResponse<TokenDTO>>(tokens, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getToken",
-            notes = "Get token",
-            response = TokenDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('TOKEN:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -88,15 +67,6 @@ public class TokenApi {
         }
     }
 
-    @ApiOperation(
-            value = "saveToken",
-            notes = "Save token",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('TOKEN:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -115,15 +85,6 @@ public class TokenApi {
         }
     }
 
-    @ApiOperation(
-            value = "deleteToken",
-            notes = "Delete token",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TOKEN:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
@@ -135,5 +96,4 @@ public class TokenApi {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
     }
-
 }

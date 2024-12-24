@@ -5,8 +5,6 @@ import com.gracelogic.platform.notification.Path;
 import com.gracelogic.platform.notification.dto.NotificationDTO;
 import com.gracelogic.platform.notification.service.NotificationService;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
-import com.gracelogic.platform.web.dto.ErrorResponse;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -23,8 +21,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_NOTIFICATION)
-@Api(value = Path.API_NOTIFICATION, tags = {"Notification API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class NotificationApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
@@ -33,15 +29,6 @@ public class NotificationApi extends AbstractAuthorizedController {
     @Autowired
     private NotificationService notificationService;
 
-    @ApiOperation(
-            value = "getNotifications",
-            notes = "Get list of notifications",
-            response =  EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('NOTIFICATION:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody

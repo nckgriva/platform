@@ -4,19 +4,19 @@ import com.gracelogic.platform.db.condition.OnPostgreSQLConditional;
 import com.gracelogic.platform.user.dao.AbstractUserDaoImpl;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.Query;
+import jakarta.persistence.Query;
 import java.math.BigInteger;
 import java.util.*;
 
 @Repository
 @Conditional(OnPostgreSQLConditional.class)
 public class UserDaoImpl extends AbstractUserDaoImpl {
-    private static Logger logger = LoggerFactory.getLogger(UserDaoImpl.class);
+    private static Log logger = LogFactory.getLog(UserDaoImpl.class);
 
     @Override
     public Integer getUsersCount(String identifierValue, Boolean approved, Boolean blocked, Map<String, String> fields) {
@@ -70,7 +70,7 @@ public class UserDaoImpl extends AbstractUserDaoImpl {
         }
 
         List<User> users = Collections.emptyList();
-        StringBuilder queryStr = new StringBuilder(String.format("select DISTINCT ON (%s,  el.id) * from {h-schema}cmn_user el ", sortField) +
+        StringBuilder queryStr = new StringBuilder(String.format("select DISTINCT ON (%s,  el.id) el.* from {h-schema}cmn_user el ", sortField) +
                 "inner join {h-schema}cmn_identifier iden on el.id = iden.user_id  where 1=1 ");
 
         Map<String, Object> params = new HashMap<>();

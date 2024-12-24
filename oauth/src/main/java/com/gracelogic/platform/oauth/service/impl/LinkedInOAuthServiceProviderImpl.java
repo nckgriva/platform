@@ -12,18 +12,19 @@ import com.gracelogic.platform.user.exception.InvalidIdentifierException;
 import com.gracelogic.platform.user.exception.InvalidPassphraseException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.net.URLEncoder;
 import java.util.Map;
 
 @Service("linkedin")
 public class LinkedInOAuthServiceProviderImpl extends AbstractOauthProvider implements OAuthServiceProvider {
-    private static Logger logger = Logger.getLogger(LinkedInOAuthServiceProviderImpl.class);
+    private static Log logger = LogFactory.getLog(LinkedInOAuthServiceProviderImpl.class);
 
     private String ACCESS_TOKEN_ENDPOINT = "https://www.linkedin.com/oauth/v2/accessToken";
     private String INFO_ENDPOINT = "https://api.linkedin.com/v1/people/~:(id,first-name,last-name,email-address)?oauth2_access_token=%s&format=json";

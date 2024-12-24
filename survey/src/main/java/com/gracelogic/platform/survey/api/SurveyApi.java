@@ -18,8 +18,6 @@ import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.web.ServletUtils;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
-import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.hibernate.PropertyValueException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,15 +28,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
 @RequestMapping(value = Path.API_SURVEY)
-@Api(value = Path.API_SURVEY, tags = {"Survey API"})
 public class SurveyApi extends AbstractAuthorizedController {
     @Autowired
     private SurveyService surveyService;
@@ -54,10 +51,6 @@ public class SurveyApi extends AbstractAuthorizedController {
     @Autowired
     private PropertyService propertyService;
 
-    @ApiOperation(
-            value = "exportResults",
-            notes = "Exports survey results to csv file"
-    )
     @PreAuthorize("hasAuthority('SURVEY_RESULT:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value="/{id}/export")
     public void exportResults(@PathVariable(value = "id") UUID surveyId, HttpServletResponse response) {
@@ -81,11 +74,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "getBaseUrl",
-            notes = "Returns base url for survey.link setup purposes",
-            response = PropertyDTO.class
-    )
     @RequestMapping(method = RequestMethod.GET, value = "/base_url")
     @ResponseBody
     @PreAuthorize("hasAuthority('SURVEY:SAVE')")
@@ -100,11 +88,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         return new ResponseEntity<>(propertyDTO, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getInitialSurveyInfo",
-            notes = "Sends initial survey information to user. This method does not begin the survey.",
-            response = SurveyIntroductionDTO.class
-    )
     @RequestMapping(method = RequestMethod.GET, value = "/{id}/info")
     @ResponseBody
     public ResponseEntity getInitialSurveyInfo(@PathVariable(value = "id") UUID surveyId) {
@@ -120,11 +103,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "getInitialSurveyInfoByExternalId",
-            notes = "Sends initial survey information to user. This method does not begin the survey.",
-            response = SurveyIntroductionDTO.class
-    )
     @RequestMapping(method = RequestMethod.GET, value = "/{id}/info_ext")
     @ResponseBody
     public ResponseEntity getInitialSurveyInfoByExternalId(@PathVariable(value = "id") String externalSurveyId) {
@@ -140,11 +118,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "startSurvey",
-            notes = "Starts survey and sends SurveyInteractionDTO with first page back to user",
-            response = SurveyInteractionDTO.class
-    )
     @RequestMapping(method = RequestMethod.GET, value = "/{id}/start")
     @ResponseBody
     public ResponseEntity startSurvey(HttpServletRequest request,
@@ -167,11 +140,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "startSurveyByExternalId",
-            notes = "Starts survey and sends SurveyInteractionDTO with first page back to user",
-            response = SurveyInteractionDTO.class
-    )
     @RequestMapping(method = RequestMethod.GET, value = "/{id}/start_ext")
     @ResponseBody
     public ResponseEntity startSurveyByExternalId(HttpServletRequest request,
@@ -194,11 +162,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "startSurveyPreview",
-            notes = "Starts survey preview. This method is only available to users which have SURVEY:SHOW grant.",
-            response = SurveyInteractionDTO.class
-    )
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}/start_preview")
     @ResponseBody
@@ -213,11 +176,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "startSurveyPreviewByExternalId",
-            notes = "Starts survey preview. This method is only available to users which have SURVEY:SHOW grant.",
-            response = SurveyInteractionDTO.class
-    )
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}/start_preview_ext")
     @ResponseBody
@@ -232,15 +190,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "getSurveys",
-            notes = "Get list of surveys",
-            response = EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -258,15 +207,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<SurveyDTO>>(properties, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getSurvey",
-            notes = "Get survey",
-            response = SurveyDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -281,15 +221,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "getSurveyByExternalId",
-            notes = "Get survey by external id",
-            response = SurveyDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/ext/{id}")
     @ResponseBody
@@ -304,15 +235,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveSurvey",
-            notes = "Save survey",
-            response = SurveyDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('SURVEY:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -343,15 +265,6 @@ public class SurveyApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "deleteSurvey",
-            notes = "Delete survey",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('SURVEY:DELETE')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}/delete")
     @ResponseBody

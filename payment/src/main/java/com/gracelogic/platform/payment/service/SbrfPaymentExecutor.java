@@ -12,12 +12,12 @@ import com.gracelogic.platform.payment.model.Payment;
 import com.gracelogic.platform.payment.model.PaymentSystem;
 import com.gracelogic.platform.web.ServletUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,7 +27,7 @@ import java.util.Map;
  Integration with SberBank payments via ATM
 */
 public class SbrfPaymentExecutor implements PaymentExecutor {
-    private static Logger logger = LoggerFactory.getLogger(SbrfPaymentExecutor.class);
+    private static Log logger = LogFactory.getLog(SbrfPaymentExecutor.class);
 
     private static final String ACTION_CHECK = "check";
     private static final String ACTION_PAY = "payment";
@@ -75,11 +75,11 @@ public class SbrfPaymentExecutor implements PaymentExecutor {
         }
 
         logger.info("Sbrf request");
-        logger.info("ACTION: {}", action);
-        logger.info("ACCOUNT: {}", account);
-        logger.info("AMOUNT: {}", amount);
-        logger.info("PAY_ID: {}", payId);
-        logger.info("PAY_DATE: {}", payDate);
+        logger.info("ACTION: %s".formatted(action));
+        logger.info("ACCOUNT: %s".formatted(account));
+        logger.info("AMOUNT: %s".formatted(amount));
+        logger.info("PAY_ID: %s".formatted(payId));
+        logger.info("PAY_DATE: %s".formatted(payDate));
 
         String resp;
         if (StringUtils.equalsIgnoreCase(action, ACTION_CHECK)) {
@@ -117,7 +117,7 @@ public class SbrfPaymentExecutor implements PaymentExecutor {
         }
 
         try {
-            logger.info("Response: {}", resp);
+            logger.info("Response: %s".formatted(resp));
             response.setCharacterEncoding("UTF-8");
             response.getWriter().print(resp);
             response.getWriter().flush();

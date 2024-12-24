@@ -1,16 +1,16 @@
 package com.gracelogic.platform.filestorage.dto;
 
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 public class StoreRequestDTO {
-    private CommonsMultipartFile content;
+    private MultipartFile content;
     private String meta;
 
-    public CommonsMultipartFile getContent() {
+    public MultipartFile getContent() {
         return content;
     }
 
-    public void setContent(CommonsMultipartFile content) {
+    public void setContent(MultipartFile content) {
         this.content = content;
     }
 

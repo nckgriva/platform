@@ -2,25 +2,26 @@ package com.gracelogic.platform.user.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import com.gracelogic.platform.db.model.StringJsonUserType;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
+import org.hibernate.annotations.JdbcTypeCode;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Version;
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,14 +29,12 @@ import java.util.UUID;
 
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "USER")
-@TypeDefs({@TypeDef(name = "stringJsonObject", typeClass = StringJsonUserType.class)})
 public class User extends IdObject<UUID> {
     @Id
     @Column(name = ID)
     @Access(AccessType.PROPERTY)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     private UUID id;
 
     @Column(name = CREATED, nullable = false)
@@ -70,7 +69,7 @@ public class User extends IdObject<UUID> {
     @Column(name = "LAST_VISIT_IP", nullable = true)
     private String lastVisitIP;
 
-    @Type(type = "stringJsonObject")
+    @Type(JsonType.class)
     @Column(columnDefinition = "json", nullable = true, name = "FIELDS")
     private String fields;
 

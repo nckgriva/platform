@@ -246,7 +246,7 @@
   font-size: 0.9em;
   border-bottom: 1px solid #cccccc;
   vertical-align: top;
-  line-height: 1.3em;
+  line-height: 1.4em;
 }
 .swagger-section .swagger-ui-wrap ol {
   margin: 0px 0 10px;
@@ -390,7 +390,7 @@
 .swagger-section .swagger-ui-wrap form.formtastic fieldset.inputs ol li.string input.title,
 .swagger-section .swagger-ui-wrap form.formtastic fieldset.inputs ol li.url input.title,
 .swagger-section .swagger-ui-wrap form.formtastic fieldset.inputs ol li.numeric input.title {
-  font-size: 1.3em;
+  font-size: 1.4em;
 }
 .swagger-section .swagger-ui-wrap table.fullwidth {
   width: 100%;
@@ -540,7 +540,7 @@
 .swagger-section .swagger-ui-wrap h1 {
   color: black;
   font-size: 1.5em;
-  line-height: 1.3em;
+  line-height: 1.4em;
   padding: 10px 0 10px 0;
   font-family: "Droid Sans", sans-serif;
   font-weight: bold;
@@ -563,7 +563,7 @@
 }
 .swagger-section .swagger-ui-wrap h2 {
   color: black;
-  font-size: 1.3em;
+  font-size: 1.4em;
   padding: 10px 0 10px 0;
 }
 .swagger-section .swagger-ui-wrap h2 a {

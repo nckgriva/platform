@@ -5,7 +5,6 @@ import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.survey.Path;
-import com.gracelogic.platform.survey.dto.admin.GetSurveyQuestionsRequest;
 import com.gracelogic.platform.survey.dto.admin.SurveyQuestionDTO;
 import com.gracelogic.platform.survey.exception.BadDTOException;
 import com.gracelogic.platform.survey.exception.LogicDependencyException;
@@ -16,7 +15,6 @@ import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -30,7 +28,6 @@ import java.util.*;
 
 @Controller
 @RequestMapping(value = Path.API_SURVEY_QUESTION)
-@Api(value = Path.API_SURVEY_QUESTION, tags = {"Survey question API"})
 public class SurveyQuestionApi extends AbstractAuthorizedController {
     @Autowired
     private SurveyService surveyService;
@@ -43,15 +40,6 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource dbMessageSource;
 
-    @ApiOperation(
-            value = "getSurveyQuestions",
-            notes = "Get list of survey questions",
-            response = EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -70,15 +58,6 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<SurveyQuestionDTO>>(properties, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getSurveyQuestion",
-            notes = "Get survey question",
-            response = SurveyQuestionDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -92,15 +71,6 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveSurveyQuestion",
-            notes = "Save survey question",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('SURVEY:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -115,15 +85,6 @@ public class SurveyQuestionApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "deleteSurveyQuestion",
-            notes = "Delete survey question",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('SURVEY:DELETE')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}/delete")
     @ResponseBody

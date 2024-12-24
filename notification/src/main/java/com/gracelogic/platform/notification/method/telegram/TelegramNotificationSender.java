@@ -5,16 +5,15 @@ import com.gracelogic.platform.notification.dto.NotificationSenderResult;
 import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationSender;
 import com.gracelogic.platform.property.service.PropertyService;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.ApiContextInitializer;
-import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import javax.annotation.PostConstruct;
 import java.util.UUID;
 
 @Service("telegramNotificationSender")
@@ -24,7 +23,7 @@ public class TelegramNotificationSender implements NotificationSender {
 
     private TelegramBot telegramBot = null;
 
-    private static Logger logger = LoggerFactory.getLogger(TelegramNotificationSender.class);
+    private static Log logger = LogFactory.getLog(TelegramNotificationSender.class);
 
 
     @PostConstruct
@@ -32,14 +31,14 @@ public class TelegramNotificationSender implements NotificationSender {
         String telegramBotUsername = propertyService.getPropertyValue("notification:telegram_bot_username");
         String telegramBotToken = propertyService.getPropertyValue("notification:telegram_bot_token");
         if (!StringUtils.isEmpty(telegramBotUsername) && !StringUtils.isEmpty(telegramBotToken)) {
-            ApiContextInitializer.init();
-            TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
             telegramBot = new TelegramBot(telegramBotUsername, telegramBotToken);
 
-            try {
-                telegramBotsApi.registerBot(telegramBot);
+            try (TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication()){
+                botsApplication.registerBot(telegramBotToken, telegramBot);
             } catch (TelegramApiException e) {
                 logger.error("Failed to initialize telegram bot", e);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

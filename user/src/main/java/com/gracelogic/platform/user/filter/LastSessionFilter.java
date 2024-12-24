@@ -5,9 +5,9 @@ import com.gracelogic.platform.user.dto.AuthorizedUser;
 import com.gracelogic.platform.user.service.LastSessionHolder;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class LastSessionFilter extends AbstractAuthorizedController implements Filter {

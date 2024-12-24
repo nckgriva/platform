@@ -4,19 +4,19 @@ import com.gracelogic.platform.content.dao.AbstractContentDaoImpl;
 import com.gracelogic.platform.content.model.Element;
 import com.gracelogic.platform.db.condition.OnPostgreSQLConditional;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.Query;
+import jakarta.persistence.Query;
 import java.math.BigInteger;
 import java.util.*;
 
 @Repository
 @Conditional(OnPostgreSQLConditional.class)
 public class ContentDaoImpl extends AbstractContentDaoImpl {
-    private static Logger logger = LoggerFactory.getLogger(ContentDaoImpl.class);
+    private static Log logger = LogFactory.getLog(ContentDaoImpl.class);
 
     @Override
     public Integer getElementsCount(String query, Collection<String> queryFields, Collection<String> sectionIds, Boolean active, Date validOnDate, Map<String, String> fields) {

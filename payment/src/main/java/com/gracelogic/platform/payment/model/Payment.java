@@ -7,7 +7,7 @@ import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.user.model.User;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
@@ -18,7 +18,7 @@ public class Payment extends IdObject<UUID> {
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
+    
     @Access(AccessType.PROPERTY)
     private UUID id;
 

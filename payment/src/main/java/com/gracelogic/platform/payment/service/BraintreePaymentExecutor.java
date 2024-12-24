@@ -9,12 +9,12 @@ import com.gracelogic.platform.payment.dto.ProcessPaymentRequest;
 import com.gracelogic.platform.payment.exception.PaymentExecutionException;
 import com.gracelogic.platform.payment.model.PaymentSystem;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +28,7 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
     private static final String ACTION_CHECKOUT = "checkout";
     private static final String ACTION = "action";
 
-    private static Logger logger = LoggerFactory.getLogger(BraintreePaymentExecutor.class);
+    private static Log logger = LogFactory.getLog(BraintreePaymentExecutor.class);
 
     @Override
     public PaymentExecutionResultDTO execute(PaymentSystem paymentSystem, PaymentExecutionRequestDTO request, ApplicationContext context) throws PaymentExecutionException {
@@ -48,7 +48,7 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
         }
 
         String action = request.getParams().get(ACTION);
-        logger.info("action: {}", action);
+        logger.info("action: %s".formatted(action));
         BraintreeGateway gateway = new BraintreeGateway(
                 StringUtils.equalsIgnoreCase(params.get(PARAMETER_IS_PRODUCTION), "true") ? Environment.PRODUCTION : Environment.SANDBOX,
                 params.get(PARAMETER_CLIENT_ID),
@@ -58,13 +58,13 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
 
         if (StringUtils.equalsIgnoreCase(action, ACTION_TOKEN)) {
             String token = gateway.clientToken().generate();
-            logger.info("token: {}", token);
+            logger.info("token: %s".formatted(token));
             Map<String, String> responseParams = new HashMap<>();
             responseParams.put("token", token);
             return new PaymentExecutionResultDTO(false, request.getUniquePaymentIdentifier(), responseParams);
         } else if (StringUtils.equalsIgnoreCase(action, ACTION_CHECKOUT)) {
             String nonce = request.getParams().get("nonce");
-            logger.info("nonce: {}", nonce);
+            logger.info("nonce: %s".formatted(nonce));
             if (StringUtils.isEmpty(nonce)) {
                 throw new PaymentExecutionException("Invalid nonce");
             }
@@ -77,7 +77,7 @@ public class BraintreePaymentExecutor implements PaymentExecutor {
                     .done();
 
             Result<Transaction> result = gateway.transaction().sale(transactionRequest);
-            logger.info("Transaction result: {}; message: {}",result.isSuccess(), result.getMessage());
+            logger.info("Transaction result: %s; message: %s".formatted(result.isSuccess(), result.getMessage()));
             if (result.isSuccess()) {
                 ProcessPaymentRequest req = new ProcessPaymentRequest();
                 req.setExternalIdentifier(request.getUniquePaymentIdentifier());

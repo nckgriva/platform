@@ -4,12 +4,8 @@ package com.gracelogic.platform.account.api;
 import com.gracelogic.platform.account.Path;
 import com.gracelogic.platform.account.dto.TransactionDTO;
 import com.gracelogic.platform.account.service.AccountService;
-import com.gracelogic.platform.db.dto.DateFormatConstants;
 import com.gracelogic.platform.db.dto.EntityListResponse;
 import com.gracelogic.platform.user.api.AbstractAuthorizedController;
-import com.gracelogic.platform.web.dto.ErrorResponse;
-import io.swagger.annotations.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -27,21 +23,10 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_TRANSACTION)
-@Api(value = Path.API_TRANSACTION, tags = {"Transaction API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class TransactionApi extends AbstractAuthorizedController {
     @Autowired
     private AccountService accountService;
 
-    @ApiOperation(
-            value = "transactions",
-            notes = "Get list of transactions",
-            response =  EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('TRANSACTION:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody

@@ -1,19 +1,19 @@
 package com.gracelogic.platform.db.dao;
 
 import com.gracelogic.platform.db.model.IdObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjectDao {
-    private static Logger logger = LoggerFactory.getLogger(AbstractIdObjectDaoImpl.class);
+    private static Log logger = LogFactory.getLog(AbstractIdObjectDaoImpl.class);
 
     public <T extends IdObject> T getObjectById(Class<T> clazz, String fetches, Object id) {
         if (StringUtils.isEmpty(fetches)) {
@@ -25,7 +25,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
             try {
                 return getEntityManager().createQuery(query, clazz).setParameter("id", id).getSingleResult();
             } catch (Exception e) {
-                logger.warn("Failed to get IdObject with id: {}", id.toString(), e);
+                logger.warn("Failed to get IdObject with id: %s".formatted(id.toString()), e);
                 return null;
             }
         }
@@ -87,7 +87,7 @@ public abstract class AbstractIdObjectDaoImpl extends BaseDao implements IdObjec
         try {
             getEntityManager().createQuery(query).setParameter("id", id).executeUpdate();
         } catch (Exception e) {
-            logger.error("Failed to delete IdObject with id: {}", id.toString(), e);
+            logger.error("Failed to delete IdObject with id: %s".formatted(id.toString()), e);
         }
     }
 

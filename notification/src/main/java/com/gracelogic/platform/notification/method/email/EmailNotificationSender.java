@@ -5,8 +5,8 @@ import com.gracelogic.platform.notification.dto.NotificationSenderResult;
 import com.gracelogic.platform.notification.service.DataConstants;
 import com.gracelogic.platform.notification.service.NotificationSender;
 import com.gracelogic.platform.property.service.PropertyService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +24,11 @@ public class EmailNotificationSender implements NotificationSender {
 
     @Autowired
     private PropertyService propertyService;
-    private static Logger logger = LoggerFactory.getLogger(EmailNotificationSender.class);
+    private static Log logger = LogFactory.getLog(EmailNotificationSender.class);
 
     @Override
     public NotificationSenderResult send(String source, String destination, Content content) {
-        logger.info("Sending e-mail to: {}", destination);
+        logger.info("Sending e-mail to: %s".formatted(destination));
 
         try {
             boolean isSslEnable = propertyService.getPropertyValueAsBoolean("notification:smtp_ssl_enable");

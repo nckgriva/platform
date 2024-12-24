@@ -18,8 +18,6 @@ import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -36,8 +34,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_PAYMENT)
-@Api(value = Path.API_PAYMENT, tags = {"Payment API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class PaymentApi extends AbstractAuthorizedController {
 
     @Autowired
@@ -51,15 +47,6 @@ public class PaymentApi extends AbstractAuthorizedController {
     @Qualifier("accountMessageSource")
     private ResourceBundleMessageSource accountMessageSource;
 
-    @ApiOperation(
-            value = "payments",
-            notes = "Get list of payments",
-            response = EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -80,15 +67,6 @@ public class PaymentApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<PaymentDTO>>(payments, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "addPayment",
-            notes = "Add payment",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:ADD')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -105,15 +83,6 @@ public class PaymentApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "cancelPayment",
-            notes = "Cancel payment",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:CANCEL')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/cancel")
     @ResponseBody
@@ -132,15 +101,6 @@ public class PaymentApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "restorePayment",
-            notes = "Restore canceled payment",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PAYMENT:CANCEL')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/restore")
     @ResponseBody

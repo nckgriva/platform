@@ -6,20 +6,17 @@ import com.gracelogic.platform.db.exception.ObjectNotFoundException;
 import com.gracelogic.platform.localization.service.LocaleHolder;
 import com.gracelogic.platform.property.dto.PropertyDTO;
 import com.gracelogic.platform.user.Path;
-import com.gracelogic.platform.user.PlatformRole;
 import com.gracelogic.platform.user.dto.PassphraseTypeDTO;
 import com.gracelogic.platform.user.model.PassphraseType;
 import com.gracelogic.platform.user.service.UserService;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -28,9 +25,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_PASSPHRASE_TYPE)
-@Secured(PlatformRole.ANONYMOUS)
-@Api(value = Path.API_PASSPHRASE_TYPE, tags = {"PassphraseType API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class PassphraseTypeApi {
 
     @Autowired
@@ -44,15 +38,6 @@ public class PassphraseTypeApi {
     @Autowired
     private UserService userService;
 
-    @ApiOperation(
-            value = "getPassphraseTypes",
-            notes = "Get list of passphrase type",
-            response = EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PASSPHRASE_TYPE:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -73,15 +58,6 @@ public class PassphraseTypeApi {
 
     }
 
-    @ApiOperation(
-            value = "getPassphraseType",
-            notes = "Get passphrase type",
-            response = PropertyDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('PASSPHRASE_TYPE:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -97,15 +73,6 @@ public class PassphraseTypeApi {
         }
     }
 
-    @ApiOperation(
-            value = "savePassphraseType",
-            notes = "Save passphrase type",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('PASSPHRASE_TYPE:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -121,15 +88,6 @@ public class PassphraseTypeApi {
         }
     }
 
-    @ApiOperation(
-            value = "deletePassphraseType",
-            notes = "Delete passphrase type",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PASSPHRASE_TYPE:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
@@ -140,6 +98,5 @@ public class PassphraseTypeApi {
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
     }
 }

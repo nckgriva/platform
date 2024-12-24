@@ -252,7 +252,7 @@ window.processOAuthCode = function processOAuthCode(data) {
   var OAuthSchemeKey = data.state;
 
   // redirect_uri is required in auth code flow 
-  // see https://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.1.3
+  // see https://tools.ietf.org/html/draft-ietf-oauth-v2-31#section-4.1.4
   var host = window.location;
   var pathname = location.pathname.substring(0, location.pathname.lastIndexOf("/"));
   var defaultRedirectUrl = host.protocol + '//' + host.host + pathname + '/o2c.html';

@@ -17,14 +17,14 @@ import com.gracelogic.platform.user.service.DataConstants;
 import com.gracelogic.platform.user.service.UserLifecycleService;
 import com.gracelogic.platform.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.checkerframework.checker.units.qual.A;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
 
 public abstract class AbstractOauthProvider implements OAuthServiceProvider {
-    private static Logger logger = Logger.getLogger(AbstractOauthProvider.class);
+    private static Log logger = LogFactory.getLog(AbstractOauthProvider.class);
 
     @Autowired
     private UserLifecycleService registrationService;

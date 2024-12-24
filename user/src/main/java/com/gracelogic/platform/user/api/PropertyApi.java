@@ -10,11 +10,9 @@ import com.gracelogic.platform.user.Path;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,8 +23,6 @@ import java.util.*;
 
 @Controller
 @RequestMapping(value = Path.API_PROPERTY)
-@Api(value = Path.API_PROPERTY, tags = {"Property API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class PropertyApi extends AbstractAuthorizedController {
     @Autowired
     @Qualifier("dbMessageSource")
@@ -35,15 +31,6 @@ public class PropertyApi extends AbstractAuthorizedController {
     @Autowired
     private PropertyService propertyService;
 
-    @ApiOperation(
-            value = "getProperties",
-            notes = "Get list of properties",
-            response =  EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PROPERTY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -61,15 +48,6 @@ public class PropertyApi extends AbstractAuthorizedController {
 
     }
 
-    @ApiOperation(
-            value = "getProperty",
-            notes = "Get property",
-            response = PropertyDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('PROPERTY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -82,15 +60,6 @@ public class PropertyApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveProperty",
-            notes = "Save property",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('PROPERTY:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -104,15 +73,6 @@ public class PropertyApi extends AbstractAuthorizedController {
 
     }
 
-    @ApiOperation(
-            value = "deleteProperty",
-            notes = "Delete property",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('PROPERTY:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
@@ -123,6 +83,5 @@ public class PropertyApi extends AbstractAuthorizedController {
         } catch (Exception e) {
             return new ResponseEntity<>(new ErrorResponse("db.FAILED_TO_DELETE", dbMessageSource.getMessage("db.FAILED_TO_DELETE", null, LocaleHolder.getLocale())), HttpStatus.BAD_REQUEST);
         }
-
     }
 }

@@ -3,10 +3,14 @@ package com.gracelogic.platform.payment.model;
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
 import com.gracelogic.platform.dictionary.model.Dictionary;
+import io.hypersistence.utils.hibernate.type.json.JsonStringType;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import org.hibernate.type.SqlTypes;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -17,7 +21,7 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
     @Column(name = ID)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
+    
     @Access(AccessType.PROPERTY)
     private UUID id;
 
@@ -49,7 +53,7 @@ public class PaymentSystem extends IdObject<UUID> implements Dictionary {
     @Column(name = "PAYMENT_EXECUTOR_CLASS", nullable = true)
     private String paymentExecutorClass;
 
-    @Type(type = "stringJsonObject")
+    @Type(JsonStringType.class)
     @Column(columnDefinition = "json", nullable = true)
     private String fields;
 

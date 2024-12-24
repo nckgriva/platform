@@ -21,16 +21,9 @@ public class StringJsonUserType implements UserType {
         TYPE = Types.OTHER;
     }
 
-    /**
-     * Return the SQL type codes for the columns mapped by this type. The
-     * codes are defined on <tt>java.sql.Types</tt>.
-     *
-     * @return int[] the typecodes
-     * @see java.sql.Types
-     */
     @Override
-    public int[] sqlTypes() {
-        return new int[]{Types.JAVA_OBJECT};
+    public int getSqlType() {
+        return Types.JAVA_OBJECT;
     }
 
     /**
@@ -71,23 +64,9 @@ public class StringJsonUserType implements UserType {
         return x.hashCode();
     }
 
-    /**
-     * Retrieve an instance of the mapped class from a JDBC resultset. Implementors
-     * should handle possibility of null values.
-     *
-     * @param rs      a JDBC result set
-     * @param names   the column names
-     * @param session
-     * @param o   the containing entity  @return Object
-     * @throws org.hibernate.HibernateException
-     * @throws java.sql.SQLException
-     */
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object o) throws HibernateException, SQLException {
-        if (rs.getString(names[0]) == null) {
-            return null;
-        }
-        return rs.getString(names[0]);
+    public Object nullSafeGet(ResultSet resultSet, int i, SharedSessionContractImplementor sharedSessionContractImplementor, Object o) throws SQLException {
+        return null;
     }
 
     /**

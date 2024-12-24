@@ -17,28 +17,21 @@ import com.gracelogic.platform.user.model.User;
 import com.gracelogic.platform.user.service.UserLifecycleService;
 import com.gracelogic.platform.web.ServletUtils;
 import com.gracelogic.platform.web.dto.ErrorResponse;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 
 
 @Controller
-@Secured(PlatformRole.ANONYMOUS)
 @RequestMapping(value = Path.API_OAUTH)
-@Api(value = Path.API_OAUTH, tags = {"OAuth API"})
 public class OAuthApi extends AbstractAuthorizedController {
     @Autowired
     private OAuthService oAuthService;
@@ -54,11 +47,6 @@ public class OAuthApi extends AbstractAuthorizedController {
     @Autowired
     private UserLifecycleService lifecycleService;
 
-    @ApiOperation(
-            value = "providers",
-            notes = "Return all available oauth providers",
-            response = ResponseEntity.class
-    )
     @RequestMapping(value = "providers", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity providers(@RequestParam(value = "redirectUri", required = false) String redirectUri) {
@@ -66,19 +54,6 @@ public class OAuthApi extends AbstractAuthorizedController {
         return new ResponseEntity<List<AuthProviderDTO>>(providers, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "tokenByCode",
-            notes = "Get platform token by auth code or access token",
-            response = ResponseEntity.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Invalid credentials"),
-            @ApiResponse(code = 423, message = "User blocked"),
-            @ApiResponse(code = 429, message = "Too many attempts"),
-            @ApiResponse(code = 422, message = "Not activated"),
-            @ApiResponse(code = 510, message = "Not allowed IP"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @RequestMapping(value = "/token-by-code", method = RequestMethod.POST)
     public ResponseEntity tokenByCode(HttpServletRequest request, HttpServletResponse response, @RequestBody TokenByCodeRequestDTO dto) {
         try {

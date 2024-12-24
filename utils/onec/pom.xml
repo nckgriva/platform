@@ -6,12 +6,12 @@
 
     <artifactId>platform-onec</artifactId>
     <name>onec</name>
-    <version>1.3</version>
+    <version>1.4</version>
     <packaging>jar</packaging>
     <parent>
         <groupId>com.gracelogic.platform</groupId>
         <artifactId>platform-parent</artifactId>
-        <version>1.3</version>
+        <version>1.4</version>
         <relativePath>../../parent</relativePath>
     </parent>
     <dependencies>
@@ -19,30 +19,14 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>commons-logging</groupId>-->
-            <!--<artifactId>commons-logging</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>log4j</groupId>-->
-            <!--<artifactId>log4j</artifactId>-->
-        <!--</dependency>-->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-finance</artifactId>
-            <version>1.3</version>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
     </dependencies>
     <build>

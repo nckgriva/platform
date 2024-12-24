@@ -2,9 +2,9 @@ package com.gracelogic.platform.property.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
@@ -13,9 +13,7 @@ import java.util.UUID;
 public class Property extends IdObject<UUID> {
     @Id
     @Column(name = ID)
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
+    @UuidGenerator
     @Access(AccessType.PROPERTY)
     private UUID id;
 

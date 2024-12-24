@@ -13,7 +13,6 @@ import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -27,7 +26,6 @@ import java.util.*;
 
 @Controller
 @RequestMapping(value = Path.API_SURVEY_PAGE)
-@Api(value = Path.API_SURVEY_PAGE, tags = {"Survey page API"})
 public class SurveyPageApi extends AbstractAuthorizedController {
     @Autowired
     private SurveyService surveyService;
@@ -40,15 +38,6 @@ public class SurveyPageApi extends AbstractAuthorizedController {
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource dbMessageSource;
 
-    @ApiOperation(
-            value = "getSurveyPages",
-            notes = "Get list of survey pages",
-            response = EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -64,15 +53,6 @@ public class SurveyPageApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<SurveyPageDTO>>(properties, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getSurveyPage",
-            notes = "Get survey page",
-            response = SurveyPageDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('SURVEY:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -86,15 +66,6 @@ public class SurveyPageApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveSurveyPage",
-            notes = "Save survey page",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('SURVEY:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -107,15 +78,6 @@ public class SurveyPageApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "deleteSurveyPage",
-            notes = "Delete survey page",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('SURVEY:DELETE')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}/delete")
     @ResponseBody

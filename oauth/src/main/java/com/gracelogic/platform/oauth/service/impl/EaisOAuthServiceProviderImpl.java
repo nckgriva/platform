@@ -14,6 +14,7 @@ import com.gracelogic.platform.user.exception.InvalidPassphraseException;
 import com.gracelogic.platform.user.model.User;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -23,13 +24,13 @@ import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class EaisOAuthServiceProviderImpl extends AbstractOauthProvider implemen
     @Autowired
     private IdObjectService idObjectService;
 
-    private static Logger logger = Logger.getLogger(EaisOAuthServiceProviderImpl.class);
+    private static Log logger = LogFactory.getLog(EaisOAuthServiceProviderImpl.class);
 
     @Transactional(rollbackFor = Exception.class)
     @Override

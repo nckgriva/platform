@@ -16,10 +16,6 @@ import com.gracelogic.platform.user.exception.ForbiddenException;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -33,7 +29,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_SURVEY_SESSION)
-@Api(value = Path.API_SURVEY_SESSION, tags = {"Survey session API"})
 public class SurveySessionApi extends AbstractAuthorizedController {
 
     @Autowired
@@ -47,11 +42,6 @@ public class SurveySessionApi extends AbstractAuthorizedController {
     @Qualifier("dbMessageSource")
     private ResourceBundleMessageSource dbMessageSource;
 
-    @ApiOperation(
-            value = "goToPage",
-            notes = "Go to the specified survey page",
-            response = SurveyInteractionDTO.class
-    )
     @RequestMapping(method = RequestMethod.GET, value = "/{session_id}/{page}")
     @ResponseBody
     public ResponseEntity goToPage(@PathVariable(value = "session_id") UUID surveySessionId,
@@ -68,11 +58,6 @@ public class SurveySessionApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "goBack",
-            notes = "Returns back to the previous page, using page visit history",
-            response = SurveyInteractionDTO.class
-    )
     @RequestMapping(method = RequestMethod.GET, value = "/{session_id}/back")
     @ResponseBody
     public ResponseEntity goBack(@PathVariable(value = "session_id") UUID surveySessionId) {
@@ -88,11 +73,6 @@ public class SurveySessionApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveAnswersAndContinue",
-            notes = "Saves user answers and returns SurveyInteractionDTO, which contains survey conclusion or next page",
-            response = SurveyInteractionDTO.class
-    )
     @RequestMapping(method = RequestMethod.POST, value = "/{session_id}/save")
     @ResponseBody
     public ResponseEntity saveAnswersAndContinue(@PathVariable(value = "session_id") UUID surveySessionId,
@@ -113,11 +93,6 @@ public class SurveySessionApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "continueSurvey",
-            notes = "Restores last visited survey page",
-            response = SurveyInteractionDTO.class
-    )
     @RequestMapping(method = RequestMethod.GET, value = "/{session_id}/continue")
     @ResponseBody
     public ResponseEntity continueSurvey(@PathVariable(value = "session_id") UUID surveySessionId) {
@@ -133,15 +108,6 @@ public class SurveySessionApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "getSurveySessions",
-            notes = "Get list of survey sessions",
-            response = EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('SURVEY_RESULT:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -157,15 +123,6 @@ public class SurveySessionApi extends AbstractAuthorizedController {
         return new ResponseEntity<EntityListResponse<SurveySessionDTO>>(results, HttpStatus.OK);
     }
 
-    @ApiOperation(
-            value = "getSurveySession",
-            notes = "Get survey passing",
-            response = SurveySessionDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('SURVEY_RESULT:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -179,15 +136,6 @@ public class SurveySessionApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveSurveyPassing",
-            notes = "Save survey passing",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('SURVEY_RESULT:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -200,15 +148,6 @@ public class SurveySessionApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "deleteSurveyPassing",
-            notes = "Delete survey passing",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('SURVEY_RESULT:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody

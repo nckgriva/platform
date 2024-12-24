@@ -30,9 +30,6 @@ public class NotificationServiceImpl implements NotificationService {
     private IdObjectService idObjectService;
 
     @Autowired
-    NotificationService notificationService;
-
-    @Autowired
     private DictionaryService ds;
 
     @Autowired
@@ -73,7 +70,7 @@ public class NotificationServiceImpl implements NotificationService {
                 notification.setDestination(destination);
                 notification.setPriority(priority);
                 notification.setReferenceObjectId(referenceObjectId);
-                notification = notificationService.saveNotification(notification);
+                notification = saveNotification(notification);
 
                 //Send notification
                 NotificationSenderResult result;
@@ -99,7 +96,7 @@ public class NotificationServiceImpl implements NotificationService {
                         ds.get(NotificationState.class, DataConstants.NotificationStates.SENT.getValue()) :
                         ds.get(NotificationState.class, DataConstants.NotificationStates.ERROR.getValue()));
                 notification.setErrorDescription(result.getErrorDescription());
-                return notificationService.saveNotification(notification);
+                return saveNotification(notification);
             }
         });
     }

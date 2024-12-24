@@ -17,13 +17,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class AlfaBankPaymentExecutor implements PaymentExecutor {
     private static final String PARAMETER_CUSTOMER_EMAIL = "customer_email";
     private static final String JSON_PARAM_ORDER_ID = "orderId";
 
-    private static final Logger logger = LoggerFactory.getLogger(AlfaBankPaymentExecutor.class);
+    private static final Log logger = LogFactory.getLog(AlfaBankPaymentExecutor.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -113,7 +113,7 @@ public class AlfaBankPaymentExecutor implements PaymentExecutor {
         }
 
         try {
-            logger.info("raw request: {}", request.getQueryString());
+            logger.info("raw request: %s".formatted(request.getQueryString()));
             if (StringUtils.equalsIgnoreCase(request.getParameter("operation"), "deposited")) {
                 AlfaBankOrderStatusRequestDTO statusRequest = new AlfaBankOrderStatusRequestDTO();
                 statusRequest.setOrderId(request.getParameter("mdOrder"));
@@ -131,7 +131,7 @@ public class AlfaBankPaymentExecutor implements PaymentExecutor {
                     req.setCurrency(getCurrencyCodeFromIso4217(orderStatus.getCurrency()));
                     paymentService.processPayment(paymentSystem.getId(), req, null);
                 } else {
-                    logger.warn("Payment not succeed, but event accepted: {}", orderStatus.getOrderNumber());
+                    logger.warn("Payment not succeed, but event accepted: %s".formatted(orderStatus.getOrderNumber()));
                 }
             } else {
                 logger.info("ignoring callback");
@@ -158,10 +158,10 @@ public class AlfaBankPaymentExecutor implements PaymentExecutor {
         sendMethod.addHeader("Accept", "application/json");
 
         CloseableHttpResponse result = httpClient.execute(sendMethod);
-        logger.debug("response status: {}", result.getStatusLine().getStatusCode());
+        logger.debug("response status: %s".formatted(result.getStatusLine().getStatusCode()));
         HttpEntity entity = result.getEntity();
         String response = EntityUtils.toString(entity);
-        logger.debug("response body: {}", response);
+        logger.debug("response body: %s".formatted(response));
         return mapper.readValue(response, AlfaBankRegisterOrderResponseDTO.class);
     }
 
@@ -175,10 +175,10 @@ public class AlfaBankPaymentExecutor implements PaymentExecutor {
         sendMethod.addHeader("Accept", "application/json");
 
         CloseableHttpResponse result = httpClient.execute(sendMethod);
-        logger.debug("response status: {}", result.getStatusLine().getStatusCode());
+        logger.debug("response status: %s".formatted(result.getStatusLine().getStatusCode()));
         HttpEntity entity = result.getEntity();
         String response = EntityUtils.toString(entity);
-        logger.debug("response body: {}", response);
+        logger.debug("response body: %s".formatted(response));
         return mapper.readValue(response, AlfaBankOrderStatusResponseDTO.class);
     }
 

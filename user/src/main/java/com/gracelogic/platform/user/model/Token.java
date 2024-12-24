@@ -3,23 +3,26 @@ package com.gracelogic.platform.user.model;
 
 import com.gracelogic.platform.db.JPAProperties;
 import com.gracelogic.platform.db.model.IdObject;
+import io.hypersistence.utils.hibernate.type.json.JsonStringType;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+import org.hibernate.type.SqlTypes;
+
 import java.util.Date;
 import java.util.UUID;
 
 @Entity
 @Table(name = JPAProperties.TABLE_PREFIX + "TOKEN")
 public class Token extends IdObject<UUID> {
-
     @Id
     @Column(name = ID)
     @Access(AccessType.PROPERTY)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @org.hibernate.annotations.Type(type = "com.gracelogic.platform.db.type.UUIDCustomType")
     private UUID id;
 
     @Column(name = CREATED, nullable = false)
@@ -43,8 +46,8 @@ public class Token extends IdObject<UUID> {
     @JoinColumn(name = "IDENTIFIER_ID", nullable = false)
     private Identifier identifier;
 
-    @Type(type = "stringJsonObject")
-    @Column(columnDefinition = "json", nullable = true)
+    @Type(JsonType.class)
+    @Column(name="additionalfields", columnDefinition = "json", nullable = true)
     private String additionalFields;
 
     @Override

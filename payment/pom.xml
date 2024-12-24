@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>platform-payment</artifactId>
     <name>payment</name>
-    <version>1.3</version>
+    <version>1.4</version>
     <properties>
         <braintree-java.version>2.73.0</braintree-java.version>
     </properties>
@@ -13,43 +13,52 @@
     <parent>
         <groupId>com.gracelogic.platform</groupId>
         <artifactId>platform-parent</artifactId>
-        <version>1.3</version>
+        <version>1.4</version>
         <relativePath>../parent</relativePath>
     </parent>
     <dependencies>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-db</artifactId>
-            <version>1.3</version>
+            <version>1.4</version>
         </dependency>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-user</artifactId>
-            <version>1.3</version>
+            <version>1.4</version>
         </dependency>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-account</artifactId>
-            <version>1.3</version>
+            <version>1.4</version>
         </dependency>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-web</artifactId>
-            <version>1.3</version>
+            <version>1.4</version>
         </dependency>
         <dependency>
             <groupId>com.gracelogic.platform</groupId>
             <artifactId>platform-finance</artifactId>
-            <version>1.3</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <version>1.4</version>
         </dependency>
         <dependency>
             <groupId>com.braintreepayments.gateway</groupId>
             <artifactId>braintree-java</artifactId>
             <version>${braintree-java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+            <classifier>jakarta</classifier>
+            <version>${querydsl.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <version>${querydsl.version}</version>
+            <classifier>jakarta</classifier>
         </dependency>
     </dependencies>
     <build>

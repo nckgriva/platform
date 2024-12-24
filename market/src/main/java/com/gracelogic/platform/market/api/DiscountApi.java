@@ -12,7 +12,6 @@ import com.gracelogic.platform.user.api.AbstractAuthorizedController;
 import com.gracelogic.platform.web.dto.EmptyResponse;
 import com.gracelogic.platform.web.dto.ErrorResponse;
 import com.gracelogic.platform.web.dto.IDResponse;
-import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -26,8 +25,6 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping(value = Path.API_DISCOUNT)
-@Api(value = Path.API_DISCOUNT, tags = {"Discount API"},
-        authorizations = @Authorization(value = "MybasicAuth"))
 public class DiscountApi extends AbstractAuthorizedController {
 
     @Autowired
@@ -41,16 +38,6 @@ public class DiscountApi extends AbstractAuthorizedController {
     @Autowired
     private MarketService marketService;
 
-    @ApiOperation(
-            value = "getDiscount",
-            notes = "Get discount",
-            response = DiscountDTO.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 400, message = "Object not found", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('DISCOUNT:SHOW')")
     @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ResponseBody
@@ -65,16 +52,6 @@ public class DiscountApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "saveDiscount",
-            notes = "Save discount",
-            response = IDResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
     @PreAuthorize("hasAuthority('DISCOUNT:SAVE')")
     @RequestMapping(method = RequestMethod.POST, value = "/save")
     @ResponseBody
@@ -89,16 +66,6 @@ public class DiscountApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "deleteDiscount",
-            notes = "Delete discount",
-            response = EmptyResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 400, message = "Failed to delete discount", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('DISCOUNT:DELETE')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/delete")
     @ResponseBody
@@ -111,15 +78,6 @@ public class DiscountApi extends AbstractAuthorizedController {
         }
     }
 
-    @ApiOperation(
-            value = "getDiscounts",
-            notes = "Get list of discounts",
-            response = EntityListResponse.class
-    )
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "Unauthorized", response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorResponse.class)})
     @PreAuthorize("hasAuthority('DISCOUNT:SHOW')")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
